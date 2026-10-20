@@ -43,3 +43,57 @@ test('a disabled button is disabled for the browser, not hidden from it', async 
     await expect(button).not.toHaveAttribute('aria-hidden', 'true');
     await expect(button).toBeEnabled();
 });
+
+test('suggest box: Up and Down move in the list, Enter takes the suggestion', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'suggest');
+    const box = page.getByRole('combobox', { name: 'Oracle suggest' });
+    await box.click();
+    await box.pressSequentially('ap', { delay: 30 });
+    await expect(page.getByRole('option')).toHaveText(['Apple', 'Apricot', 'Red apple']);
+    await expect(box).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('option', { name: 'Apricot' })).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Enter');
+    await expect(box).toHaveValue('Apricot');
+    await expect(box).toHaveAttribute('aria-expanded', 'false');
+    // HANDLER_STRING_SELECTION ("K") with the display string
+    await expect.poll(() => sent.some(m => m.includes('"K":"<strong>Ap</strong>ricot"'))).toBe(true);
+});
+
+test('menu: the arrows move in the bar and open a submenu, Escape closes it', async ({ page }) => {
+    await open(page, 'menu');
+    const item = name => page.getByRole('menuitem', { name, exact: true });
+    await item('File').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(item('Edit')).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowDown');
+    await expect(item('New')).toBeVisible();
+    await expect(item('New')).toBeFocused();
+    await expect(item('File')).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Escape');
+    await expect(item('New')).toBeHidden();
+    await expect(item('File')).toBeFocused();
+});
+
+test('tree: the arrows select, open and close, and the server is told', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'tree');
+    const item = name => page.getByRole('treeitem', { name, exact: true });
+    await page.getByText('Fruits', { exact: true }).click();
+    await page.keyboard.press('ArrowRight'); // opens
+    await expect(page.getByText('Apple', { exact: true })).toBeVisible();
+    await page.keyboard.press('ArrowRight'); // to the first child
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByText('Banana', { exact: true }).locator('xpath=ancestor::li[1]')).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('ArrowLeft'); // to the parent
+    await page.keyboard.press('ArrowLeft'); // closes it
+    await expect(page.getByText('Apple', { exact: true })).toBeHidden();
+    // HANDLER_OPEN ("G"), then HANDLER_CLOSE ("F"), with the item's id
+    await expect.poll(() => sent.filter(m => /"[GF]":\d/.test(m)).length).toBe(2);
+});

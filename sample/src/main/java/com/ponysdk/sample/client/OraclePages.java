@@ -5,6 +5,7 @@
 package com.ponysdk.sample.client;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -18,6 +19,14 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PMultiWordSuggestOracle;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PSuggestBox;
+import com.ponysdk.core.ui.basic.PPopupPanel;
+import com.ponysdk.core.ui.basic.PMenuItem;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PComposite;
 import com.ponysdk.core.ui.basic.PDecoratorPanel;
@@ -86,7 +95,12 @@ final class OraclePages {
         Map.entry("flextable", OraclePages::flexTable),
         Map.entry("grid", OraclePages::grid),
         Map.entry("disclosure", OraclePages::disclosure),
-        Map.entry("tabpanel", OraclePages::tabPanel));
+        Map.entry("tabpanel", OraclePages::tabPanel),
+        Map.entry("popup", OraclePages::popup),
+        Map.entry("dialog", OraclePages::dialog),
+        Map.entry("menu", OraclePages::menu),
+        Map.entry("tree", OraclePages::tree),
+        Map.entry("suggest", OraclePages::suggest));
 
     private OraclePages() {
     }
@@ -484,6 +498,123 @@ final class OraclePages {
         final PButton first = Element.newPButton("Select first");
         first.addClickHandler(e -> tabs.selectTab(0));
         panel.add(tabs, first);
+        return panel;
+    }
+
+    // ---- P4: popups, menus, tree, suggestions ----
+
+    /** An auto-hide popup shown at the center, hidden by a press outside; one placed by the server from its size. */
+    private static IsPWidget popup() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PButton show = Element.newPButton("Show popup");
+        show.addClickHandler(e -> {
+            final PPopupPanel popup = Element.newPPopupPanel(true);
+            final PButton inside = clickable("Inside popup");
+            popup.setWidget(inside);
+            popup.addCloseHandler(close -> {
+            });
+            PWindow.getMain().add(popup);
+            popup.center();
+        });
+        final PButton placed = Element.newPButton("Show placed");
+        placed.addClickHandler(e -> {
+            final PPopupPanel popup = Element.newPPopupPanel(false);
+            popup.setWidget(Element.newPLabel("Placed popup"));
+            popup.addCloseHandler(close -> {
+            });
+            PWindow.getMain().add(popup);
+            popup.setPopupPositionAndShow((width, height, windowWidth, windowHeight) -> popup.setPopupPosition(10, 200));
+            final PButton hide = Element.newPButton("Hide placed");
+            hide.addClickHandler(h -> popup.hide());
+            panel.add(hide);
+        });
+        panel.add(show, placed);
+        return panel;
+    }
+
+    /** A dialog box with a glass, closed by a button; then a modal one. */
+    private static IsPWidget dialog() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PButton open = Element.newPButton("Open dialog");
+        open.addClickHandler(e -> dialogBox("Oracle dialog", false));
+        final PButton modal = Element.newPButton("Open modal");
+        modal.addClickHandler(e -> dialogBox("Oracle modal", true));
+        panel.add(open, modal);
+        return panel;
+    }
+
+    private static PDialogBox dialogBox(final String caption, final boolean modal) {
+        final PDialogBox dialog = Element.newPDialogBox(false);
+        dialog.setCaption(caption);
+        dialog.setGlassEnabled(!modal);
+        dialog.setModal(modal);
+        final PButton close = Element.newPButton("Close " + caption);
+        close.addClickHandler(e -> dialog.hide());
+        dialog.setWidget(close);
+        dialog.addCloseHandler(e -> {
+        });
+        PWindow.getMain().add(dialog); // as the showcase does: attached to its window, then centred
+        dialog.center();
+        return dialog;
+    }
+
+    /** A bar with nested submenus, a separator, a disabled item and a command on the bar. */
+    private static IsPWidget menu() {
+        final PMenuBar bar = Element.newPMenuBar();
+        final PMenuBar file = Element.newPMenuBar(true);
+        file.addItem("New", () -> {
+        });
+        file.addSeparator();
+        file.addItem("Open", () -> {
+        });
+        final PMenuBar recent = Element.newPMenuBar(true);
+        recent.addItem("Doc 1", () -> {
+        });
+        file.addItem("Recent", recent);
+        final PMenuItem disabled = file.addItem("Disabled", () -> {
+        });
+        disabled.setEnabled(false);
+        final PMenuBar edit = Element.newPMenuBar(true);
+        edit.addItem("Copy", () -> {
+        });
+        bar.addItem("File", file);
+        bar.addItem("Edit", edit);
+        bar.addItem("Help", () -> {
+        });
+        return bar;
+    }
+
+    /** Items opened, selected (twice), closed by the user; one selected by the server; a widget item. */
+    private static IsPWidget tree() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PTree tree = Element.newPTree();
+        final PTreeItem fruits = tree.add("Fruits");
+        fruits.add("Apple");
+        fruits.add("Banana");
+        final PTreeItem vegetables = tree.add("Vegetables");
+        final PTreeItem carrot = vegetables.add("Carrot");
+        vegetables.add(Element.newPTreeItem(Element.newPLabel("Widget leaf")));
+        tree.addSelectionHandler(e -> {
+        });
+        final PButton select = Element.newPButton("Select Carrot");
+        select.addClickHandler(e -> tree.setSelectedItem(carrot));
+        panel.add(tree, select);
+        return panel;
+    }
+
+    /** A suggest box on a multi-word oracle. */
+    private static IsPWidget suggest() {
+        final PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
+        oracle.addAll(List.of("Apple", "Apricot", "Banana", "Blueberry", "Cherry", "Red apple"));
+        final PSuggestBox box = Element.newPSuggestBox(oracle);
+        box.getTextBox().setAttribute("aria-label", "Oracle suggest");
+        // shown with the replacement the server writes back to the box: once it shows, the box holds it
+        final PLabel selected = Element.newPLabel("Selected: none");
+        box.addSelectionHandler(e -> selected.setText("Selected: " + e.getSelectedItem().getReplacementString()));
+        box.addValueChangeHandler(e -> {
+        });
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(box, selected);
         return panel;
     }
 }

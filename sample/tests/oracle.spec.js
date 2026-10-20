@@ -42,7 +42,14 @@ const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 /** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
 const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
     'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload', 'flextable', 'grid',
-    'disclosure', 'tabpanel']);
+    'disclosure', 'tabpanel', 'popup', 'dialog', 'menu', 'tree', 'suggest']);
+
+/**
+ * Scenarios whose GWT behaviour depends on the browser: the reference is GWT's on Chromium, which the GWT terminal is
+ * checked on only; the TypeScript terminal is checked on every browser.
+ *   tree: on Firefox and WebKit, a click on an item's toggle selects it too.
+ */
+const GWT_CHROMIUM_ONLY = new Set(['tree']);
 
 /**
  * Where the TypeScript terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry
@@ -191,6 +198,81 @@ const scenarios = {
         await page.getByRole('button', { name: 'Select first' }).click();
         await expect(page.getByText('First panel')).toBeVisible();
     },
+    popup: async page => {
+        await page.getByRole('button', { name: 'Show popup' }).click();
+        await page.getByRole('button', { name: 'Inside popup' }).click();
+        await page.mouse.click(5, 300); // outside: an auto-hide popup hides
+        await expect(page.getByRole('button', { name: 'Inside popup' })).toBeHidden();
+        await page.getByRole('button', { name: 'Show placed' }).click();
+        await expect(page.getByText('Placed popup')).toBeVisible();
+        await page.getByRole('button', { name: 'Hide placed' }).click();
+        await expect(page.getByText('Placed popup')).toBeHidden();
+    },
+    dialog: async page => {
+        await page.getByRole('button', { name: 'Open dialog' }).click();
+        const caption = page.getByText('Oracle dialog', { exact: true });
+        const before = await caption.boundingBox();
+        await page.mouse.move(before.x + 10, before.y + before.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(before.x + 60, before.y + before.height / 2 + 30, { steps: 5 });
+        await page.mouse.up();
+        const after = await caption.boundingBox();
+        expect(Math.round(after.x - before.x)).toBe(50);
+        expect(Math.round(after.y - before.y)).toBe(30);
+        await page.getByRole('button', { name: 'Close Oracle dialog' }).click();
+        await expect(caption).toBeHidden();
+        await page.getByRole('button', { name: 'Open modal' }).click();
+        await page.getByRole('button', { name: 'Close Oracle modal' }).click();
+        await expect(page.getByText('Oracle modal', { exact: true })).toBeHidden();
+    },
+    menu: async page => {
+        const item = name => page.getByRole('menuitem', { name, exact: true });
+        await item('File').click();
+        await item('New').click();
+        await expect(item('New')).toBeHidden();
+        await item('File').click();
+        await item('Edit').hover();
+        await item('Copy').click();
+        await item('File').click();
+        await item('Recent').hover();
+        await item('Doc 1').click();
+        await item('File').click();
+        await item('Disabled').click({ force: true }); // nothing
+        await page.mouse.click(5, 300); // outside: the menus close
+        await expect(item('New')).toBeHidden();
+        await item('Help').click();
+    },
+    tree: async page => {
+        // By the mouse: GWT's keyboard handling misses keys right after a click
+        const fruits = page.getByText('Fruits', { exact: true });
+        const toggle = async () => {
+            const box = await fruits.boundingBox();
+            await page.mouse.click(box.x - 8, box.y + box.height / 2); // just left of the text
+        };
+        await fruits.click();
+        await toggle(); // opens
+        await expect(page.getByText('Apple', { exact: true })).toBeVisible();
+        await page.getByText('Apple', { exact: true }).click();
+        await page.getByText('Apple', { exact: true }).click(); // selected again
+        await toggle(); // closes
+        await expect(page.getByText('Apple', { exact: true })).toBeHidden();
+        await page.getByRole('button', { name: 'Select Carrot' }).click();
+    },
+    suggest: async page => {
+        // Picked with the mouse: the box loses the focus first, so every browser sends its change event (on Enter,
+        // Chrome sends one and WebKit not, a difference of the browsers, not of the terminals)
+        const box = page.getByLabel('Oracle suggest');
+        await box.click();
+        await box.pressSequentially('ap', { delay: 30 });
+        await page.getByText('Apricot', { exact: true }).click();
+        await expect(page.getByText('Selected: Apricot')).toBeVisible(); // the server wrote it back too
+        await expect(box).toHaveValue('Apricot');
+        await box.fill('');
+        await box.pressSequentially('re', { delay: 30 });
+        await page.getByText('Red apple', { exact: true }).click();
+        await expect(page.getByText('Selected: Red apple')).toBeVisible();
+        await expect(box).toHaveValue('Red apple');
+    },
     frame: async page => {
         const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
         await frame.getByRole('button', { name: 'Inside' }).click();
@@ -244,6 +326,8 @@ test.describe('behaviour oracle', () => {
             await page.goto(BASE_URL + '#' + 'oracle-' + name);
             const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
             test.skip(typescript && !READY_ON_TYPESCRIPT.has(name), 'not on the TypeScript terminal yet');
+            test.skip(!typescript && GWT_CHROMIUM_ONLY.has(name) && test.info().project.name !== 'chromium',
+                'GWT behaves differently on this browser');
             // frames that count: heartbeats and latency reports, dropped from the trace, are not
             await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count));
             await settle(payloads);
