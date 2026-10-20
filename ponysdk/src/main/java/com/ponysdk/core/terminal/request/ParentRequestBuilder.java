@@ -38,7 +38,8 @@ public abstract class ParentRequestBuilder implements RequestBuilder {
     private static native void setOnMessage(RequestCallback callback) /*-{
         $wnd.onmessage = function(event) {
             var data = event.data;
-            if (data instanceof Uint8Array) {
+            // $wnd: the message is cloned into the page's realm, not into the iframe this module runs in
+            if (data instanceof $wnd.Uint8Array) {
                 callback.@com.ponysdk.core.terminal.request.RequestCallback::onDataReceived(Lelemental2/core/Uint8Array;)(data);
             }
         };
