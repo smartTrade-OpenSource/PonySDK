@@ -412,6 +412,8 @@ const scenarios = {
         const box = page.getByLabel('Oracle mask');
         await expect(box).toHaveValue('__/__/____');
         await box.click();
+        // the terminal puts the cursor at the first empty slot once focused: GWT in a timer
+        await expect.poll(() => box.evaluate(e => e.selectionStart)).toBe(0);
         await box.pressSequentially('12032026', { delay: 30 });
         await expect(box).toHaveValue('12/03/2026');
         await box.press('Backspace');
