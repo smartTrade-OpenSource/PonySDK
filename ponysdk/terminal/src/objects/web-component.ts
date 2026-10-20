@@ -40,9 +40,9 @@ export class WebComponent extends Widget {
     /** A custom event, sent with its detail as JSON. */
     listenTo(name: string): void {
         if (this.listeners.has(name)) return;
-        const controller = new AbortController();
+        const controller = new AbortController(); // aborted by stopListening and destroy()
         this.listeners.set(name, controller);
-        const signal = AbortSignal.any([controller.signal, this.lifetime.signal]);
+        const signal = controller.signal;
         this.element.addEventListener(name, event => this.context.guard(() => {
             const message = about(this.id);
             message[C.WC_EVENT_NAME] = name;
@@ -50,6 +50,12 @@ export class WebComponent extends Widget {
             if (detail !== undefined && detail !== null) message[C.WC_EVENT_DETAIL] = toJson(detail);
             this.context.send(message);
         }), { signal });
+    }
+
+    override destroy(): void {
+        for (const controller of this.listeners.values()) controller.abort();
+        this.listeners.clear();
+        super.destroy();
     }
 
     stopListening(name: string): void {

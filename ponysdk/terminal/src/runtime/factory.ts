@@ -12,6 +12,7 @@ import { FileUpload } from '../objects/file-upload.ts';
 import { Frame } from '../objects/frame.ts';
 import { Image } from '../objects/image.ts';
 import { ListBox } from '../objects/list-box.ts';
+import { createMenuItemSeparator, MenuBar, MenuItem } from '../objects/menu.ts';
 import {
     CellPanel,
     Composite,
@@ -22,12 +23,15 @@ import {
     ScrollPanel,
     SimplePanel,
 } from '../objects/panels.ts';
+import { createDecoratedPopupPanel, DialogBox, PopupPanel } from '../objects/popup.ts';
 import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
 import { FunctionalLabel, Html, Label } from '../objects/text.ts';
 import { createPasswordTextBox, createTextArea, createTextBox } from '../objects/text-box.ts';
+import { SuggestBox, SuggestOracle } from '../objects/suggest.ts';
 import { TabPanel } from '../objects/tab-panel.ts';
 import { createFlexTable, Grid } from '../objects/tables.ts';
+import { Tree, TreeItem } from '../objects/tree.ts';
 import { WebComponent } from '../objects/web-component.ts';
 import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
@@ -75,6 +79,16 @@ const CREATORS = new Map<number, Creator>([
     [W.DISCLOSURE_PANEL, DisclosurePanel.create],
     [W.DECORATOR_PANEL, DecoratorPanel.create],
     [W.TAB_PANEL, TabPanel.create],
+    [W.POPUP_PANEL, PopupPanel.create],
+    [W.DECORATED_POPUP_PANEL, createDecoratedPopupPanel],
+    [W.DIALOG_BOX, DialogBox.create],
+    [W.MENU_BAR, MenuBar.create],
+    [W.MENU_ITEM, MenuItem.create],
+    [W.MENU_ITEM_SEPARATOR, createMenuItemSeparator],
+    [W.TREE, Tree.create],
+    [W.TREE_ITEM, TreeItem.create],
+    [W.MULTIWORD_SUGGEST_ORACLE, (context, id, type) => new SuggestOracle(context, id, type)],
+    [W.SUGGESTBOX, SuggestBox.create],
 ]);
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {
