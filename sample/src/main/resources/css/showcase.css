@@ -229,7 +229,7 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
 }
 .pony-nav-group:first-child { padding-top: 4px; }
 
-.pony-tab, .pony-tab.gwt-Button {
+.pony-tab, .pony-tab.pony-Button {
     width: 100%;
     display: block;
     text-align: left;
@@ -245,8 +245,8 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
     box-shadow: none;
     transition: background .12s, color .12s;
 }
-.pony-tab:hover, .pony-tab.gwt-Button:hover { background: var(--bg-muted); color: var(--text); }
-.pony-tab-active, .pony-tab-active.gwt-Button, .pony-tab-active.gwt-Button:hover {
+.pony-tab:hover, .pony-tab.pony-Button:hover { background: var(--bg-muted); color: var(--text); }
+.pony-tab-active, .pony-tab-active.pony-Button, .pony-tab-active.pony-Button:hover {
     background: #fff;
     color: var(--accent-strong);
     font-weight: 600;
@@ -310,8 +310,8 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
 
 .row-cost { margin-left: auto; display: flex; align-items: center; gap: 10px; padding-left: 12px; flex-shrink: 0; }
 .row-cost-result { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
-.gwt-Button.row-cost-btn { padding: 3px 10px; font-size: 12px; color: var(--text-3); }
-.gwt-Button.row-cost-btn:hover { color: var(--text); }
+.pony-Button.row-cost-btn { padding: 3px 10px; font-size: 12px; color: var(--text-3); }
+.pony-Button.row-cost-btn:hover { color: var(--text); }
 
 /* Callout */
 .highlight-box {
@@ -328,9 +328,9 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
 .highlight-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
 .highlight-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
 
-/* ── GWT widgets ─────────────────────────────────────────────────────────── */
+/* ── Widgets ─────────────────────────────────────────────────────────────── */
 
-.gwt-Button, .gwt-PushButton {
+.pony-Button, .pony-PushButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -349,18 +349,18 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
     user-select: none;
     transition: background .12s, border-color .12s, box-shadow .12s;
 }
-.gwt-Button:hover, .gwt-PushButton:hover { background: var(--bg-subtle); border-color: #94a3b8; }
-.gwt-Button:active, .gwt-PushButton-down { background: var(--bg-muted); box-shadow: none; }
-.gwt-Button:focus-visible, .gwt-PushButton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.gwt-Button[disabled] { opacity: .5; cursor: default; }
-.gwt-Button.primary, .gwt-Button.ov-primary {
+.pony-Button:hover, .pony-PushButton:hover { background: var(--bg-subtle); border-color: #94a3b8; }
+.pony-Button:active, .pony-PushButton:active { background: var(--bg-muted); box-shadow: none; }
+.pony-Button:focus-visible, .pony-PushButton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pony-Button[disabled] { opacity: .5; cursor: default; }
+.pony-Button.primary, .pony-Button.ov-primary {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
 }
-.gwt-Button.primary:hover { background: var(--accent-strong); }
+.pony-Button.primary:hover { background: var(--accent-strong); }
 
-.gwt-TextBox, .gwt-PasswordTextBox, .gwt-TextArea, .gwt-ListBox, .gwt-DateBox, .gwt-SuggestBox, select {
+.pony-TextBox, .pony-PasswordTextBox, .pony-TextArea, .pony-ListBox, .pony-DateBox, .pony-SuggestBox, select {
     font-family: var(--sans);
     font-size: 13.5px;
     color: var(--text);
@@ -372,45 +372,45 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
     box-shadow: var(--shadow);
     transition: border-color .12s, box-shadow .12s;
 }
-.gwt-TextBox:focus, .gwt-PasswordTextBox:focus, .gwt-TextArea:focus, .gwt-ListBox:focus, .gwt-DateBox:focus,
-.gwt-SuggestBox:focus, select:focus {
+.pony-TextBox:focus, .pony-PasswordTextBox:focus, .pony-TextArea:focus, .pony-ListBox:focus, .pony-DateBox:focus,
+.pony-SuggestBox:focus, select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, .15);
 }
-.gwt-TextBox::placeholder, .gwt-TextArea::placeholder { color: var(--text-4); }
+.pony-TextBox::placeholder, .pony-TextArea::placeholder { color: var(--text-4); }
 
-.gwt-CheckBox label, .gwt-RadioButton label { color: var(--text-2); font-size: 13.5px; cursor: pointer; }
+.pony-CheckBox, .pony-RadioButton { color: var(--text-2); font-size: 13.5px; cursor: pointer; }
 input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0 6px 0 0; vertical-align: -1px; }
 
-.gwt-Label { color: inherit; }
-.gwt-Anchor { color: var(--accent); }
+.pony-Label { color: inherit; }
+.pony-Anchor { color: var(--accent); }
 
-.gwt-RichTextArea {
+.pony-RichTextArea {
     background: #fff;
     border: 1px solid var(--border-strong);
     border-radius: 0 0 8px 8px;
     min-height: 140px;
     width: min(560px, 100%);
 }
-.gwt-RichTextToolbar { background: var(--bg-subtle); border: 1px solid var(--border-strong); border-bottom: 0; border-radius: 8px 8px 0 0; padding: 4px; }
+.pony-RichTextToolbar { background: var(--bg-subtle); border: 1px solid var(--border-strong); border-bottom: 0; border-radius: 8px 8px 0 0; padding: 4px; }
 
-.gwt-MenuBar { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
-.gwt-MenuBar .gwt-MenuItem { color: var(--text-2); padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; }
-.gwt-MenuBar .gwt-MenuItem-selected { background: var(--bg-muted); color: var(--text); }
-.gwt-MenuBarPopup .menuPopupMiddleCenter { background: #fff; }
+.pony-MenuBar { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+.pony-MenuBar .pony-MenuItem { color: var(--text-2); padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; }
+.pony-MenuBar .pony-MenuItem:hover, .pony-MenuBar .pony-MenuItem:focus, .pony-MenuBar .pony-MenuItem[aria-expanded=true] { background: var(--bg-muted); color: var(--text); }
+.pony-MenuPopup { background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-lg); }
 
-.gwt-DialogBox, .gwt-DecoratedPopupPanel, .gwt-PopupPanel {
+.pony-DialogBox, .pony-DecoratedPopupPanel, .pony-PopupPanel {
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
 }
-.gwt-DialogBox .Caption { font-weight: 600; color: var(--text); padding: 12px 16px; border-bottom: 1px solid var(--border); background: none; }
-.gwt-PopupPanelGlass { background: rgba(15, 23, 42, .35); }
+.pony-DialogBox .pony-Caption { font-weight: 600; color: var(--text); padding: 12px 16px; border-bottom: 1px solid var(--border); background: none; }
+.pony-Glass { background: rgba(15, 23, 42, .35); }
 
-.gwt-TabLayoutPanel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #fff; }
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs { background: var(--bg-subtle); border-bottom: 1px solid var(--border); padding: 0 6px; }
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+.pony-TabLayoutPanel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #fff; }
+.pony-TabLayoutPanel > [role=tablist] { background: var(--bg-subtle); border-bottom: 1px solid var(--border); padding: 0 6px; }
+.pony-TabLayoutPanel [role=tab] {
     background: transparent;
     border: 0;
     color: var(--text-3);
@@ -421,11 +421,11 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     font-weight: 500;
     cursor: pointer;
 }
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); background: transparent; }
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent { border: 0; background: #fff; padding: 0; }
+.pony-TabLayoutPanel [role=tab][aria-selected=true] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); background: transparent; }
+.pony-TabLayoutPanel > [role=tabpanel] { border: 0; background: #fff; padding: 0; }
 
-.gwt-StackLayoutPanel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #fff; }
-.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader {
+.pony-StackLayoutPanel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #fff; }
+.pony-StackLayoutPanel .pony-StackLayoutPanel-header {
     background: var(--bg-subtle);
     color: var(--text-2);
     border: 0;
@@ -435,31 +435,31 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     font-weight: 600;
     cursor: pointer;
 }
-.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader-hovering { background: var(--bg-muted); }
-.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent { border: 0; background: #fff; }
+.pony-StackLayoutPanel .pony-StackLayoutPanel-header:hover { background: var(--bg-muted); }
+.pony-StackLayoutPanel .pony-StackLayoutPanel-content { border: 0; background: #fff; }
 
-.gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger { background: var(--border); }
-.gwt-SplitLayoutPanel-HDragger:hover, .gwt-SplitLayoutPanel-VDragger:hover { background: var(--accent); }
+.pony-Splitter { background: var(--border); }
+.pony-Splitter:hover { background: var(--accent); }
 
-.gwt-DisclosurePanel .header, .gwt-DisclosurePanel a.header, .gwt-DisclosurePanel a.header td {
+.pony-DisclosurePanel > summary {
     color: var(--text);
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
 }
-.gwt-DisclosurePanel .content { padding: 8px 0 0 18px; color: var(--text-2); }
+.pony-DisclosurePanel > div { padding: 8px 0 0 18px; color: var(--text-2); }
 
-.gwt-DatePicker { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; color: var(--text-2); }
-.gwt-DatePicker td, .gwt-DatePicker .datePickerDay { border: 0; }
-.gwt-DatePicker .datePickerMonthSelector, .gwt-DatePicker .datePickerMonth { background: none; color: var(--text); font-weight: 600; }
-.gwt-DatePicker .datePickerWeekdayLabel, .gwt-DatePicker .datePickerWeekendLabel { background: none; color: var(--text-3); font-size: 12px; }
-.gwt-DatePicker .datePickerDay { background: none; border-radius: 6px; padding: 4px 7px; cursor: pointer; }
-.gwt-DatePicker .datePickerDay:hover, .gwt-DatePicker .datePickerDayIsHighlighted { background: var(--bg-muted); }
-.gwt-DatePicker .datePickerDayIsToday { box-shadow: inset 0 0 0 1px var(--accent-line); }
-.gwt-DatePicker .datePickerDayIsValue, .gwt-DatePicker .datePickerDayIsValueAndHighlighted { background: var(--accent); color: #fff; }
-.gwt-DatePicker .datePickerDayIsFiller { color: var(--border-strong); }
+.pony-DatePicker { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; color: var(--text-2); }
+.pony-DatePicker td { border: 0; }
+.pony-DatePicker-header, .pony-DatePicker-month { background: none; color: var(--text); font-weight: 600; }
+.pony-DatePicker th { background: none; color: var(--text-3); font-size: 12px; }
+.pony-DatePicker-day { background: none; border-radius: 6px; padding: 4px 7px; cursor: pointer; }
+.pony-DatePicker-day:hover, .pony-DatePicker-day:focus-visible { background: var(--bg-muted); }
+.pony-DatePicker-day[aria-current=date] { box-shadow: inset 0 0 0 1px var(--accent-line); }
+.pony-DatePicker-day[aria-selected=true]:not([data-filler]) { background: var(--accent); color: #fff; }
+.pony-DatePicker-day[data-filler] { color: var(--border-strong); }
 
-.gwt-Tree .gwt-TreeItem, .data-tree .gwt-TreeItem {
+.pony-Tree .pony-TreeItem-row {
     padding: 4px 8px;
     border-radius: 6px;
     color: var(--text-2);
@@ -468,9 +468,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     border: 0;
     outline: none;
 }
-.gwt-Tree .gwt-TreeItem-selected, .data-tree .gwt-TreeItem-selected { background: var(--accent-soft); color: var(--accent-strong); }
+.pony-Tree [aria-selected=true] > .pony-TreeItem-row { background: var(--accent-soft); color: var(--accent-strong); }
 .data-tree { padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; max-width: 420px; }
-.data-tree td, .data-tree tr, .data-tree table { background: transparent; border: 0; text-align: left; }
 
 /* ── Interactive example cards (Inputs) ─────────────────────────────────── */
 
@@ -495,7 +494,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     background: var(--bg-muted);
     border-radius: 8px;
 }
-.pony-ex-seg .gwt-Button {
+.pony-ex-seg .pony-Button {
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 500;
@@ -505,8 +504,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     border-radius: 6px;
     box-shadow: none;
 }
-.pony-ex-seg .gwt-Button:hover { color: var(--text); background: transparent; }
-.pony-ex-seg .gwt-Button.pony-ex-seg-on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(15, 23, 42, .12); }
+.pony-ex-seg .pony-Button:hover { color: var(--text); background: transparent; }
+.pony-ex-seg .pony-Button.pony-ex-seg-on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(15, 23, 42, .12); }
 .pony-ex-body { padding: 20px 18px; }
 .pony-ex-preview { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; background: var(--bg-subtle); }
 .pony-ex-echo {
@@ -590,7 +589,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .ov-hero-code { margin: 0; box-shadow: var(--shadow-lg); }
 .ov-hero-code .code-body { font-size: 12px; padding: 16px 18px; }
 .ov-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-.ov-ctas .gwt-Button { padding: 9px 16px; font-size: 14px; }
+.ov-ctas .pony-Button { padding: 9px 16px; font-size: 14px; }
 .ov-eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; letter-spacing: 0; }
 .ov-h1 { font-size: 42px; line-height: 1.12; font-weight: 750; letter-spacing: -.035em; color: var(--text); margin: 0 0 14px; max-width: 820px; }
 .ov-lead { font-size: 17px; line-height: 1.65; color: var(--text-3); max-width: 760px; }
@@ -637,7 +636,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
 }
-.ov-controls .gwt-Button { padding: 4px 10px; font-size: 12px; }
+.ov-controls .pony-Button { padding: 4px 10px; font-size: 12px; }
 
 .ov-ticker {
     display: grid;
@@ -699,18 +698,18 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     border: 1px solid var(--accent-line);
     border-radius: 7px;
 }
-.gwt-DockLayoutPanel .lay-chip, .gwt-SplitLayoutPanel .lay-chip, .gwt-TabLayoutPanel .lay-chip, .gwt-StackLayoutPanel .lay-chip {
+.pony-DockLayoutPanel .lay-chip, .pony-SplitLayoutPanel .lay-chip, .pony-TabLayoutPanel .lay-chip, .pony-StackLayoutPanel .lay-chip {
     width: calc(100% - 6px);
     height: calc(100% - 6px);
     margin: 3px;
 }
 .lay-frame { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; overflow: hidden; }
-.lay-frame .gwt-Label { color: var(--text-2); padding: 2px 10px; }
+.lay-frame .pony-Label { color: var(--text-2); padding: 2px 10px; }
 .lay-dialog { display: flex; flex-direction: column; gap: 12px; padding: 16px; color: var(--text-2); }
 .lay-vis { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .lay-hint { font-size: 12.5px; color: var(--text-3); }
 .lay-vis-card { margin: 10px; padding: 12px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent-line); }
-.lay-vis-card .gwt-Label { color: var(--accent-strong); font-weight: 600; }
+.lay-vis-card .pony-Label { color: var(--accent-strong); font-weight: 600; }
 
 /* ── Tables ──────────────────────────────────────────────────────────────── */
 
@@ -740,7 +739,7 @@ table.data-table, .cost-table {
 .table-scroll { max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
 .cost-table { min-width: min(980px, 100%); }
 .cost-table td { white-space: nowrap; }
-.cost-table td:first-child .gwt-Label { color: var(--text); font-weight: 600; }
+.cost-table td:first-child .pony-Label { color: var(--text); font-weight: 600; }
 .cost-table td .ov-bar { width: 120px; }
 .cost-fill { background: var(--accent) !important; }
 .cost-row { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; padding: 14px 16px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-lg); }
@@ -753,7 +752,7 @@ table.data-table, .cost-table {
 .dg-frame { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
 .pony-grid { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; background: #fff; }
 .dg-head, .pony-grid-header { background: var(--bg-subtle) !important; color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
-.dg-head .gwt-Label, .pony-grid-header .gwt-Label { font-size: 12px; }
+.dg-head .pony-Label, .pony-grid-header .pony-Label { font-size: 12px; }
 .pony-grid-row { border-bottom: 1px solid var(--bg-muted); }
 /* hover: the addon marks both halves of the row (pinned + scrolling) with [pony-hovered]; the legacy sample
    stylesheet painted it red */
@@ -774,33 +773,28 @@ div.selected-row { background-color: #e0e7ff; }
 
 /* FlexLayout demo embedded in the showcase: light toolbar */
 .pony-content .fl-demo-toolbar { background: var(--bg-subtle) !important; border-bottom: 1px solid var(--border) !important; }
-.pony-content .fl-demo-toolbar > .gwt-Label:first-child { color: var(--text) !important; }
-.pony-content .fl-demo-toolbar .gwt-Button, .pony-content .fl-demo-toolbar select,
-.pony-content .fl-demo-toolbar .gwt-Label + .gwt-Label {
+.pony-content .fl-demo-toolbar > .pony-Label:first-child { color: var(--text) !important; }
+.pony-content .fl-demo-toolbar .pony-Button, .pony-content .fl-demo-toolbar select,
+.pony-content .fl-demo-toolbar .pony-Label + .pony-Label {
     background: #fff !important;
     color: var(--text-2) !important;
     border-color: var(--border-strong) !important;
     box-shadow: none !important;
 }
 /* the demo's panel texts carry pastel colours made for its dark default theme */
-.pony-content .fl-theme-light .gwt-Label[style*="color"] { color: var(--text-2) !important; }
-.gwt-Tree table { width: auto; }
-.gwt-Tree td { padding: 0 2px; vertical-align: middle; }
+.pony-content .fl-theme-light .pony-Label[style*="color"] { color: var(--text-2) !important; }
 
 .pony-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-.pony-stack > .gwt-FlowPanel, .pony-stack > div:not([class]) { display: flex; flex-wrap: wrap; gap: 8px; }
+.pony-stack > .pony-FlowPanel, .pony-stack > div:not([class]) { display: flex; flex-wrap: wrap; gap: 8px; }
 
-/* Rich text toolbar: GWT's raw push buttons */
-.gwt-RichTextToolbar .gwt-ToggleButton, .gwt-RichTextToolbar .gwt-PushButton {
+/* Rich text toolbar: plain buttons */
+.pony-RichTextToolbar button {
     display: inline-flex; padding: 3px; margin: 1px; border: 1px solid transparent !important;
     border-radius: 6px; background: transparent !important; box-shadow: none; cursor: pointer;
 }
-.gwt-RichTextToolbar .gwt-ToggleButton:hover, .gwt-RichTextToolbar .gwt-PushButton:hover { background: #fff !important; border-color: var(--border) !important; }
-.gwt-RichTextToolbar .gwt-ToggleButton-down { background: var(--accent-soft) !important; border-color: var(--accent-line) !important; }
-.gwt-RichTextToolbar select { padding: 3px 6px; font-size: 12px; margin: 2px; box-shadow: none; }
-
-/* the selected day must stay readable over the GWT clean theme */
-.gwt-DatePicker .datePickerDayIsValue, .gwt-DatePicker .datePickerDayIsValueAndHighlighted { background: var(--accent); color: #fff; }
+.pony-RichTextToolbar button:hover { background: #fff !important; border-color: var(--border) !important; }
+.pony-RichTextToolbar button[aria-pressed=true] { background: var(--accent-soft) !important; border-color: var(--accent-line) !important; }
+.pony-RichTextToolbar select { padding: 3px 6px; font-size: 12px; margin: 2px; box-shadow: none; }
 
 /* echo readouts hug their text */
 .pony-ex-echo { display: inline-block; max-width: 100%; }
@@ -851,7 +845,7 @@ div.selected-row { background-color: #e0e7ff; }
     font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text-2);
 }
 .rc-rows-head { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--text-3); }
-.rc-rows-head .gwt-Button { padding: 2px 10px; font-size: 12px; }
+.rc-rows-head .pony-Button { padding: 2px 10px; font-size: 12px; }
 .rc-rows {
     height: 150px; overflow: auto; padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--border);
     font-family: var(--mono); font-size: 11.5px; color: var(--text-3); line-height: 1.6;
@@ -867,7 +861,7 @@ div.selected-row { background-color: #e0e7ff; }
         padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--border); white-space: nowrap;
     }
     .pony-nav-group, .pony-nav-footer { display: none; }
-    .pony-tab, .pony-tab.gwt-Button { width: auto; flex-shrink: 0; }
+    .pony-tab, .pony-tab.pony-Button { width: auto; flex-shrink: 0; }
     .pony-content { padding: 24px 20px 48px; }
     .pony-crumb, .pony-divider, .pony-hstat:not(:first-child) { display: none; }
     .pony-logo-wrap { min-width: 0; }
@@ -882,13 +876,13 @@ div.selected-row { background-color: #e0e7ff; }
     .ov-hero-code .code-body { font-size: 11px; }
     .pony-label { min-width: 0; width: 100%; }
 }
-.gwt-ListBox[multiple] { min-width: 150px; min-height: 96px; }
+.pony-ListBox[multiple] { min-width: 150px; min-height: 96px; }
 .cost-table { width: 100%; min-width: 0; }
 .cost-table td { padding: 8px 10px; }
 .cost-table td .ov-bar { width: 72px; }
-.dg-frame .gwt-TextBox { width: calc(100% - 6px); padding: 4px 6px; font-size: 12px; box-shadow: none; border-color: var(--border); }
+.dg-frame .pony-TextBox { width: calc(100% - 6px); padding: 4px 6px; font-size: 12px; box-shadow: none; border-color: var(--border); }
 .dg-frame input[type=checkbox] { margin: 0 4px; }
-.dg-controls select, .dg-controls .gwt-ListBox { padding: 7px 10px; }
+.dg-controls select, .dg-controls .pony-ListBox { padding: 7px 10px; }
 
 /* Performance: 60-second charts */
 .spark-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
@@ -900,10 +894,11 @@ div.selected-row { background-color: #e0e7ff; }
 .spark-bar { flex: 1; min-width: 2px; background: var(--accent-line); border-radius: 2px 2px 0 0; }
 .spark-bar:last-child { background: var(--accent); }
 .spark-range { font-size: 12px; color: var(--text-3); margin-top: 8px; font-variant-numeric: tabular-nums; }
-.gwt-DatePicker .datePickerPreviousButton, .gwt-DatePicker .datePickerNextButton, .gwt-DatePicker .html-face {
+.pony-DatePicker-header button {
+    border: 0; background: none; font-size: 15px;
     color: var(--text-3) !important; cursor: pointer; padding: 0 6px; border-radius: 6px;
 }
-.gwt-DatePicker .datePickerPreviousButton:hover, .gwt-DatePicker .datePickerNextButton:hover { color: var(--accent) !important; background: var(--bg-muted) !important; }
+.pony-DatePicker-header button:hover { color: var(--accent) !important; background: var(--bg-muted) !important; }
 
 /* Binary protocol: anatomy of an update */
 .anat { margin-top: 36px; max-width: 1040px; }
@@ -915,5 +910,5 @@ div.selected-row { background-color: #e0e7ff; }
 .code-counter { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); }
 /* FlexLayout demo toolbar: one line per control, aligned */
 .pony-content .fl-demo-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.pony-content .fl-demo-toolbar > .gwt-Label, .pony-content .fl-demo-toolbar > .gwt-Button { white-space: nowrap; }
-.pony-content .fl-demo-toolbar > .gwt-Button, .pony-content .fl-demo-toolbar > .gwt-ListBox { height: 30px; padding-top: 0; padding-bottom: 0; }
+.pony-content .fl-demo-toolbar > .pony-Label, .pony-content .fl-demo-toolbar > .pony-Button { white-space: nowrap; }
+.pony-content .fl-demo-toolbar > .pony-Button, .pony-content .fl-demo-toolbar > .pony-ListBox { height: 30px; padding-top: 0; padding-bottom: 0; }
