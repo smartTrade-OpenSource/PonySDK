@@ -88,12 +88,13 @@ Authoring Practices where HTML has no element.
 
 | Server class | Element |
 |---|---|
-| `PButton`, `PPushButton`, `PToggleButton` | `<button>`; `aria-pressed` for the toggle |
+| `PButton`, `PPushButton` | `<button>` |
 | `PTextBox`, `PPasswordTextBox`, `PTextArea` | `<input type="text">`, `<input type="password">`, `<textarea>` |
 | `PCheckBox`, `PRadioButton` | `<label>` around `<input type="checkbox">` or `<input type="radio">` |
 | `PListBox` | `<select>`, `multiple` when it allows several |
 | `PLabel`, `PHTML`, `PAnchor`, `PImage` | `<div>`, `<div>`, `<a>`, `<img>` |
 | `PFlowPanel`, `PSimplePanel`, `PScrollPanel`, `PFocusPanel`, `PAbsolutePanel` | `<div>` |
+| `PComposite` | the element of the widget it wraps |
 | `PHorizontalPanel`, `PVerticalPanel` | a flex `<div>`, one wrapper per child for the cell properties |
 | `PFlexTable`, `PGrid` | `<table>` |
 | `PDisclosurePanel` | `<details>` and `<summary>` |
@@ -164,7 +165,7 @@ Safari 17), `ResizeObserver` and ES2022 without polyfills.
 |---|---|
 | P0 | Node, esbuild and `tsc` in Gradle; `model.ts` generation; terminal switch in `BootstrapServlet`; oracle harness with its first scenarios |
 | P1 | `Reader`/`Writer` (v2, v3, dictionary), tested in Node on frames recorded by the Java encoder; `Dispatcher`, `Component`, socket, heartbeat, reconnection and its notice, `pony` API, History, Cookies, Script, Window, Frame, Element, AddOn, WebComponent |
-| P2 | Label, HTML, Anchor, Image, Button, PushButton, ToggleButton, TextBox, PasswordTextBox, TextArea, CheckBox, RadioButton, ListBox, FileUpload; Flow, Simple, Scroll, Focus, Absolute, Horizontal and Vertical panels |
+| P2 | Label, HTML, FunctionalLabel, Anchor, Image, Button, PushButton, TextBox, PasswordTextBox, TextArea, CheckBox, RadioButton, ListBox, FileUpload; Flow, Simple, Scroll, Focus, Absolute, Horizontal and Vertical panels; Composite |
 | P3 | FlexTable, Grid, DisclosurePanel, DecoratorPanel, TabPanel |
 | P4 | PopupPanel, DecoratedPopupPanel, DialogBox, MenuBar, SuggestBox, Tree |
 | P5 | LayoutPanel, RootLayoutPanel, SimpleLayoutPanel, DockLayoutPanel, SplitLayoutPanel, TabLayoutPanel, StackLayoutPanel, HeaderPanel, animation |

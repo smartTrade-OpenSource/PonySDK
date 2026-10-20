@@ -13,6 +13,7 @@ import { createObject } from './runtime/factory.ts';
 import { BrowserHistory } from './runtime/history.ts';
 import { log } from './runtime/log.ts';
 import type { AddOnFactory, Session } from './runtime/object.ts';
+import { installStyles } from './runtime/styles.ts';
 
 /** The terminal of the opener or of the parent frame, as a child terminal calls it. */
 interface ParentTerminal {
@@ -49,6 +50,7 @@ export class Terminal implements Session, Host {
     start(): void {
         if (this.started) return;
         this.started = true;
+        installStyles();
         const parameters = new URLSearchParams(location.search);
         if (parameters.has(C.UI_CONTEXT_ID)) this.startChild(parameters);
         else this.startMain();

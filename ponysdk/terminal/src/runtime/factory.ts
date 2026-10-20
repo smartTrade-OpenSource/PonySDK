@@ -4,10 +4,26 @@
 
 import { WidgetType as W, WidgetTypeNames } from '#model';
 import { AddOnComposite, AddOnObject } from '../objects/addon.ts';
+import { Anchor, Button, PushButton } from '../objects/buttons.ts';
+import { CheckBox, RadioButton } from '../objects/check-box.ts';
 import { ElementWidget } from '../objects/element.ts';
+import { FileUpload } from '../objects/file-upload.ts';
 import { Frame } from '../objects/frame.ts';
+import { Image } from '../objects/image.ts';
+import { ListBox } from '../objects/list-box.ts';
+import {
+    CellPanel,
+    Composite,
+    createAbsolutePanel,
+    FlowPanel,
+    FocusPanel,
+    ScrollPanel,
+    SimplePanel,
+} from '../objects/panels.ts';
 import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
+import { FunctionalLabel, Html, Label } from '../objects/text.ts';
+import { createPasswordTextBox, createTextArea, createTextBox } from '../objects/text-box.ts';
 import { WebComponent } from '../objects/web-component.ts';
 import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
@@ -28,6 +44,28 @@ const CREATORS = new Map<number, Creator>([
     [W.ADDON_COMPOSITE, AddOnComposite.create],
     [W.SCRIPT, (context, id, type) => new Script(context, id, type)],
     [W.FUNCTION, JsFunction.create],
+    [W.LABEL, Label.create],
+    [W.HTML, Html.create],
+    [W.FUNCTIONAL_LABEL, FunctionalLabel.create],
+    [W.ANCHOR, Anchor.create],
+    [W.IMAGE, Image.create],
+    [W.BUTTON, Button.create],
+    [W.PUSH_BUTTON, PushButton.create],
+    [W.TEXTBOX, createTextBox],
+    [W.PASSWORD_TEXTBOX, createPasswordTextBox],
+    [W.TEXT_AREA, createTextArea],
+    [W.CHECKBOX, CheckBox.create],
+    [W.RADIO_BUTTON, RadioButton.create],
+    [W.LISTBOX, ListBox.create],
+    [W.FILE_UPLOAD, FileUpload.create],
+    [W.FLOW_PANEL, FlowPanel.create],
+    [W.SIMPLE_PANEL, SimplePanel.create],
+    [W.SCROLL_PANEL, ScrollPanel.create],
+    [W.FOCUS_PANEL, FocusPanel.create],
+    [W.ABSOLUTE_PANEL, createAbsolutePanel],
+    [W.HORIZONTAL_PANEL, CellPanel.createHorizontal],
+    [W.VERTICAL_PANEL, CellPanel.createVertical],
+    [W.COMPOSITE, Composite.create],
 ]);
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {

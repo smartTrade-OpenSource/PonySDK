@@ -38,7 +38,10 @@ interface NativeBinding {
  * Everything the widget registers on the browser goes through {@link lifetime}: collecting the widget releases it.
  */
 export class Widget extends BaseObject {
-    readonly element: HTMLElement;
+    /** Replaced only by a composite, which takes the element of the widget it wraps. */
+    element: HTMLElement;
+    /** pony-<Type> (pony-Button...): always on the element, whatever the server's style names. Null for raw elements. */
+    protected readonly typeClass: string | null;
     parent: Widget | null = null;
     /** The widgets inside this one, in order; empty for a widget that holds none. */
     readonly children: Widget[] = [];
@@ -50,9 +53,16 @@ export class Widget extends BaseObject {
     private visibility: IntersectionObserver | undefined;
     private binding: NativeBinding | undefined;
 
-    constructor(context: Context, id: number, type: number, element: HTMLElement) {
+    constructor(context: Context, id: number, type: number, element: HTMLElement, typeClass: string | null = null) {
         super(context, id, type);
         this.element = element;
+        this.typeClass = typeClass;
+        if (typeClass !== null) element.classList.add(typeClass);
+    }
+
+    /** What FOCUS focuses: the element, or the control inside it (the input of a check box). */
+    get focusTarget(): HTMLElement {
+        return this.element;
     }
 
     override update(reader: Reader): boolean {
@@ -106,7 +116,7 @@ export class Widget extends BaseObject {
     protected append(child: Widget): void {
         child.removeFromParent();
         this.children.push(child);
-        this.element.appendChild(child.element);
+        this.element.appendChild(this.nodeFor(child));
         this.adopt(child);
     }
 
@@ -118,11 +128,22 @@ export class Widget extends BaseObject {
         if (child.parent === this && this.children.indexOf(child) < index) index--;
         child.removeFromParent();
         this.children.splice(index, 0, child);
-        this.element.insertBefore(child.element, this.element.children[index] ?? null);
+        this.element.insertBefore(this.nodeFor(child), this.element.children[index] ?? null);
         this.adopt(child);
     }
 
-    private adopt(child: Widget): void {
+    /** The node this widget's element holds for a child: its element, or a cell around it. */
+    protected nodeFor(child: Widget): Element {
+        return child.element;
+    }
+
+    /** The node to take out when a child leaves. */
+    protected nodeOf(child: Widget): Element {
+        return child.element;
+    }
+
+    /** The child is this widget's: it is attached when this widget is. */
+    protected adopt(child: Widget): void {
         child.parent = this;
         if (this.isAttached) child.attach();
     }
@@ -134,7 +155,7 @@ export class Widget extends BaseObject {
             child.detach();
         } finally {
             child.parent = null;
-            child.element.remove();
+            this.nodeOf(child).remove();
             const index = this.children.indexOf(child);
             if (index >= 0) this.children.splice(index, 1);
         }
@@ -332,9 +353,13 @@ export class Widget extends BaseObject {
         else this.element.setAttribute('aria-hidden', 'true');
     }
 
-    /** STYLE_NAME replaces the class attribute. */
+    /** STYLE_NAME replaces the class attribute, except the type class. */
     setStyleName(names: string): void {
-        this.element.className = names;
+        this.element.className = this.typeClass === null ? names : `${this.typeClass} ${names}`.trim();
+    }
+
+    removeStyleNames(names: string[]): void {
+        this.element.classList.remove(...names.filter(name => name !== this.typeClass));
     }
 
     /** BIND: a global function makes the object that receives this widget's NATIVE messages. */
@@ -384,7 +409,7 @@ function next(reader: Reader): string | null {
 
 const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>([
     [K.ADD_STYLE_NAME, (w, r) => w.element.classList.add(...names(r.str))],
-    [K.REMOVE_STYLE_NAME, (w, r) => w.element.classList.remove(...names(r.str))],
+    [K.REMOVE_STYLE_NAME, (w, r) => w.removeStyleNames(names(r.str))],
     [K.STYLE_NAME, (w, r) => w.setStyleName(r.str ?? '')],
     [K.WIDGET_VISIBLE, (w, r) => w.setVisible(r.bool)],
     [K.WIDGET_TITLE, (w, r) => {
@@ -409,10 +434,10 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
         w.element.id = String(w.id);
     }],
     [K.FOCUS, (w, r) => {
-        if (r.bool) w.element.focus();
-        else w.element.blur();
+        if (r.bool) w.focusTarget.focus();
+        else w.focusTarget.blur();
     }],
-    [K.FOCUS_PREVENT_SCROLL, w => w.element.focus({ preventScroll: true })],
+    [K.FOCUS_PREVENT_SCROLL, w => w.focusTarget.focus({ preventScroll: true })],
     [K.WIDGET_WIDTH, (w, r) => {
         w.element.style.width = r.str ?? '';
     }],
@@ -424,7 +449,7 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
         w.element.style.height = '100%';
     }],
     [K.TABINDEX, (w, r) => {
-        w.element.tabIndex = r.int;
+        w.focusTarget.tabIndex = r.int;
     }],
     [K.ENSURE_DEBUG_ID, (w, r) => w.element.setAttribute('pid', r.str ?? '')],
     [K.EVAL, (w, r) => {
