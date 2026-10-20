@@ -10,9 +10,14 @@ import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +51,8 @@ import com.ponysdk.core.ui.basic.PWindow;
  * without then with the string dictionary.</li>
  * <li>{@code page-v1}, {@code page-v2}, {@code page-v3}: the same page built, updated and partly removed by a
  * UIContext, in each protocol version. The terminal must apply the same operations whatever the version.</li>
+ * <li>{@code dates.json}: dates formatted by {@link SimpleDateFormat} in English, and texts it parses, which the
+ * terminal's date patterns must format and parse alike (ADR-0002, R3).</li>
  * </ul>
  * Argument: the output directory.
  */
@@ -64,6 +71,60 @@ public final class TerminalFixtures {
         for (final int version : new int[] {ProtocolVersion.V1, ProtocolVersion.UPDATE_RUNS, ProtocolVersion.CREATE_IN_PARENT}) {
             page(dir, "page-v" + version, version);
         }
+        dates(dir);
+    }
+
+    // ---- dates ---------------------------------------------------------------------------------------------------
+
+    private static final String[] PATTERNS = {"dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd/MM/yyyy HH:mm:ss", "d MMM yyyy",
+        "EEEE d MMMM yyyy", "EEE, MMM d, yy", "h:mm a", "K:mm a", "k:mm", "yyyyMMdd", "dd.MM.yy HH:mm",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS", "'Week of' d MMM yyyy"};
+
+    /** Year, month (1-12), day, hours, minutes, seconds, milliseconds: away from daylight saving changes. */
+    private static final int[][] DATES = {{2026, 3, 5, 14, 7, 9, 45}, {2026, 1, 1, 0, 0, 0, 0}, {2025, 12, 31, 23, 59, 59, 999},
+        {2024, 2, 29, 12, 0, 0, 0}, {1999, 7, 14, 9, 5, 1, 7}, {2045, 10, 20, 13, 30, 0, 500}, {1976, 11, 9, 0, 30, 0, 0}};
+
+    /** Texts a user may type, as the server parses them: the terminal must read the same date. */
+    private static final String[][] TYPED = {{"dd/MM/yyyy", "5/3/2026"}, {"dd/MM/yyyy", "32/01/2026"},
+        {"MM/dd/yyyy", "13/01/2026"}, {"d MMM yyyy", "5 march 2026"}, {"d MMM yyyy", "5 Mar 2026"}, {"dd/MM/yy", "05/03/26"},
+        {"dd/MM/yy", "05/03/70"}, {"dd/MM/yyyy HH:mm", "05/03/2026 7:05"}, {"h:mm a", "12:30 AM"}, {"h:mm a", "1:30 pm"}};
+
+    private static void dates(final Path dir) throws IOException {
+        final JsonArrayBuilder formatted = Json.createArrayBuilder();
+        for (final String pattern : PATTERNS) {
+            final SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.ENGLISH);
+            for (final int[] d : DATES) {
+                final Calendar calendar = Calendar.getInstance();
+                calendar.clear();
+                calendar.set(d[0], d[1] - 1, d[2], d[3], d[4], d[5]);
+                calendar.set(Calendar.MILLISECOND, d[6]);
+                formatted.add(Json.createObjectBuilder().add("pattern", pattern).add("date", fields(d))
+                    .add("text", format.format(calendar.getTime())));
+            }
+        }
+        final JsonArrayBuilder typed = Json.createArrayBuilder();
+        for (final String[] t : TYPED) {
+            final Date date;
+            try {
+                date = new SimpleDateFormat(t[0], Locale.ENGLISH).parse(t[1]);
+            } catch (final ParseException e) {
+                throw new IllegalStateException(t[0] + " " + t[1], e);
+            }
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            final int[] d = {calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND),
+                calendar.get(Calendar.MILLISECOND)};
+            typed.add(Json.createObjectBuilder().add("pattern", t[0]).add("text", t[1]).add("date", fields(d)));
+        }
+        Files.writeString(dir.resolve("dates.json"),
+            Json.createObjectBuilder().add("formatted", formatted).add("typed", typed).build().toString());
+    }
+
+    private static JsonArrayBuilder fields(final int[] date) {
+        final JsonArrayBuilder array = Json.createArrayBuilder();
+        for (final int field : date) array.add(field);
+        return array;
     }
 
     // ---- values --------------------------------------------------------------------------------------------------

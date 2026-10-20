@@ -3,6 +3,7 @@
  */
 
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { DateFormat } from '../src/runtime/date-format.ts';
@@ -59,4 +60,52 @@ test('refuses a text that does not fit', () => {
 test('takes a time zone', () => {
     const parsed = new DateFormat("yyyy-MM-dd'T'HH:mmZ").parse('2026-03-05T14:07+0100');
     assert.equal(parsed?.getTime(), Date.UTC(2026, 2, 5, 13, 7));
+});
+
+interface DateCase {
+    pattern: string;
+    text: string;
+    /** Year, month (1-12), day, hours, minutes, seconds, milliseconds. */
+    date: number[];
+}
+
+/** Written by Java's SimpleDateFormat: ./gradlew :ponysdk:terminalFixtures (TerminalFixtures.java). */
+function javaCases(): { formatted: DateCase[]; typed: DateCase[] } {
+    const file = new URL('../build/fixtures/dates.json', import.meta.url);
+    if (!existsSync(file)) throw new Error(`${file.pathname} is missing: run ./gradlew :ponysdk:terminalFixtures`);
+    return JSON.parse(readFileSync(file, 'utf8')) as { formatted: DateCase[]; typed: DateCase[] };
+}
+
+function local([year, month, day, hours, minutes, seconds, millis]: number[]): Date {
+    const date = new Date(2000, 0, 1);
+    date.setFullYear(year!, month! - 1, day!);
+    date.setHours(hours!, minutes!, seconds!, millis!);
+    return date;
+}
+
+/** The fields of a date the pattern writes: the others are today's, or midnight, when parsed. */
+function written(pattern: string, date: Date): number[] {
+    const letters = pattern.replace(/'[^']*'/g, '');
+    const has = (re: RegExp): boolean => re.test(letters);
+    return [has(/y/) ? date.getFullYear() : -1, has(/M/) ? date.getMonth() + 1 : -1, has(/d/) ? date.getDate() : -1,
+        has(/[hHkK]/) ? date.getHours() : -1, has(/m/) ? date.getMinutes() : -1, has(/s/) ? date.getSeconds() : -1,
+        has(/S/) ? date.getMilliseconds() : -1];
+}
+
+test('formats as Java\'s SimpleDateFormat, and parses back what it formats', () => {
+    for (const { pattern, date, text } of javaCases().formatted) {
+        const format = new DateFormat(pattern);
+        assert.equal(format.format(local(date)), text, `${pattern} ${date.join(',')}`);
+        const parsed = format.parse(text);
+        assert.notEqual(parsed, null, `${pattern} ${text}`);
+        assert.deepEqual(written(pattern, parsed!), written(pattern, local(date)), `${pattern} ${text}`);
+    }
+});
+
+test('reads what a user types as Java\'s SimpleDateFormat does', () => {
+    for (const { pattern, text, date } of javaCases().typed) {
+        const parsed = new DateFormat(pattern).parse(text);
+        assert.notEqual(parsed, null, `${pattern} ${text}`);
+        assert.deepEqual(written(pattern, parsed!), written(pattern, local(date)), `${pattern} ${text}`);
+    }
 });
