@@ -7,13 +7,21 @@ package com.ponysdk.sample.client;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 /**
  * The pages of the behaviour oracle (docs/decisions/0002-javascript-terminal.md, sample/tests/oracle.spec.js), opened
@@ -29,7 +37,11 @@ final class OraclePages {
         "button-busy", OraclePages::busyButton,
         "textbox", OraclePages::textBox,
         "checkbox", OraclePages::checkBox,
-        "listbox", OraclePages::listBox);
+        "listbox", OraclePages::listBox,
+        "element", OraclePages::element,
+        "webcomponent", OraclePages::webComponent,
+        "frame", OraclePages::frame,
+        "reconnect", OraclePages::reconnect);
 
     private OraclePages() {
     }
@@ -96,5 +108,75 @@ final class OraclePages {
         listBox.addChangeHandler(e -> {
         });
         return listBox;
+    }
+
+    /**
+     * The objects of a terminal without widgets: an element with a click and a visibility handler, a script whose
+     * result comes back, a cookie read back through a script, a history item.
+     */
+    private static IsPWidget element() {
+        final UIContext context = UIContext.get();
+        final PElement section = Element.newPElement("section");
+        section.setAttribute("aria-label", "Oracle element");
+        section.addVisibilityHandler(e -> {
+        });
+        final PElement run = Element.newPElement("button");
+        run.setInnerText("Run");
+        run.addDomHandler((PClickHandler) e -> PScript.execute(PWindow.getMain(), "6 * 7", new PScript.ExecutionCallback() {
+
+            @Override
+            public void onSuccess(final String result) {
+                context.getCookies().setCookie("oracle", "baked-" + result);
+                PScript.execute(PWindow.getMain(), "document.cookie", new PScript.ExecutionCallback() {
+
+                    @Override
+                    public void onSuccess(final String cookies) {
+                        run.setInnerText(cookies);
+                        context.getHistory().newItem("oracle-element-done", true);
+                    }
+
+                    @Override
+                    public void onFailure(final String message) {
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(final String message) {
+            }
+        }), PClickEvent.TYPE);
+        section.add(run);
+        return section;
+    }
+
+    /** my-counter (script/webcomponents.js): an attribute, a property, its events, and a method called back. */
+    private static IsPWidget webComponent() {
+        final PWebComponent counter = new PWebComponent("my-counter");
+        counter.attr("label", "Oracle");
+        counter.property("count").set(5);
+        counter.onEvent("count-changed", event -> {
+            if (event.getString(ClientToServerModel.WC_EVENT_DETAIL.toStringValue(), "").contains("\"count\":7")) counter.call("reset");
+        });
+        return counter;
+    }
+
+    /** A frame running a terminal of its own (the application page), fed by this one. */
+    private static IsPWidget frame() {
+        final PFrame frame = Element.newPFrame("");
+        frame.setHeight("120px");
+        final PElement inside = Element.newPElement("button");
+        inside.setInnerText("Inside");
+        inside.addDomHandler((PClickHandler) e -> inside.setInnerText("Clicked"), PClickEvent.TYPE);
+        frame.add(inside);
+        return frame;
+    }
+
+    /** A counter kept by the server: after a reconnection, it goes on where it was if the context was resumed. */
+    private static IsPWidget reconnect() {
+        final PElement counter = Element.newPElement("button");
+        counter.setInnerText("Clicks: 0");
+        final int[] clicks = {0};
+        counter.addDomHandler((PClickHandler) e -> counter.setInnerText("Clicks: " + ++clicks[0]), PClickEvent.TYPE);
+        return counter;
     }
 }

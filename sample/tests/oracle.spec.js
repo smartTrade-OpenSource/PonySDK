@@ -14,6 +14,8 @@ const path = require('path');
  *   BASE_URL=... npx playwright test oracle                  check
  *   ORACLE_RECORD=1 BASE_URL=... npx playwright test oracle  record (GWT terminal only)
  *
+ * On the TypeScript terminal, the scenarios it does not implement yet are skipped (READY_ON_TYPESCRIPT).
+ *
  * Selectors go by role and accessible name, so that they hold on both DOMs.
  */
 
@@ -34,7 +36,13 @@ const DROPPED = [KEY.HEARTBEAT_REQUEST, KEY.TERMINAL_LATENCY];
 const GEOMETRY = [KEY.WIDGET_POSITION, KEY.POPUP_POSITION];
 /** Text written by a terminal for a developer: only its presence counts. */
 const MESSAGES = [KEY.ERROR_MSG, KEY.WARN_MSG, KEY.INFO_MSG];
+/** The URL a window or a frame opened with carries the context id, which depends on the server's past. */
+const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 
+/** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
+const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame']);
+
+/** Steps of each scenario; sent(n) waits until the page sent n frames. */
 const scenarios = {
     button: async page => {
         const button = page.getByRole('button', { name: 'Oracle button' });
@@ -64,6 +72,24 @@ const scenarios = {
         await list.selectOption('Beta');
         await list.selectOption('Gamma');
     },
+    element: async (page, sent) => {
+        await sent(3); // cookies, document visibility, element visibility: before the click, whatever the timing
+        await page.getByRole('button', { name: 'Run' }).click();
+        await expect(page.getByRole('button', { name: 'oracle=baked-42' })).toBeVisible();
+        await expect(page).toHaveURL(/#oracle-element-done$/);
+    },
+    webcomponent: async page => {
+        const increment = page.getByRole('button', { name: '+1' });
+        await increment.click();
+        await expect(page.getByText('6', { exact: true })).toBeVisible();
+        await increment.click();
+        await expect(page.getByText('0', { exact: true })).toBeVisible(); // reset by the server at 7
+    },
+    frame: async page => {
+        const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
+        await frame.getByRole('button', { name: 'Inside' }).click();
+        await expect(frame.getByRole('button', { name: 'Clicked' })).toBeVisible();
+    },
 };
 
 function maskNumbers(value) {
@@ -76,6 +102,7 @@ function maskNumbers(value) {
 function normalize(value, key) {
     if (GEOMETRY.includes(key)) return maskNumbers(value);
     if (MESSAGES.includes(key)) return '<message>';
+    if (key === KEY.HANDLER_OPEN && typeof value === 'string') return value.replace(CONTEXT_IN_URL, '$1#');
     // clientX, clientY, x, y of a mouse event; the button and the modifier keys stay
     if (key === KEY.EVENT_INFO && Array.isArray(value)) return value.map((v, i) => (i < 4 ? '#' : v));
     if (Array.isArray(value)) return value.map(v => normalize(v));
@@ -109,7 +136,9 @@ test.describe('behaviour oracle', () => {
             const payloads = [];
             page.on('websocket', ws => ws.on('framesent', frame => payloads.push(frame.payload)));
             await page.goto(BASE_URL + '#' + 'oracle-' + name);
-            await steps(page);
+            const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
+            test.skip(typescript && !READY_ON_TYPESCRIPT.has(name), 'not on the TypeScript terminal yet');
+            await steps(page, count => expect.poll(() => payloads.length).toBeGreaterThanOrEqual(count));
             await settle(payloads);
             const trace = readable(payloads);
             const file = path.join(TRACES, name + '.json');

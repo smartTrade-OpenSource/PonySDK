@@ -119,16 +119,32 @@ jobs:
             sleep 2
           done
 
-      - name: Oracle
+      - name: Oracle on the GWT terminal
         working-directory: sample
         env:
           BASE_URL: 'http://localhost:8081/sample/'
         # No retry: a trace that changes from one run to the next is a defect of the scenario
-        run: npx playwright test tests/oracle.spec.js --retries=0
+        run: npx playwright test tests/oracle.spec.js tests/reconnection.spec.js -g "oracle|terminal objects" --retries=0
+
+      - name: Restart the showcase on the TypeScript terminal
+        run: |
+          kill $(lsof -tiTCP:8081 -sTCP:LISTEN) || true
+          sleep 2
+          nohup ./gradlew :sample:runShowcase -Pterminal=typescript > showcase-typescript.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -s http://localhost:8081/sample/ | grep -q 'ponyterminal/terminal.js'; then echo "Server ready"; break; fi
+            sleep 2
+          done
+
+      - name: Oracle on the TypeScript terminal (what it implements so far)
+        working-directory: sample
+        env:
+          BASE_URL: 'http://localhost:8081/sample/'
+        run: npx playwright test tests/oracle.spec.js tests/reconnection.spec.js -g "oracle|terminal objects" --retries=0
 
       - name: Showcase log
         if: failure()
-        run: cat showcase.log || true
+        run: cat showcase.log showcase-typescript.log || true
 
       - name: Upload test results
         if: failure()

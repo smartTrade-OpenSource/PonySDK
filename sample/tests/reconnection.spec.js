@@ -77,6 +77,42 @@ test('a short drop: a banner while the connection is lost, then the same context
   await expect(page.getByText('server handled click #2')).toBeVisible(); // same server state: resumed, not reloaded
 });
 
+// On a page made of terminal objects only (OraclePages#reconnect): it runs on both terminals
+test.describe('a page of terminal objects', () => {
+  test('a short drop: the same context resumes', async ({ page }) => {
+    await page.addInitScript(() => { window.onPonyReconnected = () => { window.reconnected = true; }; });
+    const sockets = await routeSockets(page);
+    await page.goto(BASE_URL + '#oracle-reconnect');
+    await page.getByRole('button', { name: 'Clicks: 0' }).click();
+    await expect(page.getByRole('button', { name: 'Clicks: 1' })).toBeVisible();
+    let reloaded = false;
+    page.on('load', () => { reloaded = true; });
+
+    sockets.offline = true;
+    await sockets.cut();
+    await page.waitForTimeout(2500); // a ping cycle while offline
+    sockets.offline = false;
+    await page.waitForFunction(() => window.reconnected === true, null, { timeout: 15000 }); // RECONNECT_CONTEXT
+
+    await page.getByRole('button', { name: 'Clicks: 1' }).click();
+    await expect(page.getByRole('button', { name: 'Clicks: 2' })).toBeVisible(); // the server's count went on
+    expect(reloaded).toBe(false);
+  });
+
+  test('a context the server no longer has: the page reloads', async ({ page }) => {
+    await page.addInitScript(forgetContextOnReconnect);
+    const sockets = await routeSockets(page);
+    await page.goto(BASE_URL + '#oracle-reconnect');
+    await page.getByRole('button', { name: 'Clicks: 0' }).click();
+    await expect(page.getByRole('button', { name: 'Clicks: 1' })).toBeVisible();
+
+    const reloaded = page.waitForEvent('load', { timeout: 15000 });
+    await sockets.cut();
+    await reloaded;
+    await expect(page.getByRole('button', { name: 'Clicks: 0' })).toBeVisible({ timeout: 10000 });
+  });
+});
+
 test('the Reconnection page drives its frame session through SessionAdmin, up to the cap', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
