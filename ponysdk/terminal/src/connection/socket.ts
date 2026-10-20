@@ -60,8 +60,9 @@ export class Socket {
         return this.socket.readyState;
     }
 
+    /** Sent while open only: a message after close (the page unloading still reports its visibility) is lost anyway. */
     send(text: string): void {
-        this.socket.send(text);
+        if (this.socket.readyState === WebSocket.OPEN) this.socket.send(text);
     }
 
     close(code?: number, reason?: string): void {
