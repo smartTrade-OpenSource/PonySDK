@@ -132,6 +132,14 @@ export class Widget extends BaseObject {
         this.adopt(child);
     }
 
+    /** A child at the end of an element inside this widget: a table cell, a tab's panel. */
+    protected appendInside(container: Element, child: Widget): void {
+        child.removeFromParent();
+        this.children.push(child);
+        container.appendChild(child.element);
+        this.adopt(child);
+    }
+
     /** The node this widget's element holds for a child: its element, or a cell around it. */
     protected nodeFor(child: Widget): Element {
         return child.element;

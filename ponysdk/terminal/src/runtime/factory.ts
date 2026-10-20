@@ -6,6 +6,7 @@ import { WidgetType as W, WidgetTypeNames } from '#model';
 import { AddOnComposite, AddOnObject } from '../objects/addon.ts';
 import { Anchor, Button, PushButton } from '../objects/buttons.ts';
 import { CheckBox, RadioButton } from '../objects/check-box.ts';
+import { DisclosurePanel } from '../objects/disclosure-panel.ts';
 import { ElementWidget } from '../objects/element.ts';
 import { FileUpload } from '../objects/file-upload.ts';
 import { Frame } from '../objects/frame.ts';
@@ -15,6 +16,7 @@ import {
     CellPanel,
     Composite,
     createAbsolutePanel,
+    DecoratorPanel,
     FlowPanel,
     FocusPanel,
     ScrollPanel,
@@ -24,6 +26,8 @@ import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
 import { FunctionalLabel, Html, Label } from '../objects/text.ts';
 import { createPasswordTextBox, createTextArea, createTextBox } from '../objects/text-box.ts';
+import { TabPanel } from '../objects/tab-panel.ts';
+import { createFlexTable, Grid } from '../objects/tables.ts';
 import { WebComponent } from '../objects/web-component.ts';
 import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
@@ -66,6 +70,11 @@ const CREATORS = new Map<number, Creator>([
     [W.HORIZONTAL_PANEL, CellPanel.createHorizontal],
     [W.VERTICAL_PANEL, CellPanel.createVertical],
     [W.COMPOSITE, Composite.create],
+    [W.FLEX_TABLE, createFlexTable],
+    [W.GRID, Grid.create],
+    [W.DISCLOSURE_PANEL, DisclosurePanel.create],
+    [W.DECORATOR_PANEL, DecoratorPanel.create],
+    [W.TAB_PANEL, TabPanel.create],
 ]);
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {

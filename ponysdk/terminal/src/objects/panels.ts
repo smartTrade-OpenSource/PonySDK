@@ -51,6 +51,13 @@ export class SimplePanel extends Widget {
     }
 }
 
+/** PDecoratorPanel: a simple panel whose decoration is left to the stylesheet. */
+export class DecoratorPanel extends SimplePanel {
+    static override create(context: Context, id: number, type: number): DecoratorPanel {
+        return new DecoratorPanel(context, id, type, div(), 'pony-DecoratorPanel');
+    }
+}
+
 /** PFocusPanel: a simple panel that takes the focus. */
 export class FocusPanel extends SimplePanel {
     static override create(context: Context, id: number, type: number): FocusPanel {
