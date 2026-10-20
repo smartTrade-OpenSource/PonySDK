@@ -26,6 +26,17 @@ const RULES = `
 :where(.pony-TreeItem-toggle[data-state=open])::before{content:"▾"}
 :where(.pony-TreeItem-content){cursor:default}
 :where(.pony-SuggestPopup [role=option]){cursor:default;white-space:nowrap}
+:where(.pony-LayoutPanel,.pony-SimpleLayoutPanel,.pony-DockLayoutPanel,.pony-SplitLayoutPanel){position:relative;overflow:hidden}
+:where(.pony-RootLayoutPanel){position:absolute;inset:0;overflow:hidden}
+:where(.pony-Layer){position:absolute;overflow:hidden}
+:where(.pony-Splitter){position:absolute;background:rgb(0 0 0/.08);touch-action:none}
+:where(.pony-Splitter-horizontal){cursor:col-resize}
+:where(.pony-Splitter-vertical){cursor:row-resize}
+:where(.pony-TabLayoutPanel,.pony-StackLayoutPanel,.pony-HeaderPanel){display:flex;flex-direction:column;overflow:hidden}
+:where(.pony-TabLayoutPanel>[role=tablist]){flex:none;display:flex}
+:where(.pony-TabLayoutPanel>[role=tabpanel],.pony-StackLayoutPanel-content,.pony-HeaderPanel-content){position:relative;flex:1 1 0;overflow:hidden}
+:where(.pony-StackLayoutPanel-header){flex:none;display:block;width:100%;text-align:start}
+:where(.pony-HeaderPanel-header,.pony-HeaderPanel-footer){flex:none}
 `;
 
 export function installStyles(): void {

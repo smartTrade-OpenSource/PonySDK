@@ -23,11 +23,20 @@ import {
     ScrollPanel,
     SimplePanel,
 } from '../objects/panels.ts';
+import {
+    DockLayoutPanel,
+    HeaderPanel,
+    LayoutPanel,
+    RootLayoutPanel,
+    SimpleLayoutPanel,
+    SplitLayoutPanel,
+} from '../objects/layout.ts';
 import { createDecoratedPopupPanel, DialogBox, PopupPanel } from '../objects/popup.ts';
 import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
 import { FunctionalLabel, Html, Label } from '../objects/text.ts';
 import { createPasswordTextBox, createTextArea, createTextBox } from '../objects/text-box.ts';
+import { StackLayoutPanel } from '../objects/stack-layout-panel.ts';
 import { SuggestBox, SuggestOracle } from '../objects/suggest.ts';
 import { TabPanel } from '../objects/tab-panel.ts';
 import { createFlexTable, Grid } from '../objects/tables.ts';
@@ -89,6 +98,14 @@ const CREATORS = new Map<number, Creator>([
     [W.TREE_ITEM, TreeItem.create],
     [W.MULTIWORD_SUGGEST_ORACLE, (context, id, type) => new SuggestOracle(context, id, type)],
     [W.SUGGESTBOX, SuggestBox.create],
+    [W.LAYOUT_PANEL, LayoutPanel.create],
+    [W.ROOT_LAYOUT_PANEL, RootLayoutPanel.create],
+    [W.SIMPLE_LAYOUT_PANEL, SimpleLayoutPanel.create],
+    [W.DOCK_LAYOUT_PANEL, DockLayoutPanel.create],
+    [W.SPLIT_LAYOUT_PANEL, SplitLayoutPanel.create],
+    [W.HEADER_PANEL, HeaderPanel.create],
+    [W.TAB_LAYOUT_PANEL, TabPanel.createLayout],
+    [W.STACKLAYOUT_PANEL, StackLayoutPanel.create],
 ]);
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {
