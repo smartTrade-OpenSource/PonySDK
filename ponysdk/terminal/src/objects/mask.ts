@@ -141,17 +141,35 @@ export class Mask {
     private config: [string, boolean, string] = ['', true, ' '];
     private readonly field: HTMLInputElement;
     private readonly changed: (text: string) => void;
+    /** Focused: the cursor goes to the first empty slot. */
+    private cursorPending = false;
 
     constructor(field: HTMLInputElement, changed: (text: string) => void, signal: AbortSignal) {
         this.field = field;
         this.changed = changed;
         this.value = new MaskValue('', true, ' ');
         field.addEventListener('beforeinput', e => this.onInput(e), { signal });
-        field.addEventListener('focus', () => setTimeout(() => {
-            if (document.activeElement !== field) return;
-            field.value = this.value.text;
-            field.setSelectionRange(this.value.insertPosition, this.value.insertPosition);
-        }), { signal });
+        // On focus the cursor goes where typing goes on: after the click that gave the focus, which places it too,
+        // else at once; before a key typed meanwhile in any case
+        let pressed = false;
+        field.addEventListener('pointerdown', () => {
+            pressed = document.activeElement !== field;
+        }, { signal });
+        field.addEventListener('focus', () => {
+            this.cursorPending = true;
+            if (!pressed) this.placeCursor();
+        }, { signal });
+        field.addEventListener('click', () => {
+            pressed = false;
+            this.placeCursor();
+        }, { signal });
+    }
+
+    private placeCursor(): void {
+        if (!this.cursorPending || document.activeElement !== this.field) return;
+        this.cursorPending = false;
+        this.field.value = this.value.text;
+        this.field.setSelectionRange(this.value.insertPosition, this.value.insertPosition);
     }
 
     /** A new mask, which takes the field's current text. */
@@ -171,6 +189,7 @@ export class Mask {
 
     private onInput(event: InputEvent): void {
         event.preventDefault();
+        this.placeCursor();
         const before = this.value.text;
         const start = this.field.selectionStart ?? 0;
         const end = this.field.selectionEnd ?? start;
