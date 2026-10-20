@@ -68,10 +68,11 @@ var PonyWC = (function () {
     };
 }());
 
-function onPonySDKModuleLoaded() {
+// Called by the terminal once loaded: the TypeScript terminal passes itself, the GWT one is read from its export
+function onPonySDKModuleLoaded(terminal) {
     console.log("onPonySDKModuleLoaded");
 
-    pony = com.ponysdk.core.terminal.PonySDK.get();
+    pony = terminal || com.ponysdk.core.terminal.PonySDK.get();
     pony.wc = PonyWC;
 
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;

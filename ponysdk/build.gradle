@@ -167,12 +167,23 @@ def terminalCheck = tasks.register('terminalCheck', NpmTask) {
     doLast { stamp.get().asFile.text = '' }
 }
 
+// Frames written by the real server write path, which the terminal's tests read (TerminalFixtures)
+def terminalFixtures = tasks.register('terminalFixtures', JavaExec) {
+    description = 'Writes terminal/build/fixtures: server frames for the tests of the TypeScript terminal'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ponysdk.core.server.websocket.TerminalFixtures'
+    def output = layout.projectDirectory.dir('terminal/build/fixtures')
+    inputs.files(sourceSets.main.output, sourceSets.test.output).withPropertyName('classes')
+    outputs.dir(output)
+    argumentProviders.add({ [output.asFile.path] } as CommandLineArgumentProvider)
+}
+
 def terminalTest = tasks.register('terminalTest', NpmTask) {
     description = 'Runs the unit tests of the TypeScript terminal on Node'
     group = 'verification'
-    dependsOn tasks.named('npmInstall'), terminalModel
+    dependsOn tasks.named('npmInstall'), terminalModel, terminalFixtures
     args = ['run', 'test']
-    inputs.files(terminalSources, file('terminal/test'), terminalModel)
+    inputs.files(terminalSources, file('terminal/test'), terminalModel, terminalFixtures)
     def stamp = layout.buildDirectory.file('terminal/test.stamp')
     outputs.file(stamp)
     doLast { stamp.get().asFile.text = '' }
