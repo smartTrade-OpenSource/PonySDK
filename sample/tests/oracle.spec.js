@@ -40,9 +40,21 @@ const MESSAGES = [KEY.ERROR_MSG, KEY.WARN_MSG, KEY.INFO_MSG];
 const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 
 /** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
-const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame']);
+const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
+    'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload']);
 
-/** Steps of each scenario; sent(n) waits until the page sent n frames. */
+/**
+ * Where the TypeScript terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry
+ * says why; the reference stays the one recorded with GWT.
+ */
+const KNOWN_DIFFERENCES = {
+    radio: {
+        reason: 'GWT sends the value of a clicked radio button twice (CheckBox and RadioButton both fire it)',
+        expected: trace => trace.filter((message, i) => i === 0 || JSON.stringify(message) !== JSON.stringify(trace[i - 1])),
+    },
+};
+
+/** Steps of each scenario; sent(n) waits until the page sent n frames of its trace. */
 const scenarios = {
     button: async page => {
         const button = page.getByRole('button', { name: 'Oracle button' });
@@ -84,6 +96,57 @@ const scenarios = {
         await expect(page.getByText('6', { exact: true })).toBeVisible();
         await increment.click();
         await expect(page.getByText('0', { exact: true })).toBeVisible(); // reset by the server at 7
+    },
+    texts: async page => {
+        await page.getByText('Oracle label').click();
+        await page.getByText('Oracle html').click();
+        await page.getByText('Oracle anchor').click();
+        await page.getByRole('img', { name: 'Oracle image' }).click();
+        await expect(page.getByText('3 ponies')).toBeVisible();
+    },
+    radio: async page => {
+        await page.getByRole('radio', { name: 'Radio B' }).check();
+        await page.getByRole('radio', { name: 'Radio C' }).check();
+        await page.getByRole('button', { name: 'Select A' }).click();
+        await expect(page.getByRole('radio', { name: 'Radio A' })).toBeChecked();
+    },
+    fields: async page => {
+        const area = page.getByRole('textbox', { name: 'Oracle area' });
+        await area.fill('two\nlines');
+        await area.blur();
+        const password = page.getByLabel('Oracle password');
+        await password.fill('secret');
+        await password.blur();
+        const enter = page.getByRole('textbox', { name: 'Oracle enter' });
+        await enter.click();
+        await enter.pressSequentially('ab', { delay: 20 });
+        await enter.press('Enter');
+    },
+    'listbox-multi': async page => {
+        await page.getByRole('listbox').selectOption(['Beta', 'Delta']);
+    },
+    scroll: async (page, sent) => {
+        const panel = page.getByLabel('Oracle scroll');
+        await sent(2);
+        await panel.evaluate(e => { e.scrollTop = 300; });
+        await sent(3);
+        await panel.evaluate(e => { e.scrollLeft = 50; });
+        await sent(4);
+    },
+    panels: async page => {
+        await page.getByRole('button', { name: 'H0' }).click();
+        await page.getByRole('button', { name: 'V2' }).click();
+        await page.getByLabel('Oracle focus panel').focus();
+        await page.keyboard.press('x');
+        await page.getByRole('button', { name: 'Swap' }).click();
+        await page.getByText('After').click();
+    },
+    composite: async page => {
+        await page.getByRole('button', { name: 'Inside composite' }).click();
+    },
+    upload: async page => {
+        await page.getByLabel('Oracle file').setInputFiles({ name: 'pony.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
+        await expect(page.getByText('Uploaded: hello')).toBeVisible();
     },
     frame: async page => {
         const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
@@ -138,18 +201,22 @@ test.describe('behaviour oracle', () => {
             await page.goto(BASE_URL + '#' + 'oracle-' + name);
             const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
             test.skip(typescript && !READY_ON_TYPESCRIPT.has(name), 'not on the TypeScript terminal yet');
-            await steps(page, count => expect.poll(() => payloads.length).toBeGreaterThanOrEqual(count));
+            // frames that count: heartbeats and latency reports, dropped from the trace, are not
+            await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count));
             await settle(payloads);
             const trace = readable(payloads);
             const file = path.join(TRACES, name + '.json');
 
             if (RECORD) {
+                expect(typescript, 'references are recorded on the GWT terminal').toBe(false);
                 fs.mkdirSync(TRACES, { recursive: true });
                 fs.writeFileSync(file, JSON.stringify(trace, null, 2) + '\n');
                 return;
             }
             expect(fs.existsSync(file), 'no reference trace: record it with ORACLE_RECORD=1 on the GWT terminal').toBe(true);
-            expect(trace).toEqual(JSON.parse(fs.readFileSync(file, 'utf8')));
+            const reference = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const difference = typescript ? KNOWN_DIFFERENCES[name] : undefined;
+            expect(trace, difference?.reason).toEqual(difference ? difference.expected(reference) : reference);
         });
     }
 });
