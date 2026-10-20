@@ -128,7 +128,8 @@ final class OraclePages {
         Map.entry("datepicker", OraclePages::datePicker),
         Map.entry("datebox", OraclePages::dateBox),
         Map.entry("richtext", OraclePages::richText),
-        Map.entry("mask", OraclePages::mask));
+        Map.entry("mask", OraclePages::mask),
+        Map.entry("legacy", OraclePages::legacy));
 
     private OraclePages() {
     }
@@ -838,6 +839,22 @@ final class OraclePages {
         box.addValueChangeHandler(e -> value.setText("Mask: " + e.getData()));
         final PFlowPanel panel = Element.newPFlowPanel();
         panel.add(box, value);
+        return panel;
+    }
+
+    // ---- not a scenario: the legacy layer (legacy.spec.js) ----
+
+    /** Primary names, one replaced by the server's style name, and the names a disabled check box takes. */
+    private static IsPWidget legacy() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PButton styled = Element.newPButton("Styled");
+        styled.setStyleName("app-button");
+        final PCheckBox off = Element.newPCheckBox("Off");
+        off.setEnabled(false);
+        final PCheckBox styledOff = Element.newPCheckBox("Styled off");
+        styledOff.setStyleName("app-box");
+        styledOff.setEnabled(false);
+        panel.add(Element.newPButton("Plain"), styled, off, styledOff, Element.newPLabel("A label"));
         return panel;
     }
 }
