@@ -3,7 +3,6 @@ ext {
     commonsBeanutilsVersion = '1.11.0'
     commonsIoVersion = '2.22.0'
     commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
-    gwtVersion = '2.13.1' // gwt-codeserver (dev-only), aligned with the ponysdk gwt-dev version
     jettyVersion = '12.1.14'
     springVersion = '7.0.9'
     jakartaServletVersion = '6.1.0'
@@ -35,7 +34,6 @@ dependencies {
 
     runtimeOnly(
             'org.eclipse.parsson:parsson:' + parssonVersion,
-            'org.gwtproject:gwt-codeserver:' + gwtVersion,
             'de.java2html:java2html:' + java2htmlVersion,
             'org.springframework:spring-context:' + springVersion,
             'org.springframework:spring-aop:' + springVersion,
@@ -50,28 +48,10 @@ dependencies {
 
 def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
 
-task runCodeServer(type: JavaExec) {
-    classpath = files()
-    doFirst {
-        classpath = project(':ponysdk').configurations.gwtdev + sourceSets.main.runtimeClasspath
-    }
-    mainClass = 'com.google.gwt.dev.codeserver.CodeServer'
-    args = [
-            '-src', '../ponysdk/src/main/java',
-            '-generateJsInteropExports', '-noincremental',
-            '-style', 'DETAILED',
-            'com.ponysdk.core.PonyTerminalDebug'
-    ]
-    jvmArgs = ['-server', '-Xmx1024m']
-}
-
 task runShowcase(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDirPath + '/gwt/gwt')
     classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
-    // The terminal served to the browser (docs/decisions/0002-javascript-terminal.md), TypeScript unless -Pterminal=gwt
-    if (project.hasProperty('terminal')) systemProperty 'ponysdk.terminal', project.property('terminal').toString()
     jvmArgs = [
         '-Xmx1g',
         '-XX:+UseZGC',
@@ -86,11 +66,9 @@ task runShowcase(type: JavaExec) {
 // Used by the Playwright E2E suite (sample/tests/flexlayout.spec.js) on http://localhost:8081/sample/.
 task runFlexLayoutDemo(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDirPath + '/gwt/gwt')
     classpath += files(buildDirPath + '/resources')
     classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.spring.MainSpring'
-    if (project.hasProperty('terminal')) systemProperty 'ponysdk.terminal', project.property('terminal').toString()
     jvmArgs = [
         '-Xmx2g',
         '--enable-native-access=ALL-UNNAMED',

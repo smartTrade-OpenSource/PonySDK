@@ -40,10 +40,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Optional, non-blocking real-browser check for the binary PAddOn protocol. It drives a headless
- * Chrome against a running PonySDK showcase and asserts that the <strong>GWT terminal</strong> — the
- * one protocol decoder that exists only as compiled JavaScript and therefore cannot be unit-tested
- * in the JVM — correctly decoded the typed binary creation arguments and a 1000-element binary
- * method-call array on the "Binary" tab.
+ * Chrome against a running PonySDK showcase and asserts that the terminal, in the browser, decoded the
+ * typed binary creation arguments and a 1000-element binary method-call array on the "Binary" tab: its
+ * reader is unit-tested on Node, this checks the whole path.
  * <p>
  * Skipped unless {@code -Dponysdk.browserTest=true} is set, so it never runs (or fails) in the
  * normal build. Optional system properties:
@@ -91,6 +90,6 @@ public class BinaryAddonBrowserIT {
 
         assertEquals("typed binary creation args delivered to the factory", 5, createLen);
         assertEquals("1000-element binary method array (beyond the old 255 cap)", 1000, bigLen);
-        assertEquals("sum of 0..999 decoded intact by the GWT terminal", 499_500, bigSum);
+        assertEquals("sum of 0..999 decoded intact by the terminal", 499_500, bigSum);
     }
 }

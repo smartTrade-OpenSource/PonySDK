@@ -2,9 +2,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
-    // Server/build target: latest Java LTS (25). The GWT terminal is transpiled
-    // separately at -sourceLevel 17 (see :ponysdk gwtc task) — GWT's limit, unrelated
-    // to the JVM that runs the build.
+    // Server/build target: latest Java LTS (25).
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(25)

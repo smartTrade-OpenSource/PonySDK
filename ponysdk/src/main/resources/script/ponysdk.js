@@ -32,7 +32,7 @@ document.doReload = function () {
 // pony.wc.PonyElement
 //   Convenience base class. Calls initShadow + _render() in connectedCallback.
 //   IMPORTANT: subclasses must NOT define a constructor (or only call super() with
-//   no other logic), because GWT creates custom elements via document.createElement()
+//   no other logic), because the terminal creates custom elements via document.createElement()
 //   which invokes the constructor — any work done there will crash.
 //   Put all initialisation in connectedCallback() or _render() instead.
 var PonyWC = (function () {
@@ -68,11 +68,11 @@ var PonyWC = (function () {
     };
 }());
 
-// Called by the terminal once loaded: the TypeScript terminal passes itself, the GWT one is read from its export
+// Called by the terminal once loaded, with itself
 function onPonySDKModuleLoaded(terminal) {
     console.log("onPonySDKModuleLoaded");
 
-    pony = terminal || com.ponysdk.core.terminal.PonySDK.get();
+    pony = terminal;
     pony.wc = PonyWC;
 
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
@@ -208,7 +208,7 @@ AbstractAddon.defineAddon = function (name, propertiesObj) {
 
     AbstractAddon[name] = JsClass;
 
-    // Wrap the constructor method since GWT uses the function as a method and not a constructor
+    // Wrap the constructor: the terminal calls the factory as a function, not as a constructor
     var wrap = function (id, args, widgetID, element) {
         return new JsClass(id, args, widgetID, element);
     }

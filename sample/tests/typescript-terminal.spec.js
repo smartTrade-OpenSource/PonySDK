@@ -2,8 +2,8 @@
 const { test, expect } = require('@playwright/test');
 
 /*
- * What the TypeScript terminal adds to the GWT one (docs/decisions/0002-javascript-terminal.md): keyboard and
- * accessibility of its native elements. Skipped when the page runs the GWT terminal.
+ * What the TypeScript terminal added to the GWT one it replaced (docs/decisions/0002-javascript-terminal.md): keyboard
+ * and accessibility of its native elements, which the oracle, recorded with GWT, does not cover.
  *
  *   ./gradlew :sample:runShowcase    then    BASE_URL=... npx playwright test typescript-terminal
  */
@@ -12,8 +12,6 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 
 async function open(page, oraclePage) {
     await page.goto(BASE_URL + '#oracle-' + oraclePage);
-    const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
-    test.skip(!typescript, 'the GWT terminal does not have it');
 }
 
 test('tabs: the arrow keys, Home and End move the selection, which goes to the server', async ({ page }) => {

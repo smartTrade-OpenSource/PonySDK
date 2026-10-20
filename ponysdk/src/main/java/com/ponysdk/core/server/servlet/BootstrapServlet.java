@@ -27,7 +27,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ import java.util.Set;
 public class BootstrapServlet extends HttpServlet {
 
     private static final String INDEX_URL = "/index.html";
-    /** GWT names its compiled files after their content (*.cache.*): they never change under the same name. */
+    /** Files named after their content (*.cache.*) never change under the same name. */
     private static final String IMMUTABLE = "public, max-age=31536000, immutable";
     /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
     private static final String REVALIDATE = "no-cache";
@@ -283,8 +282,8 @@ public class BootstrapServlet extends HttpServlet {
 
     /**
      * Opens the WebSocket while the terminal script downloads, so that the server builds the page meanwhile; the
-     * terminal adopts the socket and replays what it received (WebSocketClient.connect). Same URL as the terminal
-     * builds (History.getToken() is the decoded hash); main window only: a child window ("1" parameter) attaches to
+     * terminal adopts the socket and replays what it received (Socket.connect). Same URL as the terminal builds (its
+     * history token is the decoded hash); main window only: a child window ("1" parameter) attaches to
      * its parent's context instead.
      */
     static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">(function(){"
@@ -309,15 +308,9 @@ public class BootstrapServlet extends HttpServlet {
             sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
         }
 
-        if (isTypeScriptTerminal()) {
-            // Deferred: it starts once the page is parsed, after ponysdk.js and the application scripts, as the GWT
-            // terminal does when its permutation arrives
-            sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
-            sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
-        } else {
-            sb.append(String.format(SCRIPT_PATTERN, rootPath + "ponyterminal/ponyterminal.nocache.js")).append(NEW_LINE);
-            sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
-        }
+        // Deferred: the terminal starts once the page is parsed, after ponysdk.js and the application scripts
+        sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+        sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
 
         // Inject shared WC stylesheets as an inline script so they are registered
         // before application scripts define their web components.
@@ -345,18 +338,10 @@ public class BootstrapServlet extends HttpServlet {
     protected String addToBody(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append(addHistoryIFrame(request));
         sb.append(addLoading(request));
         sb.append(addNoScript(request));
 
         return sb.toString();
-    }
-
-    /** GWT's history support needs this frame; the TypeScript terminal does not. */
-    protected String addHistoryIFrame(final HttpServletRequest request) {
-        if (isTypeScriptTerminal()) return "";
-        return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>"
-                + NEW_LINE;
     }
 
     protected String addLoading(final HttpServletRequest request) {
@@ -380,10 +365,6 @@ public class BootstrapServlet extends HttpServlet {
         sb.append("</noscript>").append(NEW_LINE);
 
         return sb.toString();
-    }
-
-    private boolean isTypeScriptTerminal() {
-        return configuration != null && configuration.getTerminal() == Terminal.TYPESCRIPT;
     }
 
     public void setConfiguration(final ApplicationConfiguration configuration) {

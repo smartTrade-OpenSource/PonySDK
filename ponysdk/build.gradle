@@ -6,14 +6,10 @@ plugins {
 }
 ext {
     resourcesCoreTest = "src/test/resources"
-    gwtOutputDirName = layout.buildDirectory.dir("gwt").get().asFile.path
-    jsinteropAnnotationsVersion = '2.0.2' // aligned with elemental2 (was resolved to 2.0.2 anyway)
     seleniumVersion = '4.51.0'
     junitVersion = '4.13.2'
     tyrusVersion = '2.2.2'
     mockitoVersion = '5.24.0'
-    gwtVersion = '2.13.1'
-    elemental2Version = '1.3.2'
     jettyVersion = '12.1.14'
     slf4jVersion = '2.0.20'
     log4jVersion = '2.26.1'
@@ -52,11 +48,9 @@ publishing {
     }
 }
 
-// Code excluded from coverage metrics & gate (not unit-testable / not product logic):
-//  - GWT terminal: transpiled to JavaScript, runs in the browser — not executable by JVM unit tests
-//  - test harness shipped in main (com.ponysdk.test.*): test-support code, not product logic
+// Code excluded from coverage metrics & gate: the test harness shipped in main (com.ponysdk.test.*), test-support
+// code, not product logic
 def coverageExclusions = [
-        'com/ponysdk/core/terminal/**',
         'com/ponysdk/test/**',
 ]
 
@@ -83,7 +77,7 @@ jacocoTestCoverageVerification {
         }))
     }
     violationRules {
-        // Whole-module floor (over the testable code; terminal + test harness are excluded above).
+        // Whole-module floor (over the testable code; the test harness is excluded above).
         rule {
             limit {
                 counter = 'INSTRUCTION'
@@ -197,29 +191,11 @@ def terminalBundle = tasks.register('terminalBundle', NpmTask) {
     outputs.dir('terminal/build/dist')
 }
 
-configurations {
-    gwt
-    gwtdev
-    implementation.extendsFrom gwt
-}
-
 dependencies {
-    gwt(
-            'org.gwtproject:gwt-user:' + gwtVersion,
-            'com.google.elemental2:elemental2-dom:' + elemental2Version,
-            'com.google.elemental2:elemental2-core:' + elemental2Version,
-            'com.google.elemental2:elemental2-webstorage:' + elemental2Version
-    )
-
-    gwtdev(
-            'org.gwtproject:gwt-dev:' + gwtVersion
-    )
-
     implementation(
             'jakarta.validation:jakarta.validation-api:' + jakartaValidationVersion,
             // OpenTelemetry API — metrics + trace (no SDK, user brings their own)
             'io.opentelemetry:opentelemetry-api:' + otelVersion,
-            'com.google.jsinterop:jsinterop-annotations:' + jsinteropAnnotationsVersion,
             'org.eclipse.jetty:jetty-server:' + jettyVersion,
             'org.eclipse.jetty.ee11:jetty-ee11-servlet:' + jettyVersion,
             'org.eclipse.jetty.ee11:jetty-ee11-webapp:' + jettyVersion,
@@ -275,8 +251,6 @@ java {
 }
 
 javadoc {
-    classpath += configurations.gwtdev
-    exclude '**/terminal/**'
     options.addStringOption('Xdoclint:none', '-quiet')
     failOnError = false
 }
@@ -294,11 +268,8 @@ def buildTimestamp = providers.provider {
 
 jar {
     into('ponyterminal') {
-        from gwtOutputDirName + '/gwt/ponyterminal'
         from terminalBundle
     }
-    exclude('*.devmode.js')
-    exclude('*compilation-mappings.txt')
 
     // Also expose the js/css as a webjar so servlet containers can serve them straight from the jar
     with(copySpec {
@@ -328,35 +299,6 @@ jar {
     }
 }
 
-task gwtc(type: JavaExec) {
-    inputs.dir('src/main/java/com/ponysdk/core/terminal')
-    outputs.dir(gwtOutputDirName + '/gwt/ponyterminal')
-    description = "GWT compile to JavaScript (production mode)"
-    mainClass = 'com.google.gwt.dev.Compiler'
-    workingDir = new File(gwtOutputDirName)
-    classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
-    maxHeapSize = '512M'
-    javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
-    }
-    args = [
-            '-war',
-            'gwt',
-            '-localWorkers',
-            Runtime.getRuntime().availableProcessors(),
-            '-sourceLevel',
-            '17',
-            'com.ponysdk.core.PonyTerminal',
-            '-generateJsInteropExports',
-            '-XnoclassMetadata' // see PonyTerminal.gwt.xml: smaller output, class names gone from client diagnostics
-    ]
-    // Readable JavaScript for browser profiling: ./gradlew :ponysdk:gwtc -Pgwt.style=PRETTY (default OBFUSCATED)
-    if (project.hasProperty('gwt.style')) {
-        args += ['-style', project.property('gwt.style').toString()]
-        outputs.upToDateWhen { false }
-    }
-}
-
 // Server write-path bench (protocol / wire bytes, CPU, allocations, heap): ./gradlew :ponysdk:bench [-Pbench.args=v1]
 tasks.register('bench', JavaExec) {
     group = 'verification'
@@ -370,7 +312,7 @@ tasks.register('bench', JavaExec) {
 }
 
 test {
-    classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    classpath = files(resourcesCoreTest) + classpath
     // Brotli compression tests load a native lib (brotli4j); JDK 24+ (JEP 472) warns on native access
     // now and will block it later unless explicitly granted.
     jvmArgs '--enable-native-access=ALL-UNNAMED'
@@ -391,8 +333,4 @@ test {
 }
 
 check.dependsOn jacocoTestReport, jacocoTestCoverageVerification, terminalCheck, terminalTest
-gwtc.dependsOn classes
-jar.dependsOn gwtc
-// test classpath includes the GWT output dir (gwtOutputDirName), so it must run after gwtc
-test.dependsOn gwtc
 publish.dependsOn check

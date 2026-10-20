@@ -1,7 +1,7 @@
 name: Browser Test (optional)
 
-# Real-browser runtime check for the binary PAddOn protocol — it exercises the GWT terminal, the one
-# protocol decoder that exists only as compiled JavaScript and cannot be unit-tested in the JVM.
+# Real-browser runtime check for the binary PAddOn protocol: the terminal's reader is unit-tested on Node,
+# this checks the whole path in Chrome.
 #
 # This is a SEPARATE, NON-REQUIRED workflow on purpose: a failure here is visible but does not block
 # the main "CI" build or PR merges (unless a maintainer explicitly marks it as a required check).
@@ -27,13 +27,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: GWT compile + sample build
-        run: ./gradlew :ponysdk:gwtc :sample:classes :sample:processResources --stacktrace
-
-      - name: Stage the GWT terminal for the showcase
-        run: |
-          mkdir -p sample/build/gwt
-          cp -r ponysdk/build/gwt/gwt sample/build/gwt/gwt
+      - name: Sample build
+        run: ./gradlew :sample:classes :sample:processResources --stacktrace
 
       - name: Start the showcase server (background)
         run: |

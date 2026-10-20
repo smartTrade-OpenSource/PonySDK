@@ -44,7 +44,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.Terminal;
 
 /**
  * Tests for {@link BootstrapServlet} path handling — context-path stripping and the
@@ -57,7 +56,7 @@ public class BootstrapServletTest {
         assertTrue(BootstrapServlet.isSafeResourcePath("/index.html"));
         assertTrue(BootstrapServlet.isSafeResourcePath("/script/ponysdk.js"));
         assertTrue(BootstrapServlet.isSafeResourcePath("/css/sample.css"));
-        assertTrue(BootstrapServlet.isSafeResourcePath("/ponyterminal/ponyterminal.nocache.js"));
+        assertTrue(BootstrapServlet.isSafeResourcePath("/ponyterminal/terminal.js"));
     }
 
     @Test
@@ -133,12 +132,11 @@ public class BootstrapServletTest {
         assertTrue("content-type meta", html.contains("http-equiv=\"content-type\""));
         assertTrue("custom meta", html.contains("name=\"robots\" content=\"noindex\""));
         assertTrue("style link", html.contains("<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>"));
-        assertTrue("terminal script", html.contains("ponyterminal/ponyterminal.nocache.js"));
+        assertTrue("terminal script", html.contains("ponyterminal/terminal.js"));
         assertTrue("reconnect script", html.contains("window.ponyReconnectMode = true"));
         assertTrue("wc shared sheet", html.contains("pony.wc.registerSharedSheet('shared.css')"));
         assertTrue("app script", html.contains("src=\"script/app.js\""));
         assertTrue("loading", html.contains("<div id=\"loading\">Loading MyApp"));
-        assertTrue("history iframe", html.contains("__gwt_historyFrame"));
         assertTrue("noscript", html.contains("<noscript>"));
         assertTrue(html.trim().endsWith("</html>"));
     }
@@ -153,7 +151,7 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
         assertTrue(html.contains("<title>Bare</title>"));
-        assertTrue("terminal script always present", html.contains("ponyterminal/ponyterminal.nocache.js"));
+        assertTrue("terminal script always present", html.contains("ponyterminal/terminal.js"));
         assertFalse("no reconnect script when disabled", html.contains("window.ponyReconnectMode"));
         assertFalse("no shared-sheet registration", html.contains("registerSharedSheet"));
         assertTrue(html.contains("<div id=\"loading\">Loading Bare"));
@@ -169,7 +167,7 @@ public class BootstrapServletTest {
 
         final String html = servlet.buildIndexHTML(request("", "/index.html"));
 
-        assertTrue(html.contains("src=\"ctx/ponyterminal/ponyterminal.nocache.js\""));
+        assertTrue(html.contains("src=\"ctx/ponyterminal/terminal.js\" defer"));
         assertTrue(html.contains("src=\"ctx/script/ponysdk.js\""));
     }
 
@@ -180,7 +178,7 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
         final int socket = html.indexOf("window.ponyEarlySocket=");
-        final int terminal = html.indexOf("ponyterminal.nocache.js");
+        final int terminal = html.indexOf("ponyterminal/terminal.js");
         assertTrue("early socket script present", socket > 0);
         assertTrue("before the terminal script", socket < terminal);
         assertTrue("announces the protocol version the terminal speaks",
@@ -189,15 +187,12 @@ public class BootstrapServletTest {
     }
 
     @Test
-    public void theTypeScriptTerminalIsLoadedDeferredAfterPonysdkJsWithoutTheGwtHistoryFrame() {
+    public void theTerminalIsLoadedDeferredAfterPonysdkJs() {
         final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(config.getApplicationName()).thenReturn("App");
-        Mockito.when(config.getTerminal()).thenReturn(Terminal.TYPESCRIPT);
         Mockito.when(config.getJavascript()).thenReturn(Set.of("script/app.js"));
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
-        assertFalse("no GWT terminal", html.contains("nocache.js"));
-        assertFalse("no GWT history frame", html.contains("__gwt_historyFrame"));
         final int ponysdk = html.indexOf("src=\"script/ponysdk.js\"");
         final int terminal = html.indexOf("src=\"ponyterminal/terminal.js\" defer");
         assertTrue("ponysdk.js present", ponysdk > 0);
@@ -233,8 +228,8 @@ public class BootstrapServletTest {
     }
 
     @Test
-    public void contentHashedTerminalFilesAreCachedForAYear() throws IOException {
-        final String path = "/ponyterminal/18E9900BEF20543F36A9691E2645F505.cache.js";
+    public void contentHashedFilesAreCachedForAYear() throws IOException {
+        final String path = "/script/app.18E9900BEF20543F36A9691E2645F505.cache.js";
         final TestableBootstrapServlet servlet = servletServing(path, tempFile("terminal"));
         final ByteArrayOutputStream body = new ByteArrayOutputStream();
         final HttpServletResponse response = response(body);

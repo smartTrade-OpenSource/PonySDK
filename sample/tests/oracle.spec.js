@@ -6,15 +6,17 @@ const path = require('path');
 /*
  * Behaviour oracle of the terminal (docs/decisions/0002-javascript-terminal.md, section 8).
  *
- * A scenario drives the widget of an oracle page (OraclePages.java) and records the frames the client sends. The DOM
- * differs between terminals by design; what the server receives must not. The traces under oracle-traces/ were
- * recorded with the GWT terminal; a terminal passes when it sends the same, once normalized.
+ * A scenario drives the widget of an oracle page (OraclePages.java) and records the frames the client sends. The
+ * traces under oracle-traces/ were recorded with the former GWT terminal, which the TypeScript terminal replaced: its
+ * DOM differs by design, what the server receives must not. The terminal passes when it sends the same, once
+ * normalized; the GWT traces are references, never recorded again.
  *
- *   ./gradlew :sample:runShowcase [-Pterminal=gwt]
+ *   ./gradlew :sample:runShowcase
  *   BASE_URL=... npx playwright test oracle                  check
- *   ORACLE_RECORD=1 BASE_URL=... npx playwright test oracle  record (GWT terminal only)
+ *   ORACLE_RECORD=1 BASE_URL=... npx playwright test oracle  record the scenarios that have no trace yet: no other
+ *                                                            terminal confirms these, review them by hand
  *
- * Selectors go by role and accessible name, so that they hold on both DOMs.
+ * Selectors go by role and accessible name.
  */
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
@@ -37,13 +39,12 @@ const MESSAGES = [KEY.ERROR_MSG, KEY.WARN_MSG, KEY.INFO_MSG];
 /** The URL a window or a frame opened with carries the context id, which depends on the server's past. */
 const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 
-
-/** Within the borders a theme may add (the showcase styles GWT's classes). */
+/** Within the borders a theme may add. */
 function near(actual, expected) {
     return Math.abs(actual - expected) <= 4;
 }
 
-/** Left, top, width and height of an element inside a container, rounded: the layout both terminals must give. */
+/** Left, top, width and height of an element inside a container, rounded: the layout GWT gave. */
 async function box(locator, container) {
     const b = await locator.boundingBox();
     const c = await container.boundingBox();
@@ -51,16 +52,8 @@ async function box(locator, container) {
 }
 
 /**
- * Scenarios whose GWT behaviour depends on the browser: the reference is GWT's on Chromium, which the GWT terminal is
- * checked on only; the TypeScript terminal is checked on every browser.
- *   tree: on Firefox and WebKit, a click on an item's toggle selects it too.
- *   richtext: on Firefox, the empty body of GWT's frame has no height: it cannot be clicked.
- */
-const GWT_CHROMIUM_ONLY = new Set(['tree', 'richtext']);
-
-/**
- * Where the TypeScript terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry
- * says why; the reference stays the one recorded with GWT.
+ * Where the terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry says why;
+ * the reference stays the one recorded with GWT.
  */
 const KNOWN_DIFFERENCES = {
     radio: {
@@ -69,10 +62,7 @@ const KNOWN_DIFFERENCES = {
     },
 };
 
-/**
- * Steps of each scenario; sent(n) waits until the page sent n frames of its trace; typescript tells the terminal, for
- * what only GWT puts in a frame of its own (the rich text area).
- */
+/** Steps of each scenario; sent(n) waits until the page sent n frames of its trace. */
 const scenarios = {
     button: async page => {
         const button = page.getByRole('button', { name: 'Oracle button' });
@@ -253,7 +243,7 @@ const scenarios = {
         await item('Help').click();
     },
     tree: async page => {
-        // By the mouse: GWT's keyboard handling misses keys right after a click
+        // By the mouse: GWT's keyboard handling missed keys right after a click
         const fruits = page.getByText('Fruits', { exact: true });
         const toggle = async () => {
             const box = await fruits.boundingBox();
@@ -394,9 +384,8 @@ const scenarios = {
         await page.getByRole('button', { name: 'Disable date' }).click();
         await expect(box).toBeDisabled();
     },
-    richtext: async (page, sent, typescript) => {
-        const area = typescript ? page.getByRole('textbox', { name: 'Oracle rich text' })
-            : page.frameLocator('iframe[aria-label="Oracle rich text"]').locator('body');
+    richtext: async page => {
+        const area = page.getByRole('textbox', { name: 'Oracle rich text' });
         await area.click();
         await page.keyboard.type('Hello');
         await page.getByText('HTML: none').click(); // outside: the area sends its HTML
@@ -412,7 +401,7 @@ const scenarios = {
         const box = page.getByLabel('Oracle mask');
         await expect(box).toHaveValue('__/__/____');
         await box.click();
-        // the terminal puts the cursor at the first empty slot once focused: GWT in a timer
+        // the terminal puts the cursor at the first empty slot once focused (GWT did in a timer)
         await expect.poll(() => box.evaluate(e => e.selectionStart)).toBe(0);
         await box.pressSequentially('12032026', { delay: 30 });
         await expect(box).toHaveValue('12/03/2026');
@@ -422,7 +411,7 @@ const scenarios = {
         await expect(page.getByText('Mask: 12/03/20__')).toBeVisible();
     },
     frame: async page => {
-        const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
+        const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`);
         await frame.getByRole('button', { name: 'Inside' }).click();
         await expect(frame.getByRole('button', { name: 'Clicked' })).toBeVisible();
     },
@@ -472,24 +461,20 @@ test.describe('behaviour oracle', () => {
             const payloads = [];
             page.on('websocket', ws => ws.on('framesent', frame => payloads.push(frame.payload)));
             await page.goto(BASE_URL + '#' + 'oracle-' + name);
-            const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
-            test.skip(!typescript && GWT_CHROMIUM_ONLY.has(name) && test.info().project.name !== 'chromium',
-                'GWT behaves differently on this browser');
             // frames that count: heartbeats and latency reports, dropped from the trace, are not
-            await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count), typescript);
+            await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count));
             await settle(payloads);
             const trace = readable(payloads);
             const file = path.join(TRACES, name + '.json');
 
-            if (RECORD) {
-                expect(typescript, 'references are recorded on the GWT terminal').toBe(false);
+            if (RECORD && !fs.existsSync(file)) {
                 fs.mkdirSync(TRACES, { recursive: true });
                 fs.writeFileSync(file, JSON.stringify(trace, null, 2) + '\n');
                 return;
             }
-            expect(fs.existsSync(file), 'no reference trace: record it with ORACLE_RECORD=1 on the GWT terminal').toBe(true);
+            expect(fs.existsSync(file), 'no reference trace: record it with ORACLE_RECORD=1, then review it').toBe(true);
             const reference = JSON.parse(fs.readFileSync(file, 'utf8'));
-            const difference = typescript ? KNOWN_DIFFERENCES[name] : undefined;
+            const difference = KNOWN_DIFFERENCES[name];
             expect(trace, difference?.reason).toEqual(difference ? difference.expected(reference) : reference);
         });
     }

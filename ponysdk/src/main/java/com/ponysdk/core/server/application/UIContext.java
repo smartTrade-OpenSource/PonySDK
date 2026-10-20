@@ -494,7 +494,7 @@ public class UIContext {
     }
 
     /**
-     * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
+     * Registers a {@link StreamHandler} that will be called on the terminal object of a {@link PObject}
      *
      * @param streamListener the stream handler
      * @param pObject        the {@link PObject}
