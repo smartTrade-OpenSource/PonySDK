@@ -42,7 +42,20 @@ const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 /** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
 const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
     'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload', 'flextable', 'grid',
-    'disclosure', 'tabpanel', 'popup', 'dialog', 'menu', 'tree', 'suggest']);
+    'disclosure', 'tabpanel', 'popup', 'dialog', 'menu', 'tree', 'suggest', 'layoutpanel', 'dock', 'split', 'tablayout',
+    'stack', 'headerpanel']);
+
+/** Within the borders a theme may add (the showcase styles GWT's classes). */
+function near(actual, expected) {
+    return Math.abs(actual - expected) <= 4;
+}
+
+/** Left, top, width and height of an element inside a container, rounded: the layout both terminals must give. */
+async function box(locator, container) {
+    const b = await locator.boundingBox();
+    const c = await container.boundingBox();
+    return [Math.round(b.x - c.x), Math.round(b.y - c.y), Math.round(b.width), Math.round(b.height)];
+}
 
 /**
  * Scenarios whose GWT behaviour depends on the browser: the reference is GWT's on Chromium, which the GWT terminal is
@@ -272,6 +285,76 @@ const scenarios = {
         await page.getByText('Red apple', { exact: true }).click();
         await expect(page.getByText('Selected: Red apple')).toBeVisible();
         await expect(box).toHaveValue('Red apple');
+    },
+    layoutpanel: async page => {
+        const layout = page.getByLabel('Oracle layout');
+        const a = page.getByRole('button', { name: 'A', exact: true });
+        await expect.poll(() => box(a, layout)).toEqual([10, 10, 100, 30]);
+        await expect.poll(() => box(page.getByRole('button', { name: 'B', exact: true }), layout)).toEqual([310, 50, 80, 30]);
+        const c = await box(page.getByText('C', { exact: true }), layout);
+        expect([c[0], c[1] + c[3]]).toEqual([0, 200]); // at the beginning, on the bottom
+        await a.click();
+        await page.getByRole('button', { name: 'Move A' }).click();
+        await expect.poll(() => box(a, layout)).toEqual([200, 10, 100, 30]);
+        await a.click();
+    },
+    dock: async page => {
+        const dock = page.getByLabel('Oracle dock');
+        const center = page.getByRole('button', { name: 'Center' });
+        await expect.poll(() => box(center, dock)).toEqual([80, 50, 320, 250]);
+        await center.click();
+        await page.getByRole('button', { name: 'Grow north' }).click();
+        await expect.poll(() => box(center, dock)).toEqual([80, 100, 320, 200]);
+        await center.click();
+    },
+    split: async (page, sent) => {
+        const split = page.getByLabel('Oracle split');
+        const center = page.getByRole('button', { name: 'Center pane' });
+        await expect.poll(() => box(center, split)).toEqual([108, 0, 292, 300]);
+        const west = await page.getByText('West pane').boundingBox();
+        const x = west.x + west.width + 4; // the splitter, after the west pane
+        await page.mouse.move(x, west.y + 100);
+        await page.mouse.down();
+        await page.mouse.move(x + 40, west.y + 100, { steps: 4 });
+        await page.mouse.up();
+        await expect.poll(() => box(center, split)).toEqual([148, 0, 252, 300]);
+        await sent(3); // the sizes, 500 ms after the drag
+        await center.click();
+    },
+    tablayout: async page => {
+        const tabs = page.getByLabel('Oracle tab layout');
+        await expect(page.getByText('TL1 panel')).toBeVisible();
+        expect(near((await box(page.getByText('TL1 panel'), tabs))[2], 400)).toBe(true); // the panel fills the width
+        await page.getByText('TL 2', { exact: true }).click();
+        await expect(page.getByText('TL2 panel')).toBeVisible();
+        await page.getByText('TL 3', { exact: true }).click();
+        await expect(page.getByText('TL3 panel')).toBeVisible();
+        await page.getByRole('button', { name: 'Select TL 1' }).click();
+        await expect(page.getByText('TL1 panel')).toBeVisible();
+        await page.getByText('TL 3', { exact: true }).click();
+        await expect(page.getByText('TL3 panel')).toBeVisible();
+        await page.getByRole('button', { name: 'Remove TL 3' }).click();
+        await expect(page.getByText('TL 3', { exact: true })).toHaveCount(0);
+        await expect(page.getByText('TL1 panel')).toBeVisible();
+    },
+    stack: async page => {
+        const stack = page.getByLabel('Oracle stack');
+        await expect(page.getByText('S1 content')).toBeVisible();
+        await page.getByText('S2', { exact: true }).click();
+        await expect(page.getByText('S2 content')).toBeVisible();
+        await expect(page.getByText('S1 content')).toBeHidden();
+        // under the two headers, across, down to the third header
+        await expect.poll(async () => (await box(page.getByText('S2 content'), stack)).slice(1).every((v, i) => near(v, [60, 300, 210][i]))).toBe(true);
+        await page.getByRole('button', { name: 'Show S3' }).click();
+        await expect(page.getByText('S3 content')).toBeVisible();
+        await page.getByRole('button', { name: 'Remove S3' }).click();
+        await expect(page.getByText('S1 content')).toBeVisible();
+    },
+    headerpanel: async page => {
+        const panel = page.getByLabel('Oracle header panel');
+        const body = page.getByRole('button', { name: 'Body button' });
+        await expect.poll(async () => (await box(body, panel)).slice(0, 2)).toEqual([0, 30]); // under the header, its own size
+        await body.click();
     },
     frame: async page => {
         const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames

@@ -5,6 +5,7 @@
 package com.ponysdk.sample.client;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -15,10 +16,18 @@ import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.model.PAlignment;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PHeaderPanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PLayoutPanel;
 import com.ponysdk.core.ui.basic.PMultiWordSuggestOracle;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PTree;
@@ -100,7 +109,13 @@ final class OraclePages {
         Map.entry("dialog", OraclePages::dialog),
         Map.entry("menu", OraclePages::menu),
         Map.entry("tree", OraclePages::tree),
-        Map.entry("suggest", OraclePages::suggest));
+        Map.entry("suggest", OraclePages::suggest),
+        Map.entry("layoutpanel", OraclePages::layoutPanel),
+        Map.entry("dock", OraclePages::dock),
+        Map.entry("split", OraclePages::split),
+        Map.entry("tablayout", OraclePages::tabLayout),
+        Map.entry("stack", OraclePages::stack),
+        Map.entry("headerpanel", OraclePages::headerPanel));
 
     private OraclePages() {
     }
@@ -616,5 +631,120 @@ final class OraclePages {
         final PFlowPanel panel = Element.newPFlowPanel();
         panel.add(box, selected);
         return panel;
+    }
+
+    // ---- P5: layout panels ----
+
+    private static <T extends com.ponysdk.core.ui.basic.PWidget> T sized(final T widget, final String label, final String width,
+                                                                       final String height) {
+        widget.setAttribute("aria-label", label);
+        widget.setWidth(width);
+        widget.setHeight(height);
+        return widget;
+    }
+
+    /** Children placed by constraints and alignment; one moved by the server. */
+    private static IsPWidget layoutPanel() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PLayoutPanel layout = sized(Element.newPLayoutPanel(), "Oracle layout", "400px", "200px");
+        final PButton a = clickable("A");
+        final PButton b = clickable("B");
+        final PLabel c = Element.newPLabel("C");
+        layout.add(a);
+        layout.add(b);
+        layout.add(c);
+        layout.setWidgetLeftWidth(a, 10, 100, PUnit.PX);
+        layout.setWidgetTopHeight(a, 10, 30, PUnit.PX);
+        layout.setWidgetRightWidth(b, 10, 80, PUnit.PX);
+        layout.setWidgetTopHeight(b, 50, 30, PUnit.PX);
+        layout.setWidgetBottomHeight(c, 0, 20, PUnit.PX);
+        layout.setWidgetHorizontalPosition(c, PAlignment.BEGIN);
+        final PButton move = Element.newPButton("Move A");
+        move.addClickHandler(e -> {
+            layout.setWidgetLeftWidth(a, 200, 100, PUnit.PX);
+            layout.animate(Duration.ZERO);
+        });
+        panel.add(layout, move);
+        return panel;
+    }
+
+    /** North, west and center; the server grows the north. */
+    private static IsPWidget dock() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PDockLayoutPanel dock = sized(Element.newPDockLayoutPanel(PUnit.PX), "Oracle dock", "400px", "300px");
+        final PLabel north = Element.newPLabel("North");
+        dock.addNorth(north, 50);
+        dock.addWest(Element.newPLabel("West"), 80);
+        dock.add(clickable("Center"));
+        final PButton grow = Element.newPButton("Grow north");
+        grow.addClickHandler(e -> dock.setWidgetSize(north, 100));
+        panel.add(dock, grow);
+        return panel;
+    }
+
+    /** A west pane resized by its splitter; the server is told the sizes. */
+    private static IsPWidget split() {
+        final PSplitLayoutPanel split = sized(Element.newPSplitLayoutPanel(), "Oracle split", "400px", "300px");
+        final PLabel west = Element.newPLabel("West pane");
+        split.addWest(west, 100);
+        split.add(clickable("Center pane"));
+        split.setWidgetMinSize(west, 50);
+        split.addLayoutResizeHandler(e -> {
+        });
+        return split;
+    }
+
+    /** Tabs selected by the user and by the server; removing the selected one selects the first. */
+    private static IsPWidget tabLayout() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PTabLayoutPanel tabs = sized(Element.newPTabLayoutPanel(), "Oracle tab layout", "400px", "200px");
+        tabs.addBeforeSelectionHandler(e -> {
+        });
+        tabs.addSelectionHandler(e -> {
+        });
+        final PLabel first = Element.newPLabel("TL1 panel");
+        tabs.add(first, "TL 1");
+        tabs.add(Element.newPLabel("TL2 panel"), "TL 2");
+        final PLabel third = Element.newPLabel("TL3 panel");
+        tabs.add(third, "TL 3");
+        final PButton select = Element.newPButton("Select TL 1");
+        select.addClickHandler(e -> tabs.selectTab(0));
+        final PButton remove = Element.newPButton("Remove TL 3");
+        remove.addClickHandler(e -> tabs.remove(third));
+        panel.add(tabs, select, remove);
+        return panel;
+    }
+
+    /** Headers opened by the user and by the server; removing the open one opens the first. */
+    private static IsPWidget stack() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PStackLayoutPanel stack = sized(Element.newPStackLayoutPanel(PUnit.PX), "Oracle stack", "300px", "300px");
+        stack.addBeforeSelectionHandler(e -> {
+        });
+        stack.addSelectionHandler(e -> {
+        });
+        stack.add(Element.newPLabel("S1 content"), "S1", false, 30);
+        stack.add(Element.newPLabel("S2 content"), "S2", false, 30);
+        final PLabel third = Element.newPLabel("S3 content");
+        stack.add(third, "S3", false, 30);
+        final PButton show = Element.newPButton("Show S3");
+        show.addClickHandler(e -> stack.showWidget(third));
+        final PButton remove = Element.newPButton("Remove S3");
+        remove.addClickHandler(e -> stack.remove(third));
+        panel.add(stack, show, remove);
+        return panel;
+    }
+
+    /** A header and a footer around a content that fills the rest. */
+    private static IsPWidget headerPanel() {
+        final PHeaderPanel header = sized(Element.newPHeaderPanel(), "Oracle header panel", "300px", "200px");
+        final PLabel head = Element.newPLabel("Head");
+        head.setHeight("30px");
+        final PLabel foot = Element.newPLabel("Foot");
+        foot.setHeight("20px");
+        header.setHeaderWidget(head);
+        header.setContentWidget(clickable("Body button"));
+        header.setFooterWidget(foot);
+        return header;
     }
 }
