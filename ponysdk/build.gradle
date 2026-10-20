@@ -1,5 +1,8 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
     id 'jacoco'
+    id 'com.github.node-gradle.node' version '7.1.0'
 }
 ext {
     resourcesCoreTest = "src/test/resources"
@@ -123,6 +126,66 @@ jacocoTestCoverageVerification {
     }
 }
 
+// TypeScript terminal (docs/decisions/0002-javascript-terminal.md): sources in terminal/, Node provisioned by Gradle.
+node {
+    version = '24.21.0'
+    download = true
+    nodeProjectDir = file('terminal')
+    npmInstallCommand = 'ci'
+}
+
+sourceSets {
+    // Build tooling, not shipped: writes the terminal's protocol model from com.ponysdk.core.model
+    generator {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+def terminalModel = tasks.register('terminalModel', JavaExec) {
+    description = 'Generates terminal/build/generated/model.ts from com.ponysdk.core.model'
+    classpath = sourceSets.generator.runtimeClasspath
+    mainClass = 'com.ponysdk.generator.TerminalModelGenerator'
+    def classes = sourceSets.main.java.destinationDirectory
+    def output = layout.projectDirectory.file('terminal/build/generated/model.ts')
+    inputs.files(classes.dir('com/ponysdk/core/model')).withPropertyName('modelClasses')
+    outputs.file(output)
+    argumentProviders.add({ [output.asFile.path, classes.get().asFile.path] } as CommandLineArgumentProvider)
+}
+
+def terminalSources = [file('terminal/src'), file('terminal/package.json'), file('terminal/package-lock.json'),
+                       file('terminal/tsconfig.json')]
+
+def terminalCheck = tasks.register('terminalCheck', NpmTask) {
+    description = 'Type-checks the TypeScript terminal'
+    group = 'verification'
+    dependsOn tasks.named('npmInstall'), terminalModel
+    args = ['run', 'check']
+    inputs.files(terminalSources, file('terminal/test'), terminalModel)
+    def stamp = layout.buildDirectory.file('terminal/check.stamp')
+    outputs.file(stamp)
+    doLast { stamp.get().asFile.text = '' }
+}
+
+def terminalTest = tasks.register('terminalTest', NpmTask) {
+    description = 'Runs the unit tests of the TypeScript terminal on Node'
+    group = 'verification'
+    dependsOn tasks.named('npmInstall'), terminalModel
+    args = ['run', 'test']
+    inputs.files(terminalSources, file('terminal/test'), terminalModel)
+    def stamp = layout.buildDirectory.file('terminal/test.stamp')
+    outputs.file(stamp)
+    doLast { stamp.get().asFile.text = '' }
+}
+
+def terminalBundle = tasks.register('terminalBundle', NpmTask) {
+    description = 'Bundles the TypeScript terminal into terminal/build/dist/terminal.js'
+    dependsOn tasks.named('npmInstall'), terminalModel
+    args = ['run', 'bundle']
+    inputs.files(terminalSources, terminalModel)
+    outputs.dir('terminal/build/dist')
+}
+
 configurations {
     gwt
     gwtdev
@@ -221,6 +284,7 @@ def buildTimestamp = providers.provider {
 jar {
     into('ponyterminal') {
         from gwtOutputDirName + '/gwt/ponyterminal'
+        from terminalBundle
     }
     exclude('*.devmode.js')
     exclude('*compilation-mappings.txt')
@@ -315,7 +379,7 @@ test {
     })
 }
 
-check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification, terminalCheck, terminalTest
 gwtc.dependsOn classes
 jar.dependsOn gwtc
 // test classpath includes the GWT output dir (gwtOutputDirName), so it must run after gwtc

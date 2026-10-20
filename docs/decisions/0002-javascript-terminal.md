@@ -60,8 +60,8 @@ the terminal is replaced, and the DOM it builds is new.
 ### 2. Language and build
 
 The terminal is written in strict TypeScript and bundled by esbuild into one ES2022 script with source maps. `tsc
---noEmit` checks types; unit tests run on `node:test`. TypeScript and esbuild are the only development
-dependencies; the script has no runtime dependency. The Gradle build provisions Node and packages the script in the
+--noEmit` checks types; unit tests run on `node:test`. TypeScript, esbuild and the Node type definitions are the
+only development dependencies; the script has no runtime dependency. The Gradle build provisions Node and packages the script in the
 jar.
 
 ### 3. One source for the protocol
