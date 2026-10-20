@@ -70,6 +70,8 @@ task runShowcase(type: JavaExec) {
     classpath += files(buildDirPath + '/gwt/gwt')
     classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
+    // The terminal served to the browser (docs/decisions/0002-javascript-terminal.md): -Pterminal=typescript
+    if (project.hasProperty('terminal')) systemProperty 'ponysdk.terminal', project.property('terminal').toString()
     jvmArgs = [
         '-Xmx1g',
         '-XX:+UseZGC',

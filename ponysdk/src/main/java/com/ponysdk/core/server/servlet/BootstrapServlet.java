@@ -27,6 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,7 @@ public class BootstrapServlet extends HttpServlet {
     protected static final String META_PATTERN = "<meta %s>";
     protected static final String STYLE_PATTERN = "<link id=\"%s\" rel=\"stylesheet\" type=\"%s\" href=\"%s\"/>";
     protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
+    protected static final String DEFERRED_SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\" defer></script>";
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
@@ -307,10 +309,15 @@ public class BootstrapServlet extends HttpServlet {
             sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
         }
 
-        String ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
-
-        sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
-        sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+        if (isTypeScriptTerminal()) {
+            // Deferred: it starts once the page is parsed, after ponysdk.js and the application scripts, as the GWT
+            // terminal does when its permutation arrives
+            sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+            sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
+        } else {
+            sb.append(String.format(SCRIPT_PATTERN, rootPath + "ponyterminal/ponyterminal.nocache.js")).append(NEW_LINE);
+            sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+        }
 
         // Inject shared WC stylesheets as an inline script so they are registered
         // before application scripts define their web components.
@@ -345,7 +352,9 @@ public class BootstrapServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /** GWT's history support needs this frame; the TypeScript terminal does not. */
     protected String addHistoryIFrame(final HttpServletRequest request) {
+        if (isTypeScriptTerminal()) return "";
         return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>"
                 + NEW_LINE;
     }
@@ -371,6 +380,10 @@ public class BootstrapServlet extends HttpServlet {
         sb.append("</noscript>").append(NEW_LINE);
 
         return sb.toString();
+    }
+
+    private boolean isTypeScriptTerminal() {
+        return configuration != null && configuration.getTerminal() == Terminal.TYPESCRIPT;
     }
 
     public void setConfiguration(final ApplicationConfiguration configuration) {

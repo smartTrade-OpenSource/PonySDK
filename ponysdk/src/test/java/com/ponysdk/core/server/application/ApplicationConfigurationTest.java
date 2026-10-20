@@ -217,4 +217,20 @@ public class ApplicationConfigurationTest {
         assertEquals(expected, config.isTabindexOnlyFormField());
     }
 
+
+    @Test
+    public void theTerminalIsGwtUnlessTheSystemPropertyOrASetterSaysOtherwise() {
+        assertEquals(Terminal.GWT, config.getTerminal());
+        final String previous = System.getProperty(ApplicationConfiguration.TERMINAL);
+        System.setProperty(ApplicationConfiguration.TERMINAL, "TypeScript");
+        try {
+            assertEquals(Terminal.TYPESCRIPT, new ApplicationConfiguration().getTerminal());
+        } finally {
+            if (previous == null) System.clearProperty(ApplicationConfiguration.TERMINAL);
+            else System.setProperty(ApplicationConfiguration.TERMINAL, previous);
+        }
+        config.setTerminal(Terminal.TYPESCRIPT);
+        assertEquals(Terminal.TYPESCRIPT, config.getTerminal());
+        assertEquals(Terminal.TYPESCRIPT, ApplicationConfiguration.builder().terminal(Terminal.TYPESCRIPT).build().getTerminal());
+    }
 }

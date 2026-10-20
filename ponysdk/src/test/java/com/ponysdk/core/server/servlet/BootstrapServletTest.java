@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.Terminal;
 
 /**
  * Tests for {@link BootstrapServlet} path handling — context-path stripping and the
@@ -185,6 +186,23 @@ public class BootstrapServletTest {
         assertTrue("announces the protocol version the terminal speaks",
             html.contains("&w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT + "'"));
         assertTrue("not in a child window", html.contains("has('1')"));
+    }
+
+    @Test
+    public void theTypeScriptTerminalIsLoadedDeferredAfterPonysdkJsWithoutTheGwtHistoryFrame() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        Mockito.when(config.getTerminal()).thenReturn(Terminal.TYPESCRIPT);
+        Mockito.when(config.getJavascript()).thenReturn(Set.of("script/app.js"));
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+
+        assertFalse("no GWT terminal", html.contains("nocache.js"));
+        assertFalse("no GWT history frame", html.contains("__gwt_historyFrame"));
+        final int ponysdk = html.indexOf("src=\"script/ponysdk.js\"");
+        final int terminal = html.indexOf("src=\"ponyterminal/terminal.js\" defer");
+        assertTrue("ponysdk.js present", ponysdk > 0);
+        assertTrue("deferred terminal after ponysdk.js", terminal > ponysdk);
+        assertTrue("early socket before the terminal", html.indexOf("window.ponyEarlySocket=") < terminal);
     }
 
     // ---- HTTP caching of the served files ----

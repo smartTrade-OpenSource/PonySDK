@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -39,6 +40,8 @@ public class ApplicationConfiguration {
     public static final String STYLESHEETS = "ponysdk.application.stylesheets";
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
+    /** {@link Terminal} name, case-insensitive: {@code -Dponysdk.terminal=typescript}. */
+    public static final String TERMINAL = "ponysdk.terminal";
 
     private String applicationID;
     private String applicationName;
@@ -116,6 +119,8 @@ public class ApplicationConfiguration {
         applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
         applicationDescription = System.getProperty(APPLICATION_DESCRIPTION);
+        final String terminalName = System.getProperty(TERMINAL);
+        if (terminalName != null) terminal = Terminal.valueOf(terminalName.trim().toUpperCase(Locale.ROOT));
     }
 
     public String getApplicationID() {
@@ -340,6 +345,17 @@ public class ApplicationConfiguration {
      */
     private SessionAccessPolicy sessionAccessPolicy = SessionAccessPolicy.SAME_HTTP_SESSION;
 
+    /** The terminal the bootstrap page loads (ADR-0002). {@link Terminal#GWT} unless {@value #TERMINAL} says otherwise. */
+    private Terminal terminal = Terminal.GWT;
+
+    public Terminal getTerminal() {
+        return terminal;
+    }
+
+    public void setTerminal(final Terminal terminal) {
+        this.terminal = Objects.requireNonNull(terminal, "terminal");
+    }
+
     public SessionAccessPolicy getSessionAccessPolicy() {
         return sessionAccessPolicy;
     }
@@ -398,6 +414,7 @@ public class ApplicationConfiguration {
         public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
         public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
         public Builder wsPermessageDeflateEnabled(final boolean v) { config.setWsPermessageDeflateEnabled(v); return this; }
+        public Builder terminal(final Terminal v)                  { config.setTerminal(v); return this; }
 
         public ApplicationConfiguration build() {
             return config;
