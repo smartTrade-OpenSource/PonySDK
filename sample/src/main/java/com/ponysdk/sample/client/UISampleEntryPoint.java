@@ -61,6 +61,10 @@ public class UISampleEntryPoint implements EntryPoint {
             ReconnectionPage.buildClient(uiContext, token); // the session in the Reconnection page's frame
             return;
         }
+        if (token != null && token.startsWith(OraclePages.TOKEN)) {
+            OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
+            return;
+        }
 
         // Styles: css/showcase.css (declared in ShowcaseMain)
         // Favicon: the "P" monogram of the top bar, inline SVG (no extra request)
