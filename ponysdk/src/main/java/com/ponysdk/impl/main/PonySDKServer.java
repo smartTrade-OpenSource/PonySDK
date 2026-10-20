@@ -168,7 +168,7 @@ public class PonySDKServer {
         final CompressionHandler compression = new CompressionHandler();
         compression.putCompression(new GzipCompression());
         addBrotliIfAvailable(compression);
-        // Compress text assets (HTML, the GWT JS bundle, JSON) but skip already-compressed
+        // Compress text assets (HTML, the terminal's JavaScript, JSON) but skip already-compressed
         // content (images, fonts, archives) — restores the sensible GzipHandler defaults
         // instead of wasting CPU re-compressing incompressible payloads.
         // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty would always
@@ -181,7 +181,7 @@ public class PonySDKServer {
 
     /**
      * Registers Brotli HTTP compression, but only when its native library can be loaded on the
-     * current platform. Brotli compresses text assets (notably the GWT JavaScript bundle served on
+     * current platform. Brotli compresses text assets (notably the terminal's JavaScript bundle served on
      * first load) noticeably better than gzip; the browser negotiates {@code br} vs {@code gzip}
      * via {@code Accept-Encoding}. When the native is unavailable the server degrades gracefully to
      * gzip only — startup is never broken by a missing native.

@@ -5,7 +5,7 @@
 
 PonySDK is an open source framework for building real-time web applications entirely in Java — no JavaScript required.
 
-It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend. Every UI interaction is handled server-side: the browser is a thin rendering layer that receives binary protocol instructions over WebSocket.
+It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in the browser. Every UI interaction is handled server-side: the browser is a thin rendering layer that receives binary protocol instructions over WebSocket.
 
 ![PonySDK showcase: overview page with measured gains, live session metrics and the update pipeline](docs/images/showcase-overview.png)
 
@@ -16,10 +16,8 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 | Component | Version |
 |-----------|---------|
 | Java (server) | 25 (LTS, virtual threads) |
-| Java (terminal / GWT) | 17 |
+| TypeScript (terminal) | 7.0, bundled by esbuild 0.28; Node 24 provisioned by Gradle |
 | Jetty | 12.1.x (EE11 / Jakarta EE) |
-| GWT | 2.13.1 |
-| elemental2 | 1.3.2 |
 | Spring | 7.x |
 | Selenium | 4.x |
 | Gradle | 9.x |
@@ -54,7 +52,10 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
 - `PAddOn` for integrating any JavaScript library — typed creation args and method calls sent in pure binary (no JSON) via `PAddOn(Object...)`
 - Virtual threads (Java 25) for scalable concurrent `UIContext`s
-- JsInterop / elemental2 terminal — no legacy `gwt-elemental`
+- TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's
+  top layer; 134 KB, 39 KB gzipped
+- Stylesheets select `pony-<Type>` classes and native or ARIA states; [ADR-0002](docs/decisions/0002-javascript-terminal.md)
+  maps each widget to its elements, the guide for stylesheets written on GWT's `gwt-*` classes
 
 ---
 
@@ -83,8 +84,8 @@ with its encoding pipeline, and the binary protocol streaming typed arrays.
 # Run tests
 ./gradlew :ponysdk:test
 
-# GWT compile (terminal → JavaScript)
-./gradlew :ponysdk:gwtc
+# Terminal: type check, tests on Node, bundle (ponyterminal/terminal.js in the jar)
+./gradlew :ponysdk:terminalCheck :ponysdk:terminalTest :ponysdk:terminalBundle
 
 # Full build
 ./gradlew :ponysdk:build
@@ -156,7 +157,7 @@ drain within `wsSendTimeoutMs`, the connection is closed — memory stays bounde
 
 ## HTTP Compression
 
-Static HTTP assets (bootstrap HTML, the GWT JavaScript bundle, AJAX responses) are compressed by a
+Static HTTP assets (bootstrap HTML, the terminal's JavaScript bundle, AJAX responses) are compressed by a
 Jetty `CompressionHandler`. **gzip** is always enabled; **Brotli** is enabled automatically when its
 native library is available on the platform — the browser negotiates `br` vs `gzip` via the
 `Accept-Encoding` header. Already-compressed content (images, fonts, archives) is skipped.

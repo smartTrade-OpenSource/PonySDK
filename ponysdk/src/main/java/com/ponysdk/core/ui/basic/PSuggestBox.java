@@ -68,8 +68,12 @@ import java.util.Objects;
  *
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-SuggestBox</dt>
- * <dd>the suggest box itself</dd>
+ * <dt>.pony-SuggestBox</dt>
+ * <dd>the field (role combobox)</dd>
+ * <dt>.pony-SuggestPopup</dt>
+ * <dd>the list of suggestions (role listbox)</dd>
+ * <dt>.pony-SuggestPopup [role=option]</dt>
+ * <dd>a suggestion; <code>[aria-selected=true]</code> for the current one</dd>
  * </dl>
  * TODO(pdr): Add SafeHtml support to this and implementing classes.
  *

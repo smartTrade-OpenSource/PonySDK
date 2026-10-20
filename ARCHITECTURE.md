@@ -235,7 +235,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 │  │  │ (div, button)│   │ (custom el.) │   │ (JS libs)     │  │  │
 │  │  └──────────────┘   └──────────────┘   └───────────────┘  │  │
 │  │                                                            │  │
-│  │  GWT Terminal (ponyterminal.js) -- interprets instructions │  │
+│  │  Terminal (terminal.js) -- interprets instructions         │  │
 │  │  ponysdk.js -- pony.wc utilities, addon registry           │  │
 │  └────────────────────────────────────────────────────────────┘  │
 │                                                                  │
@@ -1175,7 +1175,7 @@ Every `property("x").set(value)` call goes through up to 5 optimization levels:
 
 #### Writing a Web Component for PonySDK
 
-Web Components used with PonySDK must follow one critical rule: **never do DOM work in the constructor**. GWT creates custom elements via `document.createElement()` which invokes the constructor — any DOM access there will crash.
+Web Components used with PonySDK must follow one critical rule: **never do DOM work in the constructor**. The terminal creates custom elements via `document.createElement()` which invokes the constructor — any DOM access there will crash.
 
 **Rule: constructor = empty. All init goes in `connectedCallback`.**
 
@@ -1204,7 +1204,7 @@ customElements.define('my-chart', MyChart);
 ```
 
 ```javascript
-// Wrong — crashes when GWT calls document.createElement('my-chart')
+// Wrong — crashes when the terminal calls document.createElement('my-chart')
 class MyChart extends HTMLElement {
     constructor() {
         super();
@@ -1922,7 +1922,7 @@ Untrusted client values (the reconnection parameter, malformed inbound frames) a
 
 ## 12. Package Structure
 
-The codebase is split into three main areas: `server` (runtime, transport, transactions), `ui` (widgets and event system), and `terminal` (GWT code compiled to JavaScript that runs in the browser). The `util` package contains performance-critical data structures shared by both sides.
+The codebase is split into three main areas: `server` (runtime, transport, transactions), `ui` (widgets and event system), and the terminal (TypeScript that runs in the browser, under `ponysdk/terminal`). The `util` package contains performance-critical data structures shared by both sides.
 
 ```
 com.ponysdk.core
@@ -1958,11 +1958,6 @@ com.ponysdk.core
 │   │   └── ...
 │   ├── eventbus/       # Event system
 │   └── datagrid2/      # Advanced grid
-│
-├── terminal/           # Client-side (GWT 2.13.0, elemental2, sourceLevel 17)
-│   ├── UIBuilder.java
-│   ├── ui/PTWebComponent.java  # Terminal-side Web Component handler
-│   └── CommunicationEntryPoint.java
 │
 ├── util/
 │   ├── CompactStringMap.java   # Flat String[] map for small property sets
@@ -2039,14 +2034,12 @@ public class MyEntryPoint implements EntryPoint {
 | Component | Version |
 |-----------|---------|
 | Java (server) | 25 (virtual threads) |
-| Java (GWT terminal) | 17 (`-sourceLevel 17`) |
+| TypeScript (terminal) | 7.0, esbuild 0.28 |
 | Jetty | 12.1.10 (EE11) |
 | Spring | 7.0.8 |
 | Servlet API | jakarta.servlet 6.1.0 |
 | JSON-P | jakarta.json 2.1.3 + Eclipse Parsson 1.1.9 |
 | WebSocket | Jetty native API (`Session.Listener.AutoDemanding`) |
-| GWT | 2.13.0 (`org.gwtproject`, sourceLevel 17) |
-| elemental2 | 1.3.2 (dom, core, webstorage) |
 | Selenium | 4.44.0 |
 | Tyrus | 2.2.2 |
 | SLF4J | 2.0.18 |
@@ -2089,23 +2082,21 @@ The old `WebSocketPusher` extended `AutoFlushedBuffer` with a complex double-buf
 
 ### 14.5 BinaryModel — UINT31 Type Support
 
-The `UINT31` type in `ValueTypeModel` is used by some server models (e.g. `CREATE_CONTEXT`). The GWT client `BinaryModel.toString()` must handle this type, otherwise the first WebSocket message (handshake) crashes on the client with `IllegalArgumentException`.
+The `UINT31` type in `ValueTypeModel` is used by some server models (e.g. `CREATE_CONTEXT`). The terminal's reader must handle this type, otherwise the first WebSocket message (handshake) fails on the client.
 
 ### 14.6 PonyPerMessageDeflateExtension Removed
 
 The custom compression monitoring extension has been removed. Jetty 12 handles `permessage-deflate` natively. Frame-level monitoring is no longer available but can be re-implemented via the Jetty 12 core Extension API if needed.
 
-### 14.7 GWT Terminal — elemental2 Migration and sourceLevel 17
+### 14.7 TypeScript Terminal
 
-Code in `ponysdk/src/main/java/com/ponysdk/core/terminal/` is compiled by GWT 2.13.0 to JavaScript with `-sourceLevel 17`.
+The terminal is written in TypeScript under `ponysdk/terminal` and replaced the GWT one
+([ADR-0002](docs/decisions/0002-javascript-terminal.md)). Gradle provisions Node: `terminalModel` writes the protocol
+model (`model.ts`) from `com.ponysdk.core.model`, `terminalCheck` type-checks, `terminalTest` runs its tests on Node
+against frames the server's write path produces, and `terminalBundle` builds `ponyterminal/terminal.js` into the jar.
 
-**elemental2 migration:** The old `gwt-elemental` dependency (package `elemental.*`) has been fully replaced by `elemental2-dom`, `elemental2-core`, and `elemental2-webstorage` (package `elemental2.*`). All terminal files now use native elemental2 JsInterop wrappers.
-
-**Java 17 in the terminal:** GWT 2.13.0 supports `-sourceLevel 17`, enabling switch expressions and `instanceof` pattern matching in terminal code compiled to JavaScript.
-
-**JSNI → JsInterop:** Most JSNI methods have been migrated to elemental2/JsInterop calls. Remaining JSNI methods are those that access `$wnd`, `$doc`, or use GWT-specific patterns (eval, bind, sendToNative).
-
-> **Important:** Terminal code must **never** be migrated to the `jakarta.*` namespace. GWT does not support Jakarta.
+What the server receives from it is checked against traces recorded with the GWT terminal
+(`sample/tests/oracle.spec.js`).
 
 ---
 
@@ -2449,7 +2440,7 @@ System.out.println("Terminal: " + ctx.getTerminalLatency() + "ms");
 | Aspect | PonySDK | Vaadin Flow |
 |--------|---------|-------------|
 | **Protocol** | Binary WebSocket | JSON + HTTP hybrid |
-| **Client runtime** | GWT 2.13.0 compiled JS (elemental2 + JsInterop) | Lit / Web Components |
+| **Client runtime** | TypeScript terminal on native elements and ARIA | Lit / Web Components |
 | **Efficiency** | Minimal overhead, 5-level optimization | More verbose |
 | **Widgets** | ~60 core + native Web Components | 40+ with Lumo theme |
 | **Web Components** | First-class via `PWebComponent` + `pony.wc` | Native Vaadin components |

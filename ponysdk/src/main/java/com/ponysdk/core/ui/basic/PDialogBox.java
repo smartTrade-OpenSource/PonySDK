@@ -35,30 +35,16 @@ import com.ponysdk.core.model.WidgetType;
  * of the
  * dialog box itself, even if a widget has not been added as yet.
  * <h3>CSS Style Rules</h3>
- * <ul>
- * <li>.gwt-DialogBox { the outside of the dialog }</li>
- * <li>.gwt-DialogBox .Caption { the caption }</li>
- * <li>.gwt-DialogBox .dialogContent { the wrapper around the content }</li>
- * <li>.gwt-DialogBox .dialogTopLeft { the top left cell }</li>
- * <li>.gwt-DialogBox .dialogTopLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogTopCenter { the top center cell, where the caption is located }</li>
- * <li>.gwt-DialogBox .dialogTopCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogTopRight { the top right cell }</li>
- * <li>.gwt-DialogBox .dialogTopRightInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleLeft { the middle left cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleCenter { the middle center cell, where the content is located }
- * </li>
- * <li>.gwt-DialogBox .dialogMiddleCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleRight { the middle right cell }</li>
- * <li>.gwt-DialogBox .dialogMiddleRightInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogBottomLeft { the bottom left cell }</li>
- * <li>.gwt-DialogBox .dialogBottomLeftInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogBottomCenter { the bottom center cell }</li>
- * <li>.gwt-DialogBox .dialogBottomCenterInner { the inner element of the cell }</li>
- * <li>.gwt-DialogBox .dialogBottomRight { the bottom right cell }</li>
- * <li>.gwt-DialogBox .dialogBottomRightInner { the inner element of the cell }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-DialogBox</dt>
+ * <dd>the dialog, in the top layer; <code>::backdrop</code> when modal</dd>
+ * <dt>.pony-DialogBox .pony-Caption</dt>
+ * <dd>the caption, by which it is dragged</dd>
+ * <dt>.pony-DialogBox .pony-Content</dt>
+ * <dd>the content</dd>
+ * <dt>.pony-Glass</dt>
+ * <dd>the glass behind it, when enabled</dd>
+ * </dl>
  */
 public class PDialogBox extends PDecoratedPopupPanel {
 

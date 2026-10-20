@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
- *
- * @see com.google.gwt.user.client.ui.ButtonBase
  */
 abstract class PButtonBase extends PFocusWidget {
 

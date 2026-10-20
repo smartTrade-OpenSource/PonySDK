@@ -39,13 +39,11 @@ import java.util.stream.Collectors;
  * This class also serves as a base class for {@link PRadioButton}.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-CheckBox</dt>
- * <dd>the outer element</dd>
- * <dt>.gwt-CheckBox-disabled</dt>
- * <dd>applied when PCheckbox is disabled</dd>
+ * <dt>.pony-CheckBox</dt>
+ * <dd>the label holding the input and its text</dd>
+ * <dt>.pony-CheckBox input</dt>
+ * <dd>the input: <code>:checked</code>, <code>:indeterminate</code>, <code>:disabled</code></dd>
  * </dl>
- *
- * @see com.google.gwt.user.client.ui.CheckBox
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 

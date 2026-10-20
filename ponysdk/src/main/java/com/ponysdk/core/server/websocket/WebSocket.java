@@ -399,7 +399,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     @Override
     public void onWebSocketBinary(final ByteBuffer payload, final Callback callback) {
         callback.succeed();
-        // Can't receive binary data from terminal (GWT limitation)
+        // The terminal sends text frames only
         callback.succeed();
     }
 

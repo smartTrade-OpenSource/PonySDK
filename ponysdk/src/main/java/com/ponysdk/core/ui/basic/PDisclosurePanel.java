@@ -35,18 +35,12 @@ import java.util.*;
 /**
  * A widget that consists of a header and a content panel that discloses the content when a user clicks on the header.
  * <h3>CSS Style Rules</h3>
- * <dl class="css">
- * <dt>.gwt-DisclosurePanel
- * <dd>the panel's primary style
- * <dt>.gwt-DisclosurePanel-open
- * <dd>dependent style set when panel is open
- * <dt>.gwt-DisclosurePanel-closed
- * <dd>dependent style set when panel is closed
+ * <dl>
+ * <dt>.pony-DisclosurePanel</dt>
+ * <dd>the panel, a details element; <code>[open]</code> when open</dd>
+ * <dt>.pony-DisclosurePanel > summary</dt>
+ * <dd>the header</dd>
  * </dl>
- * <p>
- * The header and content sections can be easily selected using css with a child selector:
- * .gwt-DisclosurePanel-open .header { ... }
- * </p>
  */
 public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOneWidget {
 

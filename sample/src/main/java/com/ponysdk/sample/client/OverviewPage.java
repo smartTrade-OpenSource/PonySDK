@@ -167,7 +167,7 @@ final class OverviewPage {
             { "Java setter", "label.setText(…)" }, { "Coalescing", "last value wins" },
             { "Update runs", "ids chained" }, { "Dictionary", "3-byte refs" },
             { "Typed binary", "no JSON" }, { "Deflate", "zlib stream" }, { "WebSocket", "one frame / tick" },
-            { "Terminal", "GWT → DOM" } }) {
+            { "Terminal", "TypeScript → DOM" } }) {
             final PFlowPanel box = Element.newPFlowPanel();
             box.addStyleName("pl-step");
             box.add(el("pl-step-name", step[0]), el("pl-step-sub", step[1]));

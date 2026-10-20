@@ -138,7 +138,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         // WebSocket.onWebSocketOpen -> Application.getUIContext), so the id alone grants nothing.
         // It travels as a query parameter because browsers cannot set custom headers on the
         // WebSocket handshake; moving it off the URL would require a transport change
-        // (subprotocol or post-open handshake) on the GWT terminal.
+        // (subprotocol or post-open handshake) on the terminal.
         webSocket.setProtocolVersion(negotiateProtocolVersion(
                 request.getHttpServletRequest().getParameter(ClientToServerModel.PROTOCOL_VERSION.toStringValue()), config));
 

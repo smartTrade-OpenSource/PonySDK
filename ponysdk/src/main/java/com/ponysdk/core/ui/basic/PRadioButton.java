@@ -39,8 +39,10 @@ import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
  * cleared as a side effect of another in the group being clicked.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-RadioButton</dt>
- * <dd>the outer element</dd>
+ * <dt>.pony-RadioButton</dt>
+ * <dd>the label holding the input and its text</dd>
+ * <dt>.pony-RadioButton input</dt>
+ * <dd>the input: <code>:checked</code>, <code>:disabled</code></dd>
  * </dl>
  */
 public class PRadioButton extends PCheckBox {

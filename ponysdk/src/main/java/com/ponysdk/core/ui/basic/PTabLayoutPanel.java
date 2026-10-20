@@ -47,16 +47,14 @@ import java.util.Objects;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-TabLayoutPanel
- * <dd>the panel itself
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs
- * <dd>the tab bar element
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab
- * <dd>an individual tab
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabInner
- * <dd>an element nested in each tab (useful for styling)
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent
- * <dd>applied to all child content widgets
+ * <dt>.pony-TabLayoutPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>[role=tablist]</dt>
+ * <dd>the tabs</dd>
+ * <dt>[role=tab]</dt>
+ * <dd>a tab, a button; <code>[aria-selected=true]</code> for the selected one</dd>
+ * <dt>[role=tabpanel]</dt>
+ * <dd>the content of a tab</dd>
  * </dl>
  * <p>
  * The children of a TabLayoutPanel element are laid out in tab elements.

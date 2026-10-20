@@ -38,12 +38,14 @@ import java.util.*;
  * {@link PTreeItem TreeItems} that the user can open, close, and select.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-Tree</dt>
- * <dd>the tree itself</dd>
- * <dt>.gwt-Tree .gwt-TreeItem</dt>
- * <dd>a tree item</dd>
- * <dt>.gwt-Tree .gwt-TreeItem-selected</dt>
- * <dd>a selected tree item</dd>
+ * <dt>.pony-Tree</dt>
+ * <dd>the tree (role tree)</dd>
+ * <dt>.pony-TreeItem</dt>
+ * <dd>an item (role treeitem); <code>[aria-selected=true]</code>, <code>[aria-expanded]</code></dd>
+ * <dt>.pony-TreeItem-row</dt>
+ * <dd>the row of an item: its toggle and content</dd>
+ * <dt>.pony-TreeItem-toggle</dt>
+ * <dd>the toggle; <code>[data-state]</code> is open, closed or leaf</dd>
  * </dl>
  */
 public class PTree extends PWidget implements Iterable<PTreeItem> {

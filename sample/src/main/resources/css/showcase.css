@@ -305,7 +305,7 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
 .pony-row:hover { background: var(--bg-subtle); }
 .pony-label { min-width: 220px; font-size: 13px; font-weight: 600; color: var(--text); }
 .pony-row > * { max-width: 100%; }
-.pony-row > :not(.pony-label):not(.row-cost) { overflow-x: auto; position: relative; } /* relative: also clips GWT's absolute focus inputs */
+.pony-row > :not(.pony-label):not(.row-cost) { overflow-x: auto; position: relative; } /* relative: also clips absolutely placed content */
 .pony-row > table { display: block; } /* a table only scrolls as a block (its rows keep their table layout) */
 
 .row-cost { margin-left: auto; display: flex; align-items: center; gap: 10px; padding-left: 12px; flex-shrink: 0; }

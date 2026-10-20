@@ -1,6 +1,6 @@
 # ADR-0002: A TypeScript terminal on native elements, replacing GWT
 
-- Status: Accepted
+- Status: Accepted; implemented through P8 (see Outcome), P9 pending
 - Date: 2026-10-20
 
 ## Context
@@ -212,3 +212,25 @@ the bundle size and the porting rate the rest is estimated from.
   Java `SimpleDateFormat` and checked in Node.
 - R4. A fix made on one terminal and forgotten on the other during the transition.
 - R5. The cost of migrating core_ui's stylesheets is not measured.
+
+## Outcome
+
+P0 to P8 are done on `NC_V3` (2026-10-21): the TypeScript terminal is the only one, GWT is gone from the build, the
+jar and the server.
+
+- Bundle: 134 KB minified, 39 KB gzip, against 122 KB gzip for one GWT permutation. The jar no longer pulls
+  `gwt-user`, elemental2 or jsinterop; the build no longer needs `gwt-dev`.
+- Oracle: 35 scenarios recorded with GWT pass on Chromium, Firefox and WebKit. One difference is kept on purpose:
+  a clicked radio button sends its value once (GWT sent it twice). The traces stay as references; a new scenario is
+  recorded on the TypeScript terminal and reviewed by hand.
+- Keyboard and accessibility, which the oracle does not see (R1): 9 scripted cases (`typescript-terminal.spec.js`).
+  The showcase, web component, reconnection and FlexLayout suites pass.
+- R3: the date patterns are checked against Java's `SimpleDateFormat`, 98 formatted dates and 10 typed texts written by
+  `TerminalFixtures`.
+- Defects found on the way and fixed on the server: `PComposite`, `PMenuItem` (enabled state), `PSuggestBox` (text
+  box creation). Fixed in the TypeScript terminal only: the heartbeat stopped after the first lost connection, the
+  history listener was added again at each reconnection, child windows did not share the string dictionary.
+- Open: `TYPE_REMOVE_HANDLER` carries no object id (a protocol change); `PHTMLTable` replays structural operations made
+  before attachment out of order; `PTabLayoutPanel` never creates a tab widget given before attachment; `PDateBox`
+  sends its picker the date at local midnight while the picker reads UTC midnight, so east of UTC the picker
+  highlights the day before.

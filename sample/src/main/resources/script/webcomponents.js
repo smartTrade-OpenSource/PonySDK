@@ -114,7 +114,7 @@ document.onPonyLoaded(function () {
     // Attributes: title (String), theme ("dark" | "light")
     // ============================================================
     class MyDashboard extends PonyElement {
-        // No constructor — GWT creates elements via document.createElement(),
+        // No constructor — the terminal creates elements via document.createElement(),
         // which calls the constructor. Any DOM work here crashes.
         // All init goes in connectedCallback / _render.
 

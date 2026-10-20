@@ -42,12 +42,10 @@ import java.util.*;
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-DateBox</dt>
- * <dd>default style name</dd>
- * <dt>.dateBoxPopup</dt>
- * <dd>Applied to the popup around the PDatePicker</dd>
- * <dt>.dateBoxFormatError</dt>
- * <dd>Default style for when the date box has bad input.</dd>
+ * <dt>.pony-DateBox</dt>
+ * <dd>the field (role combobox); <code>[aria-invalid=true]</code> when its text is no date</dd>
+ * <dt>.pony-DateBoxPopup</dt>
+ * <dd>the popup of its date picker</dd>
  * </dl>
  */
 public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PValueChangeHandler<Date> {

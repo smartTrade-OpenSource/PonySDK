@@ -28,11 +28,10 @@ import com.ponysdk.core.model.WidgetType;
 /**
  * A text box that visually masks its input to prevent eavesdropping.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-PasswordTextBox { primary style }</li>
- * <li>.gwt-PasswordTextBox-readonly { dependent style set when the password text box is read-only }
- * </li>
- * </ul>
+ * <dl>
+ * <dt>.pony-PasswordTextBox</dt>
+ * <dd>the field; <code>:read-only</code> when read-only</dd>
+ * </dl>
  */
 public class PPasswordTextBox extends PTextBox {
 
