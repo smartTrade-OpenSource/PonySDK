@@ -97,3 +97,70 @@ test('tree: the arrows select, open and close, and the server is told', async ({
     // HANDLER_OPEN ("G"), then HANDLER_CLOSE ("F"), with the item's id
     await expect.poll(() => sent.filter(m => /"[GF]":\d/.test(m)).length).toBe(2);
 });
+
+test('date picker: the arrows and the pages move through the days, Enter picks one', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'datepicker');
+    const cell = name => page.getByRole('gridcell', { name, exact: true });
+    await expect(page.getByRole('grid', { name: 'March 2026' })).toBeVisible();
+    await expect(cell('Sunday 1 March 2026')).toHaveAttribute('tabindex', '0'); // the first of the month
+    await cell('Sunday 1 March 2026').focus();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowDown');
+    await expect(cell('Monday 9 March 2026')).toBeFocused();
+    await page.keyboard.press('PageDown');
+    await expect(page.getByRole('grid', { name: 'April 2026' })).toBeVisible();
+    await expect(cell('Thursday 9 April 2026')).toBeFocused();
+    await page.keyboard.press('Home');
+    await page.keyboard.press('Enter');
+    await expect(cell('Monday 6 April 2026')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByText('Picked: 2026-04-06')).toBeVisible();
+    // HANDLER_SHOW_RANGE ("J") of April, from Page Down
+    expect(sent.some(m => m.includes('"q":"2026-03-30","r":"2026-05-10"'))).toBe(true);
+});
+
+test('date box: Down goes into the picker, Enter picks the day, Escape comes back', async ({ page }) => {
+    await open(page, 'datebox');
+    const box = page.getByRole('combobox', { name: 'Oracle date' });
+    await box.focus(); // opens the picker, as GWT
+    await expect(box).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('ArrowDown');
+    await expect(page.locator(':focus')).toHaveAttribute('role', 'gridcell');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+    await expect(box).toBeFocused();
+    await expect(box).toHaveAttribute('aria-expanded', 'false');
+    await expect(box).toHaveValue(/^\d\d\/03\/2026$/);
+    await expect(page.getByText(/^Date: \d\d\/03\/2026$/)).toBeVisible();
+    await page.keyboard.press('ArrowDown'); // opens
+    await page.keyboard.press('ArrowDown'); // goes in
+    await page.keyboard.press('Escape');
+    await expect(box).toBeFocused();
+    await expect(box).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('rich text: the toolbar formats the selection and shows its state', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'richtext');
+    const area = page.getByRole('textbox', { name: 'Oracle rich text' });
+    await area.click();
+    await page.keyboard.type('Hello');
+    await page.keyboard.press('ControlOrMeta+a');
+    const bold = page.getByRole('button', { name: 'Toggle Bold' });
+    await bold.click();
+    await expect(bold).toHaveAttribute('aria-pressed', 'true');
+    await expect(area).toBeFocused(); // a press on the toolbar keeps the focus in the area
+    await page.getByText('HTML: none').click();
+    await expect(page.getByText('HTML: <b>Hello</b>')).toBeVisible();
+});
+
+test('mask: a character that does not fit is refused, the mask\'s own is typed over', async ({ page }) => {
+    await open(page, 'mask');
+    const box = page.getByRole('textbox', { name: 'Oracle mask' });
+    await box.click();
+    await box.pressSequentially('1x2/0', { delay: 30 });
+    await expect(box).toHaveValue('12/0_/____');
+    await expect(page.getByText('Mask: 12/0_/____')).toBeVisible();
+});

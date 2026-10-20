@@ -5,8 +5,14 @@
 package com.ponysdk.sample.client;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -22,6 +28,9 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PHeaderPanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PTabLayoutPanel;
@@ -115,7 +124,11 @@ final class OraclePages {
         Map.entry("split", OraclePages::split),
         Map.entry("tablayout", OraclePages::tabLayout),
         Map.entry("stack", OraclePages::stack),
-        Map.entry("headerpanel", OraclePages::headerPanel));
+        Map.entry("headerpanel", OraclePages::headerPanel),
+        Map.entry("datepicker", OraclePages::datePicker),
+        Map.entry("datebox", OraclePages::dateBox),
+        Map.entry("richtext", OraclePages::richText),
+        Map.entry("mask", OraclePages::mask));
 
     private OraclePages() {
     }
@@ -746,5 +759,85 @@ final class OraclePages {
         header.setContentWidget(clickable("Body button"));
         header.setFooterWidget(foot);
         return header;
+    }
+
+    // ---- P6: dates, rich text, mask ----
+
+    /** Midnight UTC: the day a date picker shows, whatever the time zones of the server and the browser. */
+    private static Date utc(final int year, final int month, final int day) {
+        return Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneOffset.UTC).toInstant());
+    }
+
+    /** Midnight here: the day a date box formats. */
+    private static Date local(final int year, final int month, final int day) {
+        return Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    /**
+     * A picker on March 2026, the 20th disabled and the 17th styled, with its year arrows; the server shows May. The
+     * days the server learns are shown with the dates it reads.
+     */
+    private static IsPWidget datePicker() {
+        final PDatePicker picker = Element.newPDatePicker();
+        picker.setAttribute("aria-label", "Oracle picker");
+        picker.setCurrentMonth(utc(2026, 3, 1));
+        picker.setTransientEnabledOnDates(false, List.of(utc(2026, 3, 20)));
+        picker.addStyleToDates("oracle-holiday", List.of(utc(2026, 3, 17)));
+        picker.setYearArrowsVisible(true);
+        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final PLabel picked = Element.newPLabel("Picked: none");
+        picker.addValueChangeHandler(e -> picked.setText("Picked: " + format.format(e.getData())));
+        final PLabel range = Element.newPLabel("Range: none");
+        picker.addShowRangeHandler(e -> range.setText("Range: " + format.format(e.getStart()) + " " + format.format(e.getEnd())));
+        final PButton may = clickable("Show May");
+        may.addClickHandler(e -> picker.setCurrentMonth(utc(2026, 5, 1)));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(picker, picked, range, may);
+        return panel;
+    }
+
+    /** A box on 12 March 2026, in dd/MM/yyyy; the server sets 1 May, then disables the box. */
+    private static IsPWidget dateBox() {
+        final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        final PDateBox box = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy"));
+        box.setAttribute("aria-label", "Oracle date");
+        box.setValue(local(2026, 3, 12));
+        final PLabel value = Element.newPLabel("Date: none");
+        box.addValueChangeHandler(e -> value.setText("Date: " + (e.getData() == null ? "none" : format.format(e.getData()))));
+        final PButton may = clickable("Set 1 May");
+        may.addClickHandler(e -> box.setValue(local(2026, 5, 1)));
+        final PButton disable = clickable("Disable date");
+        disable.addClickHandler(e -> box.setEnabled(false));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(box, value, may, disable);
+        return panel;
+    }
+
+    /** An area with its toolbar; its HTML shows once the server has it; the server sets some. */
+    private static IsPWidget richText() {
+        final PRichTextArea area = Element.newPRichTextArea();
+        area.setAttribute("aria-label", "Oracle rich text");
+        final PLabel html = Element.newPLabel("HTML: none");
+        area.addValueChangeHandler(e -> html.setText("HTML: " + e.getData()));
+        final PButton set = clickable("Set HTML");
+        set.addClickHandler(e -> area.setHTML("<b>Bold</b> start"));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(area);
+        panel.add(Element.newPRichTextToolbar(area));
+        panel.add(html, set);
+        return panel;
+    }
+
+    /** A date mask: each change reaches the server. */
+    private static IsPWidget mask() {
+        final PTextBox box = Element.newPTextBox();
+        box.setAttribute("aria-label", "Oracle mask");
+        box.applyMask("{{00}}/{{00}}/{{0000}}", true, "_");
+        final PLabel value = Element.newPLabel("Mask: none");
+        box.addValueChangeHandler(e -> value.setText("Mask: " + e.getData()));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(box, value);
+        return panel;
     }
 }

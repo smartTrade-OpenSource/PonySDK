@@ -43,7 +43,7 @@ const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
     'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload', 'flextable', 'grid',
     'disclosure', 'tabpanel', 'popup', 'dialog', 'menu', 'tree', 'suggest', 'layoutpanel', 'dock', 'split', 'tablayout',
-    'stack', 'headerpanel']);
+    'stack', 'headerpanel', 'datepicker', 'datebox', 'richtext', 'mask']);
 
 /** Within the borders a theme may add (the showcase styles GWT's classes). */
 function near(actual, expected) {
@@ -61,8 +61,9 @@ async function box(locator, container) {
  * Scenarios whose GWT behaviour depends on the browser: the reference is GWT's on Chromium, which the GWT terminal is
  * checked on only; the TypeScript terminal is checked on every browser.
  *   tree: on Firefox and WebKit, a click on an item's toggle selects it too.
+ *   richtext: on Firefox, the empty body of GWT's frame has no height: it cannot be clicked.
  */
-const GWT_CHROMIUM_ONLY = new Set(['tree']);
+const GWT_CHROMIUM_ONLY = new Set(['tree', 'richtext']);
 
 /**
  * Where the TypeScript terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry
@@ -75,7 +76,10 @@ const KNOWN_DIFFERENCES = {
     },
 };
 
-/** Steps of each scenario; sent(n) waits until the page sent n frames of its trace. */
+/**
+ * Steps of each scenario; sent(n) waits until the page sent n frames of its trace; typescript tells the terminal, for
+ * what only GWT puts in a frame of its own (the rich text area).
+ */
 const scenarios = {
     button: async page => {
         const button = page.getByRole('button', { name: 'Oracle button' });
@@ -356,6 +360,72 @@ const scenarios = {
         await expect.poll(async () => (await box(body, panel)).slice(0, 2)).toEqual([0, 30]); // under the header, its own size
         await body.click();
     },
+    datepicker: async page => {
+        const day = text => page.getByText(text, { exact: true });
+        const range = (start, end) => expect(page.getByText(`Range: ${start} ${end}`)).toBeVisible();
+        await range('2026-02-23', '2026-04-05'); // March 2026, from Monday
+        await day('12').click();
+        await expect(page.getByText('Picked: 2026-03-12')).toBeVisible();
+        await day('20').click({ force: true }); // disabled: nothing
+        await expect(day('17')).toHaveClass(/oracle-holiday/);
+        await page.getByRole('button', { name: /^(›|Next month)$/ }).click();
+        await range('2026-03-30', '2026-05-10');
+        await day('15').click();
+        await expect(page.getByText('Picked: 2026-04-15')).toBeVisible();
+        await day('31').click(); // March's, shown before April: March shows
+        await range('2026-02-23', '2026-04-05');
+        await expect(page.getByText('Picked: 2026-03-31')).toBeVisible();
+        await page.getByRole('button', { name: 'Show May' }).click();
+        await range('2026-04-27', '2026-06-07');
+        await page.getByRole('button', { name: /^(»|Next year)$/ }).click();
+        await range('2027-04-26', '2027-06-06');
+    },
+    datebox: async page => {
+        const box = page.getByLabel('Oracle date');
+        const day = text => page.getByText(text, { exact: true });
+        await expect(box).toHaveValue('12/03/2026');
+        await box.click();
+        await day('15').click();
+        await expect(page.getByText('Date: 15/03/2026')).toBeVisible();
+        await expect(box).toHaveValue('15/03/2026');
+        await expect(day('15')).toBeHidden();
+        await box.fill('20/04/2026');
+        await box.press('Tab');
+        await expect(page.getByText('Date: 20/04/2026')).toBeVisible();
+        await page.getByRole('button', { name: 'Set 1 May' }).click();
+        await expect(box).toHaveValue('01/05/2026');
+        await box.click();
+        await expect(day('31')).toBeVisible(); // May
+        await box.press('Escape');
+        await expect(day('31')).toBeHidden();
+        await page.getByRole('button', { name: 'Disable date' }).click();
+        await expect(box).toBeDisabled();
+    },
+    richtext: async (page, sent, typescript) => {
+        const area = typescript ? page.getByRole('textbox', { name: 'Oracle rich text' })
+            : page.frameLocator('iframe[aria-label="Oracle rich text"]').locator('body');
+        await area.click();
+        await page.keyboard.type('Hello');
+        await page.getByText('HTML: none').click(); // outside: the area sends its HTML
+        await expect(page.getByText('HTML: Hello')).toBeVisible();
+        await page.getByRole('button', { name: 'Set HTML' }).click();
+        const width = (await area.boundingBox()).width;
+        await area.click({ position: { x: width - 5, y: 12 } }); // after the first line
+        await page.keyboard.type(' more');
+        await page.getByText('HTML: Hello').click();
+        await expect(page.getByText('HTML: <b>Bold</b> start more')).toBeVisible();
+    },
+    mask: async page => {
+        const box = page.getByLabel('Oracle mask');
+        await expect(box).toHaveValue('__/__/____');
+        await box.click();
+        await box.pressSequentially('12032026', { delay: 30 });
+        await expect(box).toHaveValue('12/03/2026');
+        await box.press('Backspace');
+        await box.press('Backspace');
+        await expect(box).toHaveValue('12/03/20__');
+        await expect(page.getByText('Mask: 12/03/20__')).toBeVisible();
+    },
     frame: async page => {
         const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
         await frame.getByRole('button', { name: 'Inside' }).click();
@@ -412,7 +482,7 @@ test.describe('behaviour oracle', () => {
             test.skip(!typescript && GWT_CHROMIUM_ONLY.has(name) && test.info().project.name !== 'chromium',
                 'GWT behaves differently on this browser');
             // frames that count: heartbeats and latency reports, dropped from the trace, are not
-            await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count));
+            await steps(page, count => expect.poll(() => readable(payloads).length).toBeGreaterThanOrEqual(count), typescript);
             await settle(payloads);
             const trace = readable(payloads);
             const file = path.join(TRACES, name + '.json');
