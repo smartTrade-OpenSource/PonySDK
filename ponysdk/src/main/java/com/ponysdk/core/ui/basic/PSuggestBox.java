@@ -92,6 +92,15 @@ public class PSuggestBox extends PWidget
 
     protected PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
+        this.textBox = Element.newPTextBox();
+    }
+
+    /** The oracle and the text box are created first: the creation of the suggest box names them. */
+    @Override
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        suggestOracle.attach(window, frame);
+        textBox.attach(window, frame);
+        return super.attach(window, frame);
     }
 
     @Override
@@ -105,14 +114,7 @@ public class PSuggestBox extends PWidget
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.ORACLE, suggestOracle.getID());
-
-        // TODO nciaravola
-
-        // if (textBox == null) {
-        // textBox = new PTextBox();
-        // }
-        //
-        // writer.parse(Model.TEXTBOX_ID, textBox.getID());
+        writer.write(ServerToClientModel.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
