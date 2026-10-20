@@ -345,8 +345,8 @@ public class ApplicationConfiguration {
      */
     private SessionAccessPolicy sessionAccessPolicy = SessionAccessPolicy.SAME_HTTP_SESSION;
 
-    /** The terminal the bootstrap page loads (ADR-0002). {@link Terminal#GWT} unless {@value #TERMINAL} says otherwise. */
-    private Terminal terminal = Terminal.GWT;
+    /** The terminal the bootstrap page loads (ADR-0002). {@link Terminal#TYPESCRIPT} unless {@value #TERMINAL} says otherwise. */
+    private Terminal terminal = Terminal.TYPESCRIPT;
 
     public Terminal getTerminal() {
         return terminal;

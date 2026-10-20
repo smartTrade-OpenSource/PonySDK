@@ -113,7 +113,7 @@ jobs:
 
       - name: Start the showcase (GWT terminal)
         run: |
-          nohup ./gradlew :sample:runShowcase > showcase.log 2>&1 &
+          nohup ./gradlew :sample:runShowcase -Pterminal=gwt > showcase.log 2>&1 &
           for i in $(seq 1 90); do
             if curl -s http://localhost:8081/sample/ > /dev/null 2>&1; then echo "Server ready"; break; fi
             sleep 2
@@ -136,7 +136,7 @@ jobs:
             sleep 2
           done
 
-      - name: Oracle on the TypeScript terminal (what it implements so far)
+      - name: Oracle on the TypeScript terminal
         working-directory: sample
         env:
           BASE_URL: 'http://localhost:8081/sample/'

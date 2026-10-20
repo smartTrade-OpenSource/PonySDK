@@ -10,9 +10,9 @@ package com.ponysdk.core.server.application;
  */
 public enum Terminal {
 
-    /** {@code ponyterminal/ponyterminal.nocache.js}, compiled by GWT. The default. */
+    /** {@code ponyterminal/ponyterminal.nocache.js}, compiled by GWT. */
     GWT,
 
-    /** {@code ponyterminal/terminal.js}, written in TypeScript on native elements. */
+    /** {@code ponyterminal/terminal.js}, written in TypeScript on native elements. The default. */
     TYPESCRIPT
 }

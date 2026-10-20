@@ -219,18 +219,18 @@ public class ApplicationConfigurationTest {
 
 
     @Test
-    public void theTerminalIsGwtUnlessTheSystemPropertyOrASetterSaysOtherwise() {
-        assertEquals(Terminal.GWT, config.getTerminal());
+    public void theTerminalIsTypeScriptUnlessTheSystemPropertyOrASetterSaysOtherwise() {
+        assertEquals(Terminal.TYPESCRIPT, config.getTerminal());
         final String previous = System.getProperty(ApplicationConfiguration.TERMINAL);
-        System.setProperty(ApplicationConfiguration.TERMINAL, "TypeScript");
+        System.setProperty(ApplicationConfiguration.TERMINAL, "gwt");
         try {
-            assertEquals(Terminal.TYPESCRIPT, new ApplicationConfiguration().getTerminal());
+            assertEquals(Terminal.GWT, new ApplicationConfiguration().getTerminal());
         } finally {
             if (previous == null) System.clearProperty(ApplicationConfiguration.TERMINAL);
             else System.setProperty(ApplicationConfiguration.TERMINAL, previous);
         }
-        config.setTerminal(Terminal.TYPESCRIPT);
-        assertEquals(Terminal.TYPESCRIPT, config.getTerminal());
-        assertEquals(Terminal.TYPESCRIPT, ApplicationConfiguration.builder().terminal(Terminal.TYPESCRIPT).build().getTerminal());
+        config.setTerminal(Terminal.GWT);
+        assertEquals(Terminal.GWT, config.getTerminal());
+        assertEquals(Terminal.GWT, ApplicationConfiguration.builder().terminal(Terminal.GWT).build().getTerminal());
     }
 }

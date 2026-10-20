@@ -10,11 +10,9 @@ const path = require('path');
  * differs between terminals by design; what the server receives must not. The traces under oracle-traces/ were
  * recorded with the GWT terminal; a terminal passes when it sends the same, once normalized.
  *
- *   ./gradlew :sample:runShowcase [-Pterminal=typescript]
+ *   ./gradlew :sample:runShowcase [-Pterminal=gwt]
  *   BASE_URL=... npx playwright test oracle                  check
  *   ORACLE_RECORD=1 BASE_URL=... npx playwright test oracle  record (GWT terminal only)
- *
- * On the TypeScript terminal, the scenarios it does not implement yet are skipped (READY_ON_TYPESCRIPT).
  *
  * Selectors go by role and accessible name, so that they hold on both DOMs.
  */
@@ -39,11 +37,6 @@ const MESSAGES = [KEY.ERROR_MSG, KEY.WARN_MSG, KEY.INFO_MSG];
 /** The URL a window or a frame opened with carries the context id, which depends on the server's past. */
 const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 
-/** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
-const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
-    'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload', 'flextable', 'grid',
-    'disclosure', 'tabpanel', 'popup', 'dialog', 'menu', 'tree', 'suggest', 'layoutpanel', 'dock', 'split', 'tablayout',
-    'stack', 'headerpanel', 'datepicker', 'datebox', 'richtext', 'mask']);
 
 /** Within the borders a theme may add (the showcase styles GWT's classes). */
 function near(actual, expected) {
@@ -478,7 +471,6 @@ test.describe('behaviour oracle', () => {
             page.on('websocket', ws => ws.on('framesent', frame => payloads.push(frame.payload)));
             await page.goto(BASE_URL + '#' + 'oracle-' + name);
             const typescript = await page.locator('script[src$="ponyterminal/terminal.js"]').count() > 0;
-            test.skip(typescript && !READY_ON_TYPESCRIPT.has(name), 'not on the TypeScript terminal yet');
             test.skip(!typescript && GWT_CHROMIUM_ONLY.has(name) && test.info().project.name !== 'chromium',
                 'GWT behaves differently on this browser');
             // frames that count: heartbeats and latency reports, dropped from the trace, are not

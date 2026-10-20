@@ -5,7 +5,7 @@ const { test, expect } = require('@playwright/test');
  * What the TypeScript terminal adds to the GWT one (docs/decisions/0002-javascript-terminal.md): keyboard and
  * accessibility of its native elements. Skipped when the page runs the GWT terminal.
  *
- *   ./gradlew :sample:runShowcase -Pterminal=typescript    then    BASE_URL=... npx playwright test typescript-terminal
+ *   ./gradlew :sample:runShowcase    then    BASE_URL=... npx playwright test typescript-terminal
  */
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';

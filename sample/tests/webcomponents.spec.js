@@ -139,6 +139,6 @@ test.describe('Web Components', () => {
     await page.getByRole('button', { name: 'Set count = 42' }).click();
     await expect(page.locator('my-counter')).toContainText('42');
 
-    expect(errors.filter(e => !/WebSocket|ERR_|Failure detected|reconnect/i.test(e))).toEqual([]);
+    expect(errors.filter(e => !/WebSocket|ERR_|Failure detected|Connection to the server lost|reconnect/i.test(e))).toEqual([]);
   });
 });

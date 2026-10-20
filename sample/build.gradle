@@ -70,7 +70,7 @@ task runShowcase(type: JavaExec) {
     classpath += files(buildDirPath + '/gwt/gwt')
     classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
-    // The terminal served to the browser (docs/decisions/0002-javascript-terminal.md): -Pterminal=typescript
+    // The terminal served to the browser (docs/decisions/0002-javascript-terminal.md), TypeScript unless -Pterminal=gwt
     if (project.hasProperty('terminal')) systemProperty 'ponysdk.terminal', project.property('terminal').toString()
     jvmArgs = [
         '-Xmx1g',
@@ -90,6 +90,7 @@ task runFlexLayoutDemo(type: JavaExec) {
     classpath += files(buildDirPath + '/resources')
     classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.spring.MainSpring'
+    if (project.hasProperty('terminal')) systemProperty 'ponysdk.terminal', project.property('terminal').toString()
     jvmArgs = [
         '-Xmx2g',
         '--enable-native-access=ALL-UNNAMED',
