@@ -308,8 +308,12 @@ public class BootstrapServlet extends HttpServlet {
             sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
         }
 
-        // Deferred: the terminal starts once the page is parsed, after ponysdk.js and the application scripts
+        // Deferred: the terminal starts once the page is parsed, after ponysdk.js and the application scripts; the
+        // legacy layer, when asked for, runs just before it
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+        if (configuration != null && configuration.isLegacyClassNames()) {
+            sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/legacy.js")).append(NEW_LINE);
+        }
         sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
 
         // Inject shared WC stylesheets as an inline script so they are registered

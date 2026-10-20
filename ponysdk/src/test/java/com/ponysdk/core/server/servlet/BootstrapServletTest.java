@@ -200,6 +200,19 @@ public class BootstrapServletTest {
         assertTrue("early socket before the terminal", html.indexOf("window.ponyEarlySocket=") < terminal);
     }
 
+    @Test
+    public void theLegacyLayerRunsBeforeTheTerminalWhenAskedFor() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        assertFalse("off by default", servletWith(config).buildIndexHTML(request("", "/index.html")).contains("legacy.js"));
+
+        Mockito.when(config.isLegacyClassNames()).thenReturn(true);
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+        final int legacy = html.indexOf("src=\"ponyterminal/legacy.js\" defer");
+        assertTrue("legacy layer present", legacy > 0);
+        assertTrue("before the terminal", legacy < html.indexOf("src=\"ponyterminal/terminal.js\" defer"));
+    }
+
     // ---- HTTP caching of the served files ----
 
     /** A servlet serving {@code file} at {@code path} from its servlet context. */

@@ -62,6 +62,9 @@ public class ApplicationConfiguration {
 
     private boolean tabindexOnlyFormField;
 
+    /** See {@link #setLegacyClassNames(boolean)}. */
+    private boolean legacyClassNames;
+
     // String Dictionary configuration for protocol optimization
     private boolean stringDictionaryEnabled = true;
     /** See {@link #setUpdateCoalescingEnabled(boolean)}. */
@@ -231,6 +234,19 @@ public class ApplicationConfiguration {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
+    public boolean isLegacyClassNames() {
+        return legacyClassNames;
+    }
+
+    /**
+     * Adds GWT's class names to the terminal's DOM (ADR-0002, section 10), for stylesheets written on them: the primary
+     * names ({@code gwt-Button}), the names state gives ({@code gwt-MenuItem-selected}), the names of the parts that
+     * still exist ({@code datePickerDay}). GWT's tables and nine-cell decorations are not rebuilt. Off by default.
+     */
+    public void setLegacyClassNames(final boolean legacyClassNames) {
+        this.legacyClassNames = legacyClassNames;
+    }
+
     // Web Component shared stylesheets — injected into every PonyElement shadow root
     private Set<String> wcSharedSheets;
 
@@ -379,6 +395,7 @@ public class ApplicationConfiguration {
         public Builder wcSharedSheets(final Set<String> v)         { config.setWcSharedSheets(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
+        public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
         public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }
         public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
         public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }

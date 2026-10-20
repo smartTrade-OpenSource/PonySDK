@@ -361,9 +361,15 @@ export class Widget extends BaseObject {
         else this.element.setAttribute('aria-hidden', 'true');
     }
 
-    /** STYLE_NAME replaces the class attribute, except the type class. */
+    /**
+     * STYLE_NAME replaces the class attribute, except the type class. With the legacy layer (legacy.ts), the first name
+     * becomes the GWT primary name, as GWT's setStyleName made it.
+     */
     setStyleName(names: string): void {
         this.element.className = this.typeClass === null ? names : `${this.typeClass} ${names}`.trim();
+        if (document.documentElement.hasAttribute('data-pony-legacy')) {
+            this.element.setAttribute('data-gwt-primary', names.trim().split(/\s+/)[0] ?? '');
+        }
     }
 
     removeStyleNames(names: string[]): void {
