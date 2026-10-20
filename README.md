@@ -55,7 +55,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's
   top layer; 134 KB, 39 KB gzipped
 - Stylesheets select `pony-<Type>` classes and native or ARIA states; [ADR-0002](docs/decisions/0002-javascript-terminal.md)
-  maps each widget to its elements, the guide for stylesheets written on GWT's `gwt-*` classes
+  maps each widget to its elements, the guide for stylesheets written on GWT's `gwt-*` classes.
+  `ApplicationConfiguration.setLegacyClassNames(true)` adds GWT's class names to the DOM meanwhile
 
 ---
 

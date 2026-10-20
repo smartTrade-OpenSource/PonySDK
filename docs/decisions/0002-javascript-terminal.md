@@ -1,6 +1,6 @@
 # ADR-0002: A TypeScript terminal on native elements, replacing GWT
 
-- Status: Accepted; implemented through P8 (see Outcome), P9 pending
+- Status: Accepted; implemented (see Outcome)
 - Date: 2026-10-20
 
 ## Context
@@ -215,7 +215,7 @@ the bundle size and the porting rate the rest is estimated from.
 
 ## Outcome
 
-P0 to P8 are done on `NC_V3` (2026-10-21): the TypeScript terminal is the only one, GWT is gone from the build, the
+P0 to P9 are done on `NC_V3` (2026-10-21): the TypeScript terminal is the only one, GWT is gone from the build, the
 jar and the server.
 
 - Bundle: 134 KB minified, 39 KB gzip, against 122 KB gzip for one GWT permutation. The jar no longer pulls
@@ -230,6 +230,15 @@ jar and the server.
 - Defects found on the way and fixed on the server: `PComposite`, `PMenuItem` (enabled state), `PSuggestBox` (text
   box creation). Fixed in the TypeScript terminal only: the heartbeat stopped after the first lost connection, the
   history listener was added again at each reconnection, child windows did not share the string dictionary.
+- Legacy layer (P9): `ApplicationConfiguration.setLegacyClassNames(true)` loads `legacy.js` (6.8 KB, 2 KB gzip)
+  before the terminal. It watches the DOM and gives the primary names, the names of the state (selected, disabled,
+  open, hovered) and the names of the parts that still exist; a style name the server sets replaces the primary name
+  and gives the dependent names, as in GWT. core_ui's stylesheets use 73 GWT names: 67 are given. Not given: the
+  cells of the dialog box's table (`dialogTopCenterInner`, `dialogBottomCenterInner`), the tab container
+  (`gwt-TabLayoutPanelContentContainer`), the push button's face (`html-face`), and two names GWT never set
+  (`gwt-label`, `dialogControls`). About 20 of its selectors go through GWT's structure and match nothing: the tables
+  of `Tree` and `MenuBar`, the `label` inside `CheckBox` and `RadioButton` (the label is the widget now), the `input`
+  inside `DateBox` (the input is the widget), the anchors of `StackLayoutPanel`.
 - Open: `TYPE_REMOVE_HANDLER` carries no object id (a protocol change); `PHTMLTable` replays structural operations made
   before attachment out of order; `PTabLayoutPanel` never creates a tab widget given before attachment; `PDateBox`
   sends its picker the date at local midnight while the picker reads UTC midnight, so east of UTC the picker
