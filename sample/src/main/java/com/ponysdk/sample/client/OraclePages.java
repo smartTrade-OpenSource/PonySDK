@@ -20,10 +20,14 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PComposite;
+import com.ponysdk.core.ui.basic.PDecoratorPanel;
+import com.ponysdk.core.ui.basic.PDisclosurePanel;
 import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFocusPanel;
 import com.ponysdk.core.ui.basic.PFunctionalLabel;
+import com.ponysdk.core.ui.basic.PGrid;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PImage;
@@ -33,6 +37,7 @@ import com.ponysdk.core.ui.basic.PRadioButton;
 import com.ponysdk.core.ui.basic.PRadioButtonGroup;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTabPanel;
 import com.ponysdk.core.ui.basic.PTextArea;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
@@ -77,7 +82,11 @@ final class OraclePages {
         Map.entry("scroll", OraclePages::scroll),
         Map.entry("panels", OraclePages::panels),
         Map.entry("composite", OraclePages::composite),
-        Map.entry("upload", OraclePages::upload));
+        Map.entry("upload", OraclePages::upload),
+        Map.entry("flextable", OraclePages::flexTable),
+        Map.entry("grid", OraclePages::grid),
+        Map.entry("disclosure", OraclePages::disclosure),
+        Map.entry("tabpanel", OraclePages::tabPanel));
 
     private OraclePages() {
     }
@@ -392,5 +401,89 @@ final class OraclePages {
         upload.addSubmitCompleteHandler(() -> upload.setLabel("Uploaded: " + content[0]));
         upload.addChangeHandler(e -> upload.submit());
         return upload;
+    }
+
+    // ---- P3: tables and simple containers ----
+
+    private static PButton clickable(final String text) {
+        final PButton button = Element.newPButton(text);
+        button.setEnabledOnRequest(true);
+        button.addClickHandler(e -> {
+        });
+        return button;
+    }
+
+    /**
+     * Widgets in cells; once the table is on the terminal, a row inserted, a column span, row and cell styles; a button
+     * removes the first row. (Before attachment, the server replays INSERT_ROW out of order with the widgets.)
+     */
+    private static IsPWidget flexTable() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PFlexTable table = Element.newPFlexTable();
+        table.setWidget(0, 0, clickable("R0C0"));
+        table.setWidget(0, 1, clickable("R0C1"));
+        table.setWidget(1, 0, clickable("R1C0"));
+        table.addInitializeListener(event -> {
+            table.insertRow(1);
+            table.setWidget(1, 0, clickable("New"));
+            table.getCellFormatter().setColSpan(1, 0, 2);
+            table.getRowFormatter().addStyleName(0, "first");
+            table.getCellFormatter().addStyleName(2, 0, "last");
+            table.setCellPadding(4);
+        });
+        final PButton remove = Element.newPButton("Remove row 0");
+        remove.addClickHandler(e -> table.removeRow(0));
+        panel.add(table, remove);
+        return panel;
+    }
+
+    /** A 2 x 2 grid in a decorator panel; a button inserts a row. */
+    private static IsPWidget grid() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PGrid grid = Element.newPGrid(2, 2);
+        grid.setWidget(0, 0, clickable("G00"));
+        grid.setWidget(1, 1, clickable("G11"));
+        final PDecoratorPanel decorator = Element.newPDecoratorPanel();
+        decorator.setWidget(grid);
+        final PButton insert = Element.newPButton("Insert row");
+        insert.addClickHandler(e -> {
+            grid.insertRow(1);
+            grid.setWidget(1, 0, clickable("G10"));
+        });
+        panel.add(decorator, insert);
+        return panel;
+    }
+
+    /** Opened and closed by the user, then opened by the server. */
+    private static IsPWidget disclosure() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PDisclosurePanel disclosure = Element.newPDisclosurePanel("Oracle details");
+        disclosure.setContent(Element.newPLabel("Hidden content"));
+        disclosure.addOpenHandler(e -> {
+        });
+        disclosure.addCloseHandler(e -> {
+        });
+        final PButton open = Element.newPButton("Open from server");
+        open.addClickHandler(e -> disclosure.setOpen(true));
+        panel.add(disclosure, open);
+        return panel;
+    }
+
+    /** Text tabs and a widget tab, selected by the user then by the server. */
+    private static IsPWidget tabPanel() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PTabPanel tabs = Element.newPTabPanel();
+        tabs.addBeforeSelectionHandler(e -> {
+        });
+        tabs.addSelectionHandler(e -> {
+        });
+        tabs.add(Element.newPLabel("First panel"), "Tab 1");
+        tabs.add(Element.newPLabel("Second panel"), "Tab 2");
+        // once the panel is on the terminal: a tab widget given before is never created (server side)
+        tabs.addInitializeListener(event -> tabs.add(Element.newPLabel("Third panel"), Element.newPLabel("Tab 3")));
+        final PButton first = Element.newPButton("Select first");
+        first.addClickHandler(e -> tabs.selectTab(0));
+        panel.add(tabs, first);
+        return panel;
     }
 }

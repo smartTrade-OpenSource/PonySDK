@@ -140,7 +140,9 @@ jobs:
         working-directory: sample
         env:
           BASE_URL: 'http://localhost:8081/sample/'
-        run: npx playwright test tests/oracle.spec.js tests/reconnection.spec.js -g "oracle|terminal objects" --retries=0
+        run: >-
+          npx playwright test tests/oracle.spec.js tests/reconnection.spec.js tests/typescript-terminal.spec.js
+          -g "oracle|terminal objects|tabs:|disabled button" --retries=0
 
       - name: Showcase log
         if: failure()

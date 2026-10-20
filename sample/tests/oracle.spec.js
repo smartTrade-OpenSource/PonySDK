@@ -41,7 +41,8 @@ const CONTEXT_IN_URL = new RegExp(`([?&]${KEY.UI_CONTEXT_ID}=)\\d+`);
 
 /** What the TypeScript terminal implements so far (ADR-0002 plan); the other scenarios are skipped on it. */
 const READY_ON_TYPESCRIPT = new Set(['element', 'webcomponent', 'frame', 'button', 'button-busy', 'textbox', 'checkbox',
-    'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload']);
+    'listbox', 'texts', 'radio', 'fields', 'listbox-multi', 'scroll', 'panels', 'composite', 'upload', 'flextable', 'grid',
+    'disclosure', 'tabpanel']);
 
 /**
  * Where the TypeScript terminal departs from GWT on purpose: what it must send is the GWT trace transformed. Each entry
@@ -147,6 +148,48 @@ const scenarios = {
     upload: async page => {
         await page.getByLabel('Oracle file').setInputFiles({ name: 'pony.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
         await expect(page.getByText('Uploaded: hello')).toBeVisible();
+    },
+    flextable: async page => {
+        const rows = page.getByRole('row');
+        await expect(rows).toHaveCount(3);
+        await expect(rows.nth(1).getByRole('button')).toHaveText(['New']);
+        await expect(rows.nth(2).getByRole('button')).toHaveText(['R1C0']);
+        await page.getByRole('button', { name: 'Remove row 0' }).click();
+        await expect(rows).toHaveCount(2);
+        await rows.nth(0).getByRole('button', { name: 'New' }).click();
+        await rows.nth(1).getByRole('button', { name: 'R1C0' }).click();
+    },
+    grid: async page => {
+        const rows = page.getByRole('row');
+        await expect(rows).toHaveCount(2);
+        await page.getByRole('button', { name: 'Insert row' }).click();
+        await expect(rows).toHaveCount(3);
+        await expect(rows.nth(1).getByRole('button')).toHaveText(['G10']);
+        await expect(rows.nth(1).getByRole('cell')).toHaveCount(2);
+        await rows.nth(2).getByRole('button', { name: 'G11' }).click();
+    },
+    disclosure: async (page, sent) => {
+        const header = page.getByText('Oracle details');
+        const content = page.getByText('Hidden content');
+        await expect(content).toBeHidden();
+        await header.click();
+        await expect(content).toBeVisible();
+        await sent(3);
+        await header.click();
+        await expect(content).toBeHidden();
+        await sent(4);
+        await page.getByRole('button', { name: 'Open from server' }).click();
+        await expect(content).toBeVisible();
+    },
+    tabpanel: async (page, sent) => {
+        await expect(page.getByText('First panel')).toBeVisible();
+        await page.getByText('Tab 2', { exact: true }).click();
+        await expect(page.getByText('Second panel')).toBeVisible();
+        await expect(page.getByText('First panel')).toBeHidden();
+        await page.getByText('Tab 3', { exact: true }).click();
+        await expect(page.getByText('Third panel')).toBeVisible();
+        await page.getByRole('button', { name: 'Select first' }).click();
+        await expect(page.getByText('First panel')).toBeVisible();
     },
     frame: async page => {
         const frame = page.frameLocator(`iframe[src*="&${KEY.FRAME_ID}="]`); // not GWT's own frames
