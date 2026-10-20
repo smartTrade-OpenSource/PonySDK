@@ -736,8 +736,7 @@ public class UIContextReconnectionTest {
      */
     @Test
     public void testSuspendWithZeroTimeout() throws InterruptedException {
-        uiContext.suspend(0); // 0ms timeout = immediate
-        assertTrue(uiContext.isSuspended()); // might still be suspended briefly
+        uiContext.suspend(0); // 0ms timeout = immediate: it may be destroyed already
 
         awaitDead(uiContext); // the destroy runs on a virtual thread: give it time on a loaded machine
 
