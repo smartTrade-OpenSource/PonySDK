@@ -58,6 +58,33 @@ public class ChildBeforeAttachTest extends PSuite {
         assertTrue(child.isInitialized());
     }
 
+    /** A composite's WIDGET_ID names its widget: the widget must exist on the terminal first. */
+    @Test
+    public void theWidgetOfACompositeIsCreatedBeforeTheComposite() {
+        final PLabel inner = Element.newPLabel("inner");
+        final PComposite<PLabel> composite = composite();
+        composite.initWidget(inner);
+        assertFalse(inner.isInitialized());
+        PWindow.getMain().add(composite);
+        assertTrue("created with the composite", inner.isInitialized());
+
+        final PComposite<PLabel> late = composite();
+        PWindow.getMain().add(late);
+        final PLabel lateInner = Element.newPLabel("late inner");
+        late.initWidget(lateInner);
+        assertTrue("wrapped once the composite is attached", lateInner.isInitialized());
+    }
+
+    private static PComposite<PLabel> composite() {
+        return new PComposite<>() {
+
+            @Override
+            public String dumpDOM() {
+                return "";
+            }
+        };
+    }
+
     @Test
     public void disclosureContentSetBeforeAttachIsCreatedWithThePanel() {
         final PDisclosurePanel disclosure = Element.newPDisclosurePanel("More");
