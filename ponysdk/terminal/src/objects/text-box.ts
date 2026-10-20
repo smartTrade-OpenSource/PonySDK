@@ -7,6 +7,7 @@ import { about, FLAG } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { apply, type Context, type Setters } from '../runtime/object.ts';
 import { FocusWidget } from './focus-widget.ts';
+import { Mask } from './mask.ts';
 
 type Field = HTMLInputElement | HTMLTextAreaElement;
 
@@ -19,6 +20,7 @@ export class TextBoxBase extends FocusWidget {
     private lastValue: string | null = null;
     private pasteHandled = false;
     private filter: RegExp | undefined;
+    private mask: Mask | undefined;
 
     constructor(context: Context, id: number, type: number, element: Field, typeClass: string) {
         super(context, id, type, element, typeClass);
@@ -38,7 +40,17 @@ export class TextBoxBase extends FocusWidget {
 
     text(value: string | null): void {
         this.lastValue = value;
-        this.field.value = value ?? '';
+        if (this.mask !== undefined) this.mask.load(value ?? '');
+        else this.field.value = value ?? '';
+    }
+
+    /** MASK: the field takes the mask's characters only, and sends its value at each change. */
+    setMask(mask: string, showMask: boolean, free: string): void {
+        this.mask ??= new Mask(this.field as HTMLInputElement, text => {
+            this.lastValue = text;
+            this.sendValue();
+        }, this.lifetime.signal);
+        this.mask.set(mask, showMask, free);
     }
 
     private sendValue(): void {
@@ -125,6 +137,13 @@ const TEXT_BOX: Setters<TextBoxBase> = new Map<number, (w: TextBoxBase, r: Reade
         w.select(start, r.int);
     }],
     [K.REGEX_FILTER, (w, r) => w.setFilter(r.str ?? '')],
+    [K.MASK, (w, r) => {
+        const mask = r.str ?? '';
+        r.read(); // VISIBILITY
+        const showMask = r.bool;
+        r.read(); // REPLACEMENT_STRING
+        w.setMask(mask, showMask, r.str ?? ' ');
+    }],
     [K.VISIBLE_LENGTH, (w, r) => {
         (w.element as HTMLInputElement).size = r.int;
     }],

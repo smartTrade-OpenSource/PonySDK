@@ -6,6 +6,7 @@ import { WidgetType as W, WidgetTypeNames } from '#model';
 import { AddOnComposite, AddOnObject } from '../objects/addon.ts';
 import { Anchor, Button, PushButton } from '../objects/buttons.ts';
 import { CheckBox, RadioButton } from '../objects/check-box.ts';
+import { DateBox, DatePicker } from '../objects/date-picker.ts';
 import { DisclosurePanel } from '../objects/disclosure-panel.ts';
 import { ElementWidget } from '../objects/element.ts';
 import { FileUpload } from '../objects/file-upload.ts';
@@ -32,6 +33,7 @@ import {
     SplitLayoutPanel,
 } from '../objects/layout.ts';
 import { createDecoratedPopupPanel, DialogBox, PopupPanel } from '../objects/popup.ts';
+import { RichTextArea, RichTextToolbar } from '../objects/rich-text.ts';
 import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
 import { FunctionalLabel, Html, Label } from '../objects/text.ts';
@@ -106,6 +108,10 @@ const CREATORS = new Map<number, Creator>([
     [W.HEADER_PANEL, HeaderPanel.create],
     [W.TAB_LAYOUT_PANEL, TabPanel.createLayout],
     [W.STACKLAYOUT_PANEL, StackLayoutPanel.create],
+    [W.DATEPICKER, DatePicker.create],
+    [W.DATEBOX, DateBox.create],
+    [W.RICH_TEXT_AREA, RichTextArea.create],
+    [W.RICH_TEXT_TOOLBAR, RichTextToolbar.create],
 ]);
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {

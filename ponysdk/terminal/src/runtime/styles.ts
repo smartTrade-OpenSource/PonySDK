@@ -37,6 +37,18 @@ const RULES = `
 :where(.pony-TabLayoutPanel>[role=tabpanel],.pony-StackLayoutPanel-content,.pony-HeaderPanel-content){position:relative;flex:1 1 0;overflow:hidden}
 :where(.pony-StackLayoutPanel-header){flex:none;display:block;width:100%;text-align:start}
 :where(.pony-HeaderPanel-header,.pony-HeaderPanel-footer){flex:none}
+:where(.pony-DateBoxPopup,.pony-SuggestPopup){background:Canvas;border:1px solid GrayText}
+:where(.pony-DatePicker-header){display:flex;align-items:center}
+:where(.pony-DatePicker-month){flex:1;text-align:center}
+:where(.pony-DatePicker-days){border-collapse:collapse}
+:where(.pony-DatePicker-day){text-align:center;cursor:pointer}
+:where(.pony-DatePicker-day[data-filler]){opacity:.5}
+:where(.pony-DatePicker-day[aria-current=date]){font-weight:bold}
+:where(.pony-DatePicker-day[aria-selected=true]:not([data-filler])){background:Highlight;color:HighlightText}
+:where(.pony-DatePicker-day[aria-disabled=true]){opacity:.3;cursor:default}
+:where(.pony-RichTextArea){min-height:6em;overflow:auto;border:1px solid GrayText;padding:2px}
+:where(.pony-RichTextToolbar-row){display:flex;flex-wrap:wrap;gap:2px}
+:where(.pony-RichTextToolbar [aria-pressed=true]){background:Highlight;color:HighlightText}
 `;
 
 export function installStyles(): void {
