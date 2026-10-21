@@ -83,23 +83,6 @@ public class SessionManager {
         return app != null ? app.getUIContext(id) : null;
     }
 
-    /**
-     * Returns the UIContext with the given id, searching across <strong>all</strong> sessions.
-     *
-     * @deprecated This performs a global lookup and does <strong>not</strong> verify that the
-     *             caller owns the context, which exposes an IDOR (cross-session access) when the
-     *             id is attacker-controlled. Prefer {@link #getUIContext(String, int)} scoped to
-     *             the caller's HTTP session.
-     */
-    @Deprecated(forRemoval = true)
-    public UIContext getUIContext(final int id) {
-        for (final Application app : applications.values()) {
-            final UIContext ctx = app.getUIContext(id);
-            if (ctx != null) return ctx;
-        }
-        return null;
-    }
-
     public int countUIContexts() {
         int count = 0;
         for (final Application app : applications.values()) {

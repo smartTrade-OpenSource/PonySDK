@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +91,7 @@ public class UpdateCoalescingTest {
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
         config.setUpdateCoalescingEnabled(coalescing);
-        ctx = new UIContext(socket, txn, config, Mockito.mock(JettyServerUpgradeRequest.class));
+        ctx = new UIContext(socket, txn, config);
         ctx.execute(() -> {
             root = Element.newPFlowPanel();
             PWindow.getMain().add(root);

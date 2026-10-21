@@ -9,7 +9,6 @@ import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,8 +73,7 @@ public class UIContextReconnectionTest {
         // Replace the ModelWriter's encoder with our spy so we can track writes
         txnContext.getWriter().setEncoder(spyEncoder);
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        uiContext = new UIContext(oldSocket, txnContext, config, request);
+        uiContext = new UIContext(oldSocket, txnContext, config);
     }
 
     @After
@@ -2036,8 +2034,7 @@ public class UIContextReconnectionTest {
             final TxnContext localTxn = new TxnContext(localOldSocket);
             localTxn.getWriter().setEncoder(localSpy);
 
-            final JettyServerUpgradeRequest localReq = Mockito.mock(JettyServerUpgradeRequest.class);
-            final UIContext localCtx = new UIContext(localOldSocket, localTxn, localConfig, localReq);
+            final UIContext localCtx = new UIContext(localOldSocket, localTxn, localConfig);
 
             // Suspend with very short timeout to maximize race window
             localCtx.suspend(50); // 50ms
@@ -2851,8 +2848,7 @@ public class UIContextReconnectionTest {
     @Test
     public void testResumeForcesDictionaryReAnnouncement() {
         config.setStringDictionaryEnabled(true);
-        final UIContext ctx = new UIContext(oldSocket, txnContext, config,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx = new UIContext(oldSocket, txnContext, config);
         final com.ponysdk.core.server.application.StringDictionary dict = ctx.getStringDictionary();
         assertNotNull("dictionary enabled", dict);
 
@@ -3087,8 +3083,7 @@ public class UIContextReconnectionTest {
                 new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext dictTxn = new TxnContext(dictSocket);
-        final JettyServerUpgradeRequest dictReq = Mockito.mock(JettyServerUpgradeRequest.class);
-        final UIContext dictCtx = new UIContext(dictSocket, dictTxn, dictConfig, dictReq);
+        final UIContext dictCtx = new UIContext(dictSocket, dictTxn, dictConfig);
 
         assertNotNull("StringDictionary should be created", dictCtx.getStringDictionary());
 
@@ -3421,8 +3416,7 @@ public class UIContextReconnectionTest {
         Mockito.when(otherSocket.getUpgradeRequestData()).thenReturn(
                 new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext otherTxn = new TxnContext(otherSocket);
-        final UIContext other = new UIContext(otherSocket, otherTxn, config,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext other = new UIContext(otherSocket, otherTxn, config);
         assertNotEquals(uiContext, other);
     }
 
@@ -3675,8 +3669,7 @@ public class UIContextReconnectionTest {
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
 
-        final JettyServerUpgradeRequest localReq = Mockito.mock(JettyServerUpgradeRequest.class);
-        final UIContext localCtx = new UIContext(localSocket, localTxn, localConfig, localReq);
+        final UIContext localCtx = new UIContext(localSocket, localTxn, localConfig);
 
         // Suspend and write a large payload
         localCtx.suspend(60_000);
@@ -3833,8 +3826,7 @@ public class UIContextReconnectionTest {
             final TxnContext localTxn = new TxnContext(sock);
             localTxn.getWriter().setEncoder(new SpyEncoder());
 
-            final UIContext ctx = new UIContext(sock, localTxn, localConfig,
-                    Mockito.mock(JettyServerUpgradeRequest.class));
+            final UIContext ctx = new UIContext(sock, localTxn, localConfig);
 
             ctx.suspend(60_000);
             final RecordingEncoder enc = getRecordingEncoder(ctx);
@@ -4013,8 +4005,7 @@ public class UIContextReconnectionTest {
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
 
-        final UIContext ctx = new UIContext(localSocket, localTxn, localConfig,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx = new UIContext(localSocket, localTxn, localConfig);
 
         final com.ponysdk.core.server.context.CommunicationSanityChecker checker =
                 new com.ponysdk.core.server.context.CommunicationSanityChecker(ctx);
@@ -4204,8 +4195,7 @@ public class UIContextReconnectionTest {
         final TxnContext txn2 = new TxnContext(sock2);
         txn2.getWriter().setEncoder(new SpyEncoder());
         txn2.setApplication(app);
-        final UIContext ctx2 = new UIContext(sock2, txn2, config,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx2 = new UIContext(sock2, txn2, config);
 
         app.registerUIContext(uiContext);
         txnContext.setApplication(app);
@@ -4374,8 +4364,7 @@ public class UIContextReconnectionTest {
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
 
-        final UIContext localCtx = new UIContext(localSocket, localTxn, localConfig,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext localCtx = new UIContext(localSocket, localTxn, localConfig);
 
         localCtx.acquire();
         UIContext.setCurrent(localCtx);
@@ -4624,12 +4613,10 @@ public class UIContextReconnectionTest {
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
 
-        UIContext ctx1 = new UIContext(localSocket, localTxn, localConfig,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        UIContext ctx1 = new UIContext(localSocket, localTxn, localConfig);
         final int id1 = ctx1.getID();
 
-        UIContext ctx2 = new UIContext(localSocket, localTxn, localConfig,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        UIContext ctx2 = new UIContext(localSocket, localTxn, localConfig);
         final int id2 = ctx2.getID();
 
         // IDs should be sequential
@@ -4935,8 +4922,7 @@ public class UIContextReconnectionTest {
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
 
-        final UIContext ctx = new UIContext(localSocket, localTxn, localConfig,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx = new UIContext(localSocket, localTxn, localConfig);
 
         final com.ponysdk.core.server.context.CommunicationSanityChecker checker =
                 new com.ponysdk.core.server.context.CommunicationSanityChecker(ctx);
@@ -5063,8 +5049,7 @@ public class UIContextReconnectionTest {
                 new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test2", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext txn2 = new TxnContext(sock2);
         txn2.getWriter().setEncoder(new SpyEncoder());
-        final UIContext ctx2 = new UIContext(sock2, txn2, config,
-                Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx2 = new UIContext(sock2, txn2, config);
 
         // Add data listeners
         final List<Object> received1 = new ArrayList<>();

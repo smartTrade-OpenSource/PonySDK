@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -48,7 +47,7 @@ public class NestedExecuteTest {
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
         config.setUpdateCoalescingEnabled(false);
-        return new UIContext(socket, txn, config, Mockito.mock(JettyServerUpgradeRequest.class));
+        return new UIContext(socket, txn, config);
     }
 
     @After

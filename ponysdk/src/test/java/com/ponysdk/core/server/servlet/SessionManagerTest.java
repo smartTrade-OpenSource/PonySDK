@@ -133,18 +133,6 @@ public class SessionManagerTest {
     }
 
     @Test
-    public void testGetUIContextGlobal_findsAcrossApplications() {
-        final Application application = register("app-" + UUID.randomUUID());
-        final UIContext ctx = mock(UIContext.class);
-        final int uiId = 123_456 + (int) (Math.random() * 1000);
-        when(application.getUIContext(uiId)).thenReturn(ctx);
-
-        @SuppressWarnings("deprecation")
-        final UIContext found = manager.getUIContext(uiId);
-        assertSame(ctx, found);
-    }
-
-    @Test
     public void testCountUIContexts_sumsAcrossApplicationsByDelta() {
         final int before = manager.countUIContexts();
 

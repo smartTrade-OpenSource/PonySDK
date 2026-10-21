@@ -29,7 +29,7 @@ public class UIContextTest {
     @Test
     public void testMissingUpgradeRequestDataReadsAsEmpty() {
         final UIContext uiContext = new UIContext(Mockito.mock(WebSocket.class), Mockito.mock(TxnContext.class),
-                Mockito.mock(ApplicationConfiguration.class), null, null);
+                Mockito.mock(ApplicationConfiguration.class), null);
 
         assertTrue(uiContext.getParameterMap().isEmpty());
         assertTrue(uiContext.getHeaders().isEmpty());

@@ -10,7 +10,6 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -45,8 +44,7 @@ public class PAddOnLifecycleTest {
             .thenReturn(new UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
-        final UIContext ctx = new UIContext(socket, new TxnContext(socket), config,
-            Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext ctx = new UIContext(socket, new TxnContext(socket), config);
         final WeakReference<?>[] ref = new WeakReference<?>[1];
 
         ctx.execute(() -> {

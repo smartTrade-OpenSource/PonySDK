@@ -378,14 +378,6 @@ public class BootstrapServlet extends HttpServlet {
         this.configuration = configuration;
     }
 
-    /**
-     * @deprecated Use {@link #setConfiguration(ApplicationConfiguration)} directly
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    public void setApplication(final ApplicationConfiguration application) {
-        setConfiguration(application);
-    }
-
     public void setRootPath(final String rootPath) {
         this.rootPath = rootPath;
     }

@@ -29,6 +29,7 @@ import static com.ponysdk.sample.client.Costs.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -43,7 +44,6 @@ import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
-import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 
 /** Data: trees and tables whose content is pushed from the server. */
 final class DataPage {
@@ -124,7 +124,7 @@ final class DataPage {
             }
         });
         columnDescriptor1.setHeaderCellRenderer(() -> Element.newPLabel("Key"));
-        columnDescriptor1.setValueProvider(new IdentityValueProvider<>());
+        columnDescriptor1.setValueProvider(Function.identity());
         grid.addDataGridColumnDescriptor(columnDescriptor1);
 
         for (int i = 0; i < 6; i++) {
@@ -144,7 +144,7 @@ final class DataPage {
                 }
             });
             columnDescriptor3.setHeaderCellRenderer(() -> Element.newPLabel(header));
-            columnDescriptor3.setValueProvider(new IdentityValueProvider<>());
+            columnDescriptor3.setValueProvider(Function.identity());
             grid.addDataGridColumnDescriptor(columnDescriptor3);
         }
 

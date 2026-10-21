@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.http.HttpSession;
 
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -137,7 +136,7 @@ public class SessionAdminTest {
         Mockito.when(socket.getUpgradeRequestData()).thenReturn(new UpgradeRequestData(Map.of(), "test", Mockito.mock(HttpSession.class)));
         final TxnContext txnContext = new TxnContext(socket);
         txnContext.setApplication(application);
-        final UIContext context = new UIContext(socket, txnContext, config, Mockito.mock(JettyServerUpgradeRequest.class));
+        final UIContext context = new UIContext(socket, txnContext, config);
         application.registerUIContext(context);
         sockets.put(context, socket);
         return context;

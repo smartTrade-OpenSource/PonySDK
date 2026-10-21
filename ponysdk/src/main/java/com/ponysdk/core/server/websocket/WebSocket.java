@@ -173,7 +173,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 return;
             }
 
-            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request, upgradeRequestData,
+            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), upgradeRequestData,
                     applicationManager.getSharedDictionaryProvider());
             log.info("Creating a new {}", uiContext);
 

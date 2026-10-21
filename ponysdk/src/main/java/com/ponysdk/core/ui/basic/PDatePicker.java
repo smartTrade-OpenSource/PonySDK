@@ -250,14 +250,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         return dateFormat.getTimeZone();
     }
 
-    /**
-     * @deprecated Useless
-     */
-    @Deprecated(forRemoval = true, since = "2.8.2")
-    public void setMonth(final int month) {
-        // To be removed
-    }
-
     @Override
     public String dumpDOM() {
         return "<date pid=\"" + ID + "\" year=\"" + year + "\" month=\"" + month + "\" day=\"" + day + "\"></date>";

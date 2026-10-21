@@ -148,7 +148,7 @@ public final class ProtocolBench {
             txn.getWriter().setEncoder(direct);
             final ApplicationConfiguration config = new ApplicationConfiguration();
             config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
-            ctx = new UIContext(socket, txn, config, null);
+            ctx = new UIContext(socket, txn, config);
             pusher.setStringDictionary(ctx.getStringDictionary());
             ctx.execute(() -> {
                 root = Element.newPFlowPanel();

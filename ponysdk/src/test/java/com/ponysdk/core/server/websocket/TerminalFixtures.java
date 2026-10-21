@@ -279,7 +279,7 @@ public final class TerminalFixtures {
         });
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
-        final UIContext context = new UIContext(socket, txn, config, null);
+        final UIContext context = new UIContext(socket, txn, config);
 
         final PFlowPanel[] rows = new PFlowPanel[3];
         final List<PLabel> labels = new ArrayList<>();
