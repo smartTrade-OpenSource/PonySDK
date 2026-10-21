@@ -39,6 +39,11 @@ public class CommunicationSanityChecker {
     private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
+    /**
+     * The roundtrip probe goes every 5 s, or every heartbeat period if shorter: it measures the latency, and keeps
+     * the terminal's watchdog (no message for twice the period) quiet on an idle session.
+     */
+    private static final int ROUNDTRIP_PERIOD = 5000;
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(
         System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
@@ -52,8 +57,10 @@ public class CommunicationSanityChecker {
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
+    private int roundTripChecks; // checks between two probes
+    private int checksSinceRoundTrip;
     private ScheduledFuture<?> sanityChecker;
-    private CommunicationState currentState;
+    private CommunicationState currentState = CommunicationState.OK;
     private volatile long suspectTime = -1;
 
     private static enum CommunicationState {
@@ -101,6 +108,8 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
+        roundTripChecks = (int) Math.max(1, Math.min(ROUNDTRIP_PERIOD, heartBeatPeriod) / CHECK_PERIOD);
+        checksSinceRoundTrip = roundTripChecks - 1; // the first check sends one
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
@@ -109,7 +118,7 @@ public class CommunicationSanityChecker {
         return now - lastActivity >= heartBeatPeriod;
     }
 
-    private void checkCommunicationState() {
+    void checkCommunicationState() {
         // Skip sanity checks while UIContext is suspended (waiting for WS reconnection)
         if (uiContext.isSuspended()) return;
 
@@ -142,7 +151,10 @@ public class CommunicationSanityChecker {
             case KO -> { /* nothing to do */ }
         }
 
-        uiContext.sendRoundTrip();
+        if (++checksSinceRoundTrip >= roundTripChecks) {
+            checksSinceRoundTrip = 0;
+            uiContext.sendRoundTrip();
+        }
     }
 
 }
