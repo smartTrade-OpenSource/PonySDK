@@ -1499,7 +1499,7 @@ if (roundtrip > 200) {
 }
 ```
 
-These are rolling averages over the last 10 round-trip measurements, updated automatically by the heartbeat mechanism. Useful for in-process alerting without an external metrics system.
+These are rolling averages over the last 10 round-trip measurements: the server sends a probe every 5 s (or every heartbeat period when shorter), so they cover the last 50 s. Useful for in-process alerting without an external metrics system.
 
 ---
 
