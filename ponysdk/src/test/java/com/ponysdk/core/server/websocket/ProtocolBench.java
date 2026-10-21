@@ -5,6 +5,7 @@
 package com.ponysdk.core.server.websocket;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
@@ -15,9 +16,13 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -27,7 +32,10 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PEventOptions;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}
@@ -413,5 +421,85 @@ public final class ProtocolBench {
         }, 20_000, 50_000);
 
         if ("heap".startsWith(only) || only.isEmpty()) heap(v);
+        if ("inbound".startsWith(only) || only.isEmpty()) inbound(v);
+    }
+
+    // ---- from the terminal ----------------------------------------------------------------------------------
+
+    /**
+     * What a message from the terminal costs the server, on the path of WebSocket.onWebSocketText: the JSON parsed,
+     * then each instruction given to its object in a transaction (fireClientData), whose answer is written. Parse
+     * and dispatch are also measured apart: a binary format from the terminal could only save on the parse.
+     */
+    private static void inbound(final int protocolVersion) {
+        final Bench b = new Bench(protocolVersion);
+        final int[] ids = new int[4];
+        b.ctx.execute(() -> {
+            final var button = Element.newPButton("Buy");
+            button.addClickHandler(e -> {});
+            final PTextBox quantity = Element.newPTextBox();
+            quantity.addValueChangeHandler(e -> {});
+            final PScrollPanel scroll = Element.newPScrollPanel();
+            scroll.addScrollHandler(e -> {});
+            final PTextBox search = Element.newPTextBox();
+            search.addEventListener("input", PEventOptions.fields("target.value"), e -> {});
+            b.root.add(button, quantity, scroll, search);
+            ids[0] = button.getID();
+            ids[1] = quantity.getID();
+            ids[2] = scroll.getID();
+            ids[3] = search.getID();
+        });
+        final String i = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+        final String[][] messages = {
+            {"click", "{\"" + i + "\":[{\"0\":" + ids[0] + ",\"g\":2,\"f\":[412,233,32,11,1,false,false,false,false],\"d\":[380,222,64,24]}]}"},
+            {"value change", "{\"" + i + "\":[{\"0\":" + ids[1] + ",\"C\":\"1250000\"}]}"},
+            {"scroll", "{\"" + i + "\":[{\"0\":" + ids[2] + ",\"M\":0,\"N\":540,\"O\":0,\"P\":120,\"Q\":0}]}"},
+            {"event by name", "{\"" + i + "\":[{\"0\":" + ids[3] + ",\"Z\":\"input\",\"z\":{\"target.value\":\"EUR/USD\"}}]}"},
+        };
+        System.out.printf("%-34s %10s  %11s  %11s  %11s  %11s%n", "from the terminal (per message)", "text", "parse",
+            "dispatch", "total", "alloc");
+        for (final String[] m : messages) {
+            final String text = m[1];
+            final JsonObject parsed = parse(b, text);
+            final JsonObject instruction = parsed.getJsonArray(i).getJsonObject(0);
+            final int warmup = 200_000;
+            final int ops = 500_000;
+            for (int k = 0; k < warmup; k++) {
+                parse(b, text);
+                b.ctx.execute(() -> b.ctx.fireClientData(instruction));
+                if (b.capture.size > b.capture.data.length / 2) b.capture.clear();
+            }
+            b.capture.clear();
+            long cpu0 = THREADS.getCurrentThreadCpuTime();
+            for (int k = 0; k < ops; k++) parse(b, text);
+            final long parse = THREADS.getCurrentThreadCpuTime() - cpu0;
+            cpu0 = THREADS.getCurrentThreadCpuTime();
+            for (int k = 0; k < ops; k++) {
+                b.ctx.execute(() -> b.ctx.fireClientData(instruction));
+                if (b.capture.size > b.capture.data.length / 2) b.capture.clear();
+            }
+            final long dispatch = THREADS.getCurrentThreadCpuTime() - cpu0;
+            cpu0 = THREADS.getCurrentThreadCpuTime();
+            final long alloc0 = THREADS.getCurrentThreadAllocatedBytes();
+            for (int k = 0; k < ops; k++) {
+                final JsonObject json = parse(b, text);
+                b.ctx.execute(() -> {
+                    final var array = json.getJsonArray(i);
+                    for (int n = 0; n < array.size(); n++) b.ctx.fireClientData(array.getJsonObject(n));
+                });
+                if (b.capture.size > b.capture.data.length / 2) b.capture.clear();
+            }
+            final long total = THREADS.getCurrentThreadCpuTime() - cpu0;
+            final long alloc = THREADS.getCurrentThreadAllocatedBytes() - alloc0;
+            System.out.printf("%-34s %8d B  %8.2f µs  %8.2f µs  %8.2f µs  %9.0f B%n", "in: " + m[0], text.length(),
+                parse / 1_000.0 / ops, dispatch / 1_000.0 / ops, total / 1_000.0 / ops, (double) alloc / ops);
+        }
+        b.ctx.destroy();
+    }
+
+    private static JsonObject parse(final Bench b, final String text) {
+        try (final JsonReader reader = b.ctx.getJsonProvider().createReader(new StringReader(text))) {
+            return reader.readObject();
+        }
     }
 }
