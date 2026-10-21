@@ -1554,6 +1554,10 @@ Client                          Server
   | window.onPonyReconnected()    |  UIContext alive, state current
 ```
 
+A reconnection to a context the server no longer has (restarted, window over, overflow) or that another socket
+resumed gets a `CREATE_CONTEXT` block with no context behind it, then a normal close: the terminal reloads its page,
+and no application starts for a page that is going away.
+
 #### How state stays consistent during suspension
 
 The key to correctness is the `RecordingEncoder` — a `WebsocketEncoder` implementation that buffers all protocol operations (creates, adds, removes, updates) instead of sending them over the wire.

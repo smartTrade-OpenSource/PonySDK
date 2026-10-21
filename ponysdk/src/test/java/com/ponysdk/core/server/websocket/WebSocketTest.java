@@ -617,7 +617,7 @@ public class WebSocketTest {
     /**
      * onWebSocketOpen with reconnectContextId but Application is null.
      * This happens if the HTTP session expired between disconnect and reconnect.
-     * Should fall through to creating a new UIContext (normal path).
+     * The terminal is told to reload (CREATE_CONTEXT, then close); no UIContext is created.
      */
     @Test
     public void testReconnectionMode_ReconnectWithNullApplication() throws Exception {
@@ -653,18 +653,15 @@ public class WebSocketTest {
         final Session sess = Mockito.mock(Session.class);
         Mockito.when(sess.isOpen()).thenReturn(true);
 
-        // onWebSocketOpen should fall through to creating a new UIContext
-        // because application is null → suspended UIContext can't be found
         ws.onWebSocketOpen(sess);
 
-        // Verify a new UIContext was created (startApplication was called)
-        Mockito.verify(appManager).startApplication(Mockito.any(UIContext.class));
+        assertContextLost(sess, appManager);
     }
 
     /**
      * onWebSocketOpen with reconnectContextId pointing to a non-existent UIContext.
-     * Application exists but getUIContext(id) returns null.
-     * Should fall through to creating a new UIContext.
+     * Application exists but getUIContext(id) returns null (the server restarted, or the window is over):
+     * the terminal is told to reload, and no application starts for a page that is going away.
      */
     @Test
     public void testReconnectionMode_ReconnectWithNonExistentUIContext() throws Exception {
@@ -704,16 +701,15 @@ public class WebSocketTest {
         final Session sess = Mockito.mock(Session.class);
         Mockito.when(sess.isOpen()).thenReturn(true);
 
-        // Should fall through to creating a new UIContext
         ws.onWebSocketOpen(sess);
 
-        Mockito.verify(appManager).startApplication(Mockito.any(UIContext.class));
+        assertContextLost(sess, appManager);
     }
 
     /**
      * onWebSocketOpen with reconnectContextId pointing to a UIContext that exists
      * but is NOT suspended (e.g., it was already resumed by another connection).
-     * Should fall through to creating a new UIContext.
+     * The terminal is told to reload; the live context is left alone.
      */
     @Test
     public void testReconnectionMode_ReconnectWithNonSuspendedUIContext() throws Exception {
@@ -764,10 +760,19 @@ public class WebSocketTest {
         final Session sess2 = Mockito.mock(Session.class);
         Mockito.when(sess2.isOpen()).thenReturn(true);
 
-        // Should fall through to creating a new UIContext (target is not suspended)
         ws2.onWebSocketOpen(sess2);
 
-        Mockito.verify(setup.appManager()).startApplication(Mockito.any(UIContext.class));
+        assertContextLost(sess2, setup.appManager());
+        assertTrue(setup.uiContext().isAlive());
+    }
+
+    /** A CREATE_CONTEXT block was sent, then a normal close, and no application started. */
+    private static void assertContextLost(final Session session, final ApplicationManager appManager) {
+        final ArgumentCaptor<java.nio.ByteBuffer> frame = ArgumentCaptor.forClass(java.nio.ByteBuffer.class);
+        Mockito.verify(session).sendBinary(frame.capture(), Mockito.any());
+        assertEquals((byte) ServerToClientModel.CREATE_CONTEXT.getValue(), frame.getValue().get(frame.getValue().position()));
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.anyString(), Mockito.any());
+        Mockito.verify(appManager, Mockito.never()).startApplication(Mockito.any(UIContext.class));
     }
 
     /**

@@ -44,7 +44,7 @@ test('a context the server no longer has: the page reloads instead of stacking a
   const clickMe = page.getByRole('button', { name: 'Click me' });
   await expect(clickMe).toBeVisible({ timeout: 10000 });
 
-  // The server answers the reconnection with a new context: only a reload gives a page that matches it
+  // The server answers CREATE_CONTEXT with no context behind it: the page reloads and starts one
   const reloaded = page.waitForEvent('load', { timeout: 15000 });
   await sockets.cut();
   await reloaded;

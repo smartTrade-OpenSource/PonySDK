@@ -165,9 +165,12 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                     log.info("Resuming {} on new WebSocket", suspended);
                     suspended.resume(this);
                     return;
-                } else {
-                    log.warn("Reconnect requested for UIContext #{} but it is not suspended — creating new context", reconnectContextId);
                 }
+                // Gone (server restarted, window over) or taken: the terminal reloads its page on CREATE_CONTEXT
+                // (terminal.ts contextCreated), so a new context here would run the application for nobody
+                log.info("UIContext #{} cannot be resumed, its page reloads", reconnectContextId);
+                sendContextLost();
+                return;
             }
 
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request, upgradeRequestData,
@@ -227,6 +230,20 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
         }
+    }
+
+    /** The CREATE_CONTEXT block, with no context behind it, then a normal close: the terminal reloads its page. */
+    private void sendContextLost() {
+        try {
+            websocketPusher.encode(ServerToClientModel.CREATE_CONTEXT, reconnectContextId);
+            websocketPusher.encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, false);
+            websocketPusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 0);
+            websocketPusher.encode(ServerToClientModel.END, null);
+            websocketPusher.flush();
+        } catch (final IOException e) {
+            log.info("Cannot tell the terminal of UIContext #{} to reload", reconnectContextId, e);
+        }
+        session.close(StatusCode.NORMAL, "context lost", Callback.NOOP);
     }
 
     @Override
