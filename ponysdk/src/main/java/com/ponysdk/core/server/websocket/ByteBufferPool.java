@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,8 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Memory savings: 500 sessions × 64KB = 32MB → pool of ~50 buffers × 32KB = 1.6MB
  * </p>
  * <p>
- * Implementation: lock-free {@link ConcurrentLinkedQueue} for borrow/return.
- * Buffers are direct (off-heap) to avoid GC pressure and enable zero-copy
+ * Implementation: a bounded {@link ArrayBlockingQueue} for borrow/return: unlike a linked queue, it allocates
+ * nothing per return (a {@code ConcurrentLinkedQueue} took a 24-byte node per flush). Buffers are direct (off-heap) to avoid GC pressure and enable zero-copy
  * sendBinary in Jetty.
  * </p>
  */
@@ -51,19 +51,17 @@ public final class ByteBufferPool {
     private static final Logger log = LoggerFactory.getLogger(ByteBufferPool.class);
 
     private final int bufferCapacity;
-    private final int maxPoolSize;
-    private final ConcurrentLinkedQueue<ByteBuffer> pool = new ConcurrentLinkedQueue<>();
+    private final ArrayBlockingQueue<ByteBuffer> pool;
     private final AtomicInteger totalAllocated = new AtomicInteger();
-    private final AtomicInteger pooledCount = new AtomicInteger();
 
     /**
      * @param bufferCapacity capacity of each buffer in bytes
-     * @param maxPoolSize    maximum number of buffers to retain in the pool;
+     * @param maxPoolSize    maximum number of buffers to retain in the pool, at least 1;
      *                       excess buffers returned after this limit are discarded (GC'd)
      */
     public ByteBufferPool(final int bufferCapacity, final int maxPoolSize) {
         this.bufferCapacity = bufferCapacity;
-        this.maxPoolSize = maxPoolSize;
+        this.pool = new ArrayBlockingQueue<>(maxPoolSize);
     }
 
     /**
@@ -73,7 +71,6 @@ public final class ByteBufferPool {
     public ByteBuffer acquire() {
         final ByteBuffer buf = pool.poll();
         if (buf != null) {
-            pooledCount.decrementAndGet();
             buf.clear();
             return buf;
         }
@@ -96,19 +93,15 @@ public final class ByteBufferPool {
                     buffer.capacity() / 1024, bufferCapacity / 1024);
             return;
         }
-        if (pooledCount.get() < maxPoolSize) {
-            buffer.clear();
-            pool.offer(buffer);
-            pooledCount.incrementAndGet();
-        }
-        // else: discard — let GC reclaim the native memory
+        buffer.clear();
+        pool.offer(buffer); // full: discarded, GC reclaims the native memory
     }
 
     /**
      * Returns the number of buffers currently available in the pool.
      */
     public int availableCount() {
-        return pooledCount.get();
+        return pool.size();
     }
 
     /**
