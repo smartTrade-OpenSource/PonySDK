@@ -24,6 +24,7 @@ Initial release of the FlexLayout component for PonySDK.
 - Resize with real-time layout tracking (center + bottom pushed)
 - Tab styles: auto, icon, label, iconLabel (configurable per zone)
 - Panel header with tab name + close button
+- Border size always within its min/max size (`setBorderSize`, `setBorderMinSize`, `setBorderMaxSize`); the resize handle starts from the displayed size
 
 ### Badges & Notifications
 - Badge on sidebar tabs: dot (colored glow) or number bubble
