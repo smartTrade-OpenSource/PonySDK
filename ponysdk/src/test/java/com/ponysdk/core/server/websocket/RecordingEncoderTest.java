@@ -1074,13 +1074,13 @@ public class RecordingEncoderTest {
 
     /**
      * compact() + replayTo() with null values — some protocol entries have null values
-     * (e.g. HEARTBEAT, END). Should not NPE during compaction or replay.
+     * (e.g. DESTROY_CONTEXT, END). Should not NPE during compaction or replay.
      */
     @Test
     public void testCompactAndReplayWithNullValues() {
         final RecordingEncoder rec = new RecordingEncoder();
 
-        rec.encode(ServerToClientModel.HEARTBEAT, null);
+        rec.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         rec.endObject();
 
         recordUpdateBlock(rec, 1, ServerToClientModel.HTML, null);
@@ -1090,8 +1090,8 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("HEARTBEAT block should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.HEARTBEAT));
+        assertTrue("DESTROY_CONTEXT block should survive",
+                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.DESTROY_CONTEXT));
         assertTrue("Update with null HTML should survive",
                 cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.HTML && e.value() == null));
     }
@@ -1514,8 +1514,8 @@ public class RecordingEncoderTest {
     public void testCompactPreservesOtherTypeBlocks() {
         final RecordingEncoder rec = new RecordingEncoder();
 
-        // A block with only HEARTBEAT (no TYPE_* model) — classified as OTHER
-        rec.encode(ServerToClientModel.HEARTBEAT, null);
+        // A block with only DESTROY_CONTEXT (no TYPE_* model) — classified as OTHER
+        rec.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         rec.endObject();
 
         // A normal update block
@@ -1531,14 +1531,14 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // All three blocks should be preserved
-        boolean hasHeartbeat = cap.captured.stream()
-                .anyMatch(e -> e.model() == ServerToClientModel.HEARTBEAT);
+        boolean hasDestroy = cap.captured.stream()
+                .anyMatch(e -> e.model() == ServerToClientModel.DESTROY_CONTEXT);
         boolean hasUpdate = cap.captured.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.TYPE_UPDATE);
         boolean hasRoundtrip = cap.captured.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.ROUNDTRIP_LATENCY);
 
-        assertTrue("HEARTBEAT block should be preserved", hasHeartbeat);
+        assertTrue("DESTROY_CONTEXT block should be preserved", hasDestroy);
         assertTrue("UPDATE block should be preserved", hasUpdate);
         assertTrue("ROUNDTRIP block should be preserved", hasRoundtrip);
     }

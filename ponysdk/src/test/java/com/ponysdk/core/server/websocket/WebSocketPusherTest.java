@@ -291,7 +291,7 @@ public class WebSocketPusherTest {
         final byte[] db = encodeAndFlush(ServerToClientModel.LEFT, 1.5d);
         assertEquals(9, db.length);
 
-        final byte[] nb = encodeAndFlush(ServerToClientModel.HEARTBEAT, null);
+        final byte[] nb = encodeAndFlush(ServerToClientModel.DESTROY_CONTEXT, null);
         assertEquals("NULL-typed model writes only the model key", 1, nb.length);
     }
 

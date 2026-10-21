@@ -25,7 +25,7 @@ import {
 test('a server-to-client key carries its wire value, its name and its value type', () => {
     assert.equal(ServerToClientModelNames[ServerToClientModel.TYPE_CREATE], 'TYPE_CREATE');
     assert.equal(ServerToClientModelTypeModel[ServerToClientModel.TYPE_CREATE], ValueTypeModel.UINT31);
-    assert.equal(ServerToClientModelTypeModel[ServerToClientModel.HEARTBEAT], ValueTypeModel.NULL);
+    assert.equal(ServerToClientModelTypeModel[ServerToClientModel.DESTROY_CONTEXT], ValueTypeModel.NULL);
     assert.equal(ServerToClientModelTypeModel[ServerToClientModel.VALUE], ValueTypeModel.STRING);
 });
 
