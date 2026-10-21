@@ -250,5 +250,5 @@ The terminal uses `<dialog>`, the popover API, `ResizeObserver` and ES2022 modul
 
 - [UPGRADING.md](UPGRADING.md) — from 2.10 to 3.0: platform, removed APIs, the new terminal's DOM, behaviour changes
 - [ARCHITECTURE.md](ARCHITECTURE.md) — deep dive into the protocol, reconnection engine, threading model, OTel metrics, and design patterns
-- [CONCEPTS_CLES.md](CONCEPTS_CLES.md) — conceptual primer (French): Application, UIContext, PObject, the protocol, EventBus, transactions
+- [Key concepts](ARCHITECTURE.md#5-key-concepts) — Application, UIContext, PObject, the protocol, EventBus, transactions
 - [Wiki](https://github.com/smartTrade-OpenSource/PonySDK/wiki) — FAQ
