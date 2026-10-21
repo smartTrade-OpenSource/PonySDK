@@ -682,6 +682,55 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(paneBox.height).toBeGreaterThan(panelBox.height * 0.8);
   });
 
+  // ─── Sidebar resize against a min size larger than the initial size ──
+  // The demo gives right-top a 260px min size while the border is created at 220px.
+
+  const RIGHT_MIN = 260;
+  const rightPanel = page => page.locator('.fl-sidebar-right .fl-sidebar-panel');
+  const rightWidth = page => rightPanel(page).evaluate(el => el.offsetWidth);
+
+  // Drags the right sidebar handle by dx (negative = wider) with a real pointer.
+  async function dragRightHandle(page, dx) {
+    const box = await page.locator('.fl-sidebar-right .fl-sidebar-resize').boundingBox();
+    const x = box.x + box.width / 2, y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + dx, y, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+  }
+
+  test('border opens at least at its min size', async ({ page }) => {
+    expect(await rightWidth(page)).toBeGreaterThanOrEqual(RIGHT_MIN);
+  });
+
+  test('border small drag changes width by the drag distance', async ({ page }) => {
+    const before = await rightWidth(page);
+    await dragRightHandle(page, -10);
+    expect(Math.abs((await rightWidth(page)) - (before + 10))).toBeLessThanOrEqual(2);
+  });
+
+  test('border second drag starts from the displayed width', async ({ page }) => {
+    await dragRightHandle(page, -100);
+    const afterFirst = await rightWidth(page);
+    await dragRightHandle(page, -10);
+    expect(Math.abs((await rightWidth(page)) - (afterFirst + 10))).toBeLessThanOrEqual(2);
+  });
+
+  test('border can shrink back to its min size but not below', async ({ page }) => {
+    await dragRightHandle(page, -150);
+    await dragRightHandle(page, 400);
+    expect(await rightWidth(page)).toBe(RIGHT_MIN);
+  });
+
+  test('setBorderSize resizes the border within its min size', async ({ page }) => {
+    await page.click('button:has-text("Right 300px")');
+    await expect.poll(() => rightWidth(page)).toBe(300);
+    // The model is clamped too: the next drag starts from 300.
+    await dragRightHandle(page, -10);
+    expect(Math.abs((await rightWidth(page)) - 310)).toBeLessThanOrEqual(2);
+  });
+
   test('sidebar panel header shows tab name', async ({ page }) => {
     // The demo starts with panels open; check a header has text
     const header = page.locator('.fl-sidebar-left .fl-sidebar-header span').first();
