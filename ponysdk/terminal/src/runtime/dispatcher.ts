@@ -31,6 +31,17 @@ export interface Host {
     streamRequested(requestId: number): void;
 }
 
+/** A block creates an object whose module is not loaded yet: the block runs again once it is. */
+class Pending {
+    readonly loading: Promise<void>;
+
+    constructor(loading: Promise<void>) {
+        this.loading = loading;
+    }
+}
+
+const NOTHING = new Uint8Array(0);
+
 /**
  * Applies the server's instructions to the terminal objects and sends their messages back. An
  * instruction is a block: its first model says what to do (TYPE_CREATE, TYPE_UPDATE...) to which
@@ -43,15 +54,20 @@ export class Dispatcher implements Context {
     private readonly addOnFactories = new Map<string, AddOnFactory>();
     private readonly host: Host;
     private readonly factory: ObjectFactory;
+    /** The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md). */
+    private readonly loader: (type: number) => Promise<void> | null;
+    /** Set while a block waits for a module: the blocks that come meanwhile wait in the reader. */
+    private paused = false;
     readonly session: Session;
     private readonly history: HistoryPort;
     /** The window the blocks being read belong to; -1 until the first WINDOW_ID. */
     private currentWindowId = -1;
 
     constructor(host: Host, factory: ObjectFactory, session: Session, history: HistoryPort,
-                dictionaryFallback?: (id: number) => string | undefined) {
+                dictionaryFallback?: (id: number) => string | undefined, loader: (type: number) => Promise<void> | null = () => null) {
         this.host = host;
         this.factory = factory;
+        this.loader = loader;
         this.session = session;
         this.history = history;
         this.reader = new Reader(dictionaryFallback);
@@ -64,50 +80,98 @@ export class Dispatcher implements Context {
         const started = Date.now();
         const r = this.reader;
         r.feed(message);
+        if (this.paused) return;
         while (r.hasKey()) {
             const next = r.blockEnd();
             if (next === INCOMPLETE) return;
-            const key = r.read();
-            if (key === K.ROUNDTRIP_LATENCY) {
-                this.host.send({ [C.TERMINAL_LATENCY]: r.num });
-                r.read(); // END
-            } else if (key === K.CREATE_CONTEXT) {
-                const id = r.int;
-                r.read();
-                const tabindexOnlyFormField = r.bool;
-                r.read();
-                const heartbeatSeconds = r.int;
-                r.read(); // END
-                if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds)) return;
-            } else if (key === K.RECONNECT_CONTEXT) {
-                this.host.contextResumed();
-                r.read(); // END
-            } else if (key === K.DESTROY_CONTEXT) {
-                this.host.contextDestroyed();
-                r.read(); // END
-            } else {
-                this.route(key, next);
+            const start = r.offset;
+            try {
+                if (!this.receiveBlock(next)) return;
+            } catch (e) {
+                if (!(e instanceof Pending)) throw e;
+                this.pause(start, e.loading, () => this.receive(NOTHING));
+                return;
             }
         }
         // A long batch kept the event loop busy: tell the server this terminal is alive
         if (Date.now() - started > 1000) this.host.send({ [C.HEARTBEAT_REQUEST]: FLAG });
     }
 
+    /** False when the rest of the message is not for this page: a context the server could not resume reloads it. */
+    private receiveBlock(next: number): boolean {
+        const r = this.reader;
+        const key = r.read();
+        if (key === K.ROUNDTRIP_LATENCY) {
+            this.host.send({ [C.TERMINAL_LATENCY]: r.num });
+            r.read(); // END
+        } else if (key === K.CREATE_CONTEXT) {
+            const id = r.int;
+            r.read();
+            const tabindexOnlyFormField = r.bool;
+            r.read();
+            const heartbeatSeconds = r.int;
+            r.read(); // END
+            if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds)) return false;
+        } else if (key === K.RECONNECT_CONTEXT) {
+            this.host.contextResumed();
+            r.read(); // END
+        } else if (key === K.DESTROY_CONTEXT) {
+            this.host.contextDestroyed();
+            r.read(); // END
+        } else {
+            this.route(key, next);
+        }
+        return true;
+    }
+
     /** A message from the opener, in a window: its blocks, and those of the frames it feeds. */
     receiveInWindow(message: Uint8Array): void {
         const r = this.reader;
         r.feed(message);
+        if (this.paused) return;
         while (r.hasKey()) {
-            if (r.read() === K.FRAME_ID) this.forwardToFrame(r.int, r.blockEnd());
-            else this.instruction();
+            const start = r.offset;
+            try {
+                if (r.read() === K.FRAME_ID) this.forwardToFrame(r.int, r.blockEnd());
+                else this.instruction();
+            } catch (e) {
+                if (!(e instanceof Pending)) throw e;
+                this.pause(start, e.loading, () => this.receiveInWindow(NOTHING));
+                return;
+            }
         }
     }
 
-    /** A message from the parent, in a frame: one block. */
+    /** A message from the parent, in a frame: one block, or those that waited for a module. */
     receiveInFrame(message: Uint8Array): void {
-        this.reader.feed(message);
-        this.reader.read();
-        this.instruction();
+        const r = this.reader;
+        r.feed(message);
+        if (this.paused) return;
+        while (r.hasKey()) {
+            const start = r.offset;
+            try {
+                r.read();
+                this.instruction();
+            } catch (e) {
+                if (!(e instanceof Pending)) throw e;
+                this.pause(start, e.loading, () => this.receiveInFrame(NOTHING));
+                return;
+            }
+        }
+    }
+
+    /** The block from start runs again once the module is loaded, then those that came meanwhile, in order. */
+    private pause(start: number, loading: Promise<void>, resume: () => void): void {
+        this.reader.offset = start;
+        this.paused = true;
+        loading.then(() => {
+            this.paused = false;
+            this.guard(resume);
+        }, e => {
+            this.paused = false;
+            log.error('A module of the terminal did not load: its widgets are not created', e);
+            this.guard(resume);
+        });
     }
 
     /** A block of the main window runs here; one of another window goes to it with the blocks that follow. */
@@ -195,6 +259,7 @@ export class Dispatcher implements Context {
                     if (key !== K.END) r.skipBlock();
             }
         } catch (e) {
+            if (e instanceof Pending) throw e; // the block runs again once its module is loaded
             if (key !== K.END) r.skipBlock();
             this.error(e);
         }
@@ -204,6 +269,8 @@ export class Dispatcher implements Context {
         const r = this.reader;
         r.read(); // WIDGET_TYPE
         const type = r.int;
+        const loading = this.loader(type);
+        if (loading !== null) throw new Pending(loading); // before any effect of the block
         const object = this.factory(type, this, id, r);
         if (object === null) {
             log.warn(`Cannot create #${id} of type ${nameOf(WidgetType, type) ?? type}`);

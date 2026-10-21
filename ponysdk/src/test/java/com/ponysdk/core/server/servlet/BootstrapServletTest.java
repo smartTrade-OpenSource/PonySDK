@@ -57,6 +57,7 @@ public class BootstrapServletTest {
         assertTrue(BootstrapServlet.isSafeResourcePath("/script/ponysdk.js"));
         assertTrue(BootstrapServlet.isSafeResourcePath("/css/sample.css"));
         assertTrue(BootstrapServlet.isSafeResourcePath("/ponyterminal/terminal.js"));
+        assertTrue(BootstrapServlet.isSafeResourcePath("/ponyterminal/chunks/date-picker.js"));
     }
 
     @Test
@@ -167,7 +168,7 @@ public class BootstrapServletTest {
 
         final String html = servlet.buildIndexHTML(request("", "/index.html"));
 
-        assertTrue(html.contains("src=\"ctx/ponyterminal/terminal.js\" defer"));
+        assertTrue(html.contains("type=\"module\" src=\"ctx/ponyterminal/terminal.js\""));
         assertTrue(html.contains("src=\"ctx/script/ponysdk.js\""));
     }
 
@@ -187,14 +188,14 @@ public class BootstrapServletTest {
     }
 
     @Test
-    public void theTerminalIsLoadedDeferredAfterPonysdkJs() {
+    public void theTerminalIsAModuleLoadedAfterPonysdkJs() {
         final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(config.getApplicationName()).thenReturn("App");
         Mockito.when(config.getJavascript()).thenReturn(Set.of("script/app.js"));
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
         final int ponysdk = html.indexOf("src=\"script/ponysdk.js\"");
-        final int terminal = html.indexOf("src=\"ponyterminal/terminal.js\" defer");
+        final int terminal = html.indexOf("type=\"module\" src=\"ponyterminal/terminal.js\"");
         assertTrue("ponysdk.js present", ponysdk > 0);
         assertTrue("deferred terminal after ponysdk.js", terminal > ponysdk);
         assertTrue("early socket before the terminal", html.indexOf("window.ponyEarlySocket=") < terminal);
@@ -210,7 +211,7 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
         final int legacy = html.indexOf("src=\"ponyterminal/legacy.js\" defer");
         assertTrue("legacy layer present", legacy > 0);
-        assertTrue("before the terminal", legacy < html.indexOf("src=\"ponyterminal/terminal.js\" defer"));
+        assertTrue("before the terminal", legacy < html.indexOf("type=\"module\" src=\"ponyterminal/terminal.js\""));
     }
 
     // ---- HTTP caching of the served files ----

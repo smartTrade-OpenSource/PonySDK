@@ -6,14 +6,12 @@ import { WidgetType as W } from '#model';
 import { AddOnComposite, AddOnObject } from '../objects/addon.ts';
 import { Anchor, Button, PushButton } from '../objects/buttons.ts';
 import { CheckBox, RadioButton } from '../objects/check-box.ts';
-import { DateBox, DatePicker } from '../objects/date-picker.ts';
 import { DisclosurePanel } from '../objects/disclosure-panel.ts';
 import { ElementWidget } from '../objects/element.ts';
 import { FileUpload } from '../objects/file-upload.ts';
 import { Frame } from '../objects/frame.ts';
 import { Image } from '../objects/image.ts';
 import { ListBox } from '../objects/list-box.ts';
-import { createMenuItemSeparator, MenuBar, MenuItem } from '../objects/menu.ts';
 import {
     CellPanel,
     Composite,
@@ -24,25 +22,13 @@ import {
     ScrollPanel,
     SimplePanel,
 } from '../objects/panels.ts';
-import {
-    DockLayoutPanel,
-    HeaderPanel,
-    LayoutPanel,
-    RootLayoutPanel,
-    SimpleLayoutPanel,
-    SplitLayoutPanel,
-} from '../objects/layout.ts';
 import { createDecoratedPopupPanel, DialogBox, PopupPanel } from '../objects/popup.ts';
-import { RichTextArea, RichTextToolbar } from '../objects/rich-text.ts';
 import { RootPanel } from '../objects/root-panel.ts';
 import { JsFunction, Script } from '../objects/script.ts';
 import { FunctionalLabel, Html, Label } from '../objects/text.ts';
 import { createPasswordTextBox, createTextArea, createTextBox } from '../objects/text-box.ts';
-import { StackLayoutPanel } from '../objects/stack-layout-panel.ts';
-import { SuggestBox, SuggestOracle } from '../objects/suggest.ts';
 import { TabPanel } from '../objects/tab-panel.ts';
 import { createFlexTable, Grid } from '../objects/tables.ts';
-import { Tree, TreeItem } from '../objects/tree.ts';
 import { WebComponent } from '../objects/web-component.ts';
 import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
@@ -94,26 +80,86 @@ const CREATORS = new Map<number, Creator>([
     [W.POPUP_PANEL, PopupPanel.create],
     [W.DECORATED_POPUP_PANEL, createDecoratedPopupPanel],
     [W.DIALOG_BOX, DialogBox.create],
-    [W.MENU_BAR, MenuBar.create],
-    [W.MENU_ITEM, MenuItem.create],
-    [W.MENU_ITEM_SEPARATOR, createMenuItemSeparator],
-    [W.TREE, Tree.create],
-    [W.TREE_ITEM, TreeItem.create],
-    [W.MULTIWORD_SUGGEST_ORACLE, (context, id, type) => new SuggestOracle(context, id, type)],
-    [W.SUGGESTBOX, SuggestBox.create],
-    [W.LAYOUT_PANEL, LayoutPanel.create],
-    [W.ROOT_LAYOUT_PANEL, RootLayoutPanel.create],
-    [W.SIMPLE_LAYOUT_PANEL, SimpleLayoutPanel.create],
-    [W.DOCK_LAYOUT_PANEL, DockLayoutPanel.create],
-    [W.SPLIT_LAYOUT_PANEL, SplitLayoutPanel.create],
-    [W.HEADER_PANEL, HeaderPanel.create],
     [W.TAB_LAYOUT_PANEL, TabPanel.createLayout],
-    [W.STACKLAYOUT_PANEL, StackLayoutPanel.create],
-    [W.DATEPICKER, DatePicker.create],
-    [W.DATEBOX, DateBox.create],
-    [W.RICH_TEXT_AREA, RichTextArea.create],
-    [W.RICH_TEXT_TOOLBAR, RichTextToolbar.create],
 ]);
+
+type Creators = [number, Creator][];
+
+/**
+ * The widgets many pages do not show at first, in chunks loaded on demand (docs/decisions/0004-terminal-chunks.md):
+ * the types of each module, and its loading.
+ */
+const ON_DEMAND: [number[], () => Promise<Creators>][] = [
+    [[W.DATEPICKER, W.DATEBOX], async () => {
+        const m = await import('../objects/date-picker.ts');
+        return [[W.DATEPICKER, m.DatePicker.create], [W.DATEBOX, m.DateBox.create]];
+    }],
+    [[W.RICH_TEXT_AREA, W.RICH_TEXT_TOOLBAR], async () => {
+        const m = await import('../objects/rich-text.ts');
+        return [[W.RICH_TEXT_AREA, m.RichTextArea.create], [W.RICH_TEXT_TOOLBAR, m.RichTextToolbar.create]];
+    }],
+    [[W.LAYOUT_PANEL, W.ROOT_LAYOUT_PANEL, W.SIMPLE_LAYOUT_PANEL, W.DOCK_LAYOUT_PANEL, W.SPLIT_LAYOUT_PANEL, W.HEADER_PANEL],
+        async () => {
+            const m = await import('../objects/layout.ts');
+            return [[W.LAYOUT_PANEL, m.LayoutPanel.create], [W.ROOT_LAYOUT_PANEL, m.RootLayoutPanel.create],
+                [W.SIMPLE_LAYOUT_PANEL, m.SimpleLayoutPanel.create], [W.DOCK_LAYOUT_PANEL, m.DockLayoutPanel.create],
+                [W.SPLIT_LAYOUT_PANEL, m.SplitLayoutPanel.create], [W.HEADER_PANEL, m.HeaderPanel.create]];
+        }],
+    [[W.STACKLAYOUT_PANEL], async () => {
+        const m = await import('../objects/stack-layout-panel.ts');
+        return [[W.STACKLAYOUT_PANEL, m.StackLayoutPanel.create]];
+    }],
+    [[W.TREE, W.TREE_ITEM], async () => {
+        const m = await import('../objects/tree.ts');
+        return [[W.TREE, m.Tree.create], [W.TREE_ITEM, m.TreeItem.create]];
+    }],
+    [[W.MENU_BAR, W.MENU_ITEM, W.MENU_ITEM_SEPARATOR], async () => {
+        const m = await import('../objects/menu.ts');
+        return [[W.MENU_BAR, m.MenuBar.create], [W.MENU_ITEM, m.MenuItem.create],
+            [W.MENU_ITEM_SEPARATOR, m.createMenuItemSeparator]];
+    }],
+    [[W.MULTIWORD_SUGGEST_ORACLE, W.SUGGESTBOX], async () => {
+        const m = await import('../objects/suggest.ts');
+        return [[W.MULTIWORD_SUGGEST_ORACLE, (context, id, type) => new m.SuggestOracle(context, id, type)],
+            [W.SUGGESTBOX, m.SuggestBox.create]];
+    }],
+];
+
+/** The loading of each module on demand, once started; its types' creators join CREATORS when it ends. */
+const loadings = new Map<() => Promise<Creators>, Promise<void>>();
+
+function load(module: () => Promise<Creators>): Promise<void> {
+    let loading = loadings.get(module);
+    if (loading === undefined) {
+        loading = module().then(creators => {
+            for (const [type, create] of creators) CREATORS.set(type, create);
+        });
+        loadings.set(module, loading);
+    }
+    return loading;
+}
+
+/**
+ * The loading of a type's module, or null when there is nothing to wait for: the type is loaded, unknown, or its
+ * module failed to load (the factory then reports it).
+ */
+export function loadingOf(type: number): Promise<void> | null {
+    if (CREATORS.has(type)) return null;
+    const module = ON_DEMAND.find(([types]) => types.includes(type))?.[1];
+    if (module === undefined) return null;
+    const loading = load(module);
+    return failed.has(module) ? null : loading.catch(e => {
+        failed.add(module);
+        throw e;
+    });
+}
+
+const failed = new Set<() => Promise<Creators>>();
+
+/** Loads the modules not loaded yet: when the browser is idle, so that a first rare widget does not wait. */
+export function loadAll(): void {
+    for (const [, module] of ON_DEMAND) load(module).catch(() => failed.add(module));
+}
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {
     const create = CREATORS.get(type);

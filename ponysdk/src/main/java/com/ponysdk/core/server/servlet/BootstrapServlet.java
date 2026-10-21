@@ -56,6 +56,8 @@ public class BootstrapServlet extends HttpServlet {
     protected static final String STYLE_PATTERN = "<link id=\"%s\" rel=\"stylesheet\" type=\"%s\" href=\"%s\"/>";
     protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
     protected static final String DEFERRED_SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\" defer></script>";
+    /** An ES module: deferred too, run in order with the deferred scripts. */
+    protected static final String MODULE_SCRIPT_PATTERN = "<script type=\"module\" src=\"%s\"></script>";
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
@@ -314,7 +316,8 @@ public class BootstrapServlet extends HttpServlet {
         if (configuration != null && configuration.isLegacyClassNames()) {
             sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/legacy.js")).append(NEW_LINE);
         }
-        sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
+        // A module: it loads its rarely shown widgets on demand (docs/decisions/0004-terminal-chunks.md)
+        sb.append(String.format(MODULE_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
 
         // Inject shared WC stylesheets as an inline script so they are registered
         // before application scripts define their web components.

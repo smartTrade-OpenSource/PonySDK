@@ -148,7 +148,7 @@ def terminalModel = tasks.register('terminalModel', JavaExec) {
 }
 
 def terminalSources = [file('terminal/src'), file('terminal/package.json'), file('terminal/package-lock.json'),
-                       file('terminal/tsconfig.json')]
+                       file('terminal/tsconfig.json'), file('terminal/build.mjs')]
 
 def terminalCheck = tasks.register('terminalCheck', NpmTask) {
     description = 'Type-checks the TypeScript terminal'

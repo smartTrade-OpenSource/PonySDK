@@ -128,3 +128,43 @@ test('nothing is reported to the server', () => {
         assert.deepEqual(sent.filter(m => C.ERROR_MSG in m || C.WARN_MSG in m), []);
     }
 });
+
+test('a block creating a type whose module loads later waits, and the blocks after it, in order', async () => {
+    const log: string[] = [];
+    const host: Host = {
+        send: () => undefined,
+        contextCreated: () => true,
+        contextResumed: () => undefined,
+        contextDestroyed: () => undefined,
+        streamRequested: () => undefined,
+    };
+    const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
+    const factory: ObjectFactory = (type, context, id) => {
+        log.push(`create ${WidgetTypeNames[type]} #${id}`);
+        if (type === W.BROWSER) context.windows.mainWindowId = id;
+        return new Recorded(context, id, type, log);
+    };
+    // the labels' module loads once the page has arrived
+    let loaded!: () => void;
+    const loading = new Promise<void>(resolve => {
+        loaded = resolve;
+    });
+    let labels = false;
+    const loader = (type: number): Promise<void> | null => {
+        if (type !== W.LABEL || labels) return null;
+        return loading.then(() => {
+            labels = true;
+        });
+    };
+    const dispatcher = new Dispatcher(host, factory, { contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '' },
+        history, undefined, loader);
+    for (const frame of fixture('page-v3').frames) dispatcher.receive(frame);
+    const before = log.length;
+    assert.ok(!log.some(line => line.startsWith('create LABEL')), 'no label before its module');
+    assert.ok(before < runs[2]!.log.length, 'the blocks after the first label wait');
+
+    loaded();
+    await loading;
+    await new Promise(resolve => setTimeout(resolve));
+    assert.deepEqual(log, runs[2]!.log, 'then everything, in the same order');
+});

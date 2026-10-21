@@ -10,7 +10,7 @@
   "scripts": {
     "check": "tsc --noEmit -p .",
     "test": "node --test \"test/**/*.test.ts\"",
-    "bundle": "esbuild terminal=src/main.ts legacy=src/legacy.ts --bundle --format=iife --target=es2022 --minify --sourcemap --outdir=build/dist"
+    "bundle": "node build.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

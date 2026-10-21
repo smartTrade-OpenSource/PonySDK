@@ -16,3 +16,5 @@ if (typeof loaded === 'function') {
     (window as unknown as { pony: Terminal }).pony = terminal;
     terminal.start();
 }
+
+export * from './core-api.ts';

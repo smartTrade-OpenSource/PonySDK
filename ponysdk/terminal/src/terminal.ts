@@ -9,7 +9,7 @@ import { Cookies } from './objects/cookies.ts';
 import { watchWindows } from './objects/windows.ts';
 import { FLAG, type Message } from './protocol/messages.ts';
 import { Dispatcher, type Host } from './runtime/dispatcher.ts';
-import { createObject } from './runtime/factory.ts';
+import { createObject, loadAll, loadingOf } from './runtime/factory.ts';
 import { BrowserHistory } from './runtime/history.ts';
 import { log } from './runtime/log.ts';
 import type { AddOnFactory, Session } from './runtime/object.ts';
@@ -41,10 +41,12 @@ export class Terminal implements Session, Host {
     private parent: ParentTerminal | undefined;
     private transport: (message: Message) => void = () => log.warn('A message before the connection is dropped');
     private historyListened = false;
+    private chunksScheduled = false;
     private heartbeat: ReturnType<typeof setInterval> | undefined;
 
     constructor() {
-        this.dispatcher = new Dispatcher(this, createObject, this, this.history, id => this.parent?.dictionaryEntry(id));
+        this.dispatcher = new Dispatcher(this, createObject, this, this.history, id => this.parent?.dictionaryEntry(id),
+            loadingOf);
     }
 
     start(): void {
@@ -84,6 +86,7 @@ export class Terminal implements Session, Host {
             this.dispatcher.guard(() => {
                 if (windowId !== null) this.dispatcher.receiveInWindow(bytes);
                 else this.dispatcher.receiveInFrame(bytes);
+                this.loadChunksLater();
             });
         });
         if (windowId !== null) parent.setReadyWindow(windowId);
@@ -93,6 +96,21 @@ export class Terminal implements Session, Host {
     }
 
     /** On each connection: messages go to the new transport, the cookies are sent, the splash screen hides. */
+    /**
+     * The widgets loaded on demand, once the page is built: one second after the first message, when the browser is
+     * idle, so that they do not compete with the page, and the first of them does not wait (ADR-0004).
+     */
+    private loadChunksLater(): void {
+        if (this.chunksScheduled) return;
+        this.chunksScheduled = true;
+        const idle = (window as { requestIdleCallback?: (callback: () => void, options: { timeout: number }) => void })
+            .requestIdleCallback;
+        setTimeout(() => {
+            if (idle !== undefined) idle(loadAll, { timeout: 4000 });
+            else loadAll();
+        }, 1000);
+    }
+
     private init(transport: (message: Message) => void): void {
         this.transport = transport;
         if (!this.historyListened) {
@@ -115,7 +133,10 @@ export class Terminal implements Session, Host {
     private socketListener(): SocketListener {
         return {
             opened: socket => this.init(message => socket.send(JSON.stringify(message))),
-            received: message => this.dispatcher.receive(message),
+            received: message => {
+                this.dispatcher.receive(message);
+                this.loadChunksLater();
+            },
             closed: code => {
                 if (code !== 1000) this.reconnection?.socketClosed();
             },
