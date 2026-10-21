@@ -22,7 +22,7 @@ export function reload(): void {
 }
 
 /**
- * Notices a lost connection and gets it back (the GWT terminal's ReconnectionChecker). The page is told (the
+ * Notices a lost connection and gets it back. The page is told (the
  * element #reconnection, or showReconnectionInformation), then the server is pinged every 2 s. Once it answers: with
  * transparent reconnection (ponyReconnectMode), a new socket resumes the context; else onPonyReconnected runs, or
  * the page reloads.

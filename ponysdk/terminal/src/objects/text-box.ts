@@ -12,7 +12,7 @@ import { Mask } from './mask.ts';
 type Field = HTMLInputElement | HTMLTextAreaElement;
 
 /**
- * A text field (the GWT terminal's PTTextBoxBase): its value goes to the server on change, and, when the server
+ * A text field: its value goes to the server on change, and, when the server
  * listens to key up, before each key up whose key changed it.
  */
 export class TextBoxBase extends FocusWidget {

@@ -32,7 +32,7 @@ interface NativeBinding {
 }
 
 /**
- * A terminal object with an element (the GWT terminal's PTUIObject and PTWidget): style, attributes, visibility,
+ * A terminal object with an element: style, attributes, visibility,
  * the DOM events the server listens to, and the attachment to the document. A container keeps its children here.
  *
  * Everything the widget registers on the browser goes through {@link lifetime}: collecting the widget releases it.

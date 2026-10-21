@@ -31,8 +31,8 @@ export interface Host {
 }
 
 /**
- * Applies the server's instructions to the terminal objects and sends their messages back (the GWT terminal's
- * UIBuilder). An instruction is a block: its first model says what to do (TYPE_CREATE, TYPE_UPDATE...) to which
+ * Applies the server's instructions to the terminal objects and sends their messages back. An
+ * instruction is a block: its first model says what to do (TYPE_CREATE, TYPE_UPDATE...) to which
  * object, the next models how, END closes it. A failing instruction is reported and skipped; the next one runs.
  */
 export class Dispatcher implements Context {

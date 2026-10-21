@@ -18,7 +18,7 @@ function dialog(): HTMLDialogElement {
 }
 
 /**
- * PPopupPanel and the popups made on it (the GWT terminal's PTPopupPanel): a dialog element in the browser's top
+ * PPopupPanel and the popups made on it: a dialog element in the browser's top
  * layer, shown as a popover, or with showModal() when modal; no z-index to manage. Its page position is set by the
  * server (POSITION_LEFT, POSITION_TOP), or centered (CENTER).
  *

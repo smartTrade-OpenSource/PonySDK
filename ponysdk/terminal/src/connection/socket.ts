@@ -21,7 +21,7 @@ interface EarlySocket {
     closeEvent: CloseEvent | null;
 }
 
-/** The WebSocket to the server (the GWT terminal's WebSocketClient). */
+/** The WebSocket to the server. */
 export class Socket {
     private readonly socket: WebSocket;
     private readonly listener: SocketListener;

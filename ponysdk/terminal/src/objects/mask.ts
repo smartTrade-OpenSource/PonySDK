@@ -19,7 +19,7 @@ function accepts(slot: Slot, char: string): boolean {
 }
 
 /**
- * The value of a masked text box, as the GWT terminal's TextBoxMaskedDecorator.InputValue: a mask such as
+ * The value of a masked text box, as the GWT terminal kept it: a mask such as
  * ({{000}}) {{000}}.{{0000}}, whose groups take digits (0) or letters (A). Characters go in at a position, pushing the
  * next ones; removing them pulls the next ones back.
  */

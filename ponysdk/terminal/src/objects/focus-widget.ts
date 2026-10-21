@@ -9,7 +9,7 @@ import { apply, type Context, type Setters } from '../runtime/object.ts';
 import { Widget } from '../runtime/widget.ts';
 
 /**
- * A widget the user acts on (the GWT terminal's PTFocusWidget). A disabled one sends no event. By default a click
+ * A widget the user acts on. A disabled one sends no event. By default a click
  * disables it until the server has processed the click (END_OF_PROCESSING), so that a double click is not processed
  * twice; ENABLED_ON_REQUEST keeps it enabled, LOADING_ON_REQUEST marks it busy meanwhile.
  */

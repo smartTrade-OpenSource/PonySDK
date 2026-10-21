@@ -32,7 +32,7 @@ function release(child: HTMLElement): void {
 }
 
 /**
- * The layout panels (the GWT terminal's Layout): each child is in a layer, absolutely positioned in the panel by
+ * The layout panels: each child is in a layer, absolutely positioned in the panel by
  * constraints (left, right, width; top, bottom, height) in a unit; the child fills its layer, or keeps its own size
  * at the beginning or the end of it (PAlignment). Layout is CSS: nothing is measured, the browser resizes the layers
  * with the panel, which replaces GWT's resize propagation.

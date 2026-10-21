@@ -24,7 +24,7 @@ interface ParentTerminal {
 }
 
 /**
- * The terminal of a page (the GWT terminal's PonySDK): the main window's, connected to the server by its WebSocket,
+ * The terminal of a page: the main window's, connected to the server by its WebSocket,
  * or that of a window or a frame opened by the server, fed by its opener or its parent.
  *
  * Its public methods are window.pony, which ponysdk.js, the addons and the child terminals call: their names are a

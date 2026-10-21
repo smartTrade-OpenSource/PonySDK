@@ -11,7 +11,7 @@ const TEXT_ALIGN: Readonly<Record<number, string>> = { [HA.ALIGN_LEFT]: 'left', 
 const VERTICAL_ALIGN: Readonly<Record<number, string>> = { [VA.ALIGN_TOP]: 'top', [VA.ALIGN_MIDDLE]: 'middle', [VA.ALIGN_BOTTOM]: 'bottom' };
 
 /**
- * PFlexTable and PGrid (the GWT terminal's PTHTMLTable): a table whose widgets go to a cell (ROW, COLUMN), which then
+ * PFlexTable and PGrid: a table whose widgets go to a cell (ROW, COLUMN), which then
  * carries the class ptc. Rows, cells and columns take style names, alignment, spans and sizes. A cell a property
  * names is created with the rows and cells before it, when missing.
  */
