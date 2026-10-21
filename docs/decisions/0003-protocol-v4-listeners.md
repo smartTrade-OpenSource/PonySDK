@@ -50,8 +50,7 @@ Protocol version 4, `ProtocolVersion.LISTENERS`.
 - `WC_LISTEN_EVENT` for every widget: no new key, but its events carry `detail` only, and its name says web
   component. Rejected.
 - Options as separate keys (`EVENT_FIELDS`, `THROTTLE`...): one key each from the 6 left. Rejected for the JSON string.
-- A binary frame from the terminal for the events: the server parses JSON for every message today; to measure first
-  (ADR-0002 Outcome, O5). Out of this decision.
+- A binary frame from the terminal for the events: measured, not done (see Update).
 
 ## Consequences
 
@@ -60,3 +59,17 @@ Protocol version 4, `ProtocolVersion.LISTENERS`.
   traffic for scrolling, pointer moves and typing.
 - 2 of the 6 keys left are spent.
 - A page loaded before an upgrade keeps protocol 3 until it is reloaded: it gets neither change.
+
+## Update (2026-10-21)
+
+Key budget. Five keys no V3 server writes and no terminal reads went before V3 is released: `HEARTBEAT` (2.x had
+already removed it, so V3's numbers differed from 2.x's from index 1 on), `DICTIONARY_STRING_ADD`, `WC_SHADOW_MODE`,
+`WC_USE_SHARED_SKIN` and `WC_SET_PROPERTY_TYPED` (never written). `SUGGESTIONS`, written by 2.x only, stays: V3's keys
+now extend the 227 of 2.x at the same numbers. 247 keys are used, 9 left. Once V3 is released no key is renumbered: a
+page loaded before a deployment may still read them.
+
+Binary messages from the terminal (`./gradlew :ponysdk:bench -Pbench.args="v4 inbound"`). Per message, on the path
+of `WebSocket.onWebSocketText`: a click (87 B of JSON) costs 0.57 µs to parse and 0.13 µs to dispatch, a value change
+(29 B) 0.19 and 0.03 µs, with 1.4 to 2.3 KB allocated, most of it the `JsonObject` tree. That tree is what every
+widget's `onClientData(JsonObject)` takes: a binary format would have to build it again, or change that API on every
+widget. A message costs less than one setter on the way out (1.4 µs). Not done.
