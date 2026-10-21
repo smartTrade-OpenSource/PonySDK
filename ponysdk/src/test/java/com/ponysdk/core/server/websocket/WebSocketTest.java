@@ -268,8 +268,11 @@ public class WebSocketTest {
      */
     @Test
     public void testOnWebSocketBinary() {
-        // Not implemented yet
-        webSocket.onWebSocketBinary(null, Callback.NOOP);
+        final Callback callback = Mockito.mock(Callback.class);
+        webSocket.onWebSocketBinary(null, callback);
+        // A callback completes once: a second succeed() is a protocol error for Jetty's demand
+        Mockito.verify(callback, Mockito.times(1)).succeed();
+        Mockito.verify(callback, Mockito.never()).fail(Mockito.any());
     }
 
     /**
