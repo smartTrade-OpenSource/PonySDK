@@ -162,3 +162,29 @@ test('mask: a character that does not fit is refused, the mask\'s own is typed o
     await expect(box).toHaveValue('12/0_/____');
     await expect(page.getByText('Mask: 12/0_/____')).toBeVisible();
 });
+
+test('protocol 4: a DOM event by name, debounced in the browser, with its fields', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'events');
+    await page.getByLabel('Events box').pressSequentially('hello', { delay: 20 });
+    await expect(page.getByText('Input: hello (1)')).toBeVisible(); // five keys, one event
+    // EVENT ("Z") with EVENT_FIELDS ("z")
+    expect(sent.filter(m => m.includes('"Z":"input"'))).toEqual([expect.stringContaining('"z":{"target.value":"hello"}')]);
+});
+
+test('protocol 4: a handler the server removed is no longer sent', async ({ page }) => {
+    const sent = [];
+    page.on('websocket', ws => ws.on('framesent', frame => sent.push(String(frame.payload))));
+    await open(page, 'events');
+    const scroll = page.getByLabel('Events scroll');
+    await scroll.evaluate(e => e.scrollTo(0, 100));
+    await expect(page.getByText('Scrolls: 1')).toBeVisible();
+    await page.getByRole('button', { name: 'Stop scrolls' }).click();
+    await page.waitForTimeout(500); // the click reaches the server, the removal the terminal
+    const before = sent.filter(m => m.includes('"M":')).length; // HANDLER_SCROLL
+    await scroll.evaluate(e => e.scrollTo(0, 300));
+    await page.waitForTimeout(500);
+    expect(sent.filter(m => m.includes('"M":')).length).toBe(before);
+    await expect(page.getByText('Scrolls: 1')).toBeVisible();
+});

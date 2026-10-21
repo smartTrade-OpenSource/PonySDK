@@ -81,6 +81,8 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PEventOptions;
+import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 /**
@@ -129,7 +131,8 @@ final class OraclePages {
         Map.entry("datebox", OraclePages::dateBox),
         Map.entry("richtext", OraclePages::richText),
         Map.entry("mask", OraclePages::mask),
-        Map.entry("legacy", OraclePages::legacy));
+        Map.entry("legacy", OraclePages::legacy),
+        Map.entry("events", OraclePages::events));
 
     private OraclePages() {
     }
@@ -855,6 +858,35 @@ final class OraclePages {
         styledOff.setStyleName("app-box");
         styledOff.setEnabled(false);
         panel.add(Element.newPButton("Plain"), styled, off, styledOff, Element.newPLabel("A label"));
+        return panel;
+    }
+
+    // ---- not a scenario: protocol 4 (typescript-terminal.spec.js, docs/decisions/0003-protocol-v4-listeners.md) ----
+
+    /** A DOM event by name, debounced; a scroll handler the server removes. */
+    private static IsPWidget events() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PTextBox box = Element.newPTextBox();
+        box.setAttribute("aria-label", "Events box");
+        final PLabel typed = Element.newPLabel("Input: none");
+        final int[] inputs = {0};
+        box.addEventListener("input", PEventOptions.fields("target.value").debounce(Duration.ofMillis(150)),
+            e -> typed.setText("Input: " + e.getString("target.value") + " (" + ++inputs[0] + ")"));
+
+        final PScrollPanel scroll = Element.newPScrollPanel();
+        scroll.setAttribute("aria-label", "Events scroll");
+        scroll.setHeight("60px");
+        scroll.setWidth("200px");
+        final PFlowPanel tall = Element.newPFlowPanel();
+        tall.setHeight("600px");
+        scroll.setWidget(tall);
+        final PLabel scrolls = Element.newPLabel("Scrolls: 0");
+        final int[] count = {0};
+        final PScrollEvent.PScrollHandler handler = e -> scrolls.setText("Scrolls: " + ++count[0]);
+        scroll.addScrollHandler(handler);
+        final PButton stop = clickable("Stop scrolls");
+        stop.addClickHandler(e -> scroll.removeScrollHandler(handler));
+        panel.add(box, typed, scroll, scrolls, stop);
         return panel;
     }
 }
