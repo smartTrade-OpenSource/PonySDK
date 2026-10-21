@@ -218,8 +218,9 @@ the bundle size and the porting rate the rest is estimated from.
 P0 to P9 are done on `NC_V3` (2026-10-21): the TypeScript terminal is the only one, GWT is gone from the build, the
 jar and the server.
 
-- Bundle: 134 KB minified, 39 KB gzip, against 122 KB gzip for one GWT permutation. The jar no longer pulls
-  `gwt-user`, elemental2 or jsinterop; the build no longer needs `gwt-dev`.
+- Bundle: 134 KB minified, 39 KB gzip, against 122 KB gzip for one GWT permutation; 27 KB gzip before the first
+  widget since ADR-0004. The jar no longer pulls `gwt-user`, elemental2 or jsinterop; the build no longer needs
+  `gwt-dev`.
 - Oracle: 35 scenarios recorded with GWT pass on Chromium, Firefox and WebKit. One difference is kept on purpose:
   a clicked radio button sends its value once (GWT sent it twice). The traces stay as references; a new scenario is
   recorded on the TypeScript terminal and reviewed by hand.
