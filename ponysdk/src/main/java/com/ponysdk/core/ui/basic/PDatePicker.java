@@ -38,6 +38,7 @@ import jakarta.json.JsonObject;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.util.*;
 
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
@@ -154,11 +155,28 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void setValue(final Date date) {
         if (Objects.equals(this.date, date)) return;
         this.date = date;
-        saveUpdate(ServerToClientModel.DATE, DateConverter.toTimestamp(date));
+        saveUpdate(ServerToClientModel.DATE, DateConverter.toTimestamp(day(date)));
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(ServerToClientModel.TIME, DateConverter.toTimestamp(date));
+        saveUpdate(ServerToClientModel.TIME, DateConverter.toTimestamp(day(date)));
+    }
+
+    /**
+     * The terminal shows the day a timestamp falls on in UTC: a date goes as midnight UTC of the day it falls on in this
+     * picker's time zone ({@link #setTimeZone(TimeZone)}, UTC by default), the zone the dates it sends back are read in.
+     */
+    private Date day(final Date date) {
+        if (date == null) return null;
+        return Date.from(date.toInstant().atZone(dateFormat.getTimeZone().toZoneId()).toLocalDate()
+            .atStartOfDay(ZoneOffset.UTC).toInstant());
+    }
+
+    private List<Date> days(final Collection<Date> dates) {
+        if (dates == null) return null;
+        final List<Date> days = new ArrayList<>(dates.size());
+        for (final Date date : dates) days.add(day(date));
+        return days;
     }
 
     /**
@@ -166,7 +184,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        final Long[][] encodedDates = DateConverter.encode(dates);
+        final Long[][] encodedDates = DateConverter.encode(days(dates));
         if (encodedDates != null) {
             for (final Long[] part : encodedDates) {
                 saveUpdate(writer -> {
@@ -181,7 +199,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        final Long[][] encodedDates = DateConverter.encode(dates);
+        final Long[][] encodedDates = DateConverter.encode(days(dates));
         if (encodedDates != null) {
             for (final Long[] part : encodedDates) {
                 saveUpdate(writer -> {
@@ -196,7 +214,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        final Long[][] encodedDates = DateConverter.encode(dates);
+        final Long[][] encodedDates = DateConverter.encode(days(dates));
         if (encodedDates != null) {
             for (final Long[] part : encodedDates) {
                 saveUpdate(writer -> {
@@ -223,8 +241,13 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         return day;
     }
 
+    /** The time zone of the picker's days: those it shows, and those it reads the user's picks in. */
     public void setTimeZone(final TimeZone timeZone) {
         this.dateFormat.setTimeZone(timeZone);
+    }
+
+    public TimeZone getTimeZone() {
+        return dateFormat.getTimeZone();
     }
 
     /**

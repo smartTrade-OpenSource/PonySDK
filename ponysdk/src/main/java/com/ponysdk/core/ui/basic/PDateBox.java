@@ -87,6 +87,8 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         this.keepDayTimeNeeded = keepDayTimeNeeded;
+        // the picker's days are the box's: in the zone of its format
+        datePicker.setTimeZone(dateFormat.getTimeZone());
         saveAdd(datePicker.getID(), ID);
     }
 
@@ -157,6 +159,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         if (Objects.equals(this.dateFormat, dateFormat)) return;
         this.dateFormat = dateFormat;
+        datePicker.setTimeZone(dateFormat.getTimeZone());
         if (initialized) saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
