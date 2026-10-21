@@ -26,7 +26,12 @@ package com.ponysdk.core.server.stm;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Txn {
+
+    private static final Logger log = LoggerFactory.getLogger(Txn.class);
 
     private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
@@ -74,10 +79,20 @@ public class Txn {
         end();
     }
 
+    /**
+     * Ends a transaction that failed. What it wrote is sent all the same: the objects it changed keep their changes,
+     * and the terminal must see them (a block the failure interrupted is ended where it stopped).
+     */
     public void rollback() {
         if (txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
-        fireBeforeRollback();
-        end();
+        try {
+            fireBeforeRollback();
+            flush();
+        } catch (final Throwable e) {
+            log.error("Cannot send what a failed transaction wrote", e);
+        } finally {
+            end();
+        }
     }
 
     /** Ends the transaction but keeps the instance as this thread's next one: no allocation per execute(). */

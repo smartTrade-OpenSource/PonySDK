@@ -36,6 +36,13 @@ public class ModelWriter {
 
     private WeakReference<PWindow> currentWindow;
 
+    /**
+     * True from a block's start to its END. A block still open at the next block, drain or flush was interrupted by
+     * an exception: it is ended where it stopped. Its fields are whole (a field that fails is not written) and may
+     * announce dictionary strings the terminal must learn, so it is ended, never dropped.
+     */
+    private boolean blockOpen;
+
     /** The UIContext this writer belongs to (set by the UIContext constructor). */
     private UIContext owner;
 
@@ -183,11 +190,12 @@ public class ModelWriter {
     }
 
     /**
-     * Writes everything held back - deferred updates, an open create block - now. Called before any other block,
-     * before each flush and before any write that bypasses this writer.
+     * Writes everything held back - deferred updates, an open create block - now, and ends a block an exception
+     * interrupted. Called before any other block, before each flush and before any write that bypasses this writer.
      */
     public void drainPendingUpdates() {
         closeOpenCreate();
+        if (blockOpen) endObject(); // interrupted by an exception
         final PendingUpdates p = pending;
         if (p == null || p.isEmpty() || draining) return;
         draining = true;
@@ -240,8 +248,10 @@ public class ModelWriter {
 
     public void beginObject(final PWindow window) {
         if (createOpen) closeOpenCreate();
+        if (blockOpen) endObject(); // interrupted by an exception
         if (pending != null && !draining && !pending.isEmpty()) drainPendingUpdates(); // keep write order
         encoder.beginObject();
+        blockOpen = true;
 
         if (currentWindow == null || currentWindow.get() != window) {
             currentWindow = new WeakReference<>(window);
@@ -272,6 +282,7 @@ public class ModelWriter {
     }
 
     void endObjectUnchecked() {
+        blockOpen = false;
         encoder.endObject();
     }
 
@@ -283,6 +294,7 @@ public class ModelWriter {
     }
 
     public void endObject() {
+        blockOpen = false;
         if (canWrite()) {
             encoder.endObject();
         }
