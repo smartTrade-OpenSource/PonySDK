@@ -40,7 +40,6 @@ import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -83,13 +82,6 @@ public class WebSocketTest {
 
         encodedValues.clear();
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        webSocket.setRequest(request);
         final TxnContext txnContext = Mockito.mock(TxnContext.class);
         Mockito.when(txnContext.getWriter()).thenReturn(new com.ponysdk.core.writer.ModelWriter(webSocket));
         webSocket.setContext(txnContext);
@@ -107,8 +99,6 @@ public class WebSocketTest {
         final ArgumentCaptor<UIContext> uiContextCaptor = ArgumentCaptor.forClass(UIContext.class);
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
         uiContext = uiContextCaptor.getValue();
-
-        assertEquals(request, webSocket.getRequest());
     }
 
     /**
@@ -328,13 +318,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        ws.setRequest(request);
 
         final TxnContext txnContext = Mockito.mock(TxnContext.class);
         Mockito.when(txnContext.getWriter()).thenReturn(new com.ponysdk.core.writer.ModelWriter(ws));
@@ -406,13 +389,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        ws.setRequest(request);
 
         final TxnContext txnContext = Mockito.mock(TxnContext.class);
         Mockito.when(txnContext.getWriter()).thenReturn(new com.ponysdk.core.writer.ModelWriter(ws));
@@ -626,13 +602,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        ws.setRequest(request);
 
         // TxnContext with NO application (null)
         final TxnContext txnContext = new TxnContext(ws);
@@ -670,13 +639,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        ws.setRequest(request);
 
         // TxnContext with a real Application that has no UIContexts
         final TxnContext txnContext = new TxnContext(ws);
@@ -727,13 +689,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request2 = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request2.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request2.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest2 = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest2.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request2.getHttpServletRequest()).thenReturn(httpRequest2);
-        ws2.setRequest(request2);
 
         // Use a TxnContext with an Application that contains the non-suspended UIContext
         final TxnContext txnContext2 = new TxnContext(ws2);
@@ -798,9 +753,6 @@ public class WebSocketTest {
                 @Override void flush0() {}
                 @Override public void encode(final ServerToClientModel model, final Object value) {}
             };
-            final JettyServerUpgradeRequest request2 = Mockito.mock(JettyServerUpgradeRequest.class);
-            Mockito.when(request2.getParameterMap()).thenReturn(java.util.Map.of());
-            ws2.setRequest(request2);
             final TxnContext txnContext2 = new TxnContext(ws2);
             txnContext2.setApplication(application);
             ws2.setContext(txnContext2);
@@ -1256,13 +1208,6 @@ public class WebSocketTest {
             @Override public void encode(final ServerToClientModel model, final Object value) {}
         };
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        Mockito.when(request.getParameterMap()).thenReturn(java.util.Map.of());
-        Mockito.when(request.getHeader("User-Agent")).thenReturn("test-agent");
-        final jakarta.servlet.http.HttpServletRequest httpRequest = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
-        Mockito.when(httpRequest.getSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
-        Mockito.when(request.getHttpServletRequest()).thenReturn(httpRequest);
-        ws.setRequest(request);
 
         final TxnContext txnContext = Mockito.mock(TxnContext.class);
         Mockito.when(txnContext.getWriter()).thenReturn(new com.ponysdk.core.writer.ModelWriter(ws));

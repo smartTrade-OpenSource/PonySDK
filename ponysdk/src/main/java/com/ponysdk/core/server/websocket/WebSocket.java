@@ -33,7 +33,6 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -77,7 +76,6 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     /** Poll interval while waiting for the suspended state. */
     private static final long RECONNECT_SUSPEND_POLL_MS = 20;
 
-    private JettyServerUpgradeRequest request;
     // Snapshot of the upgrade request, captured by WebSocketServlet#captureUpgradeData while the request
     // is still live (Jetty 12 recycles it after the upgrade). UIContext serves its accessors from it.
     private UpgradeRequestData upgradeRequestData;
@@ -654,14 +652,6 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             return message + " (" + statusCode + ")";
         }
 
-    }
-
-    public JettyServerUpgradeRequest getRequest() {
-        return request;
-    }
-
-    public void setRequest(final JettyServerUpgradeRequest request) {
-        this.request = request;
     }
 
     public void setUpgradeRequestData(final UpgradeRequestData upgradeRequestData) {

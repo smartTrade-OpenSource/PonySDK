@@ -2055,19 +2055,12 @@ public class MyEntryPoint implements EntryPoint {
 
 This is the most critical pitfall of Jetty 12. Unlike Jetty 9, Jetty 12 **recycles the HTTP request object** after the WebSocket upgrade. Any access to `JettyServerUpgradeRequest.getParameterMap()`, `getHeader()`, or `getHttpServletRequest()` after `onWebSocketOpen()` will throw a `NullPointerException`.
 
-**Solution — cache everything during `setRequest()`**, which is called while the request is still valid:
-
-```java
-// Called during createWebSocket(), request is still valid here
-public void setRequest(final JettyServerUpgradeRequest request) {
-    this.request = request;
-    this.cachedParameterMap = request.getParameterMap();
-    this.cachedUserAgent    = request.getHeader("User-Agent");
-    this.cachedHttpSession  = request.getHttpServletRequest().getSession();
-}
-```
-
-`UIContext` and `EntryPoint` implementations use the cached getters (`getCachedParameterMap()`, etc.) instead of accessing the HTTP request directly.
+**Solution — a snapshot taken during the handshake.** `WebSocketServlet.captureUpgradeData(request)` copies what
+the application may read later (parameters, headers, cookies, host, TLS, remote address, HTTP session) into an
+`UpgradeRequestData` while the request is still valid; an override starts from `super.captureUpgradeData(request)`.
+The WebSocket and the `UIContext` keep only the snapshot, never the request: `UIContext.getParameterMap()`,
+`getHeader(s)`, `getRequestCookies()`, `getHost()`, `isSecure()`, `getRemoteSocketAddress()`, `getUserAgent()` and
+`getSession()` serve it.
 
 ### 14.3 WebSocket API Changes (Jetty 9 → Jetty 12)
 

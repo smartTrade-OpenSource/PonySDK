@@ -15,6 +15,7 @@
 |---|---|
 | `UIContext.getRequest()` (Jetty 12 recycles the request after the upgrade) | `getParameterMap`, `getHeader(s)`, `getRequestCookies`, `getHost`, `isSecure`, `getRemoteSocketAddress`, `getSession` |
 | `SessionManager.getUIContext(int)` (a lookup across sessions) | `getUIContext(applicationId, id)` |
+| `WebSocket.getRequest()` / `setRequest()` (the same recycled request) | `WebSocket.getUpgradeRequestData()`, the snapshot taken during the handshake |
 | `ValueProvider`, `IdentityValueProvider` | `java.util.function.Function`, `Function.identity()` |
 | `SimpleEventBus` | `EventBus` |
 | `HasPClickHandlers`, `HasPKeyPressHandlers`, `HasPSelectionHandlers`, `PHasText` | the widgets' own methods (no widget implemented them) |

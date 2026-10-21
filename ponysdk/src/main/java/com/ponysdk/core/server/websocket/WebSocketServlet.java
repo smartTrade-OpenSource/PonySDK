@@ -117,7 +117,6 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         }
 
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
         // Capture request-derived data NOW, while the upgrade request is still live. Jetty 12 recycles
         // the underlying servlet request once the upgrade completes, so any later read (parameter map,
         // headers, session) throws NPE or returns another request's data. UIContext serves this snapshot.
