@@ -2,7 +2,7 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-import { WidgetType as W, WidgetTypeNames } from '#model';
+import { WidgetType as W } from '#model';
 import { AddOnComposite, AddOnObject } from '../objects/addon.ts';
 import { Anchor, Button, PushButton } from '../objects/buttons.ts';
 import { CheckBox, RadioButton } from '../objects/check-box.ts';
@@ -47,6 +47,7 @@ import { WebComponent } from '../objects/web-component.ts';
 import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { log } from './log.ts';
+import { nameOf } from './names.ts';
 import type { Context, ObjectFactory, TerminalObject } from './object.ts';
 
 type Creator = (context: Context, id: number, type: number, reader: Reader) => TerminalObject;
@@ -117,7 +118,7 @@ const CREATORS = new Map<number, Creator>([
 export const createObject: ObjectFactory = (type, context, id, reader) => {
     const create = CREATORS.get(type);
     if (create === undefined) {
-        log.warn(`The TypeScript terminal has no ${WidgetTypeNames[type] ?? `type #${type}`} yet (#${id})`);
+        log.warn(`The TypeScript terminal has no ${nameOf(W, type) ?? `type #${type}`} yet (#${id})`);
         return null;
     }
     return create(context, id, type, reader);

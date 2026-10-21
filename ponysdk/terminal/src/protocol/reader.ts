@@ -8,11 +8,11 @@ import {
     ArrayValueModelMinSize,
     BooleanModel,
     ServerToClientModel as K,
-    ServerToClientModelNames,
     ServerToClientModelTypeModel,
     ValueTypeModel as V,
     ValueTypeModelConstants as T,
 } from '#model';
+import { nameOf } from '../runtime/names.ts';
 
 /** {@link Reader.blockEnd} when the buffer does not hold the whole block yet. */
 export const INCOMPLETE = -1;
@@ -176,7 +176,7 @@ export class Reader {
 
     /** The name of a model key, for messages. */
     static keyName(key: number): string {
-        return ServerToClientModelNames[key] ?? `#${key}`;
+        return nameOf(K, key) ?? `#${key}`;
     }
 
     /** The dictionary entry an id names. */

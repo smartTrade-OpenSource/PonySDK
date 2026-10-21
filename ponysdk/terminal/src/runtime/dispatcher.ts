@@ -2,10 +2,11 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-import { ClientToServerModel as C, HandlerModel as H, ServerToClientModel as K, WidgetTypeNames } from '#model';
+import { ClientToServerModel as C, HandlerModel as H, ServerToClientModel as K, WidgetType } from '#model';
 import { FLAG, type Message } from '../protocol/messages.ts';
 import { INCOMPLETE, Reader } from '../protocol/reader.ts';
 import { describe, log } from './log.ts';
+import { nameOf } from './names.ts';
 import type { AddOnFactory, ChildTerminal, Context, ObjectFactory, Session, TerminalObject } from './object.ts';
 import { Windows } from './windows.ts';
 
@@ -205,7 +206,7 @@ export class Dispatcher implements Context {
         const type = r.int;
         const object = this.factory(type, this, id, r);
         if (object === null) {
-            log.warn(`Cannot create #${id} of type ${WidgetTypeNames[type] ?? type}`);
+            log.warn(`Cannot create #${id} of type ${nameOf(WidgetType, type) ?? type}`);
             r.skipBlock();
             return;
         }

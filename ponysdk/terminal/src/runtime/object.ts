@@ -2,7 +2,8 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-import { WidgetTypeNames } from '#model';
+import { WidgetType } from '#model';
+import { nameOf } from './names.ts';
 import type { Message } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import type { Windows } from './windows.ts';
@@ -113,6 +114,6 @@ export class BaseObject implements TerminalObject {
     }
 
     toString(): string {
-        return `${WidgetTypeNames[this.type] ?? 'object'} #${this.id}`;
+        return `${nameOf(WidgetType, this.type) ?? 'object'} #${this.id}`;
     }
 }
