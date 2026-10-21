@@ -185,7 +185,10 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             if (removeWidgetFromMap(widget) != null) {
                 // Physical detach.
                 if (physicalDetach) {
-                    widget.saveRemove(widget.getID(), ID);
+                    if (isInitialized()) widget.saveRemove(widget.getID(), ID);
+                    else safeStackedInstructions().append(() -> { // in order with the adds (setWidget)
+                        if (widget.isInitialized() && widget.getParent() != this) widget.saveRemove(widget.getID(), ID);
+                    });
                 }
             }
         }
@@ -209,12 +212,20 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             addWidgetToMap(row, column, widget);
             adopt(widget);
 
-            // Physical attach.
-            widget.attach(window, getFrame());
-            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-
+            // Physical attach. Before the table is on the terminal, the add waits in the table's queue, in order with
+            // its rows and styles (insertRow, removeRow, formatters): on the widget's own queue, it would overtake
+            // them. A widget moved to another parent meanwhile is that parent's.
+            if (isInitialized()) addToTerminal(widget, row, column);
+            else safeStackedInstructions().append(() -> {
+                if (widget.getParent() == this || widget.getParent() == null) addToTerminal(widget, row, column);
+            });
         }
+    }
+
+    private void addToTerminal(final PWidget widget, final int row, final int column) {
+        widget.attach(window, getFrame());
+        widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+            new ServerBinaryModel(ServerToClientModel.COLUMN, column));
     }
 
     private PWidget getWidgetFromMap(final int row, final int column) {
