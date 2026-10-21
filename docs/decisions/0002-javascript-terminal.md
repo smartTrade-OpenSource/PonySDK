@@ -239,7 +239,6 @@ jar and the server.
   (`gwt-label`, `dialogControls`). About 20 of its selectors go through GWT's structure and match nothing: the tables
   of `Tree` and `MenuBar`, the `label` inside `CheckBox` and `RadioButton` (the label is the widget now), the `input`
   inside `DateBox` (the input is the widget), the anchors of `StackLayoutPanel`.
-- Open: `TYPE_REMOVE_HANDLER` carries no object id (a protocol change); `PHTMLTable` replays structural operations made
-  before attachment out of order; `PTabLayoutPanel` never creates a tab widget given before attachment; `PDateBox`
-  sends its picker the date at local midnight while the picker reads UTC midnight, so east of UTC the picker
-  highlights the day before.
+- Fixed after the migration, on the one terminal left: `TYPE_REMOVE_HANDLER` names its object from protocol 4
+  (ADR-0003); `PHTMLTable` replays what it was given before attachment in order, `PTabLayoutPanel` creates the tab
+  widgets given before attachment; `PDatePicker` shows the day of its time zone, `PDateBox` that of its format.
