@@ -98,6 +98,10 @@ public enum ClientToServerModel {
     // Transparent WebSocket reconnection (opt-in)
     RECONNECT_UI_CONTEXT_ID("Y"),  // sent by client on reconnect attempt: carries the uiContextId to resume
 
+    // DOM events listened to by name (ADR-0003): the event's name, and the object of the fields read on it
+    EVENT("Z"),
+    EVENT_FIELDS("z"),
+
     // WebSocket handshake parameter: highest protocol version the terminal understands (see ProtocolVersion)
     PROTOCOL_VERSION("w");
 

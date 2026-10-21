@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +42,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
@@ -54,6 +56,8 @@ import com.ponysdk.core.ui.basic.event.PDragEndEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
 import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PEvent;
+import com.ponysdk.core.ui.basic.event.PEventOptions;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
@@ -115,6 +119,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private static final String EVENT_INFO_KEY = ClientToServerModel.EVENT_INFO.toStringValue();
     private static final String WIDGET_POSITION_KEY = ClientToServerModel.WIDGET_POSITION.toStringValue();
     private static final String HANDLER_WIDGET_VISIBILITY_KEY = ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue();
+    private static final String EVENT_KEY = ClientToServerModel.EVENT.toStringValue();
+    private static final String EVENT_FIELDS_KEY = ClientToServerModel.EVENT_FIELDS.toStringValue();
 
     boolean visible = true;
     private IsPWidget parent;
@@ -148,6 +154,17 @@ public abstract class PWidget extends PObject implements IsPWidget {
         private boolean shown;
         private List<PVisibilityHandler> visibilityHandlers;
         private Set<PAddOn> addons;
+        /** DOM events listened to by name: the options the terminal has, and the listeners. */
+        private Map<String, EventListening> eventListening;
+    }
+
+    private static final class EventListening {
+        private PEventOptions options;
+        private final List<Consumer<PEvent>> listeners = new ArrayList<>(1);
+
+        private EventListening(final PEventOptions options) {
+            this.options = options;
+        }
     }
 
     private Extras wx;
@@ -501,6 +518,56 @@ public abstract class PWidget extends PObject implements IsPWidget {
         else return addDomHandler(handler, PKeyDownEvent.TYPE);
     }
 
+    /**
+     * Listens to a DOM event of this widget by its name ({@code input}, {@code pointerenter}, {@code wheel}...): the
+     * terminal sends the fields the options name, at the rate they set (docs/decisions/0003-protocol-v4-listeners.md).
+     * Options given again for a name replace the previous ones, for every listener of the name. The last listener of
+     * a name removed, the terminal stops listening. A terminal below protocol 4 is not told: a warning is logged.
+     */
+    public HandlerRegistration addEventListener(final String name, final PEventOptions options, final Consumer<PEvent> listener) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(options, "options");
+        Objects.requireNonNull(listener, "listener");
+        final Extras x = wx();
+        if (x.eventListening == null) x.eventListening = new HashMap<>(2);
+        EventListening listening = x.eventListening.get(name);
+        final boolean tell = listening == null || !listening.options.equals(options);
+        if (listening == null) x.eventListening.put(name, listening = new EventListening(options));
+        listening.options = options;
+        listening.listeners.add(listener);
+        if (tell) saveListening(ServerToClientModel.LISTEN_EVENT, options.toJson(name));
+        return () -> removeEventListener(name, listener);
+    }
+
+    private void removeEventListener(final String name, final Consumer<PEvent> listener) {
+        final Map<String, EventListening> all = wx != null ? wx.eventListening : null;
+        final EventListening listening = all != null ? all.get(name) : null;
+        if (listening == null || !listening.listeners.remove(listener) || !listening.listeners.isEmpty()) return;
+        all.remove(name);
+        saveListening(ServerToClientModel.UNLISTEN_EVENT, name);
+    }
+
+    /** Not coalesced: two names in one round each reach the terminal. */
+    private void saveListening(final ServerToClientModel model, final String value) {
+        if (UIContext.get().getProtocolVersion() < ProtocolVersion.LISTENERS) {
+            log.warn("{}: the terminal speaks protocol {}, below {}: it is not told to listen to events by name", this,
+                UIContext.get().getProtocolVersion(), ProtocolVersion.LISTENERS);
+            return;
+        }
+        saveUpdate(writer -> writer.write(model, value));
+    }
+
+    private void fireNamedEvent(final JsonObject instruction) {
+        final Map<String, EventListening> all = wx != null ? wx.eventListening : null;
+        final String name = instruction.getString(EVENT_KEY);
+        final EventListening listening = all != null ? all.get(name) : null;
+        if (listening == null) return; // removed meanwhile
+        final JsonObject fields = instruction.containsKey(EVENT_FIELDS_KEY) ? instruction.getJsonObject(EVENT_FIELDS_KEY)
+                : JsonValue.EMPTY_JSON_OBJECT;
+        final PEvent event = new PEvent(this, name, fields);
+        for (final Consumer<PEvent> listener : List.copyOf(listening.listeners)) listener.accept(event);
+    }
+
     public HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         return addDomHandler(handler, type, null);
     }
@@ -528,7 +595,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (!isVisible()) return;
-        if (instruction.containsKey(DOM_HANDLER_TYPE_KEY)) {
+        if (instruction.containsKey(EVENT_KEY)) {
+            fireNamedEvent(instruction);
+        } else if (instruction.containsKey(DOM_HANDLER_TYPE_KEY)) {
             final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(DOM_HANDLER_TYPE_KEY));
             switch (domHandler) {
                 case KEY_PRESS -> fireKeyEvent(new PKeyPressEvent(this, instruction.getInt(VALUE_KEY_KEY)));

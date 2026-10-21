@@ -19,6 +19,7 @@ export class TextBoxBase extends FocusWidget {
     /** The value the server knows. */
     private lastValue: string | null = null;
     private pasteHandled = false;
+    private sendsPaste = false;
     private filter: RegExp | undefined;
     private mask: Mask | undefined;
 
@@ -87,10 +88,11 @@ export class TextBoxBase extends FocusWidget {
                 this.context.send(message);
             });
         } else if (handler === H.HANDLER_PASTE) {
+            this.sendsPaste = true;
             if (this.pasteHandled) return;
             this.pasteHandled = true;
             this.listen('paste', () => {
-                if (!this.enabled) return;
+                if (!this.enabled || !this.sendsPaste) return;
                 setTimeout(() => this.context.guard(() => {
                     const message = about(this.id);
                     message[C.HANDLER_PASTE] = this.field.value;
@@ -100,6 +102,11 @@ export class TextBoxBase extends FocusWidget {
         } else {
             super.addHandler(reader, handler);
         }
+    }
+
+    override removeHandler(reader: Reader, handler: number): void {
+        if (handler === H.HANDLER_PASTE) this.sendsPaste = false;
+        else super.removeHandler(reader, handler);
     }
 
     /** REGEX_FILTER: characters that do not match are refused, typed, pasted or dropped. */

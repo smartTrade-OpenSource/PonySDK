@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -442,7 +443,9 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         if (destroy) return;
 
         final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER);
+            // protocol 4: the object, which the NULL model above cannot carry (ADR-0003)
+            if (UIContext.get().getProtocolVersion() >= ProtocolVersion.LISTENERS) writer.writeInt(ServerToClientModel.WIDGET_ID, ID);
             writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         };
         if (initialized) writeRemoveHandler(callback);

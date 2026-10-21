@@ -175,11 +175,17 @@ export class Dispatcher implements Context {
                 case K.TYPE_ADD_HANDLER:
                     this.addHandler(r.int);
                     break;
-                case K.TYPE_REMOVE_HANDLER:
-                    // TYPE_REMOVE_HANDLER is a NULL model: the server's object id is not written. Like the GWT
-                    // terminal, the last int read stands for it.
-                    this.removeHandler(r.int);
+                case K.TYPE_REMOVE_HANDLER: {
+                    // Protocol 4 names the object (WIDGET_ID). Below it, the NULL model carries none and the last int
+                    // read stood for it, as in the GWT terminal (ADR-0003).
+                    const previous = r.int;
+                    if (r.read() === K.WIDGET_ID) this.removeHandler(r.int);
+                    else {
+                        r.rewind();
+                        this.removeHandler(previous);
+                    }
                     break;
+                }
                 case K.TYPE_HISTORY:
                     this.historyItem(r.str ?? '');
                     break;

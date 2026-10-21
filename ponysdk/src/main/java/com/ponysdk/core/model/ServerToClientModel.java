@@ -295,7 +295,11 @@ public enum ServerToClientModel {
     // an update block, switch to the next object instead of closing the block and opening a new one.
     UPDATE_NEXT(ValueTypeModel.NULL),        // next object = previous id + 1
     UPDATE_NEXT_DELTA(ValueTypeModel.BYTE),  // next object = previous id + 2 + (value & 0xFF)
-    UPDATE_NEXT_ID(ValueTypeModel.UINT31);   // next object = absolute id
+    UPDATE_NEXT_ID(ValueTypeModel.UINT31),   // next object = absolute id
+
+    // DOM events by name (protocol >= ProtocolVersion.LISTENERS, ADR-0003)
+    LISTEN_EVENT(ValueTypeModel.STRING),     // JSON {"name", "fields", "throttle", "debounce", "prevent", "stop", "capture"}
+    UNLISTEN_EVENT(ValueTypeModel.STRING);   // the event's name
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

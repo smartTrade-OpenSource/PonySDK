@@ -73,6 +73,8 @@ export class FocusPanel extends SimplePanel {
  */
 export class ScrollPanel extends SimplePanel {
     private dragging = false;
+    /** Undefined until HANDLER_SCROLL: then whether the scroll goes to the server. */
+    private sendsScroll: boolean | undefined;
 
     static override create(context: Context, id: number, type: number): ScrollPanel {
         return new ScrollPanel(context, id, type, div(), 'pony-ScrollPanel');
@@ -105,6 +107,9 @@ export class ScrollPanel extends SimplePanel {
             super.addHandler(reader, handler);
             return;
         }
+        const listening = this.sendsScroll !== undefined;
+        this.sendsScroll = true;
+        if (listening) return;
         this.listen('scroll', () => {
             if (!this.dragging) this.sendScroll();
         });
@@ -118,7 +123,14 @@ export class ScrollPanel extends SimplePanel {
         }, window);
     }
 
+    /** Protocol 4 names the object: the scroll stops going to the server. */
+    override removeHandler(reader: Reader, handler: number): void {
+        if (handler === H.HANDLER_SCROLL) this.sendsScroll = false;
+        else super.removeHandler(reader, handler);
+    }
+
     private sendScroll(): void {
+        if (this.sendsScroll !== true) return;
         const e = this.element;
         const message = about(this.id);
         message[C.HANDLER_SCROLL] = FLAG;

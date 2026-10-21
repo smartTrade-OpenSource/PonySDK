@@ -43,9 +43,15 @@ public final class ProtocolVersion {
      * PARENT p END]}). Sent when the add immediately follows the create: every leaf widget.
      */
     public static final int CREATE_IN_PARENT = 3;
+    /**
+     * Listeners (docs/decisions/0003-protocol-v4-listeners.md): {@link ServerToClientModel#TYPE_REMOVE_HANDLER} is
+     * followed by {@link ServerToClientModel#WIDGET_ID}, its object; DOM events are listened to by name
+     * ({@link ServerToClientModel#LISTEN_EVENT}, {@link ServerToClientModel#UNLISTEN_EVENT}).
+     */
+    public static final int LISTENERS = 4;
 
     /** Highest version implemented by this terminal / server. */
-    public static final int CURRENT = CREATE_IN_PARENT;
+    public static final int CURRENT = LISTENERS;
 
     private ProtocolVersion() {
     }

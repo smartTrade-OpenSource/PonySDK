@@ -40,7 +40,7 @@ test('an enum with a byte value and a string value keeps both', () => {
 });
 
 test('constants and paths', () => {
-    assert.equal(ProtocolVersion.CURRENT, ProtocolVersion.CREATE_IN_PARENT);
+    assert.equal(ProtocolVersion.CURRENT, ProtocolVersion.LISTENERS);
     assert.equal(MappingPath.WEBSOCKET, 'ws');
 });
 

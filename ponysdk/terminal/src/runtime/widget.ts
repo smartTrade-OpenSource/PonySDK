@@ -13,6 +13,7 @@ import {
 import { about, type Message } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { log } from './log.ts';
+import { listenByName } from './named-events.ts';
 import { apply, BaseObject, type Context, type Setters, type TerminalObject } from './object.ts';
 
 /**
@@ -52,6 +53,8 @@ export class Widget extends BaseObject {
     private stopped: Set<number> | undefined;
     private visibility: IntersectionObserver | undefined;
     private binding: NativeBinding | undefined;
+    /** The DOM events listened to by name (LISTEN_EVENT), each stopped by its controller. */
+    private named: Map<string, AbortController> | undefined;
 
     constructor(context: Context, id: number, type: number, element: HTMLElement, typeClass: string | null = null) {
         super(context, id, type);
@@ -73,6 +76,21 @@ export class Widget extends BaseObject {
         this.lifetime.abort();
         this.visibility?.disconnect();
         this.attachListeners = undefined;
+        if (this.named !== undefined) for (const controller of this.named.values()) controller.abort();
+    }
+
+    /** LISTEN_EVENT: listens to a DOM event by name; listening again replaces the options. */
+    listenEvent(json: string): void {
+        const [name, controller] = listenByName(this.context, this.id, this.element, json);
+        this.named ??= new Map();
+        this.named.get(name)?.abort();
+        this.named.set(name, controller);
+    }
+
+    /** UNLISTEN_EVENT. */
+    unlistenEvent(name: string): void {
+        this.named?.get(name)?.abort();
+        this.named?.delete(name);
     }
 
     // ---- attachment --------------------------------------------------------------------------------------------------
@@ -473,4 +491,6 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     [K.NATIVE, (w, r) => w.sendToBinding(r.str ?? 'null')],
     [K.PREVENT_EVENT, (w, r) => w.preventEvent(r.int)],
     [K.STOP_EVENT, (w, r) => w.stopEvent(r.int)],
+    [K.LISTEN_EVENT, (w, r) => w.listenEvent(r.str ?? '{}')],
+    [K.UNLISTEN_EVENT, (w, r) => w.unlistenEvent(r.str ?? '')],
 ]);
