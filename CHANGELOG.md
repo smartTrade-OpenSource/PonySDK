@@ -50,6 +50,12 @@ Also check, before enabling the policy, that the HTML your application sends (`P
 handler (`onclick=...`) and no `javascript:` URL: the policy blocks them. Serving the policy as
 `Content-Security-Policy-Report-Only` first lists them without breaking anything.
 
+### Fixed
+
+- `InfiniteScrollAddon` (used by `ListBox`) passed the result of `updateView()` to `setTimeout`
+  instead of a function: the view was refreshed at once instead of debounced, and the string
+  evaluation it triggered is blocked under a strict policy.
+
 ### Added
 
 - `PonySDKServer.setResponseHeaders(Map)`: headers added to every HTTP response, for instance a

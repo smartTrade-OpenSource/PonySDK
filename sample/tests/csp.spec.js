@@ -47,6 +47,9 @@ test.describe('Strict Content Security Policy', () => {
       await expect(page.locator(selector).first()).toBeVisible();
     }
 
+    // Opening the list box renders its items through the InfiniteScrollAddon.
+    await page.locator('.csp-listbox').click();
+
     // Leave time for violations raised late.
     await page.waitForTimeout(1000);
 

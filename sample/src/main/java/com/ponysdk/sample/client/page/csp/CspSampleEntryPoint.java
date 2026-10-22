@@ -23,6 +23,8 @@
 
 package com.ponysdk.sample.client.page.csp;
 
+import java.util.List;
+
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDisclosurePanel;
@@ -39,6 +41,9 @@ import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.formatter.TextFunction;
+import com.ponysdk.core.ui.listbox.ListBox;
+import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
+import com.ponysdk.core.ui.listbox.ListBoxConfiguration;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
@@ -114,6 +119,12 @@ public class CspSampleEntryPoint implements EntryPoint {
         root.add("Child");
         root.setState(true);
         main.add(tree);
+
+        // List box: opening it renders its items through the InfiniteScrollAddon
+        final ListBox<String> listBox = new ListBox<>(new ListBoxConfiguration(),
+            List.of(ListBoxItem.of("One"), ListBoxItem.of("Two"), ListBoxItem.of("Three")));
+        listBox.asWidget().addStyleName("csp-listbox");
+        main.add(listBox);
 
         // History
         uiContext.getHistory().newItem("csp", false);
