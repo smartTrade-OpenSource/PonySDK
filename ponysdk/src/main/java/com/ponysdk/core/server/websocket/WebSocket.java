@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     private static final String KEY_HEARTBEAT = ClientToServerModel.HEARTBEAT_REQUEST.toStringValue();
     private static final String KEY_LATENCY = ClientToServerModel.TERMINAL_LATENCY.toStringValue();
+    private static final String KEY_TERMINAL_TIME = ClientToServerModel.TERMINAL_TIME.toStringValue();
     private static final String KEY_INSTRUCTIONS = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
     private static final String KEY_ERROR = ClientToServerModel.ERROR_MSG.toStringValue();
     private static final String KEY_WARN = ClientToServerModel.WARN_MSG.toStringValue();
@@ -70,6 +72,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     public static final int CLOSE_DROPPED = 4000;
     /** Close code of a reconnection refused while held (SessionAdmin): the terminal retries every 2 s. */
     public static final int CLOSE_RECONNECTION_HELD = 4001;
+    /** Close code of the terminal whose page is left (ADR-0005): no reconnection can follow, the context goes at once. */
+    public static final int CLOSE_PAGE_LEFT = 4002;
 
     /** Max time to wait, on reconnect, for the old context to enter the suspended state (race window). */
     private static final long RECONNECT_SUSPEND_WAIT_MS = 500;
@@ -277,7 +281,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                     log.error("ReconnectionListener threw an exception for UIContext #{}", uiContext.getID(), e);
                 }
             }
-            if (config.getReconnectionTimeoutMs() > 0) {
+            if (config.getReconnectionTimeoutMs() > 0 && statusCode != CLOSE_PAGE_LEFT) {
                 // Transparent reconnection enabled — suspend instead of destroy
                 uiContext.suspend(config.getReconnectionTimeoutMs());
             } else {
@@ -307,7 +311,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 // {"h":<nanos>}): no JSON parser / object tree per message for every session.
                 final long latency = parseLatencyMessage(message);
                 if (latency != NOT_A_LATENCY_MESSAGE) {
-                    processRoundtripLatency(latency);
+                    processRoundtripLatency(latency, parseTerminalTime(message));
                     if (monitor != null) monitor.onMessageProcessed(this, message);
                     return;
                 }
@@ -351,20 +355,40 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     private static final String HEARTBEAT_MESSAGE = "{\"" + ClientToServerModel.HEARTBEAT_REQUEST.toStringValue() + "\":0}";
     private static final String LATENCY_PREFIX = "{\"" + ClientToServerModel.TERMINAL_LATENCY.toStringValue() + "\":";
+    private static final String TERMINAL_TIME_PART = ",\"" + ClientToServerModel.TERMINAL_TIME.toStringValue() + "\":";
     static final long NOT_A_LATENCY_MESSAGE = Long.MIN_VALUE;
 
-    /** Parses exactly {@code {"h":<integer>}}; anything else (spaces, other keys...) returns NOT_A_LATENCY_MESSAGE. */
+    /**
+     * Parses exactly {@code {"h":<integer>}} or {@code {"h":<integer>,"x":<integer>}} and returns h; anything else
+     * (spaces, other keys...) returns NOT_A_LATENCY_MESSAGE.
+     */
     static long parseLatencyMessage(final String message) {
         final int end = message.length() - 1;
         if (end <= LATENCY_PREFIX.length() || message.charAt(end) != '}' || !message.startsWith(LATENCY_PREFIX)) {
             return NOT_A_LATENCY_MESSAGE;
         }
-        int i = LATENCY_PREFIX.length();
-        final boolean negative = message.charAt(i) == '-';
+        final int comma = message.indexOf(',', LATENCY_PREFIX.length());
+        if (comma < 0) return parseInteger(message, LATENCY_PREFIX.length(), end);
+        if (parseTerminalTime(message) == NOT_A_LATENCY_MESSAGE) return NOT_A_LATENCY_MESSAGE;
+        return parseInteger(message, LATENCY_PREFIX.length(), comma);
+    }
+
+    /** The x of a latency message parsed by {@link #parseLatencyMessage}, 0 without one (an older terminal). */
+    static long parseTerminalTime(final String message) {
+        final int comma = message.indexOf(',', LATENCY_PREFIX.length());
+        if (comma < 0) return 0;
+        if (!message.startsWith(TERMINAL_TIME_PART, comma)) return NOT_A_LATENCY_MESSAGE;
+        return parseInteger(message, comma + TERMINAL_TIME_PART.length(), message.length() - 1);
+    }
+
+    /** The integer written in message[from, to), or NOT_A_LATENCY_MESSAGE if it is not one or may overflow. */
+    private static long parseInteger(final String message, final int from, final int to) {
+        int i = from;
+        final boolean negative = i < to && message.charAt(i) == '-';
         if (negative) i++;
-        if (i == end || end - i > 18) return NOT_A_LATENCY_MESSAGE; // empty or may overflow: use the parser
+        if (i == to || to - i > 18) return NOT_A_LATENCY_MESSAGE; // empty or may overflow: use the parser
         long value = 0;
-        for (; i < end; i++) {
+        for (; i < to; i++) {
             final char c = message.charAt(i);
             if (c < '0' || c > '9') return NOT_A_LATENCY_MESSAGE;
             value = value * 10 + (c - '0');
@@ -373,14 +397,22 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     }
 
     private void processRoundtripLatency(final JsonObject jsonObject) {
-        processRoundtripLatency(jsonObject.getJsonNumber(KEY_LATENCY).longValue());
+        final JsonNumber terminalTime = jsonObject.getJsonNumber(KEY_TERMINAL_TIME);
+        processRoundtripLatency(jsonObject.getJsonNumber(KEY_LATENCY).longValue(), terminalTime != null ? terminalTime.longValue() : 0);
     }
 
-    private void processRoundtripLatency(final long lastSentPing) {
+    /**
+     * @param terminalTime ms the probe spent in the terminal, from the arrival of its message to the answer (ADR-0005):
+     *                     the rest of the roundtrip is the network's
+     */
+    private void processRoundtripLatency(final long lastSentPing, final long terminalTime) {
         final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
-        log.trace("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
+        final long terminalLatency = Math.max(0, Math.min(terminalTime, roundtripLatency)); // h and x come from the client
+        log.trace("Roundtrip measurement : {} ms from terminal #{}, {} ms in the terminal", roundtripLatency, uiContext.getID(),
+                terminalLatency);
         uiContext.addRoundtripLatencyValue(roundtripLatency);
-        uiContext.addNetworkLatencyValue(roundtripLatency);
+        uiContext.addTerminalLatencyValue(terminalLatency);
+        uiContext.addNetworkLatencyValue(roundtripLatency - terminalLatency);
         if (metrics != null) metrics.recordRoundtrip(roundtripLatency);
     }
 

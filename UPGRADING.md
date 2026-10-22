@@ -65,6 +65,12 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `DataGrid2`'s default column headers read "Pin / Unpin / Hide" (were "[pin me] / [hide me]").
 - Transparent reconnection (`setReconnectionTimeoutMs`, off by default): a reconnection to a context the server no
   longer has reloads the page, and starts no application on the server for it.
+- With transparent reconnection, a page left (closed, reloaded, navigated away) destroys its context at once instead
+  of suspending it for the window ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)).
+- A transaction that fails (a handler that throws) sends what it wrote before the failure.
+- Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others
+  average the last 10 probes received, not 10 slots counting the empty ones as 0. `getTerminalLatency()` is the time
+  the probe waited in the terminal (it was always 0), and `getNetworkLatency()` the roundtrip minus that time.
 
 ## Protocol
 

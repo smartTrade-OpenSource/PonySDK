@@ -1186,9 +1186,11 @@ public class UIContext {
         return terminalLatency != null ? terminalLatency.getValue() : 0;
     }
 
+    /** The average of the last values, up to its size: of fewer while it fills, not of zeros. */
     private static final class Latency {
 
         private int index = 0;
+        private int count = 0;
         private long sum = 0;
         private final long[] values;
 
@@ -1201,10 +1203,11 @@ public class UIContext {
             values[index] = value;
             sum += value;
             if (++index >= values.length) index = 0;
+            if (count < values.length) count++;
         }
 
         public double getValue() {
-            return (double) sum / values.length;
+            return count == 0 ? 0 : (double) sum / count;
         }
     }
 

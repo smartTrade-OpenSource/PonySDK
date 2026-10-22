@@ -168,3 +168,28 @@ test('a block creating a type whose module loads later waits, and the blocks aft
     await new Promise(resolve => setTimeout(resolve));
     assert.deepEqual(log, runs[2]!.log, 'then everything, in the same order');
 });
+
+test('the answer to the probe tells how long it waited in the terminal (ADR-0005)', () => {
+    const sent: Message[] = [];
+    const host: Host = {
+        send: message => sent.push(message),
+        contextCreated: () => true,
+        contextResumed: () => undefined,
+        contextDestroyed: () => undefined,
+        streamRequested: () => undefined,
+    };
+    const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
+    const factory: ObjectFactory = () => {
+        throw new Error('no object in this message');
+    };
+    const dispatcher = new Dispatcher(host, factory, { contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '' }, history);
+    const probe = new Uint8Array(10); // [ROUNDTRIP_LATENCY long][END]
+    probe[0] = K.ROUNDTRIP_LATENCY;
+    new DataView(probe.buffer).setBigInt64(1, 123n);
+    probe[9] = K.END;
+    dispatcher.receive(probe, performance.now() - 30);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0]![C.TERMINAL_LATENCY], 123);
+    const waited = sent[0]![C.TERMINAL_TIME] as number;
+    assert.ok(waited >= 30 && waited < 1000, `waited ${waited} ms`);
+});

@@ -358,6 +358,28 @@ public class WebSocketTest {
         assertTrue("Reconnection mode: UIContext should be suspended", setup.uiContext().isSuspended());
     }
 
+    /** ADR-0005: a page left cannot reconnect, its context goes at once instead of waiting for the window. */
+    @Test
+    public void testReconnectionMode_PageLeftDestroysAtOnce() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        setup.webSocket().onWebSocketClose(WebSocket.CLOSE_PAGE_LEFT, "page left", Callback.NOOP);
+        assertFalse(setup.uiContext().isSuspended());
+        assertFalse(setup.uiContext().isAlive());
+    }
+
+    /** ADR-0005: the time the probe waited in the terminal is the terminal's latency, the rest the network's. */
+    @Test
+    public void testRoundTripLatencySplitBetweenTerminalAndNetwork() {
+        final long sent = System.nanoTime() - TimeUnit.MILLISECONDS.toNanos(50);
+        webSocket.onWebSocketText("{\"h\":" + sent + ",\"x\":20}");
+        assertEquals(20, uiContext.getTerminalLatency(), 0);
+        assertEquals(uiContext.getRoundtripLatency() - 20, uiContext.getNetworkLatency(), 0);
+        assertTrue(uiContext.getRoundtripLatency() >= 50);
+
+        webSocket.onWebSocketText("{\"h\":" + System.nanoTime() + "}"); // an older terminal: all of it is the network's
+        assertEquals(10, uiContext.getTerminalLatency(), 0); // average of 20 and 0
+    }
+
     /**
      * Verifies that with reconnection enabled, an error on the old socket
      * does NOT destroy a suspended UIContext (bug fix validation).

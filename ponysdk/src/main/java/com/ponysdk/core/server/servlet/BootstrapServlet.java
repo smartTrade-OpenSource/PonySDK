@@ -291,13 +291,13 @@ public class BootstrapServlet extends HttpServlet {
     static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">(function(){"
             + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
             + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
-            + "e={opened:false,messages:[],closeEvent:null};"
+            + "e={opened:false,messages:[],times:[],closeEvent:null};"
             + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname+'" + MappingPath.WEBSOCKET + "?"
             + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
             + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
             + "e.socket.binaryType='arraybuffer';"
             + "e.socket.onopen=function(){e.opened=true;};"
-            + "e.socket.onmessage=function(m){e.messages.push(m.data);};"
+            + "e.socket.onmessage=function(m){e.messages.push(m.data);e.times.push(m.timeStamp);};"
             + "e.socket.onclose=function(c){e.closeEvent=c;};"
             + "window.ponyEarlySocket=e;})();</script>";
 

@@ -62,6 +62,8 @@ export class Dispatcher implements Context {
     private readonly history: HistoryPort;
     /** The window the blocks being read belong to; -1 until the first WINDOW_ID. */
     private currentWindowId = -1;
+    /** When the message being read arrived (performance.now()): a probe answers how long it waited here (ADR-0005). */
+    private arrivedAt = 0;
 
     constructor(host: Host, factory: ObjectFactory, session: Session, history: HistoryPort,
                 dictionaryFallback?: (id: number) => string | undefined, loader: (type: number) => Promise<void> | null = () => null) {
@@ -75,12 +77,16 @@ export class Dispatcher implements Context {
 
     // ---- terminals ---------------------------------------------------------------------------------------------------
 
-    /** A message of the WebSocket: the main window's blocks, and the blocks of the windows and frames it feeds. */
-    receive(message: Uint8Array): void {
+    /**
+     * A message of the WebSocket: the main window's blocks, and the blocks of the windows and frames it feeds.
+     * arrivedAt is when it arrived; while a module loads, the messages that come wait and count from the one that waits.
+     */
+    receive(message: Uint8Array, arrivedAt = performance.now()): void {
         const started = Date.now();
         const r = this.reader;
         r.feed(message);
         if (this.paused) return;
+        this.arrivedAt = arrivedAt;
         while (r.hasKey()) {
             const next = r.blockEnd();
             if (next === INCOMPLETE) return;
@@ -89,7 +95,7 @@ export class Dispatcher implements Context {
                 if (!this.receiveBlock(next)) return;
             } catch (e) {
                 if (!(e instanceof Pending)) throw e;
-                this.pause(start, e.loading, () => this.receive(NOTHING));
+                this.pause(start, e.loading, () => this.receive(NOTHING, this.arrivedAt));
                 return;
             }
         }
@@ -102,7 +108,10 @@ export class Dispatcher implements Context {
         const r = this.reader;
         const key = r.read();
         if (key === K.ROUNDTRIP_LATENCY) {
-            this.host.send({ [C.TERMINAL_LATENCY]: r.num });
+            this.host.send({
+                [C.TERMINAL_LATENCY]: r.num,
+                [C.TERMINAL_TIME]: Math.max(0, Math.round(performance.now() - this.arrivedAt)),
+            });
             r.read(); // END
         } else if (key === K.CREATE_CONTEXT) {
             const id = r.int;

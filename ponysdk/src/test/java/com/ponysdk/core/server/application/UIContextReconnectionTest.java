@@ -3275,8 +3275,10 @@ public class UIContextReconnectionTest {
         assertEquals(0.0, uiContext.getNetworkLatency(), 0.001);
 
         uiContext.addNetworkLatencyValue(100);
-        // Only 1 value in a window of 10 → 100/10 = 10
-        assertEquals(10.0, uiContext.getNetworkLatency(), 0.001);
+        // Only 1 value in a window of 10: the average of that value, not of it and nine zeros
+        assertEquals(100.0, uiContext.getNetworkLatency(), 0.001);
+        uiContext.addNetworkLatencyValue(50);
+        assertEquals(75.0, uiContext.getNetworkLatency(), 0.001);
     }
 
     /**

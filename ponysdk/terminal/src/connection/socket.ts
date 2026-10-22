@@ -8,7 +8,8 @@ import { log } from '../runtime/log.ts';
 export interface SocketListener {
     /** May come before connect() returns: when the page's socket was already open, its opening is replayed. */
     opened(socket: Socket): void;
-    received(message: Uint8Array): void;
+    /** arrivedAt: when the message arrived, on the clock of performance.now(). */
+    received(message: Uint8Array, arrivedAt: number): void;
     /** Closed by the server, the network or this page; 1000 is a normal close. */
     closed(code: number): void;
 }
@@ -18,6 +19,8 @@ interface EarlySocket {
     socket: WebSocket;
     opened: boolean;
     messages: ArrayBuffer[];
+    /** The messages' arrival times (their events' timeStamp); absent from a page served before ADR-0005. */
+    times?: number[];
     closeEvent: CloseEvent | null;
 }
 
@@ -40,7 +43,7 @@ export class Socket {
         delete holder.ponyEarlySocket;
         const socket = new Socket(early.socket, listener);
         if (early.opened) socket.onOpen();
-        for (const message of early.messages) socket.onMessage(message);
+        early.messages.forEach((message, i) => socket.onMessage(message, early.times?.[i] ?? performance.now()));
         if (early.closeEvent !== null) socket.onClose(early.closeEvent);
         log.info(`WebSocket opened by the page, ${early.messages.length} messages replayed`);
         return socket;
@@ -53,7 +56,7 @@ export class Socket {
         socket.onopen = () => this.onOpen();
         socket.onclose = event => this.onClose(event);
         socket.onerror = () => log.error('WebSocket error');
-        socket.onmessage = event => this.onMessage(event.data as unknown);
+        socket.onmessage = event => this.onMessage(event.data as unknown, event.timeStamp);
     }
 
     get readyState(): number {
@@ -80,11 +83,11 @@ export class Socket {
         this.listener.closed(event.code);
     }
 
-    private onMessage(data: unknown): void {
+    private onMessage(data: unknown, arrivedAt: number): void {
         this.lastMessageTime = Date.now();
         if (!(data instanceof ArrayBuffer)) return;
         try {
-            this.listener.received(new Uint8Array(data));
+            this.listener.received(new Uint8Array(data), arrivedAt);
         } catch (e) {
             log.error(`Error while processing a message of ${data.byteLength} bytes`, e);
         } finally {

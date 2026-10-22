@@ -639,9 +639,9 @@ PonySDK provides built-in latency monitoring:
 UIContext ctx = UIContext.get();
 
 // Measure latencies
-double roundtrip = ctx.getRoundtripLatency();  // Total: ~50-100ms typical
-double network = ctx.getNetworkLatency();       // Network only: ~20-50ms
-double terminal = ctx.getTerminalLatency();     // Client render: ~5-10ms
+double roundtrip = ctx.getRoundtripLatency();  // server -> terminal -> server
+double network = ctx.getNetworkLatency();       // the roundtrip minus the time spent in the terminal
+double terminal = ctx.getTerminalLatency();     // the probe's wait in the terminal: a busy page shows here
 
 // Alert on degradation
 if (roundtrip > 200) {
@@ -1491,15 +1491,15 @@ If you don't use OTel, the per-tab latency averages are still available directly
 ```java
 UIContext ctx = UIContext.get();
 double roundtrip = ctx.getRoundtripLatency();  // rolling avg of last 10 measurements (ms)
-double network   = ctx.getNetworkLatency();    // network portion only (ms)
-double terminal  = ctx.getTerminalLatency();   // client DOM rendering (ms)
+double network   = ctx.getNetworkLatency();    // the roundtrip minus the terminal's part (ms)
+double terminal  = ctx.getTerminalLatency();   // from the arrival of the probe's message to the answer (ms)
 
 if (roundtrip > 200) {
     log.warn("High latency on UIContext #{}: {}ms", ctx.getID(), roundtrip);
 }
 ```
 
-These are rolling averages over the last 10 round-trip measurements: the server sends a probe every 5 s (or every heartbeat period when shorter), so they cover the last 50 s. Useful for in-process alerting without an external metrics system.
+These are rolling averages over the last 10 round-trip measurements: the server sends a probe every 5 s (or every heartbeat period when shorter), so they cover the last 50 s. The terminal answers with the time the probe waited in it, from the arrival of its message (behind the blocks before it, the page's other tasks, a module loading); the rest of the roundtrip is the network's ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)). An older terminal, or the Pony driver, reports no terminal time: the network latency is then the roundtrip. Useful for in-process alerting without an external metrics system.
 
 ---
 
@@ -1557,6 +1557,10 @@ Client                          Server
 A reconnection to a context the server no longer has (restarted, window over, overflow) or that another socket
 resumed gets a `CREATE_CONTEXT` block with no context behind it, then a normal close: the terminal reloads its page,
 and no application starts for a page that is going away.
+
+A page left (closed, reloaded, navigated away, and not kept in the back-forward cache) closes its socket with 4002:
+the server destroys its context at once instead of suspending it, since no reconnection can follow
+([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)).
 
 #### How state stays consistent during suspension
 

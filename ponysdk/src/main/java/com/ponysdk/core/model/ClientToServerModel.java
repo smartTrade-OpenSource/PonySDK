@@ -103,7 +103,11 @@ public enum ClientToServerModel {
     EVENT_FIELDS("z"),
 
     // WebSocket handshake parameter: highest protocol version the terminal understands (see ProtocolVersion)
-    PROTOCOL_VERSION("w");
+    PROTOCOL_VERSION("w"),
+
+    // In the answer to the roundtrip probe: ms from the arrival of the probe's message to the answer (ADR-0005).
+    // Appended: ClientBinaryReader reads the keys by ordinal
+    TERMINAL_TIME("x");
 
     private final String key;
 

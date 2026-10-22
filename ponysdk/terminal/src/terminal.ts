@@ -15,6 +15,9 @@ import { log } from './runtime/log.ts';
 import type { AddOnFactory, Session } from './runtime/object.ts';
 import { installStyles } from './runtime/styles.ts';
 
+/** WebSocket.CLOSE_PAGE_LEFT on the server: the page goes for good, and its context with it (ADR-0005). */
+const CLOSE_PAGE_LEFT = 4002;
+
 /** The terminal of the opener or of the parent frame, as a child terminal calls it. */
 interface ParentTerminal {
     setReadyWindow(id: number | string): void;
@@ -60,7 +63,7 @@ export class Terminal implements Session, Host {
     }
 
     private startMain(): void {
-        window.addEventListener('pagehide', () => this.close());
+        window.addEventListener('pagehide', event => this.close(!event.persisted));
         this.reconnection = new Reconnection(() => this.hostPageBaseURL, () => this.reconnectSocket(this.buildReconnectUrl()));
         this.socket = Socket.connect(this.socketUrl(''), this.socketListener());
         log.info('PonySDK TypeScript terminal is started');
@@ -133,8 +136,8 @@ export class Terminal implements Session, Host {
     private socketListener(): SocketListener {
         return {
             opened: socket => this.init(message => socket.send(JSON.stringify(message))),
-            received: message => {
-                this.dispatcher.receive(message);
+            received: (message, arrivedAt) => {
+                this.dispatcher.receive(message, arrivedAt);
                 this.loadChunksLater();
             },
             closed: code => {
@@ -263,8 +266,13 @@ export class Terminal implements Session, Host {
         }
     }
 
-    close(): void {
-        this.socket?.close();
+    /**
+     * pageLeft: the page goes for good (not kept in the back-forward cache), the server can drop its context at once
+     * (ADR-0005); otherwise it may come back and reconnect.
+     */
+    close(pageLeft = false): void {
+        if (pageLeft) this.socket?.close(CLOSE_PAGE_LEFT, 'page left');
+        else this.socket?.close();
         this.dispatcher.windows.closeAll();
     }
 

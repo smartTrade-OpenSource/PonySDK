@@ -55,6 +55,21 @@ test('a context the server no longer has: the page reloads instead of stacking a
   expect(new URL(page.url()).hash).toBe('#inputs');
 });
 
+test('a page left closes its socket with 4002, the code that makes the server drop its context (ADR-0005)', async ({ page }) => {
+  const closes = [];
+  await page.routeWebSocket(/\/sample\/ws\b/, ws => {
+    const server = ws.connectToServer();
+    ws.onClose((code, reason) => {
+      closes.push(code);
+      server.close({ code, reason });
+    });
+  });
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('button', { name: 'Click me' })).toBeVisible({ timeout: 10000 });
+  await page.goto('about:blank');
+  await expect.poll(() => closes).toEqual([4002]);
+});
+
 test('a short drop: a banner while the connection is lost, then the same context resumes', async ({ page }) => {
   const sockets = await routeSockets(page);
   await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
