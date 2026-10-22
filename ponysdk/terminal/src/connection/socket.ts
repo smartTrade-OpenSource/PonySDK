@@ -30,6 +30,8 @@ export class Socket {
     private readonly listener: SocketListener;
     /** When the last message arrived, or the socket opened: the heartbeat watches it. */
     lastMessageTime = -1;
+    /** When this page last sent a message: the heartbeat goes only after a silence. */
+    lastSendTime = -1;
 
     /**
      * The first connection of the main window: adopts the socket the page opened meanwhile, the server having built
@@ -65,7 +67,10 @@ export class Socket {
 
     /** Sent while open only: a message after close (the page unloading still reports its visibility) is lost anyway. */
     send(text: string): void {
-        if (this.socket.readyState === WebSocket.OPEN) this.socket.send(text);
+        if (this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(text);
+            this.lastSendTime = Date.now();
+        }
     }
 
     close(code?: number, reason?: string): void {

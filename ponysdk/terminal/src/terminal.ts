@@ -299,15 +299,16 @@ export class Terminal implements Session, Host {
 
     /**
      * Watches the socket: no message for twice the server's period closes it and starts a reconnection. A batch
-     * that kept the event loop busy longer than the period is not a silence. A heartbeat request goes out every
-     * second at most.
+     * that kept the event loop busy longer than the period is not a silence. A heartbeat request goes out when this
+     * page sent nothing for half the period (every second at most): the server reads any message as a sign of life,
+     * its probe's answers and the page's events included.
      */
     setHeartBeatPeriod(seconds: number): void {
         if (seconds === 0) return;
         const period = seconds * 1000;
         const timeout = period * 2;
+        const quiet = Math.max(1000, period / 2);
         let lastCheck = -1;
-        let lastSent = -1;
         clearInterval(this.heartbeat);
         this.heartbeat = setInterval(() => {
             const socket = this.socket;
@@ -321,10 +322,7 @@ export class Terminal implements Session, Host {
                 this.reconnection?.connectionLost();
                 return;
             }
-            if (lastSent < now - 1000) {
-                socket.send(JSON.stringify({ [C.HEARTBEAT_REQUEST]: FLAG }));
-                lastSent = now;
-            }
+            if (now - socket.lastSendTime >= quiet) socket.send(JSON.stringify({ [C.HEARTBEAT_REQUEST]: FLAG }));
         }, 500);
     }
 
