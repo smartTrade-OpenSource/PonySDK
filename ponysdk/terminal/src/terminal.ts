@@ -7,7 +7,7 @@ import { reload, Reconnection } from './connection/reconnection.ts';
 import { Socket, type SocketListener } from './connection/socket.ts';
 import { Cookies } from './objects/cookies.ts';
 import { watchWindows } from './objects/windows.ts';
-import { FLAG, type Message } from './protocol/messages.ts';
+import type { Message } from './protocol/messages.ts';
 import { Dispatcher, type Host } from './runtime/dispatcher.ts';
 import { createObject, loadAll, loadingOf } from './runtime/factory.ts';
 import { BrowserHistory } from './runtime/history.ts';
@@ -300,15 +300,14 @@ export class Terminal implements Session, Host {
     /**
      * Watches the socket: no message for twice the server's period closes it and starts a reconnection. A batch
      * that kept the event loop busy longer than the period is not a silence: the silence counts from the page's
-     * waking, since the messages that came meanwhile may wait behind the timers (Firefox, Safari). A heartbeat request
-     * goes out when this page sent nothing for half the period (every second at most): the server reads any message
-     * as a sign of life, its probe's answers and the page's events included.
+     * waking, since the messages that came meanwhile may wait behind the timers (Firefox, Safari). The server needs
+     * nothing from this page to know it is there: the browser answers its pings (RFC 6455, 5.5.2), even while this
+     * page is busy.
      */
     setHeartBeatPeriod(seconds: number): void {
         if (seconds === 0) return;
         const period = seconds * 1000;
         const timeout = period * 2;
-        const quiet = Math.max(1000, period / 2);
         let lastCheck = Date.now(); // a page busy before the first check is starved too
         let awake = -1; // the end of the last starvation
         clearInterval(this.heartbeat);
@@ -325,9 +324,7 @@ export class Terminal implements Session, Host {
             if (now - Math.max(socket.lastMessageTime, awake) > timeout) {
                 socket.close(1000, `no data received since ${now - socket.lastMessageTime} ms`);
                 this.reconnection?.connectionLost();
-                return;
             }
-            if (now - socket.lastSendTime >= quiet) socket.send(JSON.stringify({ [C.HEARTBEAT_REQUEST]: FLAG }));
         }, 500);
     }
 

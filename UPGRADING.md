@@ -68,6 +68,11 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - With transparent reconnection, a page left (closed, reloaded, navigated away) destroys its context at once instead
   of suspending it for the window ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)).
 - A transaction that fails (a handler that throws) sends what it wrote before the failure.
+- Liveness ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)): the server counts only what it receives, and pings a
+  client silent for half a heartbeat period; the browser answers outside the page's JavaScript. A client silent for
+  two periods (10 s by default) is dropped as an abnormal close: suspended with transparent reconnection, destroyed
+  without. The terminal no longer sends heartbeats. A proxy between browser and server must forward ping and pong
+  frames, as TCP-level WebSocket proxies do.
 - Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others
   average the last 10 probes received, not 10 slots counting the empty ones as 0. `getTerminalLatency()` is the time
   the probe waited in the terminal (it was always 0), and `getNetworkLatency()` the roundtrip minus that time.

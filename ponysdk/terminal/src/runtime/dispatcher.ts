@@ -3,7 +3,7 @@
  */
 
 import { ClientToServerModel as C, HandlerModel as H, ServerToClientModel as K, WidgetType } from '#model';
-import { FLAG, type Message } from '../protocol/messages.ts';
+import type { Message } from '../protocol/messages.ts';
 import { INCOMPLETE, Reader } from '../protocol/reader.ts';
 import { describe, log } from './log.ts';
 import { nameOf } from './names.ts';
@@ -82,7 +82,6 @@ export class Dispatcher implements Context {
      * arrivedAt is when it arrived; while a module loads, the messages that come wait and count from the one that waits.
      */
     receive(message: Uint8Array, arrivedAt = performance.now()): void {
-        const started = Date.now();
         const r = this.reader;
         r.feed(message);
         if (this.paused) return;
@@ -99,8 +98,6 @@ export class Dispatcher implements Context {
                 return;
             }
         }
-        // A long batch kept the event loop busy: tell the server this terminal is alive
-        if (Date.now() - started > 1000) this.host.send({ [C.HEARTBEAT_REQUEST]: FLAG });
     }
 
     /** False when the rest of the message is not for this page: a context the server could not resume reloads it. */

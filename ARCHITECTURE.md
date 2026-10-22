@@ -1983,7 +1983,7 @@ com.ponysdk.core
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `heartbeatPeriod` | WebSocket keep-alive (ms) | 5000 |
+| `heartbeatPeriod` | Liveness: a client silent for half of it is pinged, for two of it is dropped ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)) (ms) | 5000 |
 | `sessionTimeout` | HTTP session timeout (s) | 900 |
 | `maxInactivity` | Max client inactivity (ms) | 60000 |
 | `enableCompression` | permessage-deflate | true |
@@ -2136,7 +2136,7 @@ System.out.println("Server started on port: " + config.getPort());
 config.setHeartBeatPeriod(10_000);  // ms: 10 seconds instead of 5
 
 // Check server logs for
-// "No message have been received on UIContext #..." → the client went silent (network issues)
+// "Nothing received on UIContext #... not even a pong: the connection is dead" → the client went silent (network issues)
 // "WebSocket lost on UIContext #..." → the connection ended under the server (EOF, reset)
 // "WebSocket Error on UIContext #..." → anything else: check Jetty logs
 ```

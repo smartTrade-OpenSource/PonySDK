@@ -70,6 +70,22 @@ test('a page left closes its socket with 4002, the code that makes the server dr
   await expect.poll(() => closes).toEqual([4002]);
 });
 
+test('a page busy for two heartbeat periods keeps its connection: its browser answers the pings', async ({ page }) => {
+  const sockets = [];
+  page.on('websocket', ws => sockets.push(ws));
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  const clickMe = page.getByRole('button', { name: 'Click me' });
+  await expect(clickMe).toBeVisible({ timeout: 10000 });
+  await clickMe.click();
+  await expect(page.getByText('server handled click #1')).toBeVisible();
+
+  // 12 s without a message from the page: past the 10 s the server allows a silent client (2 periods of 5 s)
+  await page.evaluate(() => { const end = Date.now() + 12000; while (Date.now() < end); });
+  await clickMe.click();
+  await expect(page.getByText('server handled click #2')).toBeVisible(); // same server state
+  expect(sockets.length).toBe(1); // and no reconnection
+});
+
 test('a short drop: a banner while the connection is lost, then the same context resumes', async ({ page }) => {
   const sockets = await routeSockets(page);
   await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });

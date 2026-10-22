@@ -811,6 +811,18 @@ public class UIContext {
         lastReceivedTime.set(System.currentTimeMillis());
     }
 
+    /** See {@link WebSocket#ping()}. */
+    public void ping() {
+        final WebSocket s = socket;
+        if (s != null) s.ping();
+    }
+
+    /** See {@link WebSocket#connectionDead()}. */
+    public void connectionDead() {
+        final WebSocket s = socket;
+        if (s != null) s.connectionDead();
+    }
+
     public long getLastReceivedTime() {
         return lastReceivedTime.get();
     }

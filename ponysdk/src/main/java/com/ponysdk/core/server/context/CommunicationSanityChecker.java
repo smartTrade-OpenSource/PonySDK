@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.LongSupplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,8 @@ public class CommunicationSanityChecker {
     private ScheduledFuture<?> sanityChecker;
     private CommunicationState currentState = CommunicationState.OK;
     private volatile long suspectTime = -1;
+    /** The time of the checks; a test sets its own. */
+    LongSupplier clock = System::currentTimeMillis;
 
     private static enum CommunicationState {
         OK,
@@ -112,45 +115,48 @@ public class CommunicationSanityChecker {
         checksSinceRoundTrip = roundTripChecks - 1; // the first check sends one
     }
 
-    private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
-        // Communication is alive if we recently received OR sent data — both directions count
-        final long lastActivity = Math.max(uiContext.getLastReceivedTime(), uiContext.getLastSentTime());
-        return now - lastActivity >= heartBeatPeriod;
-    }
-
+    /**
+     * Only what comes from the client proves it is there: its messages, and the pongs its browser sends back to the
+     * server's pings outside the page's JavaScript, so even while the page is busy (RFC 6455, 5.5.2). The server's own
+     * sends prove nothing: they fill the socket's buffers whether the client reads them or not.
+     * <p>
+     * After half a heartbeat period of silence, a ping goes at each check. After a period, the connection is suspect;
+     * after another one, it is dead: the socket is dropped, and the context suspended or destroyed as configured.
+     */
     void checkCommunicationState() {
         // Skip sanity checks while UIContext is suspended (waiting for WS reconnection)
         if (uiContext.isSuspended()) return;
 
-        final long now = System.currentTimeMillis();
+        final long now = clock.getAsLong();
+        final long lastReceived = uiContext.getLastReceivedTime();
         switch (currentState) {
             case OK -> {
-                if (isCommunicationSuspectedToBeNonFunctional(now)) {
+                if (now - lastReceived >= heartBeatPeriod) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
-                    if (log.isDebugEnabled()) log.debug(
-                        "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
-                        uiContext.getID());
+                    if (log.isDebugEnabled()) log.debug("Nothing received on UIContext #{} for {} ms, connection suspected",
+                        uiContext.getID(), now - lastReceived);
                 }
             }
             case SUSPECT -> {
-                if (uiContext.getLastReceivedTime() < suspectTime) {
-                    if (now - suspectTime >= heartBeatPeriod) {
-                        log.info(
-                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
-                            uiContext.getID());
-                        currentState = CommunicationState.KO;
-                        stop();
-                        uiContext.disconnect();
-                    }
-                } else {
+                if (lastReceived >= suspectTime) {
                     currentState = CommunicationState.OK;
                     suspectTime = -1;
+                } else if (now - suspectTime >= heartBeatPeriod) {
+                    log.info("Nothing received on UIContext #{} for {} ms, not even a pong: the connection is dead",
+                        uiContext.getID(), now - lastReceived);
+                    currentState = CommunicationState.KO;
+                    stop();
+                    uiContext.connectionDead();
+                    return;
                 }
             }
-            case KO -> { /* nothing to do */ }
+            case KO -> {
+                return;
+            }
         }
 
+        if (now - lastReceived >= heartBeatPeriod / 2) uiContext.ping();
         if (++checksSinceRoundTrip >= roundTripChecks) {
             checksSinceRoundTrip = 0;
             uiContext.sendRoundTrip();

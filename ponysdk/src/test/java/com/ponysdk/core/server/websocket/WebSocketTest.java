@@ -358,6 +358,29 @@ public class WebSocketTest {
         assertTrue("Reconnection mode: UIContext should be suspended", setup.uiContext().isSuspended());
     }
 
+    /** A pong is a sign of life, as a message is. */
+    @Test
+    public void testPongIsASignOfLife() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        final long before = setup.uiContext().getLastReceivedTime();
+        Thread.sleep(5);
+        setup.webSocket().onWebSocketPong(java.nio.ByteBuffer.allocate(0));
+        assertTrue(setup.uiContext().getLastReceivedTime() > before);
+    }
+
+    /** A dead connection is dropped and its context suspended, once, though Jetty may report the close after. */
+    @Test
+    public void testDeadConnectionIsDroppedAndSuspendedOnce() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        final int[] lost = { 0 };
+        setup.appManager().getConfiguration().setReconnectionListener(ctx -> lost[0]++);
+        setup.webSocket().connectionDead();
+        assertTrue(setup.uiContext().isSuspended());
+        setup.webSocket().onWebSocketClose(StatusCode.NO_CLOSE, "disconnected", Callback.NOOP);
+        assertEquals(1, lost[0]);
+        assertTrue(setup.uiContext().isSuspended());
+    }
+
     /** ADR-0005: a page left cannot reconnect, its context goes at once instead of waiting for the window. */
     @Test
     public void testReconnectionMode_PageLeftDestroysAtOnce() throws Exception {
