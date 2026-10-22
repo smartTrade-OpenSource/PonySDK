@@ -234,6 +234,14 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         }
     }
 
+    /** An I/O failure of the connection, in the exception or what it wraps. */
+    static boolean isConnectionLost(final Throwable throwable) {
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+            if (t instanceof IOException) return true;
+        }
+        return false;
+    }
+
     /** The CREATE_CONTEXT block, with no context behind it, then a normal close: the terminal reloads its page. */
     private void sendContextLost() {
         try {
@@ -250,11 +258,15 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
+        // A connection the network or the browser ended (EOF, reset, closed channel) is no error of the server's
+        final boolean lost = isConnectionLost(throwable);
         if (uiContext == null) {
-            log.error("WebSocket Error before UIContext initialization", throwable);
+            if (lost) log.info("WebSocket lost before UIContext initialization: {}", throwable.toString());
+            else log.error("WebSocket Error before UIContext initialization", throwable);
             return;
         }
-        log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
+        if (lost) log.info("WebSocket lost on UIContext #{}: {}", uiContext.getID(), throwable.toString());
+        else log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
         // During suspension, the old WebSocket may still fire errors (e.g. broken pipe): the UIContext is waiting for
         // a new WebSocket. With transparent reconnection, a connection lost without a close frame (EOF, reset) fires
         // this before onWebSocketClose, which Jetty calls after every error: leave it to the close to suspend.

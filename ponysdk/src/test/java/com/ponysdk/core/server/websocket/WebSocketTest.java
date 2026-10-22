@@ -367,6 +367,14 @@ public class WebSocketTest {
         assertFalse(setup.uiContext().isAlive());
     }
 
+    /** A connection the network ended is logged without a stack trace; anything else is an error. */
+    @Test
+    public void testConnectionLostIsAnIOFailureOfTheConnection() {
+        assertTrue(WebSocket.isConnectionLost(new java.nio.channels.ClosedChannelException()));
+        assertTrue(WebSocket.isConnectionLost(new RuntimeException(new org.eclipse.jetty.io.EofException("reset"))));
+        assertFalse(WebSocket.isConnectionLost(new IllegalStateException("a bug")));
+    }
+
     /** ADR-0005: the time the probe waited in the terminal is the terminal's latency, the rest the network's. */
     @Test
     public void testRoundTripLatencySplitBetweenTerminalAndNetwork() {

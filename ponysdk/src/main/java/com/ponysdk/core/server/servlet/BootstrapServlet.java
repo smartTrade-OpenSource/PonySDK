@@ -104,8 +104,13 @@ public class BootstrapServlet extends HttpServlet {
             }
 
         } catch (final Throwable e) {
+            if (e instanceof IOException && response.isCommitted()) {
+                // The browser left during the response (a page closed while a terminal chunk downloads)
+                log.debug("Response to {} not completed: {}", request.getRequestURI(), e.toString());
+                return;
+            }
             log.error("Cannot process the request", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            if (!response.isCommitted()) response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

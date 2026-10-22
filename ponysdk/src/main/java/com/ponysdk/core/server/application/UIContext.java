@@ -898,7 +898,7 @@ public class UIContext {
                 return;
             }
             if (suspended && suspension == generation) {
-                log.warn("UIContext #{} reconnection timeout — destroying", ID);
+                log.info("UIContext #{} reconnection timeout — destroying", ID); // the policy at work: a client that did not return
                 destroy();
             }
         });
