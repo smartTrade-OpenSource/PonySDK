@@ -299,25 +299,30 @@ export class Terminal implements Session, Host {
 
     /**
      * Watches the socket: no message for twice the server's period closes it and starts a reconnection. A batch
-     * that kept the event loop busy longer than the period is not a silence. A heartbeat request goes out when this
-     * page sent nothing for half the period (every second at most): the server reads any message as a sign of life,
-     * its probe's answers and the page's events included.
+     * that kept the event loop busy longer than the period is not a silence: the silence counts from the page's
+     * waking, since the messages that came meanwhile may wait behind the timers (Firefox, Safari). A heartbeat request
+     * goes out when this page sent nothing for half the period (every second at most): the server reads any message
+     * as a sign of life, its probe's answers and the page's events included.
      */
     setHeartBeatPeriod(seconds: number): void {
         if (seconds === 0) return;
         const period = seconds * 1000;
         const timeout = period * 2;
         const quiet = Math.max(1000, period / 2);
-        let lastCheck = -1;
+        let lastCheck = Date.now(); // a page busy before the first check is starved too
+        let awake = -1; // the end of the last starvation
         clearInterval(this.heartbeat);
         this.heartbeat = setInterval(() => {
             const socket = this.socket;
             if (socket === undefined || socket.readyState !== WebSocket.OPEN) return;
             const now = Date.now();
-            const starved = lastCheck > 0 && now - lastCheck > period;
+            const starved = now - lastCheck > period;
             lastCheck = now;
-            if (starved) return;
-            if (now - socket.lastMessageTime > timeout) {
+            if (starved) {
+                awake = now;
+                return;
+            }
+            if (now - Math.max(socket.lastMessageTime, awake) > timeout) {
                 socket.close(1000, `no data received since ${now - socket.lastMessageTime} ms`);
                 this.reconnection?.connectionLost();
                 return;
