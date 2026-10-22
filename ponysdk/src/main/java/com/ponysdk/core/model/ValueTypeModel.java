@@ -78,6 +78,25 @@ public enum ValueTypeModel {
         return (byte) ordinal();
     }
 
+    /**
+     * Whether the encoder takes this value for a key of this type: {@code WebSocketPusher.encode} casts it to the type,
+     * so an {@code Integer} for a {@code LONG} key fails as a {@code Long} for an {@code INTEGER} one does.
+     */
+    public boolean accepts(final Object value) {
+        return switch (this) {
+            case NULL -> true;
+            case BOOLEAN -> value instanceof Boolean;
+            case BYTE -> value instanceof Byte;
+            case SHORT -> value instanceof Short;
+            case INTEGER, UINT31 -> value instanceof Integer;
+            case LONG -> value instanceof Long;
+            case DOUBLE -> value instanceof Double;
+            case FLOAT -> value instanceof Float;
+            case STRING -> value == null || value instanceof String;
+            case ARRAY -> value instanceof Object[];
+        };
+    }
+
     public static ValueTypeModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }

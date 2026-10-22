@@ -267,6 +267,7 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
+        assert accepts(model, value);
         if (canWrite()) {
             encoder.encode(model, value);
         }
@@ -274,6 +275,7 @@ public class ModelWriter {
 
     /** Drain-internal writes: the caller already checked {@link #canWrite()} for the whole drain. */
     void writeUnchecked(final ServerToClientModel model, final Object value) {
+        assert accepts(model, value);
         encoder.encode(model, value);
     }
 
@@ -288,6 +290,7 @@ public class ModelWriter {
 
     /** Primitive variant of {@link #write(ServerToClientModel, Object)} for int values (no boxing). */
     public void writeInt(final ServerToClientModel model, final int value) {
+        assert accepts(model, value);
         if (canWrite()) {
             encoder.encodeInt(model, value);
         }
@@ -298,6 +301,16 @@ public class ModelWriter {
         if (canWrite()) {
             encoder.endObject();
         }
+    }
+
+    /**
+     * Checked by assertions (tests run with them): a value of the wrong type fails in the encoder, in the middle of its
+     * block, only once a terminal is connected.
+     */
+    protected static boolean accepts(final ServerToClientModel model, final Object value) {
+        if (model == null || model.getTypeModel().accepts(value)) return true;
+        throw new AssertionError(model + " takes " + model.getTypeModel() + ", given "
+            + (value == null ? "null" : value.getClass().getSimpleName() + " " + value));
     }
 
     public PWindow getCurrentWindow() {

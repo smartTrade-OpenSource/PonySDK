@@ -40,6 +40,7 @@ public class ModelWriterForTest extends ModelWriter {
 
     @Override
     public void write(ServerToClientModel model, Object value) {
+        assert accepts(model, value);
         if (model == ServerToClientModel.TYPE_CREATE || model == ServerToClientModel.TYPE_UPDATE) {
             lastObjectID = (int) value;
         } else if (model == ServerToClientModel.OPEN) {

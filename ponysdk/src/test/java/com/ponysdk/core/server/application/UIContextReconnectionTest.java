@@ -516,7 +516,7 @@ public class UIContextReconnectionTest {
         uiContext.execute(() -> {
             final ModelWriter w = uiContext.getWriter();
             w.write(ServerToClientModel.TYPE_CREATE, 100);
-            w.write(ServerToClientModel.WIDGET_TYPE, 7);
+            w.write(ServerToClientModel.WIDGET_TYPE, (byte) 7);
             w.endObject();
         });
 
@@ -586,7 +586,7 @@ public class UIContextReconnectionTest {
         uiContext.execute(() -> {
             final ModelWriter w = uiContext.getWriter();
             w.write(ServerToClientModel.TYPE_CREATE, 200);
-            w.write(ServerToClientModel.WIDGET_TYPE, 3);
+            w.write(ServerToClientModel.WIDGET_TYPE, (byte) 3);
             w.endObject();
         });
 
@@ -2209,7 +2209,7 @@ public class UIContextReconnectionTest {
         // Write a specific sequence: CREATE 100, ADD 100→5, UPDATE 100, UPDATE 200, REMOVE 300
         uiContext.execute(() -> {
             uiContext.getWriter().write(ServerToClientModel.TYPE_CREATE, 100);
-            uiContext.getWriter().write(ServerToClientModel.WIDGET_TYPE, 7);
+            uiContext.getWriter().write(ServerToClientModel.WIDGET_TYPE, (byte) 7);
             uiContext.getWriter().endObject();
         });
         uiContext.execute(() -> {
@@ -3673,7 +3673,7 @@ public class UIContextReconnectionTest {
 
         // Suspend and write a large payload
         localCtx.suspend(60_000);
-        Object bigPayload = new byte[2 * 1024 * 1024];
+        Object bigPayload = "x".repeat(2 * 1024 * 1024); // a String: HTML is a STRING key
         final WeakReference<Object> payloadRef = new WeakReference<>(bigPayload);
 
         localCtx.acquire();
@@ -3774,7 +3774,7 @@ public class UIContextReconnectionTest {
         uiContext.suspend(60_000);
 
         // Write a large value during suspension
-        Object bigPayload = new byte[1024 * 1024];
+        Object bigPayload = "x".repeat(1024 * 1024); // a String: HTML is a STRING key
         final WeakReference<Object> ref = new WeakReference<>(bigPayload);
 
         uiContext.acquire();
@@ -3939,7 +3939,7 @@ public class UIContextReconnectionTest {
         config.setMaxRecordingEntries(5);
         uiContext.suspend(60_000);
 
-        Object bigPayload = new byte[2 * 1024 * 1024];
+        Object bigPayload = "x".repeat(2 * 1024 * 1024); // a String: HTML is a STRING key
         final WeakReference<Object> ref = new WeakReference<>(bigPayload);
 
         // Write the big payload first (before overflow)
