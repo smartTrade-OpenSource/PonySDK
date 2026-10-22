@@ -2133,11 +2133,12 @@ System.out.println("Server started on port: " + config.getPort());
 **Solutions:**
 ```java
 // Increase heartbeat tolerance
-config.setHeartbeatPeriod(10000);  // 10 seconds instead of 5
+config.setHeartBeatPeriod(10_000);  // ms: 10 seconds instead of 5
 
 // Check server logs for
-// "Heartbeat timeout" → client network issues
-// "WebSocket error" → check Jetty logs
+// "No message have been received on UIContext #..." → the client went silent (network issues)
+// "WebSocket lost on UIContext #..." → the connection ended under the server (EOF, reset)
+// "WebSocket Error on UIContext #..." → anything else: check Jetty logs
 ```
 
 ---
