@@ -37,6 +37,9 @@ import java.util.Map;
 
 /**
  * This class allows to call named Java-script functions defined by the application.
+ * <p>
+ * Arguments may be strings, numbers, booleans or null. A string that starts with '{' or '[' and is
+ * valid JSON reaches the function already parsed, as an object or an array.
  */
 public class PScript extends PObject {
 

@@ -42,6 +42,9 @@ function appCheck(element) { element.checked = true; }
 function appJoin(args) { return args[0] + '-' + args[1]; }
 ```
 
+Arguments may be strings, numbers, booleans or null. A string that starts with `{` or `[` and is
+valid JSON reaches the function already parsed: do not call `JSON.parse` on it again.
+
 Also check, before enabling the policy, that the HTML your application sends (`PHTML`,
 `setInnerHTML`, `PAnchor`, ...) and the attributes it sets (`setAttribute`) carry no inline event
 handler (`onclick=...`) and no `javascript:` URL: the policy blocks them. Serving the policy as

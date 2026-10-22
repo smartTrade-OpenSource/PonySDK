@@ -196,7 +196,7 @@ public abstract class PObject {
      * The function is called with the widget's element as first argument, followed by the given args.
      *
      * @param functionName the name of a function available on the terminal's window
-     * @param args         the optional arguments passed after the element
+     * @param args         the optional arguments passed after the element, converted as {@link PScript} describes
      */
     public void callTerminalFunction(final String functionName, final Object... args) {
         saveUpdate(writer -> {
