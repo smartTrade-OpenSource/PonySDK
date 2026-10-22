@@ -206,4 +206,7 @@ test {
 check.dependsOn jacocoTestReport
 gwtc.dependsOn classes
 jar.dependsOn gwtc
+// The test task adds the gwtc output dir (build/gwt) to its runtime classpath, so it consumes
+// gwtc's output. Gradle 8.14 requires that implicit input/output relationship to be explicit.
+test.dependsOn gwtc
 publish.dependsOn check
