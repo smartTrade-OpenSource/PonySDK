@@ -31,11 +31,8 @@ import java.util.Set;
 
 import javax.json.JsonObject;
 
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAddOnComposite;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PPanel;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 
 /**
  * @author mzoughagh
@@ -200,13 +197,21 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     private void addWidgetToContainer(final int index, final W widgetToAdd) {
-        container.insert(widgetToAdd.asWidget(), index);
-        widgetToAdd.asWidget().addStyleName(STYLE_IS_ITEM);
+        PWidget pWidget = widgetToAdd.asWidget();
+        container.insert(pWidget, index);
+        pWidget.addStyleName(STYLE_IS_ITEM);
+        if(pWidget.isInitialized()) dataProvider.onWidgetAttached(widgetToAdd);
+        else {
+            pWidget.addInitializeListener(object -> {
+                dataProvider.onWidgetAttached(widgetToAdd);
+            });
+        }
     }
 
     private void removeWidgetFromContainer(final W widgetToRemove) {
         container.remove(widgetToRemove.asWidget());
         widgetToRemove.asWidget().onDestroy();
+        dataProvider.onWidgetDetached(widgetToRemove);
     }
 
     /**
@@ -284,6 +289,17 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             currentIndexWidget = w;
             currentIndexWidget.asWidget().addStyleName(STYLE_IS_ITEM_INDEX);
         }
+    }
+
+    /**
+     * Returns the underlying panel that directly contains the row widgets
+     * This is useful for advanced integrations, such as registering the panel
+     * as a droppable zone in a Drag and Drop system.
+     *
+     * @return The PPanel instance that holds the items.
+     */
+    public PPanel getContainer() {
+        return container;
     }
 
     public interface InfiniteScrollAddonListener {
