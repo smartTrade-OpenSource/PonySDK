@@ -4,7 +4,7 @@ ext {
     commonsIoVersion = '2.22.0'
     commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
     jettyVersion = '12.1.14'
-    springVersion = '7.0.9'
+    springVersion = '7.0.10'
     jakartaServletVersion = '6.1.0'
     jakartaJsonVersion = '2.1.3'
     parssonVersion = '1.1.9'
@@ -26,7 +26,7 @@ dependencies {
             'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
             'commons-io:commons-io:' + commonsIoVersion,
             'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileupload2Version,
-            'com.google.code.gson:gson:2.14.0'
+            'com.google.code.gson:gson:2.15.0'
     )
 
     // Spring kept for the runFlexLayoutDemo task (FlexLayout E2E suite) — uses ponysdk-spring module

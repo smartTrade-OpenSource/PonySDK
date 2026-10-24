@@ -122,7 +122,7 @@ jacocoTestCoverageVerification {
 
 // TypeScript terminal (docs/decisions/0002-javascript-terminal.md): sources in terminal/, Node provisioned by Gradle.
 node {
-    version = '24.21.0'
+    version = '24.22.1'
     download = true
     nodeProjectDir = file('terminal')
     npmInstallCommand = 'ci'
