@@ -95,6 +95,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     private Listener listener;
     private int reconnectContextId = -1; // -1 = normal connect, ≥0 = reconnect attempt
     private final AtomicBoolean closeHandled = new AtomicBoolean();
+    /** An error was reported on this socket: a 1001 after it is the server's own close, not the browser's (ADR-0007). */
+    private volatile boolean failed;
     /** Protocol version announced by the terminal at handshake (capped by the configuration). */
     private int protocolVersion = com.ponysdk.core.model.ProtocolVersion.V1;
     /** loggerOut TRACE, read once per flush instead of once per field (a level changed at runtime applies next flush). */
@@ -260,6 +262,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
+        failed = true;
         // A connection the network or the browser ended (EOF, reset, closed channel) is no error of the server's
         final boolean lost = isConnectionLost(throwable);
         if (uiContext == null) {
@@ -326,12 +329,20 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 log.error("ReconnectionListener threw an exception for UIContext #{}", uiContext.getID(), e);
             }
         }
-        if (config.getReconnectionTimeoutMs() > 0 && statusCode != CLOSE_PAGE_LEFT) {
+        if (config.getReconnectionTimeoutMs() > 0 && !pageLeft(statusCode)) {
             // Transparent reconnection enabled — suspend instead of destroy
             uiContext.suspend(config.getReconnectionTimeoutMs());
         } else {
             uiContext.onDestroy(statusCode);
         }
+    }
+
+    /**
+     * The client's page is gone, no reconnection can follow: the terminal said so (4002), or the browser closed the
+     * socket of a document it unloads (1001, ADR-0007). Jetty's own 1001, on its idle timeout, follows the error it reports.
+     */
+    private boolean pageLeft(final int statusCode) {
+        return statusCode == CLOSE_PAGE_LEFT || statusCode == StatusCode.SHUTDOWN && !failed;
     }
 
     /**

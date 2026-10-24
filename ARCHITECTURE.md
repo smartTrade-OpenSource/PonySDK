@@ -1560,7 +1560,9 @@ and no application starts for a page that is going away.
 
 A page left (closed, reloaded, navigated away, and not kept in the back-forward cache) closes its socket with 4002:
 the server destroys its context at once instead of suspending it, since no reconnection can follow
-([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)).
+([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)). A browser may close the socket first, with 1001
+(Firefox when it navigates away, Chrome when it quits): a 1001 with no error before it counts the same; Jetty's own
+1001, on its idle timeout, follows the error it reports ([ADR-0007](docs/decisions/0007-page-left-by-going-away.md)).
 
 #### How state stays consistent during suspension
 

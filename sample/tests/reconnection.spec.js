@@ -57,10 +57,9 @@ test('a context the server no longer has: the page reloads instead of stacking a
 
 // Read on the server's side, through the Reconnection page's view of its client, not through routeWebSocket: the
 // route replaces the page's socket, so it cannot see what the browser itself sends, and Playwright 1.64 reports no
-// close code on Chromium for a page that navigates away.
-test('a page left closes its socket with 4002: the server drops its context at once (ADR-0005)', async ({ page, context, browserName }) => {
-  test.fixme(browserName === 'firefox',
-    'Firefox closes the socket with 1001 when the page navigates away, before pagehide runs: the server suspends the context');
+// close code on Chromium for a page that navigates away. Chromium and WebKit close with the terminal's 4002, Firefox
+// with its own 1001 before pagehide runs (ADR-0007).
+test('a page left: the server drops its context at once (ADR-0005, ADR-0007)', async ({ page, context }) => {
   await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
   const log = page.locator('.rc-log');
   await expect(log).toContainText('is up in the frame', { timeout: 15000 });

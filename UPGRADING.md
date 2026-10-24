@@ -70,7 +70,8 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - Transparent reconnection (`setReconnectionTimeoutMs`, off by default): a reconnection to a context the server no
   longer has reloads the page, and starts no application on the server for it.
 - With transparent reconnection, a page left (closed, reloaded, navigated away) destroys its context at once instead
-  of suspending it for the window ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)).
+  of suspending it for the window ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md),
+  [ADR-0007](docs/decisions/0007-page-left-by-going-away.md)).
 - A transaction that fails (a handler that throws) sends what it wrote before the failure.
 - Liveness ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)): the server counts only what it receives, and pings a
   client silent for half a heartbeat period; the browser answers outside the page's JavaScript. A client silent for
