@@ -1,6 +1,6 @@
 # ADR-0005: The terminal tells the server its page is left, and how long a probe waited in it
 
-- Status: Accepted
+- Status: Accepted; decision 1 amended by [ADR-0007](0007-page-left-by-going-away.md) (a 1001 from the browser)
 - Date: 2026-10-22
 
 ## Context
