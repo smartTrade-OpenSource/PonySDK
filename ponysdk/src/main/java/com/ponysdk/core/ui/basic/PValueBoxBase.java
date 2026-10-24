@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -75,14 +75,6 @@ public abstract class PValueBoxBase extends PFocusWidget {
                 writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, Math.min(rangeLength, textLength - startPosition));
             });
         }
-    }
-
-    /**
-     * @deprecated Use {@link #select(int, int)} instead
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    public void setSelectionRange(final int startPosition, final int rangeLength) {
-        select(startPosition, rangeLength);
     }
 
     public void setCursorPosition(final int cursorPosition) {

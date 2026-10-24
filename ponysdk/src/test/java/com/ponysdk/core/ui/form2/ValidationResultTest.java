@@ -25,53 +25,53 @@ package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.form2.api.ValidationResult;
 import com.ponysdk.test.PSuite;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ValidationResultTest extends PSuite {
 
     @Test
     public void testValidationResult() {
         final ValidationResult result = ValidationResult.OK("Message", "Data");
-        Assert.assertTrue(result.isValid());
-        Assert.assertEquals("Message", result.getErrorMessage());
-        Assert.assertEquals("Data", result.getData());
-        Assert.assertEquals("ValidationResult{valid=true, errorMessage='Message', data=Data}", result.toString());
+        Assertions.assertTrue(result.isValid());
+        Assertions.assertEquals("Message", result.getErrorMessage());
+        Assertions.assertEquals("Data", result.getData());
+        Assertions.assertEquals("ValidationResult{valid=true, errorMessage='Message', data=Data}", result.toString());
     }
 
     @Test
     public void testOKWithoutData() {
         final ValidationResult result = ValidationResult.OK();
-        Assert.assertTrue(result.isValid());
-        Assert.assertEquals(null, result.getErrorMessage());
-        Assert.assertEquals(null, result.getData());
-        Assert.assertEquals("ValidationResult{valid=true, errorMessage='null', data=null}", result.toString());
+        Assertions.assertTrue(result.isValid());
+        Assertions.assertEquals(null, result.getErrorMessage());
+        Assertions.assertEquals(null, result.getData());
+        Assertions.assertEquals("ValidationResult{valid=true, errorMessage='null', data=null}", result.toString());
     }
 
     @Test
     public void testOKWithData() {
         final ValidationResult result = ValidationResult.OK("Data");
-        Assert.assertTrue(result.isValid());
-        Assert.assertEquals(null, result.getErrorMessage());
-        Assert.assertEquals("Data", result.getData());
-        Assert.assertEquals("ValidationResult{valid=true, errorMessage='null', data=Data}", result.toString());
+        Assertions.assertTrue(result.isValid());
+        Assertions.assertEquals(null, result.getErrorMessage());
+        Assertions.assertEquals("Data", result.getData());
+        Assertions.assertEquals("ValidationResult{valid=true, errorMessage='null', data=Data}", result.toString());
     }
 
     @Test
     public void testKOWithoutData() {
         final ValidationResult result = ValidationResult.KO("Message");
-        Assert.assertFalse(result.isValid());
-        Assert.assertEquals("Message", result.getErrorMessage());
-        Assert.assertEquals(null, result.getData());
-        Assert.assertEquals("ValidationResult{valid=false, errorMessage='Message', data=null}", result.toString());
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertEquals("Message", result.getErrorMessage());
+        Assertions.assertEquals(null, result.getData());
+        Assertions.assertEquals("ValidationResult{valid=false, errorMessage='Message', data=null}", result.toString());
     }
 
     @Test
     public void testKOWithData() {
         final ValidationResult result = ValidationResult.KO("Message", "Data");
-        Assert.assertFalse(result.isValid());
-        Assert.assertEquals("Message", result.getErrorMessage());
-        Assert.assertEquals("Data", result.getData());
-        Assert.assertEquals("ValidationResult{valid=false, errorMessage='Message', data=Data}", result.toString());
+        Assertions.assertFalse(result.isValid());
+        Assertions.assertEquals("Message", result.getErrorMessage());
+        Assertions.assertEquals("Data", result.getData());
+        Assertions.assertEquals("ValidationResult{valid=false, errorMessage='Message', data=Data}", result.toString());
     }
 }

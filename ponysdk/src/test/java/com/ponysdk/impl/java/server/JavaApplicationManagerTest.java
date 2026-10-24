@@ -23,10 +23,10 @@
 
 package com.ponysdk.impl.java.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
@@ -45,7 +45,7 @@ public class JavaApplicationManagerTest extends PSuite {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         applicationManager = new JavaApplicationManager();
         configuration = new ApplicationConfiguration();

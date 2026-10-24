@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -371,7 +371,7 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     private static String buildTabDef(final String tabName, final String component, final String configJson) {
-        final javax.json.JsonObjectBuilder b = Json.createObjectBuilder()
+        final jakarta.json.JsonObjectBuilder b = Json.createObjectBuilder()
             .add("name", tabName)
             .add("component", component)
             .add("enableClose", true);
@@ -380,7 +380,7 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     private static String buildBordersJson(final FlexBorder[] borders) {
-        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        final jakarta.json.JsonArrayBuilder arr = Json.createArrayBuilder();
         for (final FlexBorder border : borders) {
             arr.add(Json.createReader(new java.io.StringReader(border.toJson())).readObject());
         }

@@ -29,11 +29,9 @@ import com.ponysdk.core.model.WidgetType;
  * A standard button widget.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-Button</dt>
- * <dd>the outer element</dd>
+ * <dt>.pony-Button</dt>
+ * <dd>the button; <code>:disabled</code> when disabled</dd>
  * </dl>
- *
- * @see com.google.gwt.user.client.ui.Button
  */
 public class PButton extends PButtonBase {
 

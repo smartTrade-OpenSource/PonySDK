@@ -2,8 +2,8 @@ package com.ponysdk.core.ui.flexlayout;
 
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Builder for a tab entry in a FlexLayout tabset.

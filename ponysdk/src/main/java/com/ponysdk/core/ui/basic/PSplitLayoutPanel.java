@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -50,13 +50,12 @@ import com.ponysdk.core.util.SetUtils;
  * explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger
- * }</li>
- * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }
- * </li>
- * </ul>
+ * <dl>
+ * <dt>.pony-SplitLayoutPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>.pony-Splitter</dt>
+ * <dd>a splitter; <code>.pony-Splitter-horizontal</code> or <code>.pony-Splitter-vertical</code></dd>
+ * </dl>
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 

@@ -14,11 +14,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -45,9 +41,9 @@ import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -70,12 +66,12 @@ public class WebSocketServletHandshakeTest {
     // Session lookups made on the upgrade request: JettyServerUpgradeRequest reads the request the filter wraps
     private final AtomicInteger sessionLookups = new AtomicInteger();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         server = new Server();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         // Close the way a browser does: abort() makes the server log an ERROR with a ClosedChannelException stack.
         // HttpClient has no close() before JDK 21 (CI runs 17): stopping its executor is what can be released here.
@@ -100,10 +96,10 @@ public class WebSocketServletHandshakeTest {
         assertEquals(1, uiContext.getRequestCookies().stream().filter(c -> "pony".equals(c.getName())).count());
         assertEquals("cookie-1", uiContext.getRequestCookies().stream().filter(c -> "pony".equals(c.getName()))
             .findFirst().orElseThrow().getValue());
-        assertNotNull("the session is created before it is read", uiContext.getSession());
-        assertEquals("one session creation per handshake", 1, sessionLookups.get());
-        assertEquals("the Application is keyed on the session of the snapshot", uiContext.getSession().getId(),
-            uiContext.getApplicationId());
+        assertNotNull(uiContext.getSession(), "the session is created before it is read");
+        assertEquals(1, sessionLookups.get(), "one session creation per handshake");
+        assertEquals(uiContext.getSession().getId(), uiContext.getApplicationId(),
+            "the Application is keyed on the session of the snapshot");
         assertEquals("127.0.0.1", uiContext.getHost());
         assertFalse(uiContext.isSecure());
         assertNotNull(uiContext.getRemoteSocketAddress());
@@ -115,9 +111,9 @@ public class WebSocketServletHandshakeTest {
 
         assertEquals(List.of("abc"), uiContext.getParameterMap().get("token"));
         assertEquals("value-1", uiContext.getHeader("X-Test"));
-        assertNull("no SessionHandler, so no session", uiContext.getSession());
+        assertNull(uiContext.getSession(), "no SessionHandler, so no session");
         // Without the guard getSession(true) throws "No SessionManager", which the snapshot only logs
-        assertEquals("no session lookup without a SessionHandler", 0, sessionLookups.get());
+        assertEquals(0, sessionLookups.get(), "no session lookup without a SessionHandler");
     }
 
     private UIContext connect(final boolean withSessions, final String path, final String header,
@@ -169,7 +165,7 @@ public class WebSocketServletHandshakeTest {
                 }
             });
         client = opened.get(10, TimeUnit.SECONDS);
-        assertTrue("the application was not started", started.await(10, TimeUnit.SECONDS));
+        assertTrue(started.await(10, TimeUnit.SECONDS), "the application was not started");
 
         final ArgumentCaptor<UIContext> captor = ArgumentCaptor.forClass(UIContext.class);
         Mockito.verify(applicationManager).startApplication(captor.capture());

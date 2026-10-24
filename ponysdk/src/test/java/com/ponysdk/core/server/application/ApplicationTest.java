@@ -23,22 +23,20 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class ApplicationTest {
 
     private Application application;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         final String id = "id";
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);

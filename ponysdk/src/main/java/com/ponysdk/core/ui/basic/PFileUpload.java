@@ -34,7 +34,7 @@ import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

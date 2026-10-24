@@ -51,14 +51,12 @@ import java.util.Objects;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-StackLayoutPanel
- * <dd>the panel itself
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader
- * <dd>applied to each header widget
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader-hovering
- * <dd>applied to each header widget on mouse hover
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent
- * <dd>applied to each child widget
+ * <dt>.pony-StackLayoutPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>.pony-StackLayoutPanel-header</dt>
+ * <dd>a header, a button; <code>[aria-expanded=true]</code> for the open one</dd>
+ * <dt>.pony-StackLayoutPanel-content</dt>
+ * <dd>the content of a header</dd>
  * </dl>
  */
 public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimatedLayout {
@@ -90,12 +88,19 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         return WidgetType.STACKLAYOUT_PANEL;
     }
 
+    /** Children added before this panel was attached are attached (hence created) with it, as in PPanel. */
+    @Override
+    void init0() {
+        super.init0();
+        children.forEach(widget -> widget.attach(window, getFrame()));
+    }
+
     public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
         child.removeFromParent();
         children.add(child);
         adopt(child);
 
-        child.attach(window, frame);
+        child.attach(window, getFrame());
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }
@@ -171,7 +176,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, (int) duration.toMillis()));
     }
 
     public Duration getAnimationDuration() {

@@ -2,11 +2,15 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.CellController;
 import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
+import com.ponysdk.core.ui.datagrid2.cell.ExtendedCellController;
+import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCellController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
@@ -14,9 +18,9 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.test.PSuite;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +53,7 @@ public class DefaultDataGridViewTest extends PSuite {
     private DefaultDataGridView<String, String> view;
     private CapturingColumnDefinition column;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         column = new CapturingColumnDefinition();
         view = newView(column);
@@ -326,6 +330,47 @@ public class DefaultDataGridViewTest extends PSuite {
     }
 
     // -------------------------------------------------------------------------
+    // Extended mode (cell editor)
+    // -------------------------------------------------------------------------
+
+    /** The editor is created when its cell is edited, with the value shown at that moment. */
+    @Test
+    public void editorIsCreatedOnEditWithTheCurrentValue() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final DefaultDataGridView<String, String> v = newView(col);
+        setDataOn(v, col, "a", "b");
+        Assertions.assertNull(editorOf(col.cells.get(1)), "no editor before editing");
+
+        col.controllers.get(1).setExtendedMode();
+
+        final PTextBox editor = editorOf(col.cells.get(1));
+        Assertions.assertNotNull(editor, "editor shown once editing");
+        Assertions.assertEquals("b", editor.getText());
+    }
+
+    /** Leaving the extended mode drops the editor: only cells being edited hold one. */
+    @Test
+    public void editorIsDroppedWhenEditingEnds() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final DefaultDataGridView<String, String> v = newView(col);
+        setDataOn(v, col, "a", "b");
+        col.controllers.get(0).setExtendedMode();
+        Assertions.assertNotNull(editorOf(col.cells.get(0)));
+
+        ((ExtendedCellController<String>) col.controllers.get(0)).setPrimaryMode();
+
+        Assertions.assertNull(editorOf(col.cells.get(0)));
+        Assertions.assertTrue(col.cells.get(0).asWidget().isVisible(), "the label is shown again");
+    }
+
+    /** The PTextBox the editor added to the cell, if any. */
+    private static PTextBox editorOf(final LabelCell<String> cell) {
+        final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
+        for (final PWidget w : td) if (w instanceof PTextBox t) return t;
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
@@ -358,7 +403,7 @@ public class DefaultDataGridViewTest extends PSuite {
         v.addDrawListener(rowCount -> latch.countDown());
         // Send all data in one batch to produce a single draw event
         v.getController().setData(List.of(values));
-        Assert.assertTrue("Timed out waiting for grid draw", latch.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        Assertions.assertTrue(latch.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS), "Timed out waiting for grid draw");
     }
 
     private CellController<String> getCellController(final int rowIndex) {
@@ -367,8 +412,8 @@ public class DefaultDataGridViewTest extends PSuite {
 
     private CellController<String> getCellControllerFrom(final CapturingColumnDefinition col, final int rowIndex) {
         final CellController<String> cc = col.getCellController(rowIndex);
-        Assert.assertNotNull("No CellController for row index " + rowIndex
-                + " — did you call setData() and wait for the draw?", cc);
+        Assertions.assertNotNull(cc, "No CellController for row index " + rowIndex
+                + " — did you call setData() and wait for the draw?");
         return cc;
     }
 
@@ -382,13 +427,13 @@ public class DefaultDataGridViewTest extends PSuite {
 
     private void assertSelectedOn(final DefaultDataGridView<String, String> v, final String... keys) {
         for (final String key : keys) {
-            Assert.assertTrue("Expected '" + key + "' to be selected", v.getController().isSelected(key));
+            Assertions.assertTrue(v.getController().isSelected(key), "Expected '" + key + "' to be selected");
         }
     }
 
     private void assertNotSelectedOn(final DefaultDataGridView<String, String> v, final String... keys) {
         for (final String key : keys) {
-            Assert.assertFalse("Expected '" + key + "' to not be selected", v.getController().isSelected(key));
+            Assertions.assertFalse(v.getController().isSelected(key), "Expected '" + key + "' to not be selected");
         }
     }
 
@@ -549,6 +594,28 @@ public class DefaultDataGridViewTest extends PSuite {
         @Override
         public void onMoved() {
             // nothing to do
+        }
+    }
+
+    /** A column of the framework's {@link LabelCell}s (double-click to edit), capturing cells and controllers. */
+    static class LabelColumnDefinition extends CapturingColumnDefinition {
+
+        final List<LabelCell<String>> cells = new ArrayList<>();
+        final List<PrimaryCellController<String>> controllers = new ArrayList<>();
+
+        @Override
+        public PrimaryCell<String> createCell() {
+            final int index = cells.size();
+            controllers.add(null);
+            final LabelCell<String> cell = new LabelCell<>((value, text) -> {}, 100) {
+                @Override
+                public void setController(final PrimaryCellController<String> controller) {
+                    super.setController(controller);
+                    controllers.set(index, controller);
+                }
+            };
+            cells.add(cell);
+            return cell;
         }
     }
 

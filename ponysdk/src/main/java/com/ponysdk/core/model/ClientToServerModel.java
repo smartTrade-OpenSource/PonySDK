@@ -66,7 +66,7 @@ public enum ClientToServerModel {
 
     OPTION_TABINDEX_ACTIVATED("u"),
 
-    HEARTBEAT_CLIENT("v"),
+    HEARTBEAT_REQUEST("v"),
 
     HANDLER_BOOLEAN_VALUE_CHANGE("A"),
     HANDLER_DATE_VALUE_CHANGE("B"),
@@ -89,7 +89,25 @@ public enum ClientToServerModel {
     HANDLER_PASTE("S"),
     HANDLER_WIDGET_VISIBILITY("T"),
     HANDLER_DOCUMENT_VISIBILITY("U"),
-    HANDLER_DESTROY("V");
+    HANDLER_DESTROY("V"),
+
+    // Web Component events
+    WC_EVENT_NAME("W"),
+    WC_EVENT_DETAIL("X"),
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECT_UI_CONTEXT_ID("Y"),  // sent by client on reconnect attempt: carries the uiContextId to resume
+
+    // DOM events listened to by name (ADR-0003): the event's name, and the object of the fields read on it
+    EVENT("Z"),
+    EVENT_FIELDS("z"),
+
+    // WebSocket handshake parameter: highest protocol version the terminal understands (see ProtocolVersion)
+    PROTOCOL_VERSION("w"),
+
+    // In the answer to the roundtrip probe: ms from the arrival of the probe's message to the answer (ADR-0005).
+    // Appended: ClientBinaryReader reads the keys by ordinal
+    TERMINAL_TIME("x");
 
     private final String key;
 

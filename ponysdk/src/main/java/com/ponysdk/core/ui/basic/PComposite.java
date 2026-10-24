@@ -52,7 +52,15 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
         child.removeFromParent();
         this.widget = child;
         child.setParent(this);
+        if (window != null) child.attach(window, getFrame()); // a composite already attached: its widget first
         saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_ID, child.getID()));
+    }
+
+    /** The wrapped widget is created first: the composite's WIDGET_ID refers to it. */
+    @Override
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        if (widget != null) widget.attach(window, frame);
+        return super.attach(window, frame);
     }
 
 }

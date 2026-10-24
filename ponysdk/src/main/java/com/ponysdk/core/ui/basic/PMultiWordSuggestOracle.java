@@ -37,9 +37,7 @@ public class PMultiWordSuggestOracle extends PSuggestOracle {
 
     @Override
     public void addAll(final Collection<String> collection) {
-        //            saveUpdate((writer) -> {
-        //                writer.writeModel(ServerToClientModel.SUGGESTIONS, collection);
-        //            });
+        collection.forEach(this::add);
     }
 
     public void setDefaultSuggestions(final Collection<String> collection) {

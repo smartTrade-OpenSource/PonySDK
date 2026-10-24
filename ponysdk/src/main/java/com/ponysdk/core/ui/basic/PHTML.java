@@ -38,9 +38,10 @@ import com.ponysdk.core.writer.ModelWriter;
  * used properly.
  * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-HTML { }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-HTML</dt>
+ * <dd>the element</dd>
+ * </dl>
  */
 public class PHTML extends PLabel {
 

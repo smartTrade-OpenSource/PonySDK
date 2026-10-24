@@ -29,7 +29,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.Objects;
 
 /**
@@ -46,7 +46,7 @@ public class PMenuItem extends PMenuSubElement {
 
     private Runnable cmd;
 
-    private boolean enabled;
+    private boolean enabled = true;
 
     protected PMenuItem(final String text, final boolean asHTML, final Runnable cmd) {
         this(text, asHTML);
@@ -80,7 +80,7 @@ public class PMenuItem extends PMenuSubElement {
     @Override
     void init0() {
         super.init0();
-        if (subMenu != null) subMenu.attach(window, frame);
+        if (subMenu != null) subMenu.attach(window, getFrame());
     }
 
     @Override
@@ -126,7 +126,7 @@ public class PMenuItem extends PMenuSubElement {
     public void onClientData(final JsonObject event) {
         if (!isVisible()) return;
         if (event.containsKey(ClientToServerModel.HANDLER_COMMAND.toStringValue())) {
-            cmd.run();
+            if (enabled && cmd != null) cmd.run(); // a disabled item's command is not run, whatever the client sends
         } else {
             super.onClientData(event);
         }
@@ -139,7 +139,7 @@ public class PMenuItem extends PMenuSubElement {
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
         subMenu.saveAdd(subMenu.getID(), ID);
-        subMenu.attach(window, frame);
+        subMenu.attach(window, getFrame());
     }
 
     public Runnable getCmd() {

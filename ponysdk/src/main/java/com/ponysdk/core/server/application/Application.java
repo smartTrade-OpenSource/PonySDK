@@ -87,7 +87,7 @@ public class Application {
             try {
                 context.destroyFromApplication();
             } catch (final Throwable e) {
-                log.error("Can't destroy the UIContext #" + context.getID() + " on Application #" + id, e);
+                log.error("Can't destroy the UIContext #{} on Application #{}", context.getID(), id, e);
             }
         }
         

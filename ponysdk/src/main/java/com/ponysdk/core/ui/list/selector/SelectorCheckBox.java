@@ -47,7 +47,7 @@ public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
 
     @Override
     public T getSelectedData() {
-        if (getValue()) return (T) data;
+        if (getValue()) return (T) getData();
         else return null;
     }
 

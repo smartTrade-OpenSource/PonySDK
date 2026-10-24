@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.context;
 
-import java.util.concurrent.RunnableScheduledFuture;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.LongSupplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,28 +40,31 @@ public class CommunicationSanityChecker {
     private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
+    /**
+     * The roundtrip probe goes every 5 s, or every heartbeat period if shorter: it measures the latency, and keeps
+     * the terminal's watchdog (no message for twice the period) quiet on an idle session.
+     */
+    private static final int ROUNDTRIP_PERIOD = 5000;
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(
         System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-        new ThreadFactory() {
+        Thread.ofVirtual().name("SanityChecker-", 0).factory());
 
-            private int i = 0;
-
-            @Override
-            public Thread newThread(final Runnable r) {
-                final Thread t = new Thread(r);
-                t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                t.setDaemon(true);
-                return t;
-            }
-        });
+    static {
+        // a stopped checker leaves the queue at once: no purge() (a copy and scan of every session's checker)
+        sanityCheckerTimer.setRemoveOnCancelPolicy(true);
+    }
 
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
-    private RunnableScheduledFuture<?> sanityChecker;
-    private CommunicationState currentState;
-    private long suspectTime = -1;
+    private int roundTripChecks; // checks between two probes
+    private int checksSinceRoundTrip;
+    private ScheduledFuture<?> sanityChecker;
+    private CommunicationState currentState = CommunicationState.OK;
+    private volatile long suspectTime = -1;
+    /** The time of the checks; a test sets its own. */
+    LongSupplier clock = System::currentTimeMillis;
 
     private static enum CommunicationState {
         OK,
@@ -83,7 +86,7 @@ public class CommunicationSanityChecker {
     public void start() {
         if (!isStarted() && heartBeatPeriod > 0) {
             currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
+            sanityChecker = sanityCheckerTimer.scheduleWithFixedDelay(() -> {
                 try {
                     checkCommunicationState();
                 } catch (final Throwable e) {
@@ -99,7 +102,6 @@ public class CommunicationSanityChecker {
         if (isStarted()) {
             if (sanityChecker != null) {
                 sanityChecker.cancel(false);
-                sanityCheckerTimer.remove(sanityChecker);
                 sanityChecker = null;
             }
             started.set(false);
@@ -109,48 +111,56 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
+        roundTripChecks = (int) Math.max(1, Math.min(ROUNDTRIP_PERIOD, heartBeatPeriod) / CHECK_PERIOD);
+        checksSinceRoundTrip = roundTripChecks - 1; // the first check sends one
     }
 
-    private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
-        // No message have been received or sent during the HeartbeatPeriod
-        return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
-    }
+    /**
+     * Only what comes from the client proves it is there: its messages, and the pongs its browser sends back to the
+     * server's pings outside the page's JavaScript, so even while the page is busy (RFC 6455, 5.5.2). The server's own
+     * sends prove nothing: they fill the socket's buffers whether the client reads them or not.
+     * <p>
+     * After half a heartbeat period of silence, a ping goes at each check. After a period, the connection is suspect;
+     * after another one, it is dead: the socket is dropped, and the context suspended or destroyed as configured.
+     */
+    void checkCommunicationState() {
+        // Skip sanity checks while UIContext is suspended (waiting for WS reconnection)
+        if (uiContext.isSuspended()) return;
 
-    private void checkCommunicationState() {
-        final long now = System.currentTimeMillis();
+        final long now = clock.getAsLong();
+        final long lastReceived = uiContext.getLastReceivedTime();
         switch (currentState) {
-            case OK:
-                if (isCommunicationSuspectedToBeNonFunctional(now)) {
+            case OK -> {
+                if (now - lastReceived >= heartBeatPeriod) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
-                    if (log.isDebugEnabled()) log.debug(
-                        "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
-                        uiContext.getID());
+                    if (log.isDebugEnabled()) log.debug("Nothing received on UIContext #{} for {} ms, connection suspected",
+                        uiContext.getID(), now - lastReceived);
                 }
-                break;
-            case SUSPECT:
-                if (uiContext.getLastReceivedTime() < suspectTime) {
-                    if (now - suspectTime >= heartBeatPeriod) {
-                        // No message have been received since we suspected the
-                        // communication to be non functional
-                        log.info(
-                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
-                            uiContext.getID());
-                        currentState = CommunicationState.KO;
-                        stop();
-                        uiContext.disconnect();
-                    }
-                } else {
+            }
+            case SUSPECT -> {
+                if (lastReceived >= suspectTime) {
                     currentState = CommunicationState.OK;
                     suspectTime = -1;
+                } else if (now - suspectTime >= heartBeatPeriod) {
+                    log.info("Nothing received on UIContext #{} for {} ms, not even a pong: the connection is dead",
+                        uiContext.getID(), now - lastReceived);
+                    currentState = CommunicationState.KO;
+                    stop();
+                    uiContext.connectionDead();
+                    return;
                 }
-                break;
-            case KO:
-            default:
-                break;
+            }
+            case KO -> {
+                return;
+            }
         }
 
-        uiContext.sendRoundTrip();
+        if (now - lastReceived >= heartBeatPeriod / 2) uiContext.ping();
+        if (++checksSinceRoundTrip >= roundTripChecks) {
+            checksSinceRoundTrip = 0;
+            uiContext.sendRoundTrip();
+        }
     }
 
 }

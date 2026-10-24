@@ -74,7 +74,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         super.init0();
         forEach(child -> {
             child.setTree(tree);
-            child.attach(window, frame);
+            child.attach(window, getFrame());
         });
 
         if (widget != null) {
@@ -87,7 +87,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
             if (tree != null) {
                 tree.adopt(widget, this);
-                widget.attach(window, frame);
+                widget.attach(window, getFrame());
                 saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
             }
         }
@@ -115,8 +115,10 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
+    /** Also sets it on the items below: a subtree built first and added to the tree afterwards knows its tree. */
     private void setTree(final PTree tree) {
         this.tree = tree;
+        if (children != null) children.forEach(child -> child.setTree(tree));
     }
 
     public void setSelected(final boolean newSelected) {
@@ -126,7 +128,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean isSelected() {
-        return this.equals(tree.getSelectedItem());
+        return tree != null && this.equals(tree.getSelectedItem());
     }
 
     public void setState(final boolean openState) {
@@ -145,7 +147,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(beforeIndex, item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window, frame);
+        if (isInitialized()) item.attach(window, getFrame());
 
         if (!isInitialized()) item.saveAdd(item.getID(), ID);
         else item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
@@ -158,7 +160,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window, frame);
+        if (isInitialized()) item.attach(window, getFrame());
         item.saveAdd(item.getID(), ID);
         return item;
     }

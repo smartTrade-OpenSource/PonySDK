@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -39,10 +38,36 @@ public class ApplicationConfigurationTest {
 
     private ApplicationConfiguration config;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         config = new ApplicationConfiguration();
         assertNotNull(config.toString());
+    }
+
+    /**
+     * Pins the WebSocket hardening defaults — notably the secure-by-default Origin check — and
+     * verifies the setters round-trip.
+     */
+    @Test
+    public void testWebSocketConfigDefaultsAndSetters() {
+        // Secure / safe defaults
+        assertTrue(config.isWsOriginCheckEnabled(), "Origin check (anti-CSWSH) must be on by default");
+        assertTrue(config.isWsPermessageDeflateEnabled(), "permessage-deflate on by default");
+        assertEquals(1 << 20, config.getWsMaxInboundMessageSize());
+        assertEquals(1_000_000L, config.getWsIdleTimeoutMs());
+        assertEquals(60_000L, config.getWsSendTimeoutMs());
+
+        // Setters round-trip
+        config.setWsOriginCheckEnabled(false);
+        assertFalse(config.isWsOriginCheckEnabled());
+        config.setWsPermessageDeflateEnabled(false);
+        assertFalse(config.isWsPermessageDeflateEnabled());
+        config.setWsAllowedOrigins(Set.of("https://app.example.com"));
+        assertTrue(config.getWsAllowedOrigins().contains("https://app.example.com"));
+        config.setWsMaxInboundMessageSize(4096);
+        assertEquals(4096, config.getWsMaxInboundMessageSize());
+        config.setWsSendTimeoutMs(5_000);
+        assertEquals(5_000L, config.getWsSendTimeoutMs());
     }
 
     /**
@@ -188,5 +213,4 @@ public class ApplicationConfigurationTest {
         config.setTabindexOnlyFormField(expected);
         assertEquals(expected, config.isTabindexOnlyFormField());
     }
-
 }

@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -30,6 +31,7 @@ import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -40,20 +42,20 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.spi.JsonProvider;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -73,12 +75,29 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
+    private static final String DEFAULT_PROVIDER = "org.eclipse.parsson.JsonProviderImpl";
+
+    /** Shared JsonProvider instance — Parsson is thread-safe, no need to create one per session. */
+    private static final JsonProvider SHARED_JSON_PROVIDER;
+    static {
+        JsonProvider p;
+        try {
+            p = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
+        } catch (final Throwable t) {
+            p = JsonProvider.provider();
+        }
+        SHARED_JSON_PROVIDER = p;
+    }
+
+    // Cached JSON keys to avoid repeated toStringValue() calls
+    private static final String KEY_TYPE_HISTORY = ClientToServerModel.TYPE_HISTORY.toStringValue();
+    private static final String KEY_OBJECT_ID = ClientToServerModel.OBJECT_ID.toStringValue();
+    private static final String KEY_PARENT_OBJECT_ID = ClientToServerModel.PARENT_OBJECT_ID.toStringValue();
 
     private final int ID;
 
     private final ReentrantLock lock = new ReentrantLock();
-    private final Map<String, Object> attributes = new HashMap<>();
+    private Map<String, Object> attributes;
 
     private final PObjectCache pObjectCache = new PObjectCache();
     private int objectCounter = 1;
@@ -92,27 +111,32 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
-    @Deprecated(forRemoval = true, since = "v2.8.0")
+    private Set<ContextDestroyListener> destroyListeners;
     private final TxnContext context;
-    private final Set<DataListener> listeners = ConcurrentHashMap.newKeySet();
+    private final Set<DataListener> listeners = new CopyOnWriteArraySet<>();
 
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean alive = true;
+    private volatile boolean suspended = false;  // volatile: read by timeout thread + resume
+    private volatile int suspension; // generation of the current suspension: a timer ends only its own
+    private volatile long suspendedAt; // read by SessionAdmin
+    private volatile long suspensionTimeoutMs;
+    private volatile boolean reconnectionHeld; // set by SessionAdmin, read by the reconnection path
     private int closeStatusCode = StatusCode.NO_CODE;
 
-    private final Latency roundtripLatency = new Latency(10);
-    private final Latency networkLatency = new Latency(10);
-    private final Latency terminalLatency = new Latency(10);
+    /** Records all protocol operations during suspension for replay on reconnection (volatile: read by SessionAdmin). */
+    private volatile RecordingEncoder recordingEncoder;
+
+    private Latency roundtripLatency;
+    private Latency networkLatency;
+    private Latency terminalLatency;
 
     private final ApplicationConfiguration configuration;
-    private final WebSocket socket;
-    private final JettyServerUpgradeRequest request;
+    private volatile WebSocket socket; // replaced on resume, read by SessionAdmin
 
-    private long lastReceivedTime = System.currentTimeMillis();
-
-    private final JsonProvider jsonProvider;
+    private final AtomicLong lastReceivedTime = new AtomicLong(System.currentTimeMillis());
+    private final AtomicLong lastSentTime = new AtomicLong(System.currentTimeMillis());
 
     private final ModelWriter modelWriter;
 
@@ -122,14 +146,32 @@ public class UIContext {
     // so parameter map, User-Agent and session are all served from this immutable snapshot.
     private final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData;
 
+    private final StringDictionary stringDictionary;
+
+    /** Optional OTel metrics — null if not configured. */
+    private PonySDKMetrics metrics;
+
+    /** Upgrade data taken from the socket ({@link WebSocket#getUpgradeRequestData()}), no shared dictionary. */
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration) {
+        this(socket, context, configuration, socket != null ? socket.getUpgradeRequestData() : null, null);
+    }
+
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final JettyServerUpgradeRequest request,
                      final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData) {
+        this(socket, context, configuration, upgradeRequestData, null);
+    }
+
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
+                     final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData,
+                     final SharedDictionaryProvider sharedDictionaryProvider) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
-        this.request = request;
         this.context = context;
+        if (context != null && context.getWriter() != null) {
+            context.getWriter().bindTo(this);
+            context.getWriter().setCoalescing(configuration != null && configuration.isUpdateCoalescingEnabled());
+        }
         this.modelWriter = context.getWriter();
         if (upgradeRequestData == null) {
             log.warn("No upgrade request data for UIContext #{}: parameters, headers and cookies read as empty,"
@@ -139,14 +181,19 @@ public class UIContext {
             this.upgradeRequestData = upgradeRequestData;
         }
 
-        JsonProvider provider;
-        try {
-            provider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (final Throwable t) {
-            provider = JsonProvider.provider();
+        // Initialize StringDictionary based on configuration
+        if (configuration.isStringDictionaryEnabled()) {
+            this.stringDictionary = new StringDictionary(
+                configuration.getStringDictionaryMaxSize(),
+                configuration.getStringDictionaryMinLength(),
+                configuration.getStringDictionaryMaxEvictionsPerFlush()
+            );
+            this.stringDictionary.setAdmitOnSecondUse(configuration.isStringDictionaryAdmitOnSecondUse());
+            // Pre-seed from shared provider (learned from previous sessions)
+            this.stringDictionary.initFromSharedProvider(sharedDictionaryProvider);
+        } else {
+            this.stringDictionary = null;
         }
-
-        jsonProvider = provider;
     }
 
     /**
@@ -229,23 +276,34 @@ public class UIContext {
      */
     public boolean execute(final Runnable runnable) {
         if (!isAlive()) return false;
-        if (log.isDebugEnabled()) log.debug("Pushing to #{}", this);
-        if (UIContext.get() != this) {
+        final UIContext outer = UIContext.get();
+        if (outer != this) {
+            // Clock reads only when metrics are wired — execute() runs for every client event/push
+            final PonySDKMetrics m = metrics;
+            final long lockStart = m != null ? System.currentTimeMillis() : 0;
             acquire();
+            final long runStart = m != null ? System.currentTimeMillis() : 0;
+            if (m != null) m.recordLockWait(runStart - lockStart);
+            // Run from inside another context's transaction (e.g. a push from a handler): that one is suspended
+            Txn txn = Txn.get();
+            final Txn suspended = txn.isActive() ? Txn.replace(txn = new Txn()) : null;
             try {
-                final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
                     runnable.run();
                     txn.commit();
+                    if (m != null) m.recordExecute(System.currentTimeMillis() - runStart);
                     return true;
                 } catch (final Throwable e) {
-                    log.error("Cannot process client instruction", e);
+                    log.error("Cannot process client instruction for UIContext #{}", ID, e);
                     txn.rollback();
+                    if (m != null) m.recordExecute(System.currentTimeMillis() - runStart);
                     return false;
                 }
             } finally {
+                if (suspended != null) Txn.replace(suspended);
                 release();
+                if (outer != null) setCurrent(outer);
             }
         } else {
             runnable.run();
@@ -299,20 +357,19 @@ public class UIContext {
      * @param jsonObject the JSON instructions
      */
     public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
-            history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
+        if (jsonObject.containsKey(KEY_TYPE_HISTORY)) {
+            history.fireHistoryChanged(jsonObject.getString(KEY_TYPE_HISTORY));
         } else {
-            final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
-            int objectID;
-            final ValueType valueType = jsonValue.getValueType();
-            if (ValueType.NUMBER == valueType) {
-                objectID = ((JsonNumber) jsonValue).intValue();
-            } else if (ValueType.STRING == valueType) {
-                objectID = Integer.parseInt(((JsonString) jsonValue).getString());
-            } else {
-                log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
-                return;
-            }
+            final JsonValue jsonValue = jsonObject.get(KEY_OBJECT_ID);
+            final int objectID = switch (jsonValue.getValueType()) {
+                case NUMBER -> ((JsonNumber) jsonValue).intValue();
+                case STRING -> Integer.parseInt(((JsonString) jsonValue).getString());
+                default -> {
+                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
+                    yield -1;
+                }
+            };
+            if (objectID == -1) return;
 
             //Cookies
             if (objectID == 0) {
@@ -323,8 +380,8 @@ public class UIContext {
                 if (object == null) {
                     log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
-                    if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
+                    if (jsonObject.containsKey(KEY_PARENT_OBJECT_ID)) {
+                        final int parentObjectID = jsonObject.getJsonNumber(KEY_PARENT_OBJECT_ID)
                                 .intValue();
                         final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
@@ -352,6 +409,11 @@ public class UIContext {
     /**
      * Locks the current UIContext
      */
+    /** True if the calling thread holds this context's lock (cheaper than a {@link #get()} ThreadLocal lookup). */
+    public boolean isHeldByCurrentThread() {
+        return lock.isHeldByCurrentThread();
+    }
+
     public void acquire() {
         lock.lock();
         currentContext.set(this);
@@ -361,7 +423,7 @@ public class UIContext {
      * Unlock the current UIContext
      */
     public void release() {
-        UIContext.remove();
+        currentContext.set(null); // not remove(): the next acquire() on this thread would allocate a new entry
         lock.unlock();
     }
 
@@ -425,7 +487,7 @@ public class UIContext {
     }
 
     /**
-     * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
+     * Registers a {@link StreamHandler} that will be called on the terminal object of a {@link PObject}
      *
      * @param streamListener the stream handler
      * @param pObject        the {@link PObject}
@@ -468,6 +530,7 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
+        context.getWriter().drainPendingUpdates(); // a block held back by the writer comes first
         socket.beginObject();
         socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         socket.endObject();
@@ -477,7 +540,10 @@ public class UIContext {
      * force flush instructions to the server
      */
     public void flush() {
-        if(isAlive()) socket.flush();
+        if (isAlive()) {
+            context.getWriter().drainPendingUpdates();
+            socket.flush();
+        }
     }
 
     /**
@@ -491,7 +557,10 @@ public class UIContext {
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
-        else attributes.put(name, value);
+        else {
+            if (attributes == null) attributes = new HashMap<>(4);
+            attributes.put(name, value);
+        }
     }
 
     /**
@@ -502,7 +571,7 @@ public class UIContext {
      * @param name the name of the object to remove from this session
      */
     public Object removeAttribute(final String name) {
-        return attributes.remove(name);
+        return attributes != null ? attributes.remove(name) : null;
     }
 
     /**
@@ -513,7 +582,7 @@ public class UIContext {
      * @return the object with the specified name
      */
     public <T> T getAttribute(final String name) {
-        return (T) attributes.get(name);
+        return attributes != null ? (T) attributes.get(name) : null;
     }
 
     /**
@@ -521,6 +590,11 @@ public class UIContext {
      * <p>
      * This method locks the UIContext
      */
+    /** {@link #onDestroy(int)} without a known close status code. */
+    public void onDestroy() {
+        onDestroy(StatusCode.NO_CODE);
+    }
+
     public void onDestroy(final int statusCode) {
         //we used to avoid calling socket.close() there, but sometimes jetty does not close the WS
         //when there is an exception in a listener => always call close since it is a no-op on a closed WS
@@ -580,39 +654,75 @@ public class UIContext {
     }
 
     /**
-     * Destroys effectively the UIContext
+     * Destroys effectively the UIContext.
+     * <p>
+     * Cleanup order:
+     * <ol>
+     *   <li>Sets {@code alive=false} and {@code suspended=false}</li>
+     *   <li>Clears the {@link RecordingEncoder} and resets {@link ModelWriter} to the raw socket</li>
+     *   <li>Flushes {@link StringDictionary} frequency data to the shared provider</li>
+     *   <li>Fires all {@link ContextDestroyListener}s (set is nulled before iteration)</li>
+     * </ol>
+     * Must be called under the UIContext lock.
      */
     private void doDestroy() {
         alive = false;
-        destroyListeners.forEach(listener -> {
-            try {
-                listener.onBeforeDestroy(this);
-            } catch (final AlreadyDestroyedApplication e) {
-                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-            } catch (final Exception e) {
-                log.error("Exception while destroying UIContext #" + getID(), e);
+        suspended = false;
+
+        // Clear and release the recording encoder to avoid retaining buffered entries
+        final RecordingEncoder rec = recordingEncoder;
+        recordingEncoder = null;
+        if (rec != null) {
+            rec.clear();
+            // Reset ModelWriter encoder so it no longer references the recorder
+            context.getWriter().setEncoder(socket);
+        }
+
+        // Flush string dictionary frequency data to shared provider
+        if (stringDictionary != null) {
+            stringDictionary.flushToSharedProvider();
+        }
+
+        if (destroyListeners != null) {
+            final Set<ContextDestroyListener> toNotify = destroyListeners;
+            destroyListeners = null;
+            for (final ContextDestroyListener listener : toNotify) {
+                try {
+                    listener.onBeforeDestroy(this);
+                } catch (final AlreadyDestroyedApplication e) {
+                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
+                } catch (final Exception e) {
+                    log.error("Exception while destroying UIContext #" + getID(), e);
+                }
             }
-        });
+        }
     }
 
     /**
-     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
+     * Adds a {@link ContextDestroyListener} that will be notified when the UIContext is destroyed.
+     * No-op if the UIContext is already destroyed.
      *
      * @param listener the context destroy listener
-     * @since {@link #destroy()}
+     * @see #destroy()
      */
     public void addContextDestroyListener(final ContextDestroyListener listener) {
-        destroyListeners.add(listener);
+        final Set<ContextDestroyListener> dl = destroyListeners;
+        if (dl == null) {
+            if (!alive) return; // already destroyed — ignore silently
+            destroyListeners = new HashSet<>(4);
+        }
+        if (destroyListeners != null) destroyListeners.add(listener);
     }
 
     /**
-     * Removes a {@link ContextDestroyListener}
+     * Removes a {@link ContextDestroyListener}.
      *
      * @param listener the context destroy listener
-     * @since {@link #destroy()}
+     * @see #destroy()
      */
     public void removeContextDestroyListener(final ContextDestroyListener listener) {
-        destroyListeners.remove(listener);
+        final Set<ContextDestroyListener> dl = destroyListeners;
+        if (dl != null) dl.remove(listener);
     }
 
     /**
@@ -623,6 +733,7 @@ public class UIContext {
     public void sendRoundTrip() {
         acquire();
         try {
+            context.getWriter().drainPendingUpdates(); // never inside a block held back by the writer
             socket.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
@@ -670,8 +781,7 @@ public class UIContext {
 
     /**
      * The query parameters of the WebSocket upgrade request, captured at handshake time (safe to read
-     * at any point in the session). Prefer this over {@code getRequest().getParameterMap()}, which
-     * throws under Jetty 12 because the underlying servlet request is recycled after the upgrade.
+     * at any point in the session: Jetty 12 recycles the servlet request after the upgrade).
      *
      * @return the parameter map (never null)
      */
@@ -698,11 +808,31 @@ public class UIContext {
     }
 
     public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
+        lastReceivedTime.set(System.currentTimeMillis());
+    }
+
+    /** See {@link WebSocket#ping()}. */
+    public void ping() {
+        final WebSocket s = socket;
+        if (s != null) s.ping();
+    }
+
+    /** See {@link WebSocket#connectionDead()}. */
+    public void connectionDead() {
+        final WebSocket s = socket;
+        if (s != null) s.connectionDead();
     }
 
     public long getLastReceivedTime() {
-        return lastReceivedTime;
+        return lastReceivedTime.get();
+    }
+
+    public void onMessageSent() {
+        lastSentTime.set(System.currentTimeMillis());
+    }
+
+    public long getLastSentTime() {
+        return lastSentTime.get();
     }
 
     public UserAgent getUserAgent() {
@@ -738,33 +868,182 @@ public class UIContext {
         return context.getApplication();
     }
 
+    public void setMetrics(final PonySDKMetrics metrics) {
+        this.metrics = metrics;
+    }
+
+    public PonySDKMetrics getMetrics() {
+        return metrics;
+    }
+
+    /**
+     * Suspends this UIContext on WebSocket disconnect, keeping all widget state intact.
+     * Called only when transparent reconnection is enabled.
+     * <p>
+     * During suspension, {@link #execute(Runnable)} still runs runnables (mutating PObject state)
+     * but writes go to a {@link RecordingEncoder} — buffered, not sent over the wire.
+     * On {@link #resume(WebSocket)}, the buffer is compacted (consecutive updates merged,
+     * create+remove cancelled) and replayed on the new WebSocket in a single flush.
+     *
+     * @param timeoutMs how long to wait for reconnection before destroying (ms)
+     */
+    public void suspend(final long timeoutMs) {
+        if (!alive) return; // no client can come back to a destroyed context
+        final int generation = ++suspension; // single writer: the socket's close path
+        suspendedAt = System.currentTimeMillis();
+        suspensionTimeoutMs = timeoutMs;
+        suspended = true;
+        final int maxEntries = configuration.getMaxRecordingEntries();
+        recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
+            log.warn("UIContext #{} recording buffer overflow ({}/{}) — destroying session to prevent unbounded memory growth",
+                    ID, count, max);
+            Thread.ofVirtual().start(this::destroy);
+        });
+        // Swap to RecordingEncoder — all protocol writes are buffered
+        context.getWriter().setEncoder(recordingEncoder);
+        log.info("UIContext #{} suspended, waiting for reconnection (timeout={}ms)", ID, timeoutMs);
+        Thread.ofVirtual().start(() -> {
+            try {
+                Thread.sleep(timeoutMs);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (suspended && suspension == generation) {
+                log.info("UIContext #{} reconnection timeout — destroying", ID); // the policy at work: a client that did not return
+                destroy();
+            }
+        });
+    }
+
+    /**
+     * Resumes a suspended UIContext with a new WebSocket.
+     * Compacts the recorded buffer (merges updates, cancels create+remove pairs),
+     * replays it on the new socket, then signals the client with {@code RECONNECT_CONTEXT}.
+     */
+    public void resume(final WebSocket newSocket) {
+        if (!suspended) throw new IllegalStateException("UIContext #" + ID + " is not suspended");
+        if (!alive) throw new IllegalStateException("UIContext #" + ID + " is already destroyed");
+        suspended = false;
+
+        final RecordingEncoder recorder = this.recordingEncoder;
+        this.recordingEncoder = null;
+
+        // If the recorder overflowed, the UIContext is already being destroyed — abort
+        if (recorder == null || recorder.isOverflowed()) {
+            log.warn("UIContext #{} resume aborted — recorder overflowed or null", ID);
+            return;
+        }
+
+        // Compact: merge consecutive updates, cancel create+remove pairs
+        final int beforeSize = recorder.size();
+        recorder.compact();
+        log.info("UIContext #{} resumed — replaying {} entries (compacted from {})",
+                ID, recorder.size(), beforeSize);
+
+        // Swap back to real encoder and socket for flush path
+        context.getWriter().setEncoder(newSocket);
+        context.setSocket(newSocket);
+        this.socket = newSocket;
+
+        // Reset last received time so CommunicationSanityChecker doesn't immediately kill us
+        onMessageReceived();
+
+        acquire();
+        try {
+            // DICTIONARY_ADD frames still in flight when the old socket dropped never reached the
+            // client: re-announce every entry on its next use instead of sending dangling refs.
+            if (stringDictionary != null) stringDictionary.resetClientSync();
+
+            final Txn txn = Txn.get();
+            txn.begin(context);
+            try {
+                // Replay all buffered operations in order
+                recorder.replayTo(newSocket);
+
+                // Signal the client that reconnection succeeded, in a block of its own like CREATE_CONTEXT: the
+                // terminal reads it only as the first model of a block, and the writer would put a WINDOW_ID first
+                newSocket.beginObject();
+                newSocket.encode(ServerToClientModel.RECONNECT_CONTEXT, ID);
+                newSocket.endObject();
+
+                txn.commit();
+            } catch (final Throwable e) {
+                log.error("Error during UIContext #{} resume replay", ID, e);
+                txn.rollback();
+            } finally {
+                // Release recorder entries now that replay is done
+                recorder.clear();
+            }
+        } finally {
+            release();
+        }
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    /** True while an administrator keeps this context's client away ({@link SessionAdmin#holdReconnection}). */
+    public boolean isReconnectionHeld() {
+        return reconnectionHeld;
+    }
+
+    void setReconnectionHeld(final boolean held) {
+        reconnectionHeld = held;
+    }
+
+    /** {@link SessionAdmin#dropConnection}: closes the socket as a network failure would. */
+    void dropConnection() {
+        socket.drop();
+    }
+
+    /**
+     * {@link SessionAdmin#destroy}: tells a connected client to reload, then destroys. On a thread of its own, so that
+     * the caller never holds its lock while taking this one (ADR-0001).
+     */
+    void destroyByAdministrator() {
+        Thread.ofVirtual().start(() -> {
+            if (!suspended) execute(this::close);
+            destroy();
+        });
+    }
+
+    /** {@link SessionAdmin}'s read-only view of this context; safe from any thread. */
+    SessionInfo snapshot() {
+        final boolean isSuspended = suspended;
+        SessionInfo.Suspension info = null;
+        if (isSuspended) {
+            final RecordingEncoder recorder = recordingEncoder;
+            info = new SessionInfo.Suspension(suspendedAt, suspensionTimeoutMs,
+                recorder == null ? 0 : recorder.getWrittenEntries(), recorder == null ? 0 : recorder.getHeldEntries(),
+                configuration.getMaxRecordingEntries());
+        }
+        final SessionInfo.State state = !alive ? SessionInfo.State.DESTROYED
+                : isSuspended ? SessionInfo.State.SUSPENDED : SessionInfo.State.CONNECTED;
+        return new SessionInfo(ID, state, getRoundtripLatency(), reconnectionHeld, info);
+    }
+
     public ModelWriter getWriter() {
         return modelWriter;
     }
 
     public JsonProvider getJsonProvider() {
-        return jsonProvider;
+        return SHARED_JSON_PROVIDER;
     }
 
     /**
-     * @deprecated Returns the raw Jetty upgrade request, whose servlet-request-backed accessors
-     *             ({@code getHeader}, {@code getHeaders}, {@code getCookies}, {@code getHost},
-     *             {@code isSecure}, {@code getParameterMap}, ...) throw {@link NullPointerException}
-     *             once the WebSocket upgrade completes, because Jetty 12 recycles the underlying
-     *             servlet request. Use the snapshot-backed accessors instead:
-     *             {@link #getHeader(String)}, {@link #getHeaders()}, {@link #getRequestCookies()},
-     *             {@link #getHost()}, {@link #isSecure()}, {@link #getRemoteSocketAddress()},
-     *             {@link #getParameterMap()}, {@link #getUserAgent()}, {@link #getSession()}.
+     * Gets the StringDictionary for protocol optimization.
+     *
+     * @return The StringDictionary, or null if disabled
      */
-    @Deprecated(forRemoval = true)
-    public JettyServerUpgradeRequest getRequest() {
-        return request;
+    public StringDictionary getStringDictionary() {
+        return stringDictionary;
     }
 
     /**
      * The value of the given upgrade-request header (case-insensitive), captured at handshake time and
-     * safe to read at any point in the session. Prefer this over {@code getRequest().getHeader(name)},
-     * which throws under Jetty 12 because the underlying servlet request is recycled after the upgrade.
+     * safe to read at any point in the session.
      *
      * @return the first header value, or null if absent
      */
@@ -773,8 +1052,7 @@ public class UIContext {
     }
 
     /**
-     * The upgrade-request headers (keyed case-insensitively), captured at handshake time. Prefer this
-     * over {@code getRequest().getHeaders()}, which throws under Jetty 12.
+     * The upgrade-request headers (keyed case-insensitively), captured at handshake time.
      *
      * @return the header map (never null)
      */
@@ -783,9 +1061,8 @@ public class UIContext {
     }
 
     /**
-     * The cookies of the WebSocket upgrade request, captured at handshake time. Prefer this over
-     * {@code getRequest().getCookies()}, which throws under Jetty 12. Note this is distinct from
-     * {@link #getCookies()}, which returns the PonySDK {@link PCookies}.
+     * The cookies of the WebSocket upgrade request, captured at handshake time. Note this is distinct
+     * from {@link #getCookies()}, which returns the PonySDK {@link PCookies}.
      *
      * @return the upgrade-request cookies (never null)
      */
@@ -794,8 +1071,7 @@ public class UIContext {
     }
 
     /**
-     * The Host of the WebSocket upgrade request, captured at handshake time. Prefer this over
-     * {@code getRequest().getHost()}, which throws under Jetty 12.
+     * The Host of the WebSocket upgrade request, captured at handshake time.
      *
      * @return the host, or null
      */
@@ -805,15 +1081,14 @@ public class UIContext {
 
     /**
      * Whether the WebSocket upgrade request was received over a secure (TLS) transport, captured at
-     * handshake time. Prefer this over {@code getRequest().isSecure()}, which throws under Jetty 12.
+     * handshake time.
      */
     public boolean isSecure() {
         return upgradeRequestData.isSecure();
     }
 
     /**
-     * The remote socket address of the connection, captured at handshake time. Prefer this over
-     * {@code getRequest().getRemoteSocketAddress()}.
+     * The remote socket address of the connection, captured at handshake time.
      *
      * @return the remote socket address, or null
      */
@@ -845,6 +1120,7 @@ public class UIContext {
      * @param value the value
      */
     public void addRoundtripLatencyValue(final long value) {
+        if (roundtripLatency == null) roundtripLatency = new Latency(10);
         roundtripLatency.add(value);
     }
 
@@ -853,8 +1129,35 @@ public class UIContext {
      *
      * @return the lantency
      */
+    /**
+     * Protocol bytes sent to the terminal on the current connection, before permessage-deflate (the size the
+     * binary protocol itself produces). Cheap: a counter of the flush path.
+     */
+    public long getProtocolBytesSent() {
+        final WebSocket s = socket;
+        return s != null ? s.getProtocolBytesSent() : 0;
+    }
+
+    /** Bytes sent on the wire on the current connection (framing + compressed payload), or -1 if unknown. */
+    public long getWireBytesSent() {
+        final WebSocket s = socket;
+        return s != null ? s.getWireBytesSent() : -1;
+    }
+
+    /** Bytes received on the wire on the current connection, or -1 if unknown. */
+    public long getWireBytesReceived() {
+        final WebSocket s = socket;
+        return s != null ? s.getWireBytesReceived() : -1;
+    }
+
+    /** Binary protocol version negotiated with the terminal (see {@link com.ponysdk.core.model.ProtocolVersion}). */
+    public int getProtocolVersion() {
+        final WebSocket s = socket;
+        return s != null ? s.protocolVersion() : com.ponysdk.core.model.ProtocolVersion.V1;
+    }
+
     public double getRoundtripLatency() {
-        return roundtripLatency.getValue();
+        return roundtripLatency != null ? roundtripLatency.getValue() : 0;
     }
 
     /**
@@ -863,6 +1166,7 @@ public class UIContext {
      * @param value the value
      */
     public void addNetworkLatencyValue(final long value) {
+        if (networkLatency == null) networkLatency = new Latency(10);
         networkLatency.add(value);
     }
 
@@ -872,7 +1176,7 @@ public class UIContext {
      * @return the lantency
      */
     public double getNetworkLatency() {
-        return networkLatency.getValue();
+        return networkLatency != null ? networkLatency.getValue() : 0;
     }
 
     /**
@@ -881,6 +1185,7 @@ public class UIContext {
      * @param value the ping value
      */
     public void addTerminalLatencyValue(final long value) {
+        if (terminalLatency == null) terminalLatency = new Latency(10);
         terminalLatency.add(value);
     }
 
@@ -890,26 +1195,31 @@ public class UIContext {
      * @return the lantency
      */
     public double getTerminalLatency() {
-        return terminalLatency.getValue();
+        return terminalLatency != null ? terminalLatency.getValue() : 0;
     }
 
+    /** The average of the last values, up to its size: of fewer while it fills, not of zeros. */
     private static final class Latency {
 
         private int index = 0;
+        private int count = 0;
+        private long sum = 0;
         private final long[] values;
 
         private Latency(final int size) {
             values = new long[size];
-            Arrays.fill(values, 0);
         }
 
         public void add(final long value) {
-            values[index++] = value;
-            if (index >= values.length) index = 0;
+            sum -= values[index];
+            values[index] = value;
+            sum += value;
+            if (++index >= values.length) index = 0;
+            if (count < values.length) count++;
         }
 
         public double getValue() {
-            return Arrays.stream(values).average().orElse(0);
+            return count == 0 ? 0 : (double) sum / count;
         }
     }
 

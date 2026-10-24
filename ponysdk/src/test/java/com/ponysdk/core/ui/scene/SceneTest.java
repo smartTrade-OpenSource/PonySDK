@@ -27,9 +27,10 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class SceneTest extends PSuite {
 

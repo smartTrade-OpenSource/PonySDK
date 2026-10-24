@@ -26,8 +26,16 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Toolbar of a {@link PRichTextArea}. The terminal builds it on the area: the area must be created first (added
+ * before the toolbar, or already attached), otherwise the toolbar is not shown.
+ */
 public class PRichTextToolbar extends PWidget {
+
+    private static final Logger log = LoggerFactory.getLogger(PRichTextToolbar.class);
 
     private final PRichTextArea richTextArea;
 
@@ -38,6 +46,10 @@ public class PRichTextToolbar extends PWidget {
     @Override
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
+        if (!richTextArea.isInitialized()) {
+            log.warn("{} is created before its {}: add the area first, or the terminal cannot build the toolbar", this,
+                richTextArea);
+        }
         writer.write(ServerToClientModel.WIDGET_ID, richTextArea.getID());
     }
 

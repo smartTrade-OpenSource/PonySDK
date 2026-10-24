@@ -1,0 +1,72 @@
+96559	hideLoading
+9152	100%
+9020	height
+9017	vertical-align
+8847	140px
+8784	display
+8764	inline-block
+8596	112px
+4112	pony-pending
+495	none
+335	white-space
+335	nowrap
+335	20px
+327	pony-grid-row
+293	flex
+254	width
+252	position
+249	0 0 auto
+169	span
+166	pony-pinned
+166	7280px
+126	relative
+123	absolute
+123	data-column-id
+123	onColumnAdded
+121	-moz-user-select
+121	pony-grid-col-resizer
+121	-ms-user-select
+121	right
+121	col-resize
+121	user-select
+121	pony-grid-draggable-col
+121	cursor
+121	[hide me]
+121	-webkit-user-select
+121	112.0px
+121	[pin me]
+22	auto
+19	hidden
+12	padding
+10	initial
+10	overflow-x
+8	color
+8	title
+6	onDataUpdated
+6	margin
+6	-ms-overflow-y
+6	-ms-overflow-x
+6	toolbar
+6	overflow-y
+6	content
+3	font-weight
+3	caption
+3	"Card body text set from server via property API."
+3	PonySdk Dashboard
+3	checkPosition
+3	actions
+3	4px 12px
+3	PonySdk Card
+3	form-field
+3	Clicks
+3	count-changed
+3	count
+3	bold
+3	background
+3	10px 0
+3	font-size
+3	aliceblue
+3	4px 10px
+3	label
+3	inner-widget
+3	12px

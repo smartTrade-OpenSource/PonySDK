@@ -33,16 +33,17 @@ import com.ponysdk.core.model.WidgetType;
  * widgets are
  * shown as the user selects the various tabs associated with them. The tabs can contain arbitrary
  * HTML.
- * <p>
- * This widget will <em>only</em> work in quirks mode. If your application is in Standards Mode, use
- * {@link PTabLayoutPanel} instead.
- * </p>
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TabPanel { the tab panel itself }</li>
- * <li>.gwt-TabPanelBottom { the bottom
- * section of the tab panel (the deck containing the widget) }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-TabPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>[role=tablist]</dt>
+ * <dd>the tabs</dd>
+ * <dt>[role=tab]</dt>
+ * <dd>a tab, a button; <code>[aria-selected=true]</code> for the selected one</dd>
+ * <dt>[role=tabpanel]</dt>
+ * <dd>the content of a tab</dd>
+ * </dl>
  *
  * @see PTabLayoutPanel
  */

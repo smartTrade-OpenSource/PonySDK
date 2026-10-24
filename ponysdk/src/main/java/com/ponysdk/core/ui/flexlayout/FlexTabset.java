@@ -3,9 +3,9 @@ package com.ponysdk.core.ui.flexlayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Builder for a tabset container that holds multiple {@link FlexTab} entries.

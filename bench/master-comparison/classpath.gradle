@@ -1,0 +1,20 @@
+// Init script of compare.sh: writes the classpaths of the ponysdk module (server: main runtime; client: test
+// runtime, which adds the Tyrus Grizzly container the driver needs) and the JDK of its Java toolchain.
+allprojects {
+    if (name == 'ponysdk') {
+        tasks.register('benchClasspath') {
+            dependsOn 'classes'
+            def server = sourceSets.main.runtimeClasspath
+            def client = sourceSets.test.runtimeClasspath
+            def launcher = javaToolchains.launcherFor(java.toolchain)
+            def out = file(providers.gradleProperty('bench.out').get())
+            doLast {
+                new File(out, 'server.cp').text = server.files.join(':')
+                new File(out, 'client.cp').text = client.files
+                    .findAll { !it.path.endsWith('/classes/java/test') && !it.path.endsWith('/resources/test') }
+                    .join(':')
+                new File(out, 'jdk.home').text = launcher.get().metadata.installationPath.asFile.path
+            }
+        }
+    }
+}

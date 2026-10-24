@@ -32,10 +32,12 @@ import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,16 +49,14 @@ import java.util.Objects;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-TabLayoutPanel
- * <dd>the panel itself
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs
- * <dd>the tab bar element
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab
- * <dd>an individual tab
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabInner
- * <dd>an element nested in each tab (useful for styling)
- * <dt>.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent
- * <dd>applied to all child content widgets
+ * <dt>.pony-TabLayoutPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>[role=tablist]</dt>
+ * <dd>the tabs</dd>
+ * <dt>[role=tab]</dt>
+ * <dd>a tab, a button; <code>[aria-selected=true]</code> for the selected one</dd>
+ * <dt>[role=tabpanel]</dt>
+ * <dd>the content of a tab</dd>
  * </dl>
  * <p>
  * The children of a TabLayoutPanel element are laid out in tab elements.
@@ -70,12 +70,15 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
 
     private Integer selectedItemIndex;
     private Duration animationDuration;
+    /** The widget of each tab given one: created with the panel, before the tab's add names it. */
+    private Map<PWidget, PWidget> tabWidgets;
 
     protected PTabLayoutPanel() {
     }
 
     @Override
     void init0() {
+        if (tabWidgets != null) tabWidgets.values().forEach(tabWidget -> tabWidget.attach(window, getFrame()));
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
@@ -103,10 +106,14 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             children.insert(child, beforeIndex);
 
             adopt(child);
-            tabWidget.attach(window, frame);
-            child.attach(window, frame);
+            if (tabWidgets == null) tabWidgets = new IdentityHashMap<>();
+            tabWidgets.put(child, tabWidget);
+            if (isInitialized()) {
+                tabWidget.attach(window, getFrame());
+                child.attach(window, getFrame());
+            }
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
-                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                    beforeIndex(beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindow() + ", new window : " + window);
@@ -121,13 +128,28 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             children.insert(child, beforeIndex);
 
             adopt(child);
-            child.attach(window, frame);
+            if (isInitialized()) child.attach(window, getFrame());
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
-                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                    beforeIndex(beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindow() + ", new window : " + window);
         }
+    }
+
+    /**
+     * Where the tab goes. Before the panel is on the terminal, none: its tabs are added in their final order when it
+     * attaches, where an index given at the time would misplace them (two tabs inserted first would swap).
+     */
+    private ServerBinaryModel beforeIndex(final int beforeIndex) {
+        return isInitialized() ? new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex) : null;
+    }
+
+    @Override
+    public boolean remove(final PWidget child) {
+        if (!super.remove(child)) return false;
+        if (tabWidgets != null) tabWidgets.remove(child);
+        return true;
     }
 
     public void add(final IsPWidget w, final IsPWidget tabWidget) {

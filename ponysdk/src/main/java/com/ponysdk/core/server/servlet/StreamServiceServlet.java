@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class StreamServiceServlet extends HttpServlet {
@@ -59,7 +60,15 @@ public class StreamServiceServlet extends HttpServlet {
     private static void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            // Resolve within the caller's HTTP session only — guard against cross-session access (IDOR).
+            final HttpSession session = req.getSession(false);
+            final UIContext uiContext = session == null ? null
+                    : SessionManager.get().getUIContext(session.getId(), uiContextID);
+            if (uiContext == null) {
+                log.warn("UI Context #{} not found for the calling session", uiContextID);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "UI Context #" + uiContextID + " not found");
+                return;
+            }
             final StreamHandler streamHandler = uiContext
                     .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);

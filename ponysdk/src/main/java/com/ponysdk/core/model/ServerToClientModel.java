@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.model;
 
+/**
+ * The keys of the server's messages, written as their ordinal on one byte: 256 at most. The first 227 are those of 2.x,
+ * at the same numbers. A key is never renumbered once a version is released, a page loaded before a deployment may
+ * still read it; a key no server writes any more can go only before a release
+ * (docs/decisions/0003-protocol-v4-listeners.md).
+ */
 public enum ServerToClientModel {
 
     ROUNDTRIP_LATENCY(ValueTypeModel.LONG),
@@ -255,9 +261,41 @@ public enum ServerToClientModel {
     POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
     DISCLOSURE_PANEL_OPEN_IMG(ValueTypeModel.INTEGER),
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
+    /** Written by 2.x servers only: kept so that the 227 keys of 2.x keep their numbers, which V3's extend. */
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    TEXTBOX_ID(ValueTypeModel.INTEGER),
+
+    // Web Component Protocol
+    WC_TAG_NAME(ValueTypeModel.STRING),
+    WC_SET_PROPERTY(ValueTypeModel.STRING),        // property name (followed by WC_PROPERTY_VALUE)
+    WC_PROPERTY_VALUE(ValueTypeModel.STRING),      // property value (JSON-encoded for complex types)
+    WC_REMOVE_PROPERTY(ValueTypeModel.STRING),     // property name to remove
+    WC_SET_ATTRIBUTE(ValueTypeModel.STRING),       // attribute name (followed by WC_ATTRIBUTE_VALUE)
+    WC_ATTRIBUTE_VALUE(ValueTypeModel.STRING),     // attribute value
+    WC_REMOVE_ATTRIBUTE(ValueTypeModel.STRING),    // attribute name to remove
+    WC_LISTEN_EVENT(ValueTypeModel.STRING),        // custom event name to listen for
+    WC_UNLISTEN_EVENT(ValueTypeModel.STRING),      // custom event name to stop listening
+    WC_CALL_METHOD(ValueTypeModel.STRING),         // method name to call on the WC element
+    WC_METHOD_ARGS(ValueTypeModel.ARRAY),          // arguments for the method call
+    WC_PATCH_PROPERTY(ValueTypeModel.STRING),      // property name for JSON patch (followed by WC_PROPERTY_VALUE with patch JSON)
+    WC_SLOT_NAME(ValueTypeModel.STRING),           // slot name for targeted child insertion inside a Web Component
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECT_CONTEXT(ValueTypeModel.UINT31),      // sent to client on reconnect: carries the uiContextId to resume
+
+    // Typed binary creation arguments for PAddOn — a pure-binary alternative to the JSON PADDON_CREATION
+    PADDON_CREATION_ARGS(ValueTypeModel.ARRAY),
+
+    // Update runs (protocol >= ProtocolVersion.UPDATE_RUNS, only sent to clients announcing it): inside
+    // an update block, switch to the next object instead of closing the block and opening a new one.
+    UPDATE_NEXT(ValueTypeModel.NULL),        // next object = previous id + 1
+    UPDATE_NEXT_DELTA(ValueTypeModel.BYTE),  // next object = previous id + 2 + (value & 0xFF)
+    UPDATE_NEXT_ID(ValueTypeModel.UINT31),   // next object = absolute id
+
+    // DOM events by name (protocol >= ProtocolVersion.LISTENERS, ADR-0003)
+    LISTEN_EVENT(ValueTypeModel.STRING),     // JSON {"name", "fields", "throttle", "debounce", "prevent", "stop", "capture"}
+    UNLISTEN_EVENT(ValueTypeModel.STRING);   // the event's name
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

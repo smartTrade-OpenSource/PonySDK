@@ -48,8 +48,8 @@ public final class Scheduler {
 	 */
 	public void shutdown() {
 		for (final Runnable r : executor.shutdownNow()) {
-			if (r instanceof SchedulingContext) {
-				((SchedulingContext) r).destroy();
+			if (r instanceof SchedulingContext sc) {
+				sc.destroy();
 			}
 		}
 

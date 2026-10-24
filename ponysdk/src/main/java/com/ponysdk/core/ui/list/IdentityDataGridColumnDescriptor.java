@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.list;
 import java.util.function.Function;
 
 /**
- * By default an IdentityDataGridColumnDescriptor has an IdentityValueProvider
+ * A column whose value is the row's data itself ({@link Function#identity()}).
  */
 public class IdentityDataGridColumnDescriptor<D> extends DataGridColumnDescriptor<D, D> {
 

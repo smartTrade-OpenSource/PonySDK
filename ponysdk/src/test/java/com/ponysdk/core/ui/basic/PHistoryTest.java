@@ -26,12 +26,13 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PHistoryTest extends PSuite {
 

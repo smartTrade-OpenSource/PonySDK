@@ -66,6 +66,11 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     private void initHeader() {
+        // Style hooks: dg-col-head (the header), dg-col-name, dg-col-action (pin / hide)
+        header.addStyleName("dg-col-head");
+        columnNameLabel.addStyleName("dg-col-name");
+        pinLabel.addStyleName("dg-col-action");
+        hideLabel.addStyleName("dg-col-action");
         columnNameLabel.setText(columnName);
         columnNameLabel.addClickHandler(e -> {
             if (columnController == null) return;
@@ -74,7 +79,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
         this.header.add(columnNameLabel);
 
         if (isPinnable()) {
-            this.pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
+            this.pinLabel.setText(state.isPinned() ? "Unpin" : "Pin");
             this.pinLabel.addClickHandler(e -> {
                 if (columnController == null) return;
                 columnController.setState(state.isPinned() ? state.onUnpin() : state.onPin());
@@ -83,7 +88,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
         this.header.add(pinLabel);
 
         if (isVisibilitySwitchable()) {
-            this.hideLabel.setText("[hide me]");
+            this.hideLabel.setText("Hide");
             this.hideLabel.addClickHandler(e -> {
                 if (columnController == null) return;
                 columnController.setState(state.isShown() ? state.onHide() : state.onShow());
@@ -188,7 +193,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     @Override
     public void onStateChanged(final State state) {
         this.state = state;
-        pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
+        pinLabel.setText(state.isPinned() ? "Unpin" : "Pin");
     }
 
     @Override

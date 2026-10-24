@@ -126,14 +126,14 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Adopt.
         adopt(child);
 
-        child.attach(window, frame);
+        child.attach(window, getFrame());
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
             new ServerBinaryModel(ServerToClientModel.SIZE, size));
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, (int) duration.toMillis()));
     }
 
     public PUnit getUnit() {

@@ -28,11 +28,11 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
-import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PCheckBoxTest extends PSuite {
 

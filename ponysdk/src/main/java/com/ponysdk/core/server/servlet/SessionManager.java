@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.application.Application;
@@ -67,12 +66,29 @@ public class SessionManager {
         listeners.add(listener);
     }
 
-    public UIContext getUIContext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
+    /**
+     * Returns the {@link UIContext} with the given id <strong>only if</strong> it belongs to the
+     * application identified by {@code applicationId} (i.e. the caller's HTTP session).
+     * <p>
+     * This is the safe lookup to use from HTTP endpoints: it prevents a client from reaching a
+     * UIContext owned by another session by guessing its (sequential) id — an IDOR.
+     *
+     * @param applicationId the caller's application id (its HTTP session id)
+     * @param id            the UIContext id
+     * @return the UIContext, or {@code null} if no such context exists in that application
+     */
+    public UIContext getUIContext(final String applicationId, final int id) {
+        if (applicationId == null) return null;
+        final Application app = applications.get(applicationId);
+        return app != null ? app.getUIContext(id) : null;
     }
 
     public int countUIContexts() {
-        return applications.values().stream().mapToInt(Application::countUIContexts).sum();
+        int count = 0;
+        for (final Application app : applications.values()) {
+            count += app.countUIContexts();
+        }
+        return count;
     }
 
 }
