@@ -2043,17 +2043,17 @@ public class MyEntryPoint implements EntryPoint {
 |-----------|---------|
 | Java (server) | 25 (virtual threads) |
 | TypeScript (terminal) | 7.0, esbuild 0.28 |
-| Jetty | 12.1.10 (EE11) |
-| Spring | 7.0.8 |
+| Jetty | 12.1.14 (EE11) |
+| Spring | 7.0.10 |
 | Servlet API | jakarta.servlet 6.1.0 |
 | JSON-P | jakarta.json 2.1.3 + Eclipse Parsson 1.1.9 |
 | WebSocket | Jetty native API (`Session.Listener.AutoDemanding`) |
-| Selenium | 4.44.0 |
+| Selenium | 4.51.0 |
 | Tyrus | 2.2.2 |
-| SLF4J | 2.0.18 |
-| Mockito | 5.23.0 |
-| JUnit | 4.13.2 / Jupiter 5.14.4 |
-| Gradle | 9.5.1 |
+| SLF4J | 2.0.20 |
+| Mockito | 5.24.0 |
+| JUnit | Jupiter 6.1.3 |
+| Gradle | 9.8.2 |
 
 ### 14.2 HTTP Request Recycling After WebSocket Upgrade
 
