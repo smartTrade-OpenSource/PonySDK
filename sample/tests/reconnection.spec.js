@@ -55,19 +55,23 @@ test('a context the server no longer has: the page reloads instead of stacking a
   expect(new URL(page.url()).hash).toBe('#inputs');
 });
 
-test('a page left closes its socket with 4002, the code that makes the server drop its context (ADR-0005)', async ({ page }) => {
-  const closes = [];
-  await page.routeWebSocket(/\/sample\/ws\b/, ws => {
-    const server = ws.connectToServer();
-    ws.onClose((code, reason) => {
-      closes.push(code);
-      server.close({ code, reason });
-    });
-  });
-  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('button', { name: 'Click me' })).toBeVisible({ timeout: 10000 });
-  await page.goto('about:blank');
-  await expect.poll(() => closes).toEqual([4002]);
+// Read on the server's side, through the Reconnection page's view of its client, not through routeWebSocket: the
+// route replaces the page's socket, so it cannot see what the browser itself sends, and Playwright 1.64 reports no
+// close code on Chromium for a page that navigates away.
+test('a page left closes its socket with 4002: the server drops its context at once (ADR-0005)', async ({ page, context, browserName }) => {
+  test.fixme(browserName === 'firefox',
+    'Firefox closes the socket with 1001 when the page navigates away, before pagehide runs: the server suspends the context');
+  await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
+  const log = page.locator('.rc-log');
+  await expect(log).toContainText('is up in the frame', { timeout: 15000 });
+
+  const client = await context.newPage();
+  await client.goto(new URL(await page.locator('.rc-frame').getAttribute('src'), page.url()).href,
+    { waitUntil: 'domcontentloaded' });
+  await expect(log).toContainText('New session', { timeout: 15000 }); // the page now watches the tab
+  await client.goto('about:blank');
+  await expect(log).toContainText('destroyed: it ended', { timeout: 5000 });
+  await expect(log).not.toContainText('the client is away'); // never suspended for a reconnection
 });
 
 test('a page busy for two heartbeat periods keeps its connection: its browser answers the pings', async ({ page }) => {
