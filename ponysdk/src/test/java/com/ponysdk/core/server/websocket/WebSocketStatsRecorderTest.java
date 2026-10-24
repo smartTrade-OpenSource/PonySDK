@@ -24,11 +24,7 @@
 package com.ponysdk.core.server.websocket;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -40,8 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
@@ -63,7 +59,7 @@ public class WebSocketStatsRecorderTest {
 
     private static final ServerToClientModel MODEL = ServerToClientModel.HEARTBEAT_PERIOD;
 
-    @After
+    @AfterEach
     public void unbindContext() {
         UIContext.remove();
     }
@@ -98,8 +94,8 @@ public class WebSocketStatsRecorderTest {
         final WebSocketStats summary = recorder.stop();
 
         assertNotNull(summary);
-        assertFalse("recorder must be stopped", recorder.isStarted());
-        assertEquals("listener must receive the summary", summary, notified.get());
+        assertFalse(recorder.isStarted(), "recorder must be stopped");
+        assertEquals(summary, notified.get(), "listener must receive the summary");
         assertEquals(summary, recorder.getSummary());
 
         final Map<Object, ? extends Record> records = summary.getStats().get(MODEL);
@@ -123,7 +119,7 @@ public class WebSocketStatsRecorderTest {
 
         final WebSocketStats summary = recorder.stop();
 
-        assertTrue("summary built with a groupBy must be grouped", summary.isGrouped());
+        assertTrue(summary.isGrouped(), "summary built with a groupBy must be grouped");
         final Bandwidth group = summary.getBandwidthPerGroup().get("grp");
         assertNotNull(group);
         assertEquals(10, group.getData()); // data 5 * count 2
@@ -142,7 +138,7 @@ public class WebSocketStatsRecorderTest {
         final WebSocketStats summary = recorder.stop();
 
         assertEquals(1, summary.getSummaryCount());
-        assertNull("the pre-start value must not have been recorded", summary.getStats().get(MODEL).get(1));
+        assertNull(summary.getStats().get(MODEL).get(1), "the pre-start value must not have been recorded");
         assertNotNull(summary.getStats().get(MODEL).get(2));
     }
 
@@ -151,7 +147,7 @@ public class WebSocketStatsRecorderTest {
         final WebSocketStatsRecorder recorder = new WebSocketStatsRecorder(s -> {});
         try {
             assertTrue(recorder.start(10, SECONDS));
-            assertFalse("start while already started must return false", recorder.start(10, SECONDS));
+            assertFalse(recorder.start(10, SECONDS), "start while already started must return false");
         } finally {
             recorder.stop();
         }
@@ -162,7 +158,7 @@ public class WebSocketStatsRecorderTest {
         final WebSocketStatsRecorder recorder = new WebSocketStatsRecorder(s -> {});
         assertTrue(recorder.start(10, SECONDS));
         recorder.stop();
-        assertFalse("start after stop must return false (already finished)", recorder.start(10, SECONDS));
+        assertFalse(recorder.start(10, SECONDS), "start after stop must return false (already finished)");
     }
 
     @Test

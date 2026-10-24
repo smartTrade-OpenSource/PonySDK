@@ -4,7 +4,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -17,9 +17,9 @@ import java.util.TimeZone;
 
 import jakarta.json.Json;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -37,12 +37,12 @@ public class PDatePickerTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }

@@ -24,8 +24,8 @@
 package com.ponysdk.core.server.concurrent;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -36,9 +36,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.junit.Test;
-
 import com.ponysdk.core.server.application.UIContext;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Non-regression tests for {@link UIDelegator}: a {@link Consumer} wrapper that re-dispatches the
@@ -73,7 +73,7 @@ public class UIDelegatorTest {
 
         delegator.accept("payload");
 
-        assertTrue("consumer must be dispatched asynchronously via PScheduler", latch.await(5, SECONDS));
+        assertTrue(latch.await(5, SECONDS), "consumer must be dispatched asynchronously via PScheduler");
         assertEquals("payload", received.get());
         verify(ui).execute(any(Runnable.class));
     }
@@ -90,7 +90,7 @@ public class UIDelegatorTest {
         }, ui);
         delegate.accept("hello");
 
-        assertTrue("PScheduler.delegate must produce a UIContext-dispatching consumer", latch.await(5, SECONDS));
+        assertTrue(latch.await(5, SECONDS), "PScheduler.delegate must produce a UIContext-dispatching consumer");
         assertEquals("hello", received.get());
     }
 }

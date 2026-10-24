@@ -23,18 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.PWebComponent.SlotPanel;
@@ -49,12 +44,12 @@ public class PWebComponentProtocolTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }
@@ -62,7 +57,7 @@ public class PWebComponentProtocolTest extends PSuite {
     private PWebComponent attached(final String tag) {
         final PWebComponent c = new PWebComponent(tag);
         PWindow.getMain().add(c);
-        assertTrue("attached to the (opened) main window", c.isInitialized());
+        assertTrue(c.isInitialized(), "attached to the (opened) main window");
         writer.clear();
         return c;
     }
@@ -83,7 +78,7 @@ public class PWebComponentProtocolTest extends PSuite {
         c.property("data").set("{\"a\":1}");
         writer.clear();
         c.property("data").set("{\"a\":1}");
-        assertTrue("no write for an unchanged value", writer.isEmpty());
+        assertTrue(writer.isEmpty(), "no write for an unchanged value");
     }
 
     @Test
@@ -149,7 +144,7 @@ public class PWebComponentProtocolTest extends PSuite {
         h.set(big);
         writer.clear();
         h.set(big);
-        assertTrue("off-heap dedupes identical values", writer.isEmpty());
+        assertTrue(writer.isEmpty(), "off-heap dedupes identical values");
         h.set(big.replace("\"count\":1", "\"count\":7"));
         assertEquals(List.of("{\"count\":7}"), writer.valuesAfter(ServerToClientModel.WC_PATCH_PROPERTY, "rows"));
         assertEquals(big.replace("\"count\":1", "\"count\":7"), h.get());
@@ -178,7 +173,7 @@ public class PWebComponentProtocolTest extends PSuite {
     public void removeSendsRemoveOnlyWhenCached() {
         final PWebComponent c = attached("x-remove");
         c.property("never").remove();
-        assertEquals("nothing to remove", 0, writer.count(ServerToClientModel.WC_REMOVE_PROPERTY));
+        assertEquals(0, writer.count(ServerToClientModel.WC_REMOVE_PROPERTY), "nothing to remove");
 
         c.property("data").set("{\"a\":1}");
         c.property("data").remove();
@@ -251,8 +246,8 @@ public class PWebComponentProtocolTest extends PSuite {
 
         PWindow.getMain().add(c);
 
-        assertEquals("final value only, sent once", List.of("{\"a\":2}"),
-                writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "data"));
+        assertEquals(List.of("{\"a\":2}"), writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "data"),
+                "final value only, sent once");
         assertEquals(0, writer.count(ServerToClientModel.WC_PATCH_PROPERTY));
         assertEquals(1, writer.valuesAfter(ServerToClientModel.WC_SET_ATTRIBUTE, "theme").size());
         assertEquals(1, writer.count(ServerToClientModel.WC_LISTEN_EVENT));
@@ -278,7 +273,7 @@ public class PWebComponentProtocolTest extends PSuite {
                 ServerToClientModel.WC_REMOVE_PROPERTY, ServerToClientModel.WC_SET_ATTRIBUTE,
                 ServerToClientModel.WC_REMOVE_ATTRIBUTE, ServerToClientModel.WC_LISTEN_EVENT,
                 ServerToClientModel.WC_UNLISTEN_EVENT }) {
-            assertEquals(m + " must not be sent", 0, writer.count(m));
+            assertEquals(0, writer.count(m), m + " must not be sent");
         }
     }
 
@@ -307,7 +302,7 @@ public class PWebComponentProtocolTest extends PSuite {
         final PLabel label = Element.newPLabel("hi");
         toolbar.add(label);
 
-        assertTrue("child initialized through the slot", label.isInitialized());
+        assertTrue(label.isInitialized(), "child initialized through the slot");
         assertSame(toolbar, label.getParent());
         assertEquals(List.of("toolbar"), writer.valuesOf(ServerToClientModel.WC_SLOT_NAME));
         assertEquals(List.of(c.getID()), writer.valuesOf(ServerToClientModel.PARENT_OBJECT_ID));
@@ -323,7 +318,7 @@ public class PWebComponentProtocolTest extends PSuite {
 
         PWindow.getMain().add(c);
 
-        assertTrue("slot children are initialized when the WC attaches", label.isInitialized());
+        assertTrue(label.isInitialized(), "slot children are initialized when the WC attaches");
         assertTrue(writer.valuesOf(ServerToClientModel.WC_SLOT_NAME).contains("content"));
     }
 
@@ -331,7 +326,7 @@ public class PWebComponentProtocolTest extends PSuite {
     public void slotPanelIsNotAStandaloneWidget() {
         final SlotPanel sp = new PWebComponent("x-slot-type").slot("s");
         assertThrows(UnsupportedOperationException.class, sp::getWidgetType);
-        assertThrows(IllegalStateException.class, () -> sp.add(sp));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> sp.add(sp));
     }
 
     // ---- lifecycle ----

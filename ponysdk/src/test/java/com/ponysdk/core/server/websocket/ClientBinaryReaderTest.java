@@ -23,17 +23,14 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
-
 import com.ponysdk.core.model.ClientToServerModel;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests {@link ClientBinaryReader}, which parses <strong>untrusted</strong> client bytes.
@@ -116,13 +113,13 @@ public class ClientBinaryReaderTest {
     public void skipValueHugeStringLengthIsRejected() {
         final ByteBuffer buf = (ByteBuffer) ByteBuffer.allocate(8).putInt(Integer.MAX_VALUE).flip();
         final ClientBinaryReader r = new ClientBinaryReader(buf);
-        assertThrows(IllegalStateException.class, () -> r.skipValue(ClientBinaryReader.tagString()));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> r.skipValue(ClientBinaryReader.tagString()));
     }
 
     @Test
     public void skipValueUnknownTagIsRejected() {
         final ClientBinaryReader r = new ClientBinaryReader(ByteBuffer.allocate(4));
-        assertThrows(IllegalStateException.class, () -> r.skipValue(99));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> r.skipValue(99));
     }
 
     @Test

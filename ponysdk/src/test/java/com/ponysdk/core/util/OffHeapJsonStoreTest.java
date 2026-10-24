@@ -23,12 +23,9 @@
 
 package com.ponysdk.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link OffHeapJsonStore} — covers the off-heap put/read/remove lifecycle,
@@ -41,7 +38,7 @@ public class OffHeapJsonStoreTest {
         final OffHeapJsonStore store = new OffHeapJsonStore();
         final long previous = store.put("k", "{\"a\":1}");
 
-        assertEquals("new key has no previous hash", 0L, previous);
+        assertEquals(0L, previous, "new key has no previous hash");
         assertEquals("{\"a\":1}", store.readValue("k"));
         assertTrue(store.containsKey("k"));
         assertEquals(1, store.size());
@@ -62,7 +59,7 @@ public class OffHeapJsonStoreTest {
         store.put("k", "old-value");
         final long oldHash = store.put("k", "new-value");
 
-        assertTrue("overwrite returns a non-zero previous hash", oldHash != 0L);
+        assertTrue(oldHash != 0L, "overwrite returns a non-zero previous hash");
         assertEquals("new-value", store.readValue("k"));
         assertEquals(1, store.size());
     }
@@ -88,7 +85,7 @@ public class OffHeapJsonStoreTest {
 
         assertTrue(store.hasSameValue("k", "{\"x\":42}"));
         assertFalse(store.hasSameValue("k", "{\"x\":43}"));
-        assertFalse("missing key is never equal", store.hasSameValue("missing", "{\"x\":42}"));
+        assertFalse(store.hasSameValue("missing", "{\"x\":42}"), "missing key is never equal");
     }
 
     @Test
@@ -100,7 +97,7 @@ public class OffHeapJsonStoreTest {
         assertFalse(store.containsKey("k"));
         assertEquals(0, store.size());
         assertNull(store.readValue("k"));
-        assertFalse("removing an absent key returns false", store.remove("k"));
+        assertFalse(store.remove("k"), "removing an absent key returns false");
     }
 
     @Test
@@ -138,7 +135,7 @@ public class OffHeapJsonStoreTest {
         final String bigValue = big.toString();
         store.put("big", bigValue);
 
-        assertTrue("buffer must have grown", store.offHeapBytes() > initialCapacity);
+        assertTrue(store.offHeapBytes() > initialCapacity, "buffer must have grown");
         assertEquals(bigValue, store.readValue("big"));
     }
 

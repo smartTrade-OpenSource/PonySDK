@@ -23,14 +23,14 @@
 
 package com.ponysdk.driver;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -56,9 +56,9 @@ public class BinaryAddonBrowserIT {
 
     private WebDriver driver;
 
-    @Before
+    @BeforeEach
     public void onlyWhenEnabled() {
-        Assume.assumeTrue("set -Dponysdk.browserTest=true to run", Boolean.getBoolean("ponysdk.browserTest"));
+        Assumptions.assumeTrue(Boolean.getBoolean("ponysdk.browserTest"), "set -Dponysdk.browserTest=true to run");
 
         final ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage",
@@ -68,7 +68,7 @@ public class BinaryAddonBrowserIT {
         driver = new ChromeDriver(options);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (driver != null) driver.quit();
     }
@@ -88,8 +88,8 @@ public class BinaryAddonBrowserIT {
         final long bigLen = ((Number) js.executeScript("return window.__bigLen")).longValue();
         final long bigSum = ((Number) js.executeScript("return window.__bigSum")).longValue();
 
-        assertEquals("typed binary creation args delivered to the factory", 5, createLen);
-        assertEquals("1000-element binary method array (beyond the old 255 cap)", 1000, bigLen);
-        assertEquals("sum of 0..999 decoded intact by the terminal", 499_500, bigSum);
+        assertEquals(5, createLen, "typed binary creation args delivered to the factory");
+        assertEquals(1000, bigLen, "1000-element binary method array (beyond the old 255 cap)");
+        assertEquals(499_500, bigSum, "sum of 0..999 decoded intact by the terminal");
     }
 }

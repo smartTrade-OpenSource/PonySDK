@@ -25,8 +25,8 @@ package com.ponysdk.core.ui.listbox;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.ReflectionTestUtil;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,8 +35,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.ponysdk.core.ui.listbox.MultiLevelDropDownRenderer.getConfiguration;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ListBoxTest extends PSuite {
 
@@ -49,7 +49,7 @@ public class ListBoxTest extends PSuite {
     private final ListBox<String> listBox = new ListBox<>(configuration);
 
 
-    @After
+    @AfterEach
     public void tearDown() {
         configuration = getConfiguration();
     }

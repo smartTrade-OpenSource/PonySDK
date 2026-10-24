@@ -23,14 +23,12 @@
 
 package com.ponysdk.core.server.stm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /** Unit tests for {@link Txn}: per-transaction lifecycle and (lazily created) listeners. */
@@ -40,11 +38,11 @@ public class TxnTest {
     public void commitWithoutListenersFlushesAndEndsTheTransaction() {
         final TxnContext context = Mockito.mock(TxnContext.class);
         final Txn txn = Txn.get();
-        assertSame("same transaction while it is open", txn, Txn.get());
+        assertSame(txn, Txn.get(), "same transaction while it is open");
         txn.begin(context);
         txn.commit();
         Mockito.verify(context).flush();
-        assertThrows("commit ends the transaction", RuntimeException.class, () -> Txn.get().commit());
+        assertThrows(RuntimeException.class, () -> Txn.get().commit(), "commit ends the transaction");
         Txn.get().begin(context);
         Txn.get().rollback(); // cleanup + rollback without listeners
     }
@@ -81,7 +79,7 @@ public class TxnTest {
         final Txn second = Txn.get();
         second.begin(context);
         second.rollback();
-        assertEquals("the second transaction has no listener", List.of("rollback"), calls);
+        assertEquals(List.of("rollback"), calls, "the second transaction has no listener");
     }
 
     @Test

@@ -5,23 +5,20 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
-
 import com.ponysdk.core.model.PCheckBoxState;
+
+import org.junit.jupiter.api.Test;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.test.PSuite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PRadioButtonSelectionTest extends PSuite {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEmptyListThrowsException() {
-        Element.newPRadioButtonSelection(Collections.emptyList());
+        assertThrows(IllegalArgumentException.class, () ->
+            Element.newPRadioButtonSelection(Collections.emptyList()));
     }
 
     @Test

@@ -23,15 +23,12 @@
 
 package com.ponysdk.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link CompactStringMap} — the flat-array String→String map used for small
@@ -49,7 +46,7 @@ public class CompactStringMapTest {
         assertEquals(1, m.size());
         assertFalse(m.isEmpty());
         assertTrue(m.containsKey("a"));
-        assertNull("missing key", m.get("zzz"));
+        assertNull(m.get("zzz"), "missing key");
         assertFalse(m.containsKey("zzz"));
     }
 
@@ -59,7 +56,7 @@ public class CompactStringMapTest {
         m.put("k", "old");
         assertEquals("old", m.put("k", "new"));
         assertEquals("new", m.get("k"));
-        assertEquals("update does not grow size", 1, m.size());
+        assertEquals(1, m.size(), "update does not grow size");
     }
 
     @Test
@@ -71,7 +68,7 @@ public class CompactStringMapTest {
         assertTrue(m.isEmpty());
         assertNull(m.get("k"));
         assertFalse(m.containsKey("k"));
-        assertNull("removing a missing key returns null", m.remove("k"));
+        assertNull(m.remove("k"), "removing a missing key returns null");
     }
 
     @Test

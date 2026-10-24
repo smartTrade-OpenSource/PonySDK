@@ -7,7 +7,7 @@ plugins {
 ext {
     resourcesCoreTest = "src/test/resources"
     seleniumVersion = '4.51.0'
-    junitVersion = '4.13.2'
+    junitVersion = '6.1.3'
     tyrusVersion = '2.2.2'
     mockitoVersion = '5.24.0'
     jettyVersion = '12.1.14'
@@ -217,11 +217,12 @@ dependencies {
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
             'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
-            'junit:junit:' + junitVersion,
+            'org.junit.jupiter:junit-jupiter-api:' + junitVersion,
             'org.mockito:mockito-core:' + mockitoVersion
     )
 
     testImplementation(
+            'org.junit.jupiter:junit-jupiter:' + junitVersion,
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'jakarta.websocket:jakarta.websocket-client-api:2.2.0',
             'org.jsoup:jsoup:1.23.2'
@@ -238,6 +239,7 @@ dependencies {
     )
 
     testRuntimeOnly(
+            'org.junit.platform:junit-platform-launcher:' + junitVersion,
             'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
             'org.slf4j:jul-to-slf4j:' + slf4jVersion,
             'org.apache.logging.log4j:log4j-slf4j2-impl:' + log4jVersion,
@@ -312,6 +314,7 @@ tasks.register('bench', JavaExec) {
 }
 
 test {
+    useJUnitPlatform()
     classpath = files(resourcesCoreTest) + classpath
     // Brotli compression tests load a native lib (brotli4j); JDK 24+ (JEP 472) warns on native access
     // now and will block it later unless explicitly granted.

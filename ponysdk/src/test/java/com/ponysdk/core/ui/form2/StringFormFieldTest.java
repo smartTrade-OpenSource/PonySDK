@@ -28,10 +28,13 @@ import com.ponysdk.core.ui.form2.api.ValidationResult;
 import com.ponysdk.core.ui.form2.impl.validator.NotEmptyFormFieldValidator;
 import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.test.PSuite;
+
 import org.jsoup.Jsoup;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.jsoup.nodes.Element;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StringFormFieldTest extends PSuite {
 

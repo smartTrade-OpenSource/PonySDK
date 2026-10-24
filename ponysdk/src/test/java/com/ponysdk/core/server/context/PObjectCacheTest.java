@@ -26,16 +26,16 @@ package com.ponysdk.core.server.context;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PObject;
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PObjectCacheTest extends PSuite {
 
     private PObjectCache cache;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cache = new PObjectCache();
     }

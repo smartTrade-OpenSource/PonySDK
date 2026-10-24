@@ -13,7 +13,8 @@ ext {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.3'
     testRuntimeOnly 'org.eclipse.parsson:parsson:' + parssonVersion // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
 
     implementation(
@@ -75,4 +76,8 @@ task runFlexLayoutDemo(type: JavaExec) {
         '-Dlog4j.configurationFile=etc/log4j2.xml',
         '-Dspring.profiles.active=flexlayout'
     ]
+}
+
+test {
+    useJUnitPlatform()
 }

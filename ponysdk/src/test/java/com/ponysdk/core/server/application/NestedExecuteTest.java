@@ -4,17 +4,15 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -50,7 +48,7 @@ public class NestedExecuteTest {
         return new UIContext(socket, txn, config);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -72,10 +70,10 @@ public class NestedExecuteTest {
             labels[0].setText("after the push");
         });
 
-        assertTrue("the outer transaction commits", ok);
-        assertSame("the outer code still runs in its own context", a, seen[0]);
+        assertTrue(ok, "the outer transaction commits");
+        assertSame(a, seen[0], "the outer code still runs in its own context");
         assertTrue(wireB.values.contains("TEXT=pushed"));
         assertTrue(wireA.values.contains("TEXT=after the push"));
-        assertEquals("nothing of A written to B", -1, wireB.values.indexOf("TEXT=after the push"));
+        assertEquals(-1, wireB.values.indexOf("TEXT=after the push"), "nothing of A written to B");
     }
 }

@@ -23,12 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -39,9 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
-
 import com.ponysdk.core.model.ServerToClientModel;
+
+import org.junit.jupiter.api.Test;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.websocket.WebSocketStats.Bandwidth;
 import com.ponysdk.core.server.websocket.WebSocketStats.DecodeException;
@@ -133,7 +128,7 @@ public class WebSocketStatsTest {
         ungrouped().toCsv(file, ';', null, null);
 
         final List<String> lines = Files.readAllLines(file.toPath());
-        assertTrue("header must be present", lines.get(0).startsWith("MODEL;"));
+        assertTrue(lines.get(0).startsWith("MODEL;"), "header must be present");
         assertTrue(lines.get(0).contains("BANDWIDTH"));
         // header + 3 records (the toCsv writer starts each record with '\n')
         final long dataLines = lines.stream().filter(l -> l.contains(";")).count();
@@ -175,7 +170,7 @@ public class WebSocketStatsTest {
         // Every original (value, group) pair must survive the round-trip with its byte counts.
         for (final Map.Entry<Object, Record> e : records.entrySet()) {
             final Record d = decodedRecords.get(e.getKey());
-            assertNotNull("missing key after round-trip: " + e.getKey(), d);
+            assertNotNull(d, "missing key after round-trip: " + e.getKey());
             assertEquals(e.getValue().getCount(), d.getCount());
             assertEquals(e.getValue().getDataBytes(), d.getDataBytes());
         }

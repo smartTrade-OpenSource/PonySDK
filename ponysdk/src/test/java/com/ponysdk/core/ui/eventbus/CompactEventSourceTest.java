@@ -4,16 +4,13 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.Test;
-
 import com.ponysdk.core.util.SetPool;
+
+import org.junit.jupiter.api.Test;
 
 /** The compact per-widget handler storage keeps the contract of {@link EventSource}; pooled sets join once. */
 public class CompactEventSourceTest {

@@ -4,15 +4,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.json.Json;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.test.PSuite;

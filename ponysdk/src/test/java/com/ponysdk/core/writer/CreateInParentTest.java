@@ -4,16 +4,16 @@
 
 package com.ponysdk.core.writer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ProtocolVersion;
@@ -72,7 +72,7 @@ public class CreateInParentTest {
         wire.blocks.clear();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -84,7 +84,7 @@ public class CreateInParentTest {
         ctx.execute(() -> root.add(l[0] = Element.newPLabel("a")));
         assertEquals(List.of(List.of("TYPE_CREATE=" + l[0].getID(), "WIDGET_TYPE=" + com.ponysdk.core.model.WidgetType.LABEL.getValue(), "TEXT=a",
             "PARENT_OBJECT_ID=" + root.getID())), wire.blocks);
-        assertNull("every block is ended by the transaction", wire.open);
+        assertNull(wire.open, "every block is ended by the transaction");
     }
 
     @Test

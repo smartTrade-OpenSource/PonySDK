@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.server.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,8 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
@@ -56,7 +52,7 @@ public class SessionManagerTest {
     private final SessionManager manager = SessionManager.get();
     private final List<Application> registered = new ArrayList<>();
 
-    @After
+    @AfterEach
     public void cleanup() {
         registered.forEach(manager::unregisterApplication);
         registered.clear();
@@ -81,7 +77,7 @@ public class SessionManagerTest {
         final Application application = register(id);
 
         assertSame(application, manager.getApplication(id));
-        assertTrue("registered application must be listed", manager.getApplications().contains(application));
+        assertTrue(manager.getApplications().contains(application), "registered application must be listed");
     }
 
     @Test
@@ -93,7 +89,7 @@ public class SessionManagerTest {
         assertSame(application, manager.getApplication(id));
 
         manager.unregisterApplication(application);
-        assertNull("unregistered application must no longer be found", manager.getApplication(id));
+        assertNull(manager.getApplication(id), "unregistered application must no longer be found");
         assertFalse(manager.getApplications().contains(application));
     }
 

@@ -4,8 +4,8 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -13,9 +13,9 @@ import java.util.List;
 
 import jakarta.json.Json;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
@@ -34,13 +34,13 @@ public class PEventListenerTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
         speak(ProtocolVersion.LISTENERS);
     }
 
-    @After
+    @AfterEach
     public void restore() {
         writer.uninstall();
         Mockito.doCallRealMethod().when(UIContext.get()).getProtocolVersion();
@@ -70,11 +70,11 @@ public class PEventListenerTest extends PSuite {
 
         box.addEventListener("input", options.throttle(Duration.ofMillis(100)), e -> {
         });
-        assertEquals("new options are sent", 2, writer.count(ServerToClientModel.LISTEN_EVENT));
+        assertEquals(2, writer.count(ServerToClientModel.LISTEN_EVENT), "new options are sent");
 
         first.removeHandler();
         second.removeHandler();
-        assertEquals("one listener left", 0, writer.count(ServerToClientModel.UNLISTEN_EVENT));
+        assertEquals(0, writer.count(ServerToClientModel.UNLISTEN_EVENT), "one listener left");
     }
 
     @Test
@@ -131,7 +131,7 @@ public class PEventListenerTest extends PSuite {
         panel.addScrollHandler(handler);
         writer.clear();
         panel.removeScrollHandler(handler);
-        assertEquals("the old block below 4", 0, writer.count(ServerToClientModel.WIDGET_ID));
+        assertEquals(0, writer.count(ServerToClientModel.WIDGET_ID), "the old block below 4");
         assertEquals(1, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
     }
 }

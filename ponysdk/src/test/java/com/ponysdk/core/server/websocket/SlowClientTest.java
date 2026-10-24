@@ -4,10 +4,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.Mockito;
 
 /**
@@ -70,7 +68,7 @@ public class SlowClientTest {
         return b;
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void aFlushWhileTheClientIsBusyDoesNotWait() throws IOException {
         final ManualSession s = new ManualSession();
         final WebSocketPusher p = new WebSocketPusher(s.session, 1 << 15, 2_000, new ByteBufferPool(1 << 12, 8));
@@ -80,8 +78,8 @@ public class SlowClientTest {
         final long t0 = System.nanoTime();
         p.put(bytes(100, 2));
         p.flush();
-        assertTrue("returned without waiting for the client", System.nanoTime() - t0 < TimeUnit.MILLISECONDS.toNanos(500));
-        assertEquals("queued, not sent", 1, s.sends());
+        assertTrue(System.nanoTime() - t0 < TimeUnit.MILLISECONDS.toNanos(500), "returned without waiting for the client");
+        assertEquals(1, s.sends(), "queued, not sent");
 
         s.completeOne(); // the client caught up: the queued data goes out
         assertEquals(2, s.sends());
@@ -91,7 +89,7 @@ public class SlowClientTest {
         assertArrayEquals(expected.toByteArray(), s.wire.toByteArray());
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void flushesMadeMeanwhileGoOutTogetherInOrder() throws IOException {
         final ManualSession s = new ManualSession();
         final WebSocketPusher p = new WebSocketPusher(s.session, 1 << 15, 2_000, new ByteBufferPool(1 << 12, 8));
@@ -102,14 +100,14 @@ public class SlowClientTest {
             p.put(b);
             p.flush();
         }
-        assertEquals("one in flight, the 5 others wait", 1, s.sends());
+        assertEquals(1, s.sends(), "one in flight, the 5 others wait");
         s.completeOne();
-        assertEquals("the 5 waiting flushes leave as one message", 2, s.sends());
+        assertEquals(2, s.sends(), "the 5 waiting flushes leave as one message");
         s.completeOne();
         assertArrayEquals(expected.toByteArray(), s.wire.toByteArray());
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void aClientStuckPastTheQueueTimesOutAsBefore() throws IOException {
         final ManualSession s = new ManualSession();
         final WebSocketPusher p = new WebSocketPusher(s.session, 1 << 10, 300, new ByteBufferPool(1 << 10, 16));
@@ -119,11 +117,11 @@ public class SlowClientTest {
                 p.flush();
             }
         });
-        assertTrue(e.getMessage(), e.getMessage().contains("Timeout"));
+        assertTrue(e.getMessage().contains("Timeout"), e.getMessage());
         assertTrue(p.isClosed());
     }
 
-    @Test(timeout = 20_000)
+    @Test @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void sendsCompletingOnAnotherThreadKeepTheOrder() throws Exception {
         final Session session = Mockito.mock(Session.class);
         Mockito.when(session.isOpen()).thenReturn(true);

@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.server.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,7 +38,7 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -62,14 +60,14 @@ public class BootstrapServletTest {
 
     @Test
     public void traversalAndMalformedPathsAreRejected() {
-        assertFalse("null", BootstrapServlet.isSafeResourcePath(null));
-        assertFalse("empty", BootstrapServlet.isSafeResourcePath(""));
-        assertFalse("parent traversal", BootstrapServlet.isSafeResourcePath("/../etc/passwd"));
-        assertFalse("nested traversal", BootstrapServlet.isSafeResourcePath("/a/../../b"));
-        assertFalse("bare ..", BootstrapServlet.isSafeResourcePath(".."));
-        assertFalse("trailing traversal", BootstrapServlet.isSafeResourcePath("/assets/.."));
-        assertFalse("backslash", BootstrapServlet.isSafeResourcePath("/a\\..\\b"));
-        assertFalse("nul byte", BootstrapServlet.isSafeResourcePath("/a\u0000.js"));
+        assertFalse(BootstrapServlet.isSafeResourcePath(null), "null");
+        assertFalse(BootstrapServlet.isSafeResourcePath(""), "empty");
+        assertFalse(BootstrapServlet.isSafeResourcePath("/../etc/passwd"), "parent traversal");
+        assertFalse(BootstrapServlet.isSafeResourcePath("/a/../../b"), "nested traversal");
+        assertFalse(BootstrapServlet.isSafeResourcePath(".."), "bare ..");
+        assertFalse(BootstrapServlet.isSafeResourcePath("/assets/.."), "trailing traversal");
+        assertFalse(BootstrapServlet.isSafeResourcePath("/a\\..\\b"), "backslash");
+        assertFalse(BootstrapServlet.isSafeResourcePath("/a\u0000.js"), "nul byte");
     }
 
     @Test
@@ -129,16 +127,16 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
         assertTrue(html.startsWith("<!doctype html>"));
-        assertTrue("title", html.contains("<title>MyApp</title>"));
-        assertTrue("content-type meta", html.contains("http-equiv=\"content-type\""));
-        assertTrue("custom meta", html.contains("name=\"robots\" content=\"noindex\""));
-        assertTrue("style link", html.contains("<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>"));
-        assertTrue("terminal script", html.contains("ponyterminal/terminal.js"));
-        assertTrue("reconnect script", html.contains("window.ponyReconnectMode = true"));
-        assertTrue("wc shared sheet", html.contains("pony.wc.registerSharedSheet('shared.css')"));
-        assertTrue("app script", html.contains("src=\"script/app.js\""));
-        assertTrue("loading", html.contains("<div id=\"loading\">Loading MyApp"));
-        assertTrue("noscript", html.contains("<noscript>"));
+        assertTrue(html.contains("<title>MyApp</title>"), "title");
+        assertTrue(html.contains("http-equiv=\"content-type\""), "content-type meta");
+        assertTrue(html.contains("name=\"robots\" content=\"noindex\""), "custom meta");
+        assertTrue(html.contains("<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>"), "style link");
+        assertTrue(html.contains("ponyterminal/terminal.js"), "terminal script");
+        assertTrue(html.contains("window.ponyReconnectMode = true"), "reconnect script");
+        assertTrue(html.contains("pony.wc.registerSharedSheet('shared.css')"), "wc shared sheet");
+        assertTrue(html.contains("src=\"script/app.js\""), "app script");
+        assertTrue(html.contains("<div id=\"loading\">Loading MyApp"), "loading");
+        assertTrue(html.contains("<noscript>"), "noscript");
         assertTrue(html.trim().endsWith("</html>"));
     }
 
@@ -152,9 +150,9 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
 
         assertTrue(html.contains("<title>Bare</title>"));
-        assertTrue("terminal script always present", html.contains("ponyterminal/terminal.js"));
-        assertFalse("no reconnect script when disabled", html.contains("window.ponyReconnectMode"));
-        assertFalse("no shared-sheet registration", html.contains("registerSharedSheet"));
+        assertTrue(html.contains("ponyterminal/terminal.js"), "terminal script always present");
+        assertFalse(html.contains("window.ponyReconnectMode"), "no reconnect script when disabled");
+        assertFalse(html.contains("registerSharedSheet"), "no shared-sheet registration");
         assertTrue(html.contains("<div id=\"loading\">Loading Bare"));
     }
 
@@ -180,11 +178,11 @@ public class BootstrapServletTest {
 
         final int socket = html.indexOf("window.ponyEarlySocket=");
         final int terminal = html.indexOf("ponyterminal/terminal.js");
-        assertTrue("early socket script present", socket > 0);
-        assertTrue("before the terminal script", socket < terminal);
-        assertTrue("announces the protocol version the terminal speaks",
-            html.contains("&w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT + "'"));
-        assertTrue("not in a child window", html.contains("has('1')"));
+        assertTrue(socket > 0, "early socket script present");
+        assertTrue(socket < terminal, "before the terminal script");
+        assertTrue(html.contains("&w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT + "'"),
+            "announces the protocol version the terminal speaks");
+        assertTrue(html.contains("has('1')"), "not in a child window");
     }
 
     @Test
@@ -196,22 +194,22 @@ public class BootstrapServletTest {
 
         final int ponysdk = html.indexOf("src=\"script/ponysdk.js\"");
         final int terminal = html.indexOf("type=\"module\" src=\"ponyterminal/terminal.js\"");
-        assertTrue("ponysdk.js present", ponysdk > 0);
-        assertTrue("deferred terminal after ponysdk.js", terminal > ponysdk);
-        assertTrue("early socket before the terminal", html.indexOf("window.ponyEarlySocket=") < terminal);
+        assertTrue(ponysdk > 0, "ponysdk.js present");
+        assertTrue(terminal > ponysdk, "deferred terminal after ponysdk.js");
+        assertTrue(html.indexOf("window.ponyEarlySocket=") < terminal, "early socket before the terminal");
     }
 
     @Test
     public void theLegacyLayerRunsBeforeTheTerminalWhenAskedFor() {
         final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(config.getApplicationName()).thenReturn("App");
-        assertFalse("off by default", servletWith(config).buildIndexHTML(request("", "/index.html")).contains("legacy.js"));
+        assertFalse(servletWith(config).buildIndexHTML(request("", "/index.html")).contains("legacy.js"), "off by default");
 
         Mockito.when(config.isLegacyClassNames()).thenReturn(true);
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
         final int legacy = html.indexOf("src=\"ponyterminal/legacy.js\" defer");
-        assertTrue("legacy layer present", legacy > 0);
-        assertTrue("before the terminal", legacy < html.indexOf("type=\"module\" src=\"ponyterminal/terminal.js\""));
+        assertTrue(legacy > 0, "legacy layer present");
+        assertTrue(legacy < html.indexOf("type=\"module\" src=\"ponyterminal/terminal.js\""), "before the terminal");
     }
 
     // ---- HTTP caching of the served files ----
@@ -283,6 +281,6 @@ public class BootstrapServletTest {
         servlet.handleRequest(request, response, "/index.html");
 
         Mockito.verify(response).setHeader("Cache-Control", "no-cache");
-        assertEquals("generated per request: no modification time", -1L, servlet.getLastModified(request));
+        assertEquals(-1L, servlet.getLastModified(request), "generated per request: no modification time");
     }
 }

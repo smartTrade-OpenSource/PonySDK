@@ -23,20 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.StringReader;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.WidgetType;
@@ -68,7 +62,7 @@ public class PWebComponentTest extends PSuite {
     public void propertyHandleIsIdempotent() {
         final PWebComponent c = new PWebComponent("my-chart");
         final PropertyHandle a = c.property("title");
-        assertSame("property(name) must return the same handle", a, c.property("title"));
+        assertSame(a, c.property("title"), "property(name) must return the same handle");
     }
 
     @Test
@@ -85,7 +79,7 @@ public class PWebComponentTest extends PSuite {
 
         final PropertyHandle stateless = c.property("tick").stateless();
         assertEquals(StorageMode.STATELESS, stateless.getMode());
-        assertFalse("stateless disables patch", stateless.isPatchEnabled());
+        assertFalse(stateless.isPatchEnabled(), "stateless disables patch");
 
         assertFalse(c.property("snap").withoutPatch().isPatchEnabled());
     }
@@ -113,14 +107,14 @@ public class PWebComponentTest extends PSuite {
         final PropertyHandle dataset = c.property("dataset").offHeap();
         dataset.set("{\"rows\":[1,2,3]}");
         assertEquals("{\"rows\":[1,2,3]}", dataset.get());
-        assertTrue("off-heap buffer should be allocated", c.getOffHeapBytes() > 0);
+        assertTrue(c.getOffHeapBytes() > 0, "off-heap buffer should be allocated");
     }
 
     @Test
     public void statelessIsNotCached() {
         final PropertyHandle tick = new PWebComponent("my-chart").property("tick").stateless();
         tick.set("42");
-        assertNull("stateless properties are never cached server-side", tick.get());
+        assertNull(tick.get(), "stateless properties are never cached server-side");
     }
 
     // ---- attributes ----
@@ -148,7 +142,7 @@ public class PWebComponentTest extends PSuite {
                 .build();
         c.onClientData(clientEvent);
 
-        assertTrue("registered listener must receive the custom event", fired[0]);
+        assertTrue(fired[0], "registered listener must receive the custom event");
     }
 
     // ---- computeJsonPatch (RFC 7396 merge-patch, shallow/top-level) ----
@@ -156,7 +150,7 @@ public class PWebComponentTest extends PSuite {
     @Test
     public void patchEmitsOnlyChangedAndAddedKeys() {
         final JsonObject patch = patch("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":3,\"c\":4}");
-        assertFalse("unchanged key omitted", patch.containsKey("a"));
+        assertFalse(patch.containsKey("a"), "unchanged key omitted");
         assertEquals(3, patch.getInt("b"));
         assertEquals(4, patch.getInt("c"));
         assertEquals(2, patch.size());

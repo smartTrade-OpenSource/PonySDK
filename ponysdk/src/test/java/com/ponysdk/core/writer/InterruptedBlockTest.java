@@ -4,18 +4,15 @@
 
 package com.ponysdk.core.writer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ProtocolVersion;
@@ -78,7 +75,7 @@ public class InterruptedBlockTest {
         Mockito.clearInvocations(socket);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -91,7 +88,7 @@ public class InterruptedBlockTest {
             b.setText("boom");
         }));
         assertEquals(List.of(List.of("TYPE_UPDATE=" + a.getID(), "TEXT=ok"), List.of("TYPE_UPDATE=" + b.getID())), wire.blocks);
-        assertNull("the interrupted block is ended", wire.open);
+        assertNull(wire.open, "the interrupted block is ended");
         Mockito.verify(socket).flush();
     }
 

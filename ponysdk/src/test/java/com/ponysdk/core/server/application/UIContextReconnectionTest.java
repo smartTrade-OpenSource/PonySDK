@@ -9,9 +9,9 @@ import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.ref.WeakReference;
@@ -20,10 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for the UIContext suspend/resume reconnection engine.
@@ -56,7 +53,7 @@ public class UIContextReconnectionTest {
     private WebSocket oldSocket;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         spyEncoder = new SpyEncoder();
         config = new ApplicationConfiguration();
@@ -76,7 +73,7 @@ public class UIContextReconnectionTest {
         uiContext = new UIContext(oldSocket, txnContext, config);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -150,7 +147,7 @@ public class UIContextReconnectionTest {
         // Wait for timeout + margin
         Thread.sleep(500);
 
-        assertFalse("UIContext should be destroyed after timeout", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "UIContext should be destroyed after timeout");
         assertFalse(uiContext.isSuspended());
     }
 
@@ -189,8 +186,8 @@ public class UIContextReconnectionTest {
 
         final List<RecordingEncoder.Entry> sent = replayEncoder.entries;
         final int at = sent.stream().map(RecordingEncoder.Entry::model).toList().indexOf(ServerToClientModel.RECONNECT_CONTEXT);
-        assertTrue("RECONNECT_CONTEXT sent: " + sent, at >= 0);
-        assertTrue("RECONNECT_CONTEXT opens its block: " + sent, at == 0 || sent.get(at - 1).model() == ServerToClientModel.END);
+        assertTrue(at >= 0, "RECONNECT_CONTEXT sent: " + sent);
+        assertTrue(at == 0 || sent.get(at - 1).model() == ServerToClientModel.END, "RECONNECT_CONTEXT opens its block: " + sent);
         assertEquals(uiContext.getID(), sent.get(at).value());
     }
 
@@ -206,11 +203,11 @@ public class UIContextReconnectionTest {
         uiContext.suspend(1000); // its window ends at about 1 400 ms
 
         Thread.sleep(800); // about 1 200 ms: the first timer fired 200 ms ago
-        assertTrue("a later suspension keeps its own window", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "a later suspension keeps its own window");
         assertTrue(uiContext.isSuspended());
 
         awaitDead(uiContext);
-        assertFalse("destroyed when its own window expires", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "destroyed when its own window expires");
     }
 
     /** A destroyed context is never suspended: no recorder, no timer for a client that cannot come back. */
@@ -233,7 +230,7 @@ public class UIContextReconnectionTest {
         // Wait past the original timeout
         Thread.sleep(2500);
 
-        assertTrue("UIContext should still be alive after resume", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "UIContext should still be alive after resume");
     }
 
     // ---- overflow destroys UIContext ----
@@ -265,7 +262,7 @@ public class UIContextReconnectionTest {
         // Give the virtual thread time to run destroy
         Thread.sleep(500);
 
-        assertFalse("UIContext should be destroyed after overflow", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "UIContext should be destroyed after overflow");
     }
 
     // ---- onWebSocketError during suspension ----
@@ -282,8 +279,8 @@ public class UIContextReconnectionTest {
         // With our fix, onWebSocketError checks isSuspended() and skips destroy
         // We can't easily call WebSocket.onWebSocketError without a full setup,
         // but we verify the state contract: suspended + alive = should not be destroyed
-        assertTrue("Suspended UIContext should remain alive", uiContext.isAlive());
-        assertTrue("Suspended UIContext should remain suspended", uiContext.isSuspended());
+        assertTrue(uiContext.isAlive(), "Suspended UIContext should remain alive");
+        assertTrue(uiContext.isSuspended(), "Suspended UIContext should remain suspended");
     }
 
     // ---- CommunicationSanityChecker skips suspended UIContext ----
@@ -296,8 +293,8 @@ public class UIContextReconnectionTest {
         // The CommunicationSanityChecker should skip checks when isSuspended()
         Thread.sleep(100);
 
-        assertTrue("Suspended UIContext should not be killed by sanity checker",
-                uiContext.isAlive());
+        assertTrue(uiContext.isAlive(),
+                "Suspended UIContext should not be killed by sanity checker");
         assertTrue(uiContext.isSuspended());
     }
 
@@ -338,7 +335,7 @@ public class UIContextReconnectionTest {
         } finally {
             uiContext.release();
         }
-        assertEquals("Live write should reach spyEncoder", 1, spyEncoder.entries.size());
+        assertEquals(1, spyEncoder.entries.size(), "Live write should reach spyEncoder");
         assertEquals(ServerToClientModel.HTML, spyEncoder.entries.get(0).model());
         assertEquals("live-write", spyEncoder.entries.get(0).value());
 
@@ -376,7 +373,7 @@ public class UIContextReconnectionTest {
         });
 
         // Verify spyEncoder did NOT receive any of these (they went to RecordingEncoder)
-        assertTrue("Spy should not receive writes during suspension", spyEncoder.entries.isEmpty());
+        assertTrue(spyEncoder.entries.isEmpty(), "Spy should not receive writes during suspension");
 
         // Phase 4: Reconnect — manually replay (we can't call resume() because
         // it needs PWindow.getMain() which requires a full UI stack).
@@ -457,8 +454,8 @@ public class UIContextReconnectionTest {
                 }
             }
         }
-        assertTrue("Object 10 update should be replayed", foundObj10Update);
-        assertEquals("Object 10 HTML should be last value (v2, not v1)", "v2", obj10HtmlValue);
+        assertTrue(foundObj10Update, "Object 10 update should be replayed");
+        assertEquals("v2", obj10HtmlValue, "Object 10 HTML should be last value (v2, not v1)");
 
         // Find TEXT entry for object 20
         boolean foundObj20Update = false;
@@ -476,21 +473,21 @@ public class UIContextReconnectionTest {
                 }
             }
         }
-        assertTrue("Object 20 update should be replayed", foundObj20Update);
-        assertEquals("Object 20 TEXT should be 'hello'", "hello", obj20TextValue);
+        assertTrue(foundObj20Update, "Object 20 update should be replayed");
+        assertEquals("hello", obj20TextValue, "Object 20 TEXT should be 'hello'");
 
         // Verify RECONNECT_CONTEXT was sent
         boolean foundReconnect = replayed.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.RECONNECT_CONTEXT);
-        assertTrue("RECONNECT_CONTEXT should be sent after replay", foundReconnect);
+        assertTrue(foundReconnect, "RECONNECT_CONTEXT should be sent after replay");
 
         // Verify RECONNECT_CONTEXT carries the correct UIContext ID
         int reconnectId = replayed.stream()
                 .filter(e -> e.model() == ServerToClientModel.RECONNECT_CONTEXT)
                 .map(e -> (int) e.value())
                 .findFirst().orElse(-1);
-        assertEquals("RECONNECT_CONTEXT should carry the UIContext ID",
-                uiContext.getID(), reconnectId);
+        assertEquals(uiContext.getID(),
+                reconnectId, "RECONNECT_CONTEXT should carry the UIContext ID");
 
         // Verify ordering: object 10 update comes before object 20 update
         int obj10Pos = -1, obj20Pos = -1;
@@ -500,8 +497,8 @@ public class UIContextReconnectionTest {
                 if (Integer.valueOf(20).equals(replayed.get(i).value()) && obj20Pos < 0) obj20Pos = i;
             }
         }
-        assertTrue("Object 10 update should come before object 20 update",
-                obj10Pos < obj20Pos);
+        assertTrue(obj10Pos < obj20Pos,
+                "Object 10 update should come before object 20 update");
     }
 
     /**
@@ -567,11 +564,11 @@ public class UIContextReconnectionTest {
                         || m == ServerToClientModel.TYPE_UPDATE)
                 .toList();
 
-        assertEquals("Should have CREATE, ADD, UPDATE in order",
-                List.of(ServerToClientModel.TYPE_CREATE,
+        assertEquals(List.of(ServerToClientModel.TYPE_CREATE,
                         ServerToClientModel.TYPE_ADD,
                         ServerToClientModel.TYPE_UPDATE),
-                structuralTypes);
+                structuralTypes,
+                "Should have CREATE, ADD, UPDATE in order");
     }
 
     /**
@@ -644,13 +641,13 @@ public class UIContextReconnectionTest {
                         || e.model() == ServerToClientModel.TYPE_UPDATE
                         || e.model() == ServerToClientModel.TYPE_REMOVE)
                         && Integer.valueOf(200).equals(e.value()));
-        assertFalse("Object 200 (created+removed) should be eliminated", hasObj200);
+        assertFalse(hasObj200, "Object 200 (created+removed) should be eliminated");
 
         // Object 300 should survive
         boolean hasObj300 = replayEncoder.entries.stream().anyMatch(e ->
                 e.model() == ServerToClientModel.TYPE_UPDATE
                         && Integer.valueOf(300).equals(e.value()));
-        assertTrue("Object 300 should survive", hasObj300);
+        assertTrue(hasObj300, "Object 300 should survive");
 
         String obj300Text = null;
         for (int i = 0; i < replayEncoder.entries.size(); i++) {
@@ -664,7 +661,7 @@ public class UIContextReconnectionTest {
                 }
             }
         }
-        assertEquals("Object 300 TEXT should be 'survivor'", "survivor", obj300Text);
+        assertEquals("survivor", obj300Text, "Object 300 TEXT should be 'survivor'");
     }
 
     // ====================================================================
@@ -726,7 +723,7 @@ public class UIContextReconnectionTest {
 
         assertFalse(uiContext.isAlive());
         boolean result = uiContext.execute(() -> fail("Should not run"));
-        assertFalse("execute() should return false on dead UIContext", result);
+        assertFalse(result, "execute() should return false on dead UIContext");
     }
 
     /**
@@ -738,7 +735,7 @@ public class UIContextReconnectionTest {
 
         awaitDead(uiContext); // the destroy runs on a virtual thread: give it time on a loaded machine
 
-        assertFalse("Zero timeout should destroy UIContext", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "Zero timeout should destroy UIContext");
     }
 
     /** Waits until the context is destroyed (a timer thread does it), at most 5 s: a fixed sleep is flaky on CI. */
@@ -792,7 +789,7 @@ public class UIContextReconnectionTest {
         // Should still have RECONNECT_CONTEXT even with empty replay
         boolean foundReconnect = replayEncoder.entries.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.RECONNECT_CONTEXT);
-        assertTrue("RECONNECT_CONTEXT should be sent even with empty buffer", foundReconnect);
+        assertTrue(foundReconnect, "RECONNECT_CONTEXT should be sent even with empty buffer");
     }
 
     /**
@@ -835,9 +832,9 @@ public class UIContextReconnectionTest {
             uiContext.getWriter().endObject();
         });
 
-        assertTrue("Post-resume writes should reach the new socket",
-                replayEncoder.entries.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.HTML && "post-resume".equals(e.value())));
+        assertTrue(replayEncoder.entries.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.HTML && "post-resume".equals(e.value())),
+                "Post-resume writes should reach the new socket");
     }
 
     /**
@@ -847,7 +844,7 @@ public class UIContextReconnectionTest {
     public void testRapidSuspendResumeCycles() {
         for (int cycle = 0; cycle < 5; cycle++) {
             uiContext.suspend(30_000);
-            assertTrue("Cycle " + cycle + ": should be suspended", uiContext.isSuspended());
+            assertTrue(uiContext.isSuspended(), "Cycle " + cycle + ": should be suspended");
 
             // Write during suspension
             uiContext.execute(() -> {
@@ -869,10 +866,10 @@ public class UIContextReconnectionTest {
             final WebSocket newSocket = Mockito.mock(WebSocket.class);
             uiContext.resume(newSocket);
 
-            assertFalse("Cycle " + cycle + ": should not be suspended after resume",
-                    uiContext.isSuspended());
-            assertTrue("Cycle " + cycle + ": should be alive after resume",
-                    uiContext.isAlive());
+            assertFalse(uiContext.isSuspended(),
+                    "Cycle " + cycle + ": should not be suspended after resume");
+            assertTrue(uiContext.isAlive(),
+                    "Cycle " + cycle + ": should be alive after resume");
         }
     }
 
@@ -908,11 +905,11 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("All threads should complete within 5s",
-                latch.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(latch.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "All threads should complete within 5s");
 
         // Verify the spy did NOT receive any writes (all went to RecordingEncoder)
-        assertTrue("Spy should be empty during suspension", spyEncoder.entries.isEmpty());
+        assertTrue(spyEncoder.entries.isEmpty(), "Spy should be empty during suspension");
 
         // UIContext should still be alive and suspended
         assertTrue(uiContext.isAlive());
@@ -931,8 +928,8 @@ public class UIContextReconnectionTest {
 
         // pushToClient goes through execute() — should succeed
         boolean result = uiContext.pushToClient("test-data");
-        assertTrue("pushToClient should succeed during suspension", result);
-        assertTrue("DataListener should have been called", listenerCalled.get());
+        assertTrue(result, "pushToClient should succeed during suspension");
+        assertTrue(listenerCalled.get(), "DataListener should have been called");
     }
 
     /**
@@ -978,8 +975,8 @@ public class UIContextReconnectionTest {
 
         uiContext.destroy();
 
-        assertFalse("destroy() should kill the UIContext", uiContext.isAlive());
-        assertFalse("destroy() should clear suspended flag", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "destroy() should kill the UIContext");
+        assertFalse(uiContext.isSuspended(), "destroy() should clear suspended flag");
     }
 
     /**
@@ -1010,7 +1007,7 @@ public class UIContextReconnectionTest {
         Thread.sleep(200); // give timeout thread time to acquire lock and destroy
 
         // UIContext should be dead (timeout fired after execute released the lock)
-        assertFalse("UIContext should be destroyed after timeout", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "UIContext should be destroyed after timeout");
     }
 
     /**
@@ -1043,11 +1040,11 @@ public class UIContextReconnectionTest {
             // Wait past the timeout
             Thread.sleep(200);
             // UIContext should still be alive (resume cleared suspended, timeout sees !suspended)
-            assertTrue("Resume won the race — UIContext should be alive", uiContext.isAlive());
+            assertTrue(uiContext.isAlive(), "Resume won the race — UIContext should be alive");
         } else {
             // Timeout already fired — UIContext may be dead or being destroyed
             Thread.sleep(200);
-            assertFalse("Timeout won the race — UIContext should be dead", uiContext.isAlive());
+            assertFalse(uiContext.isAlive(), "Timeout won the race — UIContext should be dead");
         }
         // Either way, no crash, no corruption
     }
@@ -1064,8 +1061,8 @@ public class UIContextReconnectionTest {
 
         // Wait a bit so lastReceivedTime becomes stale
         Thread.sleep(200);
-        assertTrue("lastReceivedTime should be stale",
-                System.currentTimeMillis() - uiContext.getLastReceivedTime() >= 200);
+        assertTrue(System.currentTimeMillis() - uiContext.getLastReceivedTime() >= 200,
+                "lastReceivedTime should be stale");
 
         // Resume
         uiContext.acquire();
@@ -1082,8 +1079,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // lastReceivedTime should be fresh (within last 100ms)
-        assertTrue("lastReceivedTime should be reset after resume",
-                System.currentTimeMillis() - uiContext.getLastReceivedTime() < 100);
+        assertTrue(System.currentTimeMillis() - uiContext.getLastReceivedTime() < 100,
+                "lastReceivedTime should be reset after resume");
     }
 
     /**
@@ -1108,8 +1105,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // After resume, TxnContext.socket should be the new socket
-        assertSame("TxnContext should point to new socket after resume",
-                newSocket, txnContext.getSocket());
+        assertSame(newSocket,
+                txnContext.getSocket(), "TxnContext should point to new socket after resume");
     }
 
     // ====================================================================
@@ -1140,10 +1137,10 @@ public class UIContextReconnectionTest {
             uiContext.getWriter().endObject();
         });
 
-        assertTrue("execute() should succeed during suspension", result);
-        assertTrue("Runnable should have executed", runnableExecuted.get());
+        assertTrue(result, "execute() should succeed during suspension");
+        assertTrue(runnableExecuted.get(), "Runnable should have executed");
         // spyEncoder should NOT have received these writes (they went to RecordingEncoder)
-        assertTrue("Spy should be empty — writes go to RecordingEncoder", spyEncoder.entries.isEmpty());
+        assertTrue(spyEncoder.entries.isEmpty(), "Spy should be empty — writes go to RecordingEncoder");
         assertTrue(uiContext.isAlive());
         assertTrue(uiContext.isSuspended());
 
@@ -1174,7 +1171,7 @@ public class UIContextReconnectionTest {
         // The in-flight update should appear in the replay
         boolean foundInFlightUpdate = replayEncoder.entries.stream().anyMatch(e ->
                 e.model() == ServerToClientModel.HTML && "in-flight-update".equals(e.value()));
-        assertTrue("In-flight update should be replayed after resume", foundInFlightUpdate);
+        assertTrue(foundInFlightUpdate, "In-flight update should be replayed after resume");
     }
 
     /**
@@ -1206,8 +1203,8 @@ public class UIContextReconnectionTest {
                 Mockito.mock(jakarta.servlet.http.HttpSession.class), config);
         // We need to register the UIContext in the application
         application.registerUIContext(uiContext);
-        assertNotNull("UIContext should be registered",
-                application.getUIContext(uiContext.getID()));
+        assertNotNull(application.getUIContext(uiContext.getID()),
+                "UIContext should be registered");
 
         // Wire the TxnContext to this application
         txnContext.setApplication(application);
@@ -1222,8 +1219,8 @@ public class UIContextReconnectionTest {
         assertFalse(uiContext.isSuspended());
 
         // UIContext should be deregistered from Application
-        assertNull("UIContext should be deregistered after destroy",
-                application.getUIContext(uiContext.getID()));
+        assertNull(application.getUIContext(uiContext.getID()),
+                "UIContext should be deregistered after destroy");
     }
 
     /**
@@ -1253,8 +1250,8 @@ public class UIContextReconnectionTest {
         uiContext.suspend(30_000);
         uiContext.destroy();
 
-        assertTrue("Destroy listener should have been called", listenerCalled.get());
-        assertNull("Destroy listener should not throw", listenerError.get());
+        assertTrue(listenerCalled.get(), "Destroy listener should have been called");
+        assertNull(listenerError.get(), "Destroy listener should not throw");
         assertFalse(uiContext.isAlive());
     }
 
@@ -1332,9 +1329,9 @@ public class UIContextReconnectionTest {
         final WebSocket newSocket = Mockito.mock(WebSocket.class);
         uiContext.resume(newSocket);
 
-        assertTrue("Writer thread should complete",
-                allDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
-        assertTrue("Some writes should have succeeded", successCount.get() > 0);
+        assertTrue(allDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "Writer thread should complete");
+        assertTrue(successCount.get() > 0, "Some writes should have succeeded");
         assertTrue(uiContext.isAlive());
     }
 
@@ -1366,19 +1363,19 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("All threads should complete",
-                allDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(allDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "All threads should complete");
 
         // Give destroy virtual thread time to run
         Thread.sleep(500);
 
         // UIContext should be dead from overflow
-        assertFalse("UIContext should be destroyed after overflow", uiContext.isAlive());
-        assertFalse("Suspended flag should be cleared", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "UIContext should be destroyed after overflow");
+        assertFalse(uiContext.isSuspended(), "Suspended flag should be cleared");
 
         // After destroy, execute() should return false
         boolean postDestroyResult = uiContext.execute(() -> fail("Should not run after destroy"));
-        assertFalse("execute() should return false after overflow destroy", postDestroyResult);
+        assertFalse(postDestroyResult, "execute() should return false after overflow destroy");
     }
 
     // ====================================================================
@@ -1449,8 +1446,8 @@ public class UIContextReconnectionTest {
 
         uiContext.disconnect();
 
-        assertFalse("disconnect() should kill the UIContext", uiContext.isAlive());
-        assertFalse("disconnect() should clear suspended flag", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "disconnect() should kill the UIContext");
+        assertFalse(uiContext.isSuspended(), "disconnect() should clear suspended flag");
         Mockito.verify(oldSocket).disconnect();
     }
 
@@ -1466,8 +1463,8 @@ public class UIContextReconnectionTest {
         uiContext.suspend(30_000);
 
         boolean result = uiContext.pushToClient(List.of("item1", "item2", "item3"));
-        assertTrue("pushToClient(List) should succeed during suspension", result);
-        assertEquals("DataListener should be called for each item", 3, callCount.get());
+        assertTrue(result, "pushToClient(List) should succeed during suspension");
+        assertEquals(3, callCount.get(), "DataListener should be called for each item");
     }
 
     /**
@@ -1522,14 +1519,14 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // Should NOT contain first recorder's data (object 10)
-        assertFalse("First recorder data should be lost",
-                replayEncoder.entries.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.HTML && "first-recorder".equals(e.value())));
+        assertFalse(replayEncoder.entries.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.HTML && "first-recorder".equals(e.value())),
+                "First recorder data should be lost");
 
         // Should contain second recorder's data (object 20)
-        assertTrue("Second recorder data should be present",
-                replayEncoder.entries.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TEXT && "second-recorder".equals(e.value())));
+        assertTrue(replayEncoder.entries.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TEXT && "second-recorder".equals(e.value())),
+                "Second recorder data should be present");
     }
 
     /**
@@ -1550,9 +1547,9 @@ public class UIContextReconnectionTest {
         final int id4 = uiContext.nextID();
 
         // All IDs should be unique and monotonically increasing
-        assertTrue("IDs should be monotonically increasing", id1 < id2);
-        assertTrue("IDs should be monotonically increasing across suspension", id2 < id3);
-        assertTrue("IDs should be monotonically increasing", id3 < id4);
+        assertTrue(id1 < id2, "IDs should be monotonically increasing");
+        assertTrue(id2 < id3, "IDs should be monotonically increasing across suspension");
+        assertTrue(id3 < id4, "IDs should be monotonically increasing");
 
         // Resume
         uiContext.acquire();
@@ -1570,7 +1567,7 @@ public class UIContextReconnectionTest {
 
         // Post-resume IDs should continue the sequence
         final int id5 = uiContext.nextID();
-        assertTrue("Post-resume IDs should continue the sequence", id4 < id5);
+        assertTrue(id4 < id5, "Post-resume IDs should continue the sequence");
     }
 
     /**
@@ -1585,12 +1582,12 @@ public class UIContextReconnectionTest {
         Mockito.when(mockPObject.getID()).thenReturn(42);
         uiContext.registerObject(mockPObject);
 
-        assertNotNull("Object should be registered", uiContext.getObject(42));
+        assertNotNull(uiContext.getObject(42), "Object should be registered");
 
         uiContext.suspend(30_000);
 
         // Object should still be accessible during suspension
-        assertNotNull("Object should be accessible during suspension", uiContext.getObject(42));
+        assertNotNull(uiContext.getObject(42), "Object should be accessible during suspension");
 
         // Resume
         uiContext.acquire();
@@ -1607,8 +1604,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // Object should still be accessible after resume
-        assertNotNull("Object should be accessible after resume", uiContext.getObject(42));
-        assertSame("Should be the same object", mockPObject, uiContext.getObject(42));
+        assertNotNull(uiContext.getObject(42), "Object should be accessible after resume");
+        assertSame(mockPObject, uiContext.getObject(42), "Should be the same object");
     }
 
     /**
@@ -1670,7 +1667,7 @@ public class UIContextReconnectionTest {
 
         // Push data after resume — listener should fire
         uiContext.pushToClient("test");
-        assertTrue("DataListener should fire after resume", fired.get());
+        assertTrue(fired.get(), "DataListener should fire after resume");
     }
 
     /**
@@ -1700,7 +1697,7 @@ public class UIContextReconnectionTest {
 
         // Destroy after resume — listener should fire
         uiContext.destroy();
-        assertTrue("ContextDestroyListener should fire after resume+destroy", fired.get());
+        assertTrue(fired.get(), "ContextDestroyListener should fire after resume+destroy");
     }
 
     /**
@@ -1712,7 +1709,7 @@ public class UIContextReconnectionTest {
         final int originalId = uiContext.getID();
 
         uiContext.suspend(30_000);
-        assertEquals("ID should be stable during suspension", originalId, uiContext.getID());
+        assertEquals(originalId, uiContext.getID(), "ID should be stable during suspension");
 
         uiContext.acquire();
         try {
@@ -1727,7 +1724,7 @@ public class UIContextReconnectionTest {
         final WebSocket newSocket = Mockito.mock(WebSocket.class);
         uiContext.resume(newSocket);
 
-        assertEquals("ID should be stable after resume", originalId, uiContext.getID());
+        assertEquals(originalId, uiContext.getID(), "ID should be stable after resume");
     }
 
     /**
@@ -1784,7 +1781,7 @@ public class UIContextReconnectionTest {
             long count = replayEncoder.entries.stream()
                     .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE && Integer.valueOf(o).equals(e.value()))
                     .count();
-            assertEquals("Object " + obj + " should have exactly 1 merged update", 1, count);
+            assertEquals(1, count, "Object " + obj + " should have exactly 1 merged update");
         }
 
         // Each object should have the last round's value
@@ -1797,8 +1794,8 @@ public class UIContextReconnectionTest {
                     for (int j = i + 1; j < replayEncoder.entries.size(); j++) {
                         if (replayEncoder.entries.get(j).model() == ServerToClientModel.END) break;
                         if (replayEncoder.entries.get(j).model() == ServerToClientModel.HTML) {
-                            assertEquals("Object " + o + " should have last round value",
-                                    expected, replayEncoder.entries.get(j).value());
+                            assertEquals(expected,
+                                    replayEncoder.entries.get(j).value(), "Object " + o + " should have last round value");
                         }
                     }
                     break;
@@ -1807,8 +1804,8 @@ public class UIContextReconnectionTest {
         }
 
         // RECONNECT_CONTEXT should be present
-        assertTrue("RECONNECT_CONTEXT should be sent",
-                replayEncoder.entries.stream().anyMatch(e -> e.model() == ServerToClientModel.RECONNECT_CONTEXT));
+        assertTrue(replayEncoder.entries.stream().anyMatch(e -> e.model() == ServerToClientModel.RECONNECT_CONTEXT),
+                "RECONNECT_CONTEXT should be sent");
     }
 
     // ====================================================================
@@ -1872,10 +1869,10 @@ public class UIContextReconnectionTest {
         // Wait for T1 to finish
         Thread.sleep(500);
 
-        assertNull("No exception should occur", error.get());
-        assertTrue("execute() should complete", executeCompleted.get());
-        assertTrue("UIContext should be alive", uiContext.isAlive());
-        assertTrue("UIContext should be suspended", uiContext.isSuspended());
+        assertNull(error.get(), "No exception should occur");
+        assertTrue(executeCompleted.get(), "execute() should complete");
+        assertTrue(uiContext.isAlive(), "UIContext should be alive");
+        assertTrue(uiContext.isSuspended(), "UIContext should be suspended");
     }
 
     /**
@@ -1922,15 +1919,15 @@ public class UIContextReconnectionTest {
         });
 
         // Wait for execute to complete
-        assertTrue("Execute should complete (no deadlock)",
-                executeDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(executeDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "Execute should complete (no deadlock)");
 
         // Give destroy thread time to acquire lock and run
         Thread.sleep(500);
 
-        assertNull("No exception should occur", error.get());
-        assertFalse("UIContext should be dead after overflow destroy", uiContext.isAlive());
-        assertFalse("Suspended flag should be cleared", uiContext.isSuspended());
+        assertNull(error.get(), "No exception should occur");
+        assertFalse(uiContext.isAlive(), "UIContext should be dead after overflow destroy");
+        assertFalse(uiContext.isSuspended(), "Suspended flag should be cleared");
     }
 
     /**
@@ -1997,8 +1994,8 @@ public class UIContextReconnectionTest {
         // Wait for T2
         Thread.sleep(500);
 
-        assertNull("No exception should occur", error.get());
-        assertFalse("UIContext should be dead", uiContext.isAlive());
+        assertNull(error.get(), "No exception should occur");
+        assertFalse(uiContext.isAlive(), "UIContext should be dead");
         // execute() returns false because isAlive() is false when it checks at the top
         // OR it returns true if it passed the check before destroy
         // Either way, no crash
@@ -2076,12 +2073,12 @@ public class UIContextReconnectionTest {
 
             // Invariant: UIContext is either alive (resumed) or dead (timeout won)
             if (resumed) {
-                assertTrue("Attempt " + attempt + ": resumed UIContext should be alive",
-                        localCtx.isAlive());
+                assertTrue(localCtx.isAlive(),
+                        "Attempt " + attempt + ": resumed UIContext should be alive");
             }
             // Either way: no crash, no deadlock, consistent state
-            assertFalse("Attempt " + attempt + ": should not be suspended",
-                    localCtx.isSuspended());
+            assertFalse(localCtx.isSuspended(),
+                    "Attempt " + attempt + ": should not be suspended");
         }
     }
 
@@ -2169,8 +2166,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // TxnContext.socket should be newSocket
-        assertSame("TxnContext.socket should be newSocket",
-                newSocket, txnContext.getSocket());
+        assertSame(newSocket,
+                txnContext.getSocket(), "TxnContext.socket should be newSocket");
 
         // Verify writes go to newSocket (not old socket or RecordingEncoder)
         final java.util.concurrent.atomic.AtomicBoolean writeReachedNewSocket =
@@ -2185,8 +2182,8 @@ public class UIContextReconnectionTest {
             uiContext.getWriter().endObject();
         });
 
-        assertTrue("Writes after resume should reach newSocket",
-                writeReachedNewSocket.get());
+        assertTrue(writeReachedNewSocket.get(),
+                "Writes after resume should reach newSocket");
 
         // Verify sendRoundTrip goes to newSocket
         uiContext.sendRoundTrip();
@@ -2269,14 +2266,14 @@ public class UIContextReconnectionTest {
             }
         }
 
-        assertEquals("Replay order must match write order",
-                List.of(
+        assertEquals(List.of(
                         ServerToClientModel.TYPE_CREATE,   // 100
                         ServerToClientModel.TYPE_ADD,      // 100→5
                         ServerToClientModel.TYPE_UPDATE,   // 100
                         ServerToClientModel.TYPE_UPDATE,   // 200
                         ServerToClientModel.TYPE_REMOVE    // 300
-                ), ops);
+                ),
+                ops, "Replay order must match write order");
     }
 
     /**
@@ -2316,8 +2313,8 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("All threads should complete",
-                allDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(allDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "All threads should complete");
 
         // Resume and capture
         uiContext.acquire();
@@ -2352,7 +2349,7 @@ public class UIContextReconnectionTest {
                     .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE
                             && Integer.valueOf(objId).equals(e.value()))
                     .count();
-            assertEquals("Object " + objId + " should appear exactly once", 1, count);
+            assertEquals(1, count, "Object " + objId + " should appear exactly once");
 
             boolean markerFound = false;
             for (int i = 0; i < replayEncoder.entries.size(); i++) {
@@ -2367,7 +2364,7 @@ public class UIContextReconnectionTest {
                     }
                 }
             }
-            assertTrue("Marker '" + marker + "' should be in replay", markerFound);
+            assertTrue(markerFound, "Marker '" + marker + "' should be in replay");
         }
 
         // Verify no interleaved blocks: between each TYPE_UPDATE and its END,
@@ -2375,7 +2372,7 @@ public class UIContextReconnectionTest {
         boolean inBlock = false;
         for (final RecordingEncoder.Entry e : replayEncoder.entries) {
             if (e.model() == ServerToClientModel.TYPE_UPDATE) {
-                assertFalse("Blocks should not be interleaved", inBlock);
+                assertFalse(inBlock, "Blocks should not be interleaved");
                 inBlock = true;
             } else if (e.model() == ServerToClientModel.END) {
                 inBlock = false;
@@ -2430,15 +2427,15 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("Both destroy threads should complete (no deadlock)",
-                bothDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(bothDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "Both destroy threads should complete (no deadlock)");
 
-        assertFalse("UIContext should be dead", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "UIContext should be dead");
         // Note: destroyListeners may be called 1 or 2 times depending on timing.
         // The second destroy() may pass isAlive() before the first sets alive=false.
         // This is a known limitation — destroy() is not fully idempotent.
-        assertTrue("Destroy listener should be called at least once",
-                destroyListenerCallCount.get() >= 1);
+        assertTrue(destroyListenerCallCount.get() >= 1,
+                "Destroy listener should be called at least once");
     }
 
     /**
@@ -2482,8 +2479,8 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("All threads should complete",
-                allDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(allDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "All threads should complete");
 
         // Resume and capture
         uiContext.acquire();
@@ -2515,7 +2512,7 @@ public class UIContextReconnectionTest {
                 .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE
                         && Integer.valueOf(42).equals(e.value()))
                 .count();
-        assertEquals("All concurrent updates on same object should merge to 1", 1, updateCount);
+        assertEquals(1, updateCount, "All concurrent updates on same object should merge to 1");
 
         // The HTML value should be from one of the threads (last-write-wins)
         String htmlValue = null;
@@ -2530,9 +2527,9 @@ public class UIContextReconnectionTest {
                 }
             }
         }
-        assertNotNull("HTML value should exist", htmlValue);
-        assertTrue("HTML value should be from a valid thread write",
-                htmlValue.startsWith("t") && htmlValue.contains("-w"));
+        assertNotNull(htmlValue, "HTML value should exist");
+        assertTrue(htmlValue.startsWith("t") && htmlValue.contains("-w"),
+                "HTML value should be from a valid thread write");
     }
 
     /**
@@ -2622,15 +2619,15 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("All threads should complete",
-                allDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(allDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "All threads should complete");
 
         // Total entries should be threadCount * writesPerThread * 3 (UPDATE + HTML + END)
         // But due to ArrayList's non-thread-safe add(), some entries might be lost or duplicated.
         // The important thing is: no crash (ArrayIndexOutOfBoundsException, NPE, etc.)
         // In practice, ArrayList.add() on OpenJDK rarely crashes but can lose entries.
-        assertTrue("RecordingEncoder should have entries (some may be lost due to races)",
-                rec.size() > 0);
+        assertTrue(rec.size() > 0,
+                "RecordingEncoder should have entries (some may be lost due to races)");
     }
 
     // ====================================================================
@@ -2676,8 +2673,8 @@ public class UIContextReconnectionTest {
 
         // UIContext should still be alive (rollback doesn't destroy)
         // but suspended=false (resume set it before replay)
-        assertFalse("Should not be suspended after resume attempt", uiContext.isSuspended());
-        assertTrue("UIContext should still be alive after replay failure", uiContext.isAlive());
+        assertFalse(uiContext.isSuspended(), "Should not be suspended after resume attempt");
+        assertTrue(uiContext.isAlive(), "UIContext should still be alive after replay failure");
     }
 
     /**
@@ -2705,14 +2702,14 @@ public class UIContextReconnectionTest {
         });
 
         // spyEncoder should have the "before-suspend" write
-        assertTrue("Pre-suspend write should reach spy",
-                spyEncoder.entries.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.HTML && "before-suspend".equals(e.value())));
+        assertTrue(spyEncoder.entries.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.HTML && "before-suspend".equals(e.value())),
+                "Pre-suspend write should reach spy");
 
         // spyEncoder should NOT have the "after-suspend" write
-        assertFalse("Post-suspend write should NOT reach spy",
-                spyEncoder.entries.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TEXT && "after-suspend".equals(e.value())));
+        assertFalse(spyEncoder.entries.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TEXT && "after-suspend".equals(e.value())),
+                "Post-suspend write should NOT reach spy");
 
         assertTrue(uiContext.isSuspended());
         assertTrue(uiContext.isAlive());
@@ -2768,12 +2765,12 @@ public class UIContextReconnectionTest {
             });
         }
 
-        assertTrue("Both threads should complete",
-                done.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertTrue(done.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                "Both threads should complete");
 
         // Exactly one should succeed, one should fail
-        assertEquals("Exactly one resume should succeed", 1, successCount.get());
-        assertEquals("Exactly one resume should fail", 1, failCount.get());
+        assertEquals(1, successCount.get(), "Exactly one resume should succeed");
+        assertEquals(1, failCount.get(), "Exactly one resume should fail");
         assertFalse(uiContext.isSuspended());
         assertTrue(uiContext.isAlive());
     }
@@ -2794,7 +2791,7 @@ public class UIContextReconnectionTest {
         // → thread exits without destroying. So UIContext stays alive and suspended.
         // This is acceptable — negative timeout is a misconfiguration.
         // The important thing is: no crash, no deadlock.
-        assertTrue("No crash with negative timeout", true);
+        assertTrue(true, "No crash with negative timeout");
     }
 
     /**
@@ -2818,8 +2815,8 @@ public class UIContextReconnectionTest {
         uiContext.suspend(30_000);
 
         // Dictionary should be unchanged during suspension
-        assertSame("Dictionary should be same during suspension",
-                dictBefore, uiContext.getStringDictionary());
+        assertSame(dictBefore,
+                uiContext.getStringDictionary(), "Dictionary should be same during suspension");
 
         // Resume
         uiContext.acquire();
@@ -2836,8 +2833,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // Dictionary should still be the same reference
-        assertSame("Dictionary should be preserved after resume",
-                dictBefore, uiContext.getStringDictionary());
+        assertSame(dictBefore,
+                uiContext.getStringDictionary(), "Dictionary should be preserved after resume");
     }
 
     /**
@@ -2850,13 +2847,13 @@ public class UIContextReconnectionTest {
         config.setStringDictionaryEnabled(true);
         final UIContext ctx = new UIContext(oldSocket, txnContext, config);
         final com.ponysdk.core.server.application.StringDictionary dict = ctx.getStringDictionary();
-        assertNotNull("dictionary enabled", dict);
+        assertNotNull(dict, "dictionary enabled");
 
-        assertEquals("first use: sent inline (second-use admission)",
-                com.ponysdk.core.server.application.StringDictionary.InternResult.NOT_FOUND, dict.internOrGet("market-data-cell"));
+        assertEquals(com.ponysdk.core.server.application.StringDictionary.InternResult.NOT_FOUND,
+                dict.internOrGet("market-data-cell"), "first use: sent inline (second-use admission)");
         final long first = dict.internOrGet("market-data-cell");
-        assertTrue("known by the client before the drop",
-                com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(dict.internOrGet("market-data-cell")));
+        assertTrue(com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(dict.internOrGet("market-data-cell")),
+                "known by the client before the drop");
 
         ctx.suspend(30_000);
         ctx.acquire();
@@ -2869,13 +2866,13 @@ public class UIContextReconnectionTest {
         }
         ctx.resume(Mockito.mock(WebSocket.class));
 
-        assertSame("same dictionary instance", dict, ctx.getStringDictionary());
+        assertSame(dict, ctx.getStringDictionary(), "same dictionary instance");
         final long afterResume = dict.internOrGet("market-data-cell");
-        assertFalse("first use after resume must be a DICTIONARY_ADD",
-                com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(afterResume));
-        assertEquals("same id is reused",
-                com.ponysdk.core.server.application.StringDictionary.InternResult.id(first),
-                com.ponysdk.core.server.application.StringDictionary.InternResult.id(afterResume));
+        assertFalse(com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(afterResume),
+                "first use after resume must be a DICTIONARY_ADD");
+        assertEquals(com.ponysdk.core.server.application.StringDictionary.InternResult.id(first),
+                com.ponysdk.core.server.application.StringDictionary.InternResult.id(afterResume),
+                "same id is reused");
         ctx.destroy();
     }
 
@@ -2896,8 +2893,8 @@ public class UIContextReconnectionTest {
         final java.util.concurrent.atomic.AtomicBoolean ran = new java.util.concurrent.atomic.AtomicBoolean(false);
         boolean result = uiContext.execute(() -> ran.set(true));
 
-        assertFalse("execute() should return false on dead UIContext", result);
-        assertFalse("Runnable should not run on dead UIContext", ran.get());
+        assertFalse(result, "execute() should return false on dead UIContext");
+        assertFalse(ran.get(), "Runnable should not run on dead UIContext");
     }
 
     /**
@@ -2930,9 +2927,9 @@ public class UIContextReconnectionTest {
             done.countDown();
         });
 
-        assertTrue("execute() should complete (lock is free)",
-                done.await(2, java.util.concurrent.TimeUnit.SECONDS));
-        assertTrue("Runnable should have executed", executed.get());
+        assertTrue(done.await(2, java.util.concurrent.TimeUnit.SECONDS),
+                "execute() should complete (lock is free)");
+        assertTrue(executed.get(), "Runnable should have executed");
     }
 
     /**
@@ -2966,8 +2963,8 @@ public class UIContextReconnectionTest {
                 });
             }
 
-            assertTrue("Writers should complete in cycle " + cycle,
-                    writersDone.await(5, java.util.concurrent.TimeUnit.SECONDS));
+            assertTrue(writersDone.await(5, java.util.concurrent.TimeUnit.SECONDS),
+                    "Writers should complete in cycle " + cycle);
 
             // Resume
             uiContext.acquire();
@@ -2983,8 +2980,8 @@ public class UIContextReconnectionTest {
             final WebSocket newSocket = Mockito.mock(WebSocket.class);
             uiContext.resume(newSocket);
 
-            assertTrue("UIContext should be alive after cycle " + cycle, uiContext.isAlive());
-            assertFalse("Should not be suspended after cycle " + cycle, uiContext.isSuspended());
+            assertTrue(uiContext.isAlive(), "UIContext should be alive after cycle " + cycle);
+            assertFalse(uiContext.isSuspended(), "Should not be suspended after cycle " + cycle);
         }
     }
 
@@ -3006,19 +3003,18 @@ public class UIContextReconnectionTest {
 
         boolean outerResult = uiContext.execute(() -> {
             // We're inside execute(), so UIContext.get() == uiContext
-            assertSame("UIContext.get() should be this inside execute()",
-                    uiContext, UIContext.get());
+            assertSame(uiContext,
+                    UIContext.get(), "UIContext.get() should be this inside execute()");
 
             // Re-entrant execute() — should take the else branch
-            boolean result = uiContext.execute(() -> {
-                innerRan.set(true);
-            });
+            boolean result = uiContext.execute(() ->
+                innerRan.set(true));
             innerResult.set(result);
         });
 
-        assertTrue("Outer execute() should succeed", outerResult);
-        assertTrue("Inner runnable should have run", innerRan.get());
-        assertFalse("Re-entrant execute() should return false", innerResult.get());
+        assertTrue(outerResult, "Outer execute() should succeed");
+        assertTrue(innerRan.get(), "Inner runnable should have run");
+        assertFalse(innerResult.get(), "Re-entrant execute() should return false");
     }
 
     /**
@@ -3057,8 +3053,8 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // UIContext should still be alive (resume doesn't destroy on error)
-        assertTrue("UIContext should still be alive after replay failure", uiContext.isAlive());
-        assertFalse("UIContext should not be suspended after resume", uiContext.isSuspended());
+        assertTrue(uiContext.isAlive(), "UIContext should still be alive after replay failure");
+        assertFalse(uiContext.isSuspended(), "UIContext should not be suspended after resume");
     }
 
     /**
@@ -3085,7 +3081,7 @@ public class UIContextReconnectionTest {
         final TxnContext dictTxn = new TxnContext(dictSocket);
         final UIContext dictCtx = new UIContext(dictSocket, dictTxn, dictConfig);
 
-        assertNotNull("StringDictionary should be created", dictCtx.getStringDictionary());
+        assertNotNull(dictCtx.getStringDictionary(), "StringDictionary should be created");
 
         // Suspend, then destroy — should flush dictionary and not crash
         dictCtx.suspend(30_000);
@@ -3114,7 +3110,7 @@ public class UIContextReconnectionTest {
             uiContext.getWriter().endObject();
         });
 
-        assertTrue("execute() should return true (runnable didn't throw)", result);
+        assertTrue(result, "execute() should return true (runnable didn't throw)");
     }
 
     /**
@@ -3124,7 +3120,7 @@ public class UIContextReconnectionTest {
     public void testPushToClientNull() {
         uiContext.addDataListener(data -> fail("Should not be called"));
         boolean result = uiContext.pushToClient((Object) null);
-        assertFalse("pushToClient(null) should return false", result);
+        assertFalse(result, "pushToClient(null) should return false");
     }
 
     /**
@@ -3134,7 +3130,7 @@ public class UIContextReconnectionTest {
     public void testPushToClientNoListeners() {
         // No listeners added
         boolean result = uiContext.pushToClient("data");
-        assertFalse("pushToClient with no listeners should return false", result);
+        assertFalse(result, "pushToClient with no listeners should return false");
     }
 
     /**
@@ -3144,7 +3140,7 @@ public class UIContextReconnectionTest {
     public void testPushToClientListNull() {
         uiContext.addDataListener(data -> fail("Should not be called"));
         boolean result = uiContext.pushToClient((java.util.List<Object>) null);
-        assertFalse("pushToClient(null list) should return false", result);
+        assertFalse(result, "pushToClient(null list) should return false");
     }
 
     /**
@@ -3162,7 +3158,7 @@ public class UIContextReconnectionTest {
 
         uiContext.removeDataListener(listener);
         uiContext.pushToClient("second");
-        assertEquals("Listener should not fire after removal", 1, callCount.get());
+        assertEquals(1, callCount.get(), "Listener should not fire after removal");
     }
 
     /**
@@ -3174,7 +3170,7 @@ public class UIContextReconnectionTest {
         assertEquals("value", uiContext.getAttribute("key"));
 
         uiContext.setAttribute("key", null);
-        assertNull("Setting null should remove attribute", uiContext.getAttribute("key"));
+        assertNull(uiContext.getAttribute("key"), "Setting null should remove attribute");
     }
 
     /**
@@ -3243,10 +3239,10 @@ public class UIContextReconnectionTest {
 
         uiContext.onMessageReceived();
 
-        assertTrue("lastReceivedTime should be updated",
-                uiContext.getLastReceivedTime() > before);
-        assertTrue("lastReceivedTime should be recent",
-                System.currentTimeMillis() - uiContext.getLastReceivedTime() < 50);
+        assertTrue(uiContext.getLastReceivedTime() > before,
+                "lastReceivedTime should be updated");
+        assertTrue(System.currentTimeMillis() - uiContext.getLastReceivedTime() < 50,
+                "lastReceivedTime should be recent");
     }
 
     /**
@@ -3322,14 +3318,13 @@ public class UIContextReconnectionTest {
         uiContext.addContextDestroyListener(ctx -> {
             throw new RuntimeException("listener crash");
         });
-        uiContext.addContextDestroyListener(ctx -> {
-            secondListenerCalled.set(true);
-        });
+        uiContext.addContextDestroyListener(ctx ->
+            secondListenerCalled.set(true));
 
         uiContext.destroy();
         assertFalse(uiContext.isAlive());
-        assertTrue("Second listener should still be called despite first throwing",
-                secondListenerCalled.get());
+        assertTrue(secondListenerCalled.get(),
+                "Second listener should still be called despite first throwing");
     }
 
     /**
@@ -3345,7 +3340,7 @@ public class UIContextReconnectionTest {
         uiContext.removeContextDestroyListener(listener);
 
         uiContext.destroy();
-        assertFalse("Removed listener should not be called", called.get());
+        assertFalse(called.get(), "Removed listener should not be called");
     }
 
     /**
@@ -3497,7 +3492,7 @@ public class UIContextReconnectionTest {
         // The local var 'encoder' still holds a strong ref — drop it
         // (we can't null a final, but the test method scope ends soon;
         //  instead, verify the field is null)
-        assertNull("recordingEncoder field should be null after destroy", getRecordingEncoder());
+        assertNull(getRecordingEncoder(), "recordingEncoder field should be null after destroy");
     }
 
     /**
@@ -3532,7 +3527,7 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // After resume, the UIContext's recordingEncoder field should be null
-        assertNull("recordingEncoder should be null after resume", getRecordingEncoder());
+        assertNull(getRecordingEncoder(), "recordingEncoder should be null after resume");
         assertFalse(uiContext.isSuspended());
     }
 
@@ -3560,8 +3555,8 @@ public class UIContextReconnectionTest {
 
         // UIContext should be destroyed and deregistered
         assertFalse(uiContext.isAlive());
-        assertNull("UIContext should be deregistered from Application after timeout",
-                app.getUIContext(uiContext.getID()));
+        assertNull(app.getUIContext(uiContext.getID()),
+                "UIContext should be deregistered from Application after timeout");
         assertEquals(0, app.countUIContexts());
     }
 
@@ -3600,9 +3595,9 @@ public class UIContextReconnectionTest {
         // Give the virtual thread time to run destroy
         Thread.sleep(500);
 
-        assertFalse("UIContext should be dead after overflow", uiContext.isAlive());
-        assertNull("UIContext should be deregistered after overflow",
-                app.getUIContext(uiContext.getID()));
+        assertFalse(uiContext.isAlive(), "UIContext should be dead after overflow");
+        assertNull(app.getUIContext(uiContext.getID()),
+                "UIContext should be deregistered after overflow");
     }
 
     /**
@@ -3621,8 +3616,8 @@ public class UIContextReconnectionTest {
         uiContext.destroy();
         encoder = null; // drop our local strong ref
 
-        assertTrue("RecordingEncoder should be GC'd after destroy nulls the field",
-                tryCollect(ref));
+        assertTrue(tryCollect(ref),
+                "RecordingEncoder should be GC'd after destroy nulls the field");
     }
 
     /**
@@ -3639,7 +3634,7 @@ public class UIContextReconnectionTest {
 
         // Before destroy: listener is held by the set
         System.gc();
-        assertNotNull("Listener should be retained before destroy", ref.get());
+        assertNotNull(ref.get(), "Listener should be retained before destroy");
 
         uiContext.destroy();
         // After destroy, the set still exists but UIContext is dead.
@@ -3701,10 +3696,10 @@ public class UIContextReconnectionTest {
         // Verify internal state is clean
         assertFalse(localCtx.isAlive());
         assertFalse(localCtx.isSuspended());
-        assertNull("recordingEncoder should be null", getRecordingEncoder(localCtx));
+        assertNull(getRecordingEncoder(localCtx), "recordingEncoder should be null");
 
         // The large payload should be GC-eligible since the encoder was cleared
-        assertTrue("Large payload should be GC'd after destroy", tryCollect(payloadRef));
+        assertTrue(tryCollect(payloadRef), "Large payload should be GC'd after destroy");
     }
 
     /**
@@ -3718,7 +3713,7 @@ public class UIContextReconnectionTest {
 
         uiContext.release();
         UIContext.remove();
-        assertNull("ThreadLocal should be null after remove()", UIContext.get());
+        assertNull(UIContext.get(), "ThreadLocal should be null after remove()");
     }
 
     /**
@@ -3732,8 +3727,8 @@ public class UIContextReconnectionTest {
         final WebSocket newSocket = createMockNewSocket();
         uiContext.resume(newSocket);
 
-        assertSame("TxnContext should reference new socket after resume",
-                newSocket, txnContext.getSocket());
+        assertSame(newSocket,
+                txnContext.getSocket(), "TxnContext should reference new socket after resume");
     }
 
     /**
@@ -3798,12 +3793,12 @@ public class UIContextReconnectionTest {
 
         // Before destroy: encoder holds the payload
         System.gc();
-        assertNotNull("Payload should be retained during suspension", ref.get());
+        assertNotNull(ref.get(), "Payload should be retained during suspension");
 
         // Destroy nulls recordingEncoder
         uiContext.destroy();
 
-        assertTrue("Large payload should be GC'd after destroy", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Large payload should be GC'd after destroy");
     }
 
     /**
@@ -3842,8 +3837,8 @@ public class UIContextReconnectionTest {
 
         // All old encoders should be GC-eligible
         for (int i = 0; i < refs.size(); i++) {
-            assertTrue("Encoder from cycle " + i + " should be GC'd",
-                    tryCollect(refs.get(i)));
+            assertTrue(tryCollect(refs.get(i)),
+                    "Encoder from cycle " + i + " should be GC'd");
         }
     }
 
@@ -3867,12 +3862,12 @@ public class UIContextReconnectionTest {
 
         // Before destroy: attribute is held
         System.gc();
-        assertNotNull("Attribute should be retained before destroy", ref.get());
+        assertNotNull(ref.get(), "Attribute should be retained before destroy");
 
         // After destroy: UIContext still holds the map, but if we remove the attribute
         // explicitly (simulating cleanup), it should be GC-eligible
         uiContext.removeAttribute("bigData");
-        assertTrue("Attribute should be GC'd after removeAttribute", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Attribute should be GC'd after removeAttribute");
     }
 
     /**
@@ -3888,7 +3883,7 @@ public class UIContextReconnectionTest {
 
         // Before removal: listener is held by the set and our local var
         System.gc();
-        assertNotNull("DataListener should be retained while registered", ref.get());
+        assertNotNull(ref.get(), "DataListener should be retained while registered");
 
         // Remove the listener
         uiContext.removeDataListener(listener);
@@ -3897,7 +3892,7 @@ public class UIContextReconnectionTest {
         // We can't null a final, but we can verify the set no longer holds it
         // by checking that after destroy (which GC's the UIContext eventually),
         // the listener is releasable. For now, just verify removal works.
-        assertTrue("removeDataListener should return true", true);
+        assertTrue(true, "removeDataListener should return true");
     }
 
     /**
@@ -3928,7 +3923,7 @@ public class UIContextReconnectionTest {
         // Drop our local ref by letting the test method scope handle it
         // Actually we still hold 'encoder' — but the field is null
         // This test verifies the field is properly nulled
-        assertTrue("Field should be null, encoder only held by local var", getRecordingEncoder() == null);
+        assertTrue(getRecordingEncoder() == null, "Field should be null, encoder only held by local var");
     }
 
     /**
@@ -3983,7 +3978,7 @@ public class UIContextReconnectionTest {
         Thread.sleep(500);
 
         assertFalse(uiContext.isAlive());
-        assertTrue("Large payload should be GC'd after overflow destroy", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Large payload should be GC'd after overflow destroy");
     }
 
     /**
@@ -4024,7 +4019,7 @@ public class UIContextReconnectionTest {
         // Destroy the UIContext — should trigger stop() via destroy listener
         ctx.destroy();
 
-        assertFalse("Checker should be stopped after UIContext destroy", started.get());
+        assertFalse(started.get(), "Checker should be stopped after UIContext destroy");
         UIContext.remove();
     }
 
@@ -4044,7 +4039,7 @@ public class UIContextReconnectionTest {
         uiContext.resume(newSocket);
 
         // After resume, the socket field should point to the new socket
-        assertSame("UIContext.socket should be the new socket", newSocket, getSocketField());
+        assertSame(newSocket, getSocketField(), "UIContext.socket should be the new socket");
     }
 
     /**
@@ -4106,8 +4101,8 @@ public class UIContextReconnectionTest {
         for (int i = 0; i < encoderRefs.size(); i++) {
             // The WeakRef may or may not be collected (depends on GC),
             // but the UIContext field should be null
-            assertNull("recordingEncoder field should be null after resume cycle " + i,
-                    getRecordingEncoder());
+            assertNull(getRecordingEncoder(),
+                    "recordingEncoder field should be null after resume cycle " + i);
         }
     }
 
@@ -4156,8 +4151,8 @@ public class UIContextReconnectionTest {
         Thread.sleep(300);
 
         assertFalse(uiContext.isAlive());
-        assertEquals("Application map should be empty after timeout destroy",
-                0, app.countUIContexts());
+        assertEquals(0,
+                app.countUIContexts(), "Application map should be empty after timeout destroy");
         assertNull(app.getUIContext(uiContext.getID()));
     }
 
@@ -4176,8 +4171,8 @@ public class UIContextReconnectionTest {
         // Destroy the entire application
         app.destroy();
 
-        assertFalse("UIContext should be dead after Application.destroy()",
-                uiContext.isAlive());
+        assertFalse(uiContext.isAlive(),
+                "UIContext should be dead after Application.destroy()");
         assertEquals(0, app.countUIContexts());
     }
 
@@ -4211,7 +4206,7 @@ public class UIContextReconnectionTest {
 
         assertFalse(uiContext.isAlive());
         assertTrue(ctx2.isAlive());
-        assertEquals("Only one UIContext should remain", 1, app.countUIContexts());
+        assertEquals(1, app.countUIContexts(), "Only one UIContext should remain");
         assertNull(app.getUIContext(uiContext.getID()));
         assertNotNull(app.getUIContext(ctx2.getID()));
 
@@ -4273,7 +4268,7 @@ public class UIContextReconnectionTest {
             // Fire event — handler should NOT be called
             // (We can't easily fire without a proper Event subclass, so just verify
             //  the removal API works without error)
-            assertTrue("Handler removal should succeed", true);
+            assertTrue(true, "Handler removal should succeed");
         } finally {
             uiContext.release();
             UIContext.remove();
@@ -4296,11 +4291,11 @@ public class UIContextReconnectionTest {
                     bus.subscribe(String.class, s -> called.set(true));
 
             // Unsubscribe
-            assertTrue("Unsubscribe should return true", bus.unsubscribe(handler));
+            assertTrue(bus.unsubscribe(handler), "Unsubscribe should return true");
 
             // Post event — handler should NOT be called
             bus.post("test");
-            assertFalse("Handler should not be called after unsubscribe", called.get());
+            assertFalse(called.get(), "Handler should not be called after unsubscribe");
         } finally {
             uiContext.release();
             UIContext.remove();
@@ -4332,7 +4327,7 @@ public class UIContextReconnectionTest {
         // Let it run a couple times (lock is released, task can acquire it)
         Thread.sleep(300);
         final int countBefore = counter.get();
-        assertTrue("Task should have run at least once, got " + countBefore, countBefore > 0);
+        assertTrue(countBefore > 0, "Task should have run at least once, got " + countBefore);
 
         // Destroy UIContext — should cancel the task
         uiContext.destroy();
@@ -4341,8 +4336,8 @@ public class UIContextReconnectionTest {
         Thread.sleep(300);
         final int countAfter = counter.get();
         // Allow at most 1 extra execution (race between cancel and scheduled run)
-        assertTrue("Task should stop after destroy, before=" + countBefore + " after=" + countAfter,
-                countAfter <= countBefore + 2);
+        assertTrue(countAfter <= countBefore + 2,
+                "Task should stop after destroy, before=" + countBefore + " after=" + countAfter);
     }
 
     /**
@@ -4393,8 +4388,8 @@ public class UIContextReconnectionTest {
             @SuppressWarnings("unchecked")
             final Map<UIContext, ?> map = (Map<UIContext, ?>) mapField.get(scheduler);
 
-            assertFalse("PScheduler should not retain destroyed UIContext",
-                    map.containsKey(localCtx));
+            assertFalse(map.containsKey(localCtx),
+                    "PScheduler should not retain destroyed UIContext");
         } finally {
             localCtx.release();
             UIContext.remove();
@@ -4420,8 +4415,8 @@ public class UIContextReconnectionTest {
             txn.commit();
 
             // The thread keeps its Txn for the next transaction, emptied: commit without begin() fails
-            assertThrows("Txn should drop its context after commit", RuntimeException.class,
-                () -> com.ponysdk.core.server.stm.Txn.get().commit());
+            assertThrows(RuntimeException.class, () -> com.ponysdk.core.server.stm.Txn.get().commit(),
+                "Txn should drop its context after commit");
         } finally {
             uiContext.release();
             UIContext.remove();
@@ -4440,8 +4435,8 @@ public class UIContextReconnectionTest {
             txn.begin(txnContext);
             txn.rollback();
 
-            assertThrows("Txn should drop its context after rollback", RuntimeException.class,
-                () -> com.ponysdk.core.server.stm.Txn.get().rollback());
+            assertThrows(RuntimeException.class, () -> com.ponysdk.core.server.stm.Txn.get().rollback(),
+                "Txn should drop its context after rollback");
         } finally {
             uiContext.release();
             UIContext.remove();
@@ -4468,7 +4463,7 @@ public class UIContextReconnectionTest {
         // But execute() doesn't set UIContext.setCurrent — it only acquires the lock.
         // The ThreadLocal is managed by the caller. Let's verify release() was called.
         // We can check by trying to acquire again (would deadlock if not released).
-        assertTrue("UIContext should still be alive after failed execute", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "UIContext should still be alive after failed execute");
     }
 
     /**
@@ -4491,7 +4486,7 @@ public class UIContextReconnectionTest {
 
         // Let it run
         Thread.sleep(150);
-        assertTrue("Task should have run", counter.get() > 0);
+        assertTrue(counter.get() > 0, "Task should have run");
 
         // Suspend/resume cycle
         for (int i = 0; i < 3; i++) {
@@ -4510,8 +4505,8 @@ public class UIContextReconnectionTest {
         // After all cycles, the task should still be running
         final int countBefore = counter.get();
         Thread.sleep(200);
-        assertTrue("Task should still run after multiple reconnections",
-                counter.get() > countBefore);
+        assertTrue(counter.get() > countBefore,
+                "Task should still run after multiple reconnections");
 
         // Clean up
         uiContext.destroy();
@@ -4536,7 +4531,7 @@ public class UIContextReconnectionTest {
 
         uiContext.destroy();
 
-        assertEquals("Both listeners should be called", 2, callCount.get());
+        assertEquals(2, callCount.get(), "Both listeners should be called");
     }
 
     /**
@@ -4554,7 +4549,7 @@ public class UIContextReconnectionTest {
 
         uiContext.destroy();
 
-        assertTrue("Second listener should be called despite first throwing", secondCalled.get());
+        assertTrue(secondCalled.get(), "Second listener should be called despite first throwing");
     }
 
     /**
@@ -4573,7 +4568,7 @@ public class UIContextReconnectionTest {
 
         uiContext.destroy();
 
-        assertEquals("Active contexts should be 0 after destroy", 0, metrics.getActiveContexts());
+        assertEquals(0, metrics.getActiveContexts(), "Active contexts should be 0 after destroy");
     }
 
     /**
@@ -4644,7 +4639,7 @@ public class UIContextReconnectionTest {
         final java.util.concurrent.CountDownLatch suspendDone = new java.util.concurrent.CountDownLatch(1);
 
         // Start an execute that waits
-        Thread.ofVirtual().start(() -> {
+        Thread.ofVirtual().start(() ->
             uiContext.execute(() -> {
                 inExecute.countDown();
                 try {
@@ -4652,8 +4647,7 @@ public class UIContextReconnectionTest {
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-            });
-        });
+            }));
 
         // Wait for execute to start
         assertTrue(inExecute.await(5, TimeUnit.SECONDS));
@@ -4755,7 +4749,7 @@ public class UIContextReconnectionTest {
         // If we drop all strong refs, it should be GC-eligible.
         // (In this test, Mockito holds the mock, so we can't fully test GC,
         //  but we verify the cache uses WeakReferences by checking the type)
-        assertTrue("UIContext should be suspended", uiContext.isSuspended());
+        assertTrue(uiContext.isSuspended(), "UIContext should be suspended");
 
         uiContext.destroy();
         UIContext.remove();
@@ -4781,7 +4775,7 @@ public class UIContextReconnectionTest {
         try {
             uiContext.resume(newSocket);
             // Resume won the race — UIContext should be alive
-            assertTrue("UIContext should be alive after successful resume", uiContext.isAlive());
+            assertTrue(uiContext.isAlive(), "UIContext should be alive after successful resume");
             assertFalse(uiContext.isSuspended());
         } catch (final IllegalStateException e) {
             // Timeout won the race — UIContext is no longer suspended
@@ -4839,7 +4833,7 @@ public class UIContextReconnectionTest {
         uiContext.suspend(60_000);
         final RecordingEncoder second = getRecordingEncoder();
         assertNotNull(second);
-        assertNotSame("Second suspend should create a new encoder", first, second);
+        assertNotSame(first, second, "Second suspend should create a new encoder");
 
         // The first encoder is orphaned — its entries are lost
         // This is a design choice: double suspend shouldn't happen in practice
@@ -4851,16 +4845,18 @@ public class UIContextReconnectionTest {
      * Resume with null socket — documents that this throws NPE.
      * In production, the WebSocket is always non-null when resume is called.
      */
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testResume_WithNullSocket_ThrowsNPE() {
-        uiContext.suspend(60_000);
-        try {
-            uiContext.resume(null);
-        } finally {
-            // Clean up — UIContext may be in inconsistent state
-            if (uiContext.isAlive()) uiContext.destroy();
-            UIContext.remove();
-        }
+        assertThrows(NullPointerException.class, () -> {
+            uiContext.suspend(60_000);
+            try {
+                uiContext.resume(null);
+            } finally {
+                // Clean up — UIContext may be in inconsistent state
+                if (uiContext.isAlive()) uiContext.destroy();
+                UIContext.remove();
+            }
+        });
     }
 
     /**
@@ -4937,8 +4933,8 @@ public class UIContextReconnectionTest {
         // Wait longer than the heartbeat period — checker should NOT destroy
         Thread.sleep(500);
 
-        assertTrue("UIContext should still be alive during suspension (checker skips)",
-                ctx.isAlive());
+        assertTrue(ctx.isAlive(),
+                "UIContext should still be alive during suspension (checker skips)");
         assertTrue(ctx.isSuspended());
 
         // Clean up
@@ -4977,7 +4973,7 @@ public class UIContextReconnectionTest {
             uiContext.release();
         }
 
-        assertTrue("Encoder should be overflowed", encoder.isOverflowed());
+        assertTrue(encoder.isOverflowed(), "Encoder should be overflowed");
         final int sizeAtOverflow = encoder.size();
 
         // Further writes should be no-ops
@@ -4998,8 +4994,8 @@ public class UIContextReconnectionTest {
         // After overflow the encoder must not accept new entries. It may, however, be cleared
         // concurrently by the async overflow->destroy handler — so assert it does not GROW
         // (the actual invariant) rather than strict equality, which was a timing assumption.
-        assertTrue("Encoder size should not grow after overflow",
-                encoder.size() <= sizeAtOverflow);
+        assertTrue(encoder.size() <= sizeAtOverflow,
+                "Encoder size should not grow after overflow");
 
         // Clean up — wait for destroy thread
         try { Thread.sleep(300); } catch (final InterruptedException ignored) {}
@@ -5029,8 +5025,8 @@ public class UIContextReconnectionTest {
         // The lambda calls listeners.forEach(listener -> listener.onData(data)).
         // This doesn't write to the encoder — it's application-level data delivery.
         // So the listener should be called.
-        assertTrue("Data should be delivered to listener during suspension",
-                received.contains("hello-during-suspension"));
+        assertTrue(received.contains("hello-during-suspension"),
+                "Data should be delivered to listener during suspension");
 
         uiContext.destroy();
         UIContext.remove();
@@ -5069,10 +5065,10 @@ public class UIContextReconnectionTest {
         app.pushToClients("broadcast");
 
         // Both should receive (pushToClient calls execute which works during suspension)
-        assertTrue("Suspended UIContext should receive push",
-                received1.contains("broadcast"));
-        assertTrue("Alive UIContext should receive push",
-                received2.contains("broadcast"));
+        assertTrue(received1.contains("broadcast"),
+                "Suspended UIContext should receive push");
+        assertTrue(received2.contains("broadcast"),
+                "Alive UIContext should receive push");
 
         // Clean up
         uiContext.destroy();
@@ -5111,8 +5107,8 @@ public class UIContextReconnectionTest {
             uiContext.release();
         }
 
-        assertTrue("Object counter should continue after reconnection, got " + id3 + " after " + id2,
-                id3 > id2);
+        assertTrue(id3 > id2,
+                "Object counter should continue after reconnection, got " + id3 + " after " + id2);
 
         uiContext.destroy();
         UIContext.remove();
@@ -5136,8 +5132,8 @@ public class UIContextReconnectionTest {
         final WebSocket newSocket = createMockNewSocket();
         uiContext.resume(newSocket);
 
-        assertTrue("lastReceivedTime should be updated after resume",
-                uiContext.getLastReceivedTime() >= timeBefore);
+        assertTrue(uiContext.getLastReceivedTime() >= timeBefore,
+                "lastReceivedTime should be updated after resume");
 
         uiContext.destroy();
         UIContext.remove();
@@ -5149,21 +5145,21 @@ public class UIContextReconnectionTest {
      */
     @Test
     public void testIsAlive_ThroughoutLifecycle() {
-        assertTrue("Should be alive initially", uiContext.isAlive());
-        assertFalse("Should not be suspended initially", uiContext.isSuspended());
+        assertTrue(uiContext.isAlive(), "Should be alive initially");
+        assertFalse(uiContext.isSuspended(), "Should not be suspended initially");
 
         uiContext.suspend(60_000);
-        assertTrue("Should be alive during suspension", uiContext.isAlive());
-        assertTrue("Should be suspended", uiContext.isSuspended());
+        assertTrue(uiContext.isAlive(), "Should be alive during suspension");
+        assertTrue(uiContext.isSuspended(), "Should be suspended");
 
         final WebSocket newSocket = createMockNewSocket();
         uiContext.resume(newSocket);
-        assertTrue("Should be alive after resume", uiContext.isAlive());
-        assertFalse("Should not be suspended after resume", uiContext.isSuspended());
+        assertTrue(uiContext.isAlive(), "Should be alive after resume");
+        assertFalse(uiContext.isSuspended(), "Should not be suspended after resume");
 
         uiContext.destroy();
-        assertFalse("Should be dead after destroy", uiContext.isAlive());
-        assertFalse("Should not be suspended after destroy", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "Should be dead after destroy");
+        assertFalse(uiContext.isSuspended(), "Should not be suspended after destroy");
         UIContext.remove();
     }
 }

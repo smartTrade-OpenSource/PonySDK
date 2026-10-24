@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.server.concurrent;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -41,8 +39,8 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Non-regression tests for {@link SchedulingContextImpl} — the per-context task queue + executor
@@ -55,7 +53,7 @@ public class SchedulingContextImplTest {
     private Scheduler scheduler;
     private SchedulingContextImpl ctx;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         scheduler = mock(Scheduler.class);
         when(scheduler.isShutdown()).thenReturn(false);
@@ -82,7 +80,7 @@ public class SchedulingContextImplTest {
         final AtomicBoolean ran = new AtomicBoolean(false);
         ctx.execute(() -> ran.set(true)); // executeContext is a no-op mock here
         ctx.run();
-        assertTrue("queued standard task must run when the context is processed", ran.get());
+        assertTrue(ran.get(), "queued standard task must run when the context is processed");
     }
 
     @Test
@@ -90,7 +88,7 @@ public class SchedulingContextImplTest {
         final AtomicBoolean ran = new AtomicBoolean(false);
         ctx.forceExecute(() -> ran.set(true));
         ctx.run();
-        assertTrue("queued real-time task must run when the context is processed", ran.get());
+        assertTrue(ran.get(), "queued real-time task must run when the context is processed");
     }
 
     @Test
@@ -101,7 +99,7 @@ public class SchedulingContextImplTest {
 
         verify(scheduler, never()).executeContext(any(), anyBoolean());
         ctx.run();
-        assertFalse("a destroyed context must not run newly submitted tasks", ran.get());
+        assertFalse(ran.get(), "a destroyed context must not run newly submitted tasks");
     }
 
     @Test
@@ -110,7 +108,7 @@ public class SchedulingContextImplTest {
         ctx.execute(() -> ran.set(true)); // enqueued while alive
         ctx.destroy(); // alive = false
         ctx.run(); // the alive guard in the run loop must skip the task
-        assertFalse("task must be skipped once the context is destroyed", ran.get());
+        assertFalse(ran.get(), "task must be skipped once the context is destroyed");
     }
 
     @Test
@@ -123,7 +121,7 @@ public class SchedulingContextImplTest {
 
         final AtomicBoolean ran = new AtomicBoolean(false);
         ctx.executeAndWait(() -> ran.set(true));
-        assertTrue("executeAndWait must block until the task has run", ran.get());
+        assertTrue(ran.get(), "executeAndWait must block until the task has run");
     }
 
     @Test
@@ -137,7 +135,7 @@ public class SchedulingContextImplTest {
         final RuntimeException thrown = assertThrows(RuntimeException.class, () -> ctx.executeAndWait(() -> {
             throw boom;
         }));
-        assertTrue("the original task exception must be rethrown", thrown == boom);
+        assertTrue(thrown == boom, "the original task exception must be rethrown");
     }
 
     @Test

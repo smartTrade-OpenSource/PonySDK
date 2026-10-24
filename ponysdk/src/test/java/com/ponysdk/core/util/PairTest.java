@@ -23,13 +23,10 @@
 
 package com.ponysdk.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PairTest {
 
@@ -37,7 +34,7 @@ public class PairTest {
     private Object o2;
     private Pair<Object, Object> pair1;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         o1 = new Object();
         o2 = new Object();

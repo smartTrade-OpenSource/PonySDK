@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,8 +35,8 @@ import java.util.Arrays;
 
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.BooleanModel;
@@ -66,7 +62,7 @@ public class WebSocketPusherTest {
     private Field bufferField;
     private Field asciiField;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         final Session session = Mockito.mock(Session.class);
         final ByteBufferPool pool = new ByteBufferPool(1 << 16, 4);
@@ -87,15 +83,15 @@ public class WebSocketPusherTest {
         final boolean ascii = (boolean) asciiField.get(pusher);
         final byte[] encoded = Arrays.copyOf(buffer, byteLength);
         final String decoded = new String(encoded, ascii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8);
-        assertEquals("encoding must round-trip losslessly", value, decoded);
+        assertEquals(value, decoded, "encoding must round-trip losslessly");
         return ascii;
     }
 
     @Test
     public void nonAsciiBeyondSampledPositionsIsNotTruncated() throws Exception {
         // 20 ASCII chars, then 'é' at index 20 — exactly the case the old sampling heuristic missed.
-        assertFalse("a string holding a non-ASCII char must use the UTF-8 path",
-                assertRoundTrips("abcdefghijklmnopqrst\u00e9uvwxyz0123456789"));
+        assertFalse(assertRoundTrips("abcdefghijklmnopqrst\u00e9uvwxyz0123456789"),
+                "a string holding a non-ASCII char must use the UTF-8 path");
     }
 
     @Test
@@ -119,8 +115,8 @@ public class WebSocketPusherTest {
 
     @Test
     public void pureAsciiKeepsUsingTheFastPath() throws Exception {
-        assertTrue("pure ASCII (even long) must keep using the fast path",
-                assertRoundTrips("a long but perfectly ASCII string 0123456789 abcdefghijklmnop"));
+        assertTrue(assertRoundTrips("a long but perfectly ASCII string 0123456789 abcdefghijklmnop"),
+                "pure ASCII (even long) must keep using the fast path");
     }
 
     @Test
@@ -157,7 +153,7 @@ public class WebSocketPusherTest {
     public void smallArrayLengthIsASingleByte() throws Exception {
         final byte[] bytes = encodeArrayAndCapture(new Object[] { 1, 2, 3 });
         assertEquals(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS.getValue() & 0xFF, bytes[0] & 0xFF);
-        assertEquals("length < 255 stays a single byte", 3, bytes[1] & 0xFF);
+        assertEquals(3, bytes[1] & 0xFF, "length < 255 stays a single byte");
     }
 
     @Test
@@ -167,8 +163,8 @@ public class WebSocketPusherTest {
         final byte[] bytes = encodeArrayAndCapture(array);
 
         assertEquals(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS.getValue() & 0xFF, bytes[0] & 0xFF);
-        assertEquals("escape byte signals a uint31 length follows",
-                com.ponysdk.core.model.ArrayValueModel.LENGTH_UINT31_ESCAPE, bytes[1] & 0xFF);
+        assertEquals(com.ponysdk.core.model.ArrayValueModel.LENGTH_UINT31_ESCAPE,
+                bytes[1] & 0xFF, "escape byte signals a uint31 length follows");
         // 300 <= Short.MAX → 2-byte big-endian, high bit clear (positive uint31)
         final int uint31 = (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
         assertEquals(300, uint31);
@@ -183,8 +179,8 @@ public class WebSocketPusherTest {
             final Object[] array = new Object[size];
             for (int i = 0; i < size; i++) array[i] = i % 100; // small ints → BYTE-encoded elements
             final int[] decoded = decodeSmallIntArray(encodeArrayAndCapture(array));
-            assertEquals("size " + size, size, decoded.length);
-            for (int i = 0; i < size; i++) assertEquals("size " + size + " idx " + i, i % 100, decoded[i]);
+            assertEquals(size, decoded.length, "size " + size);
+            for (int i = 0; i < size; i++) assertEquals(i % 100, decoded[i], "size " + size + " idx " + i);
         }
     }
 
@@ -292,19 +288,19 @@ public class WebSocketPusherTest {
         assertEquals(9, db.length);
 
         final byte[] nb = encodeAndFlush(ServerToClientModel.DESTROY_CONTEXT, null);
-        assertEquals("NULL-typed model writes only the model key", 1, nb.length);
+        assertEquals(1, nb.length, "NULL-typed model writes only the model key");
     }
 
     @Test
     public void encodesUint31AsShortWhenSmallAndIntWithHighBitWhenLarge() throws Exception {
         final byte[] small = encodeAndFlush(ServerToClientModel.CREATE_CONTEXT, 5);
-        assertEquals("small uint31 -> 2 bytes", 3, small.length);
+        assertEquals(3, small.length, "small uint31 -> 2 bytes");
         assertEquals(5, (small[1] & 0xFF) << 8 | (small[2] & 0xFF));
 
         final byte[] large = encodeAndFlush(ServerToClientModel.CREATE_CONTEXT, 100_000);
-        assertEquals("large uint31 -> 4 bytes", 5, large.length);
+        assertEquals(5, large.length, "large uint31 -> 4 bytes");
         final int raw = (large[1] & 0xFF) << 24 | (large[2] & 0xFF) << 16 | (large[3] & 0xFF) << 8 | (large[4] & 0xFF);
-        assertTrue("high bit set signals an int-width uint31", (raw & 0x80000000) != 0);
+        assertTrue((raw & 0x80000000) != 0, "high bit set signals an int-width uint31");
         assertEquals(100_000, raw & 0x7FFFFFFF);
     }
 
@@ -312,7 +308,7 @@ public class WebSocketPusherTest {
     public void encodesShortAsciiStringAsLengthPrefixedBytes() throws Exception {
         final byte[] b = encodeAndFlush(ServerToClientModel.TYPE_HISTORY, "hello");
         assertEquals(key(ServerToClientModel.TYPE_HISTORY), b[0] & 0xFF);
-        assertEquals("short ASCII -> single length byte", 5, b[1] & 0xFF);
+        assertEquals(5, b[1] & 0xFF, "short ASCII -> single length byte");
         assertEquals("hello", new String(b, 2, 5, StandardCharsets.US_ASCII));
     }
 
@@ -354,7 +350,7 @@ public class WebSocketPusherTest {
             c.pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, (long) i); // 1 + 8 bytes each
         }
         c.pusher.flush();
-        assertTrue("a small maxChunkSize must split the output across several sends", c.sendCount >= 2);
+        assertTrue(c.sendCount >= 2, "a small maxChunkSize must split the output across several sends");
     }
 
     @Test
@@ -374,8 +370,8 @@ public class WebSocketPusherTest {
         c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
         c.pusher.flush(); // triggers sendBinary -> callback.fail(...) -> asyncError set
 
-        assertThrows("a failed async send must surface on the next write",
-            IOException.class, () -> c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2));
+        assertThrows(IOException.class,
+            () -> c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2), "a failed async send must surface on the next write");
     }
 
     // ── Zero-allocation UTF-8 encoder ──
@@ -401,8 +397,8 @@ public class WebSocketPusherTest {
             final String s = sb.toString();
             final int end = WebSocketPusher.encodeUtf8(s, 0, s.length(), out, 0);
             final byte[] expected = s.getBytes(StandardCharsets.UTF_8);
-            assertEquals("length for " + s, expected.length, end);
-            assertTrue("bytes for " + s, Arrays.equals(expected, Arrays.copyOf(out, end)));
+            assertEquals(expected.length, end, "length for " + s);
+            assertTrue(Arrays.equals(expected, Arrays.copyOf(out, end)), "bytes for " + s);
         }
     }
 
@@ -495,7 +491,7 @@ public class WebSocketPusherTest {
         assertEquals(k, b[i++] & 0xFF);
         assertEquals(com.ponysdk.core.model.ValueTypeModel.STRING_DICTIONARY_REF, b[i++] & 0xFF);
         assertEquals(0, ((b[i++] & 0xFF) << 8) | (b[i++] & 0xFF));
-        assertEquals("nothing else on the wire", b.length, i);
+        assertEquals(b.length, i, "nothing else on the wire");
     }
 
     @Test
@@ -512,7 +508,7 @@ public class WebSocketPusherTest {
         c.pusher.flush();
 
         final byte[] b = c.bytes();
-        assertEquals("same frame size: re-sent in full", afterFirst * 2, b.length);
+        assertEquals(afterFirst * 2, b.length, "same frame size: re-sent in full");
         assertEquals(com.ponysdk.core.model.ValueTypeModel.STRING_DICTIONARY_ADD, b[afterFirst + 1] & 0xFF);
     }
 
@@ -558,7 +554,7 @@ public class WebSocketPusherTest {
         }
         assertNotNull(result.get());
         final WebSocketStats.Bandwidth end = result.get().getBandwidthPerServerToClientModel().get(ServerToClientModel.END);
-        assertNotNull("END recorded", end);
+        assertNotNull(end, "END recorded");
         assertTrue(result.get().getStats().get(ServerToClientModel.END).containsKey(null));
     }
 
@@ -587,7 +583,7 @@ public class WebSocketPusherTest {
 
         assertTrue(assertRoundTrips("{\"k\":1}".repeat(20_000))); // 140 KB, written from its own byte[]
 
-        assertEquals("kept per session: sized by short strings only", before, ((byte[]) scratch.get(pusher)).length);
+        assertEquals(before, ((byte[]) scratch.get(pusher)).length, "kept per session: sized by short strings only");
     }
 
     @Test

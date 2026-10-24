@@ -23,17 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -41,7 +38,7 @@ public class ApplicationConfigurationTest {
 
     private ApplicationConfiguration config;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         config = new ApplicationConfiguration();
         assertNotNull(config.toString());
@@ -54,8 +51,8 @@ public class ApplicationConfigurationTest {
     @Test
     public void testWebSocketConfigDefaultsAndSetters() {
         // Secure / safe defaults
-        assertTrue("Origin check (anti-CSWSH) must be on by default", config.isWsOriginCheckEnabled());
-        assertTrue("permessage-deflate on by default", config.isWsPermessageDeflateEnabled());
+        assertTrue(config.isWsOriginCheckEnabled(), "Origin check (anti-CSWSH) must be on by default");
+        assertTrue(config.isWsPermessageDeflateEnabled(), "permessage-deflate on by default");
         assertEquals(1 << 20, config.getWsMaxInboundMessageSize());
         assertEquals(1_000_000L, config.getWsIdleTimeoutMs());
         assertEquals(60_000L, config.getWsSendTimeoutMs());

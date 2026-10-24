@@ -4,14 +4,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Test;
-
 import com.ponysdk.test.PSuite;
+
+import org.junit.jupiter.api.Test;
 
 public class PSuggestBoxTest extends PSuite {
 
@@ -27,6 +27,6 @@ public class PSuggestBoxTest extends PSuite {
         assertTrue(box.getTextBox().isInitialized());
         assertTrue(box.isInitialized());
         box.setText("Apple");
-        assertTrue("the text is the text box's", "Apple".equals(box.getText()));
+        assertTrue("Apple".equals(box.getText()), "the text is the text box's");
     }
 }

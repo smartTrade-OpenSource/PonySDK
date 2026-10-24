@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ponysdk.core.model.PUnit;
+
+import org.junit.jupiter.api.Test;
 import com.ponysdk.test.PSuite;
 
 public class ChildBeforeAttachTest extends PSuite {
@@ -45,7 +45,7 @@ public class ChildBeforeAttachTest extends PSuite {
         PWindow.getMain().add(stack);
 
         assertTrue(stack.isInitialized());
-        assertTrue("child created when the panel is attached", first.isInitialized());
+        assertTrue(first.isInitialized(), "child created when the panel is attached");
         assertTrue(second.isInitialized());
     }
 
@@ -66,13 +66,13 @@ public class ChildBeforeAttachTest extends PSuite {
         composite.initWidget(inner);
         assertFalse(inner.isInitialized());
         PWindow.getMain().add(composite);
-        assertTrue("created with the composite", inner.isInitialized());
+        assertTrue(inner.isInitialized(), "created with the composite");
 
         final PComposite<PLabel> late = composite();
         PWindow.getMain().add(late);
         final PLabel lateInner = Element.newPLabel("late inner");
         late.initWidget(lateInner);
-        assertTrue("wrapped once the composite is attached", lateInner.isInitialized());
+        assertTrue(lateInner.isInitialized(), "wrapped once the composite is attached");
     }
 
     private static PComposite<PLabel> composite() {
@@ -94,7 +94,7 @@ public class ChildBeforeAttachTest extends PSuite {
 
         PWindow.getMain().add(disclosure);
 
-        assertTrue("content created when the panel is attached", content.isInitialized());
+        assertTrue(content.isInitialized(), "content created when the panel is attached");
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ChildBeforeAttachTest extends PSuite {
         final PTree tree = Element.newPTree();
         final PTreeItem folder = Element.newPTreeItem("folder");
         final PTreeItem leaf = folder.add(Element.newPTreeItem("leaf"));
-        assertFalse("not in a tree yet", leaf.isSelected());
+        assertFalse(leaf.isSelected(), "not in a tree yet");
 
         tree.add(folder);
         leaf.setSelected(true);

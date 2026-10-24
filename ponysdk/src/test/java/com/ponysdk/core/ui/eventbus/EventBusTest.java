@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ponysdk.test.PSuite;
+
+import org.junit.jupiter.api.Test;
 
 public class EventBusTest extends PSuite {
 
@@ -42,14 +42,14 @@ public class EventBusTest extends PSuite {
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         final Event<TestEventHandler> hoverEvent = new HoverTestEvent(null);
         eventBus.fireEvent(hoverEvent);
-        assertFalse("Click handler should NOT have been invoked", clickEventHandler.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler should NOT have been invoked");
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(null);
         eventBus.fireEvent(clickEvent);
-        assertTrue("Click handler should have been invoked", clickEventHandler.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler should have been invoked");
         eventBus.removeHandler(CLICK_EVENT_TYPE, clickEventHandler);
         clickEventHandler.invoked = false;
         eventBus.fireEvent(clickEvent);
-        assertFalse("Click handler should NOT have been invoked", clickEventHandler.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler should NOT have been invoked");
     }
 
     @Test
@@ -60,14 +60,14 @@ public class EventBusTest extends PSuite {
         eventSource.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         final Event<TestEventHandler> hoverEvent = new HoverTestEvent(eventSource);
         eventBus.fireEventFromSource(hoverEvent, eventSource);
-        assertFalse("Click handler should NOT have been invoked", clickEventHandler.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler should NOT have been invoked");
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(eventSource);
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertTrue("Click handler should have been invoked", clickEventHandler.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler should have been invoked");
         eventSource.removeHandler(CLICK_EVENT_TYPE, clickEventHandler);
         clickEventHandler.invoked = false;
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertFalse("Click handler should NOT have been invoked", clickEventHandler.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler should NOT have been invoked");
     }
 
     @Test
@@ -75,14 +75,14 @@ public class EventBusTest extends PSuite {
         final EventBus eventBus = new EventBus();
         final TestBroadcastHandler broadcastHandler = new TestBroadcastHandler();
         eventBus.addHandler(broadcastHandler);
-        assertFalse("Broadcast handler should NOT have been invoked", broadcastHandler.invoked);
+        assertFalse(broadcastHandler.invoked, "Broadcast handler should NOT have been invoked");
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(null);
         eventBus.fireEvent(clickEvent);
-        assertTrue("Broadcast handler should have been invoked", broadcastHandler.invoked);
+        assertTrue(broadcastHandler.invoked, "Broadcast handler should have been invoked");
         eventBus.removeHandler(broadcastHandler);
         broadcastHandler.invoked = false;
         eventBus.fireEvent(clickEvent);
-        assertFalse("Broadcast handler should NOT have been invoked", broadcastHandler.invoked);
+        assertFalse(broadcastHandler.invoked, "Broadcast handler should NOT have been invoked");
     }
 
     @Test
@@ -94,11 +94,11 @@ public class EventBusTest extends PSuite {
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         eventBus.addHandler(HOVER_EVENT_TYPE, hoverEventHandler);
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(eventSource);
-        assertFalse("Click handler should NOT have been invoked", clickEventHandler.invoked);
-        assertFalse("Hover handler should NOT have been invoked", hoverEventHandler.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler should NOT have been invoked");
+        assertFalse(hoverEventHandler.invoked, "Hover handler should NOT have been invoked");
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertTrue("Click handler should have been invoked", clickEventHandler.invoked);
-        assertFalse("Hover handler should NOT have been invoked", hoverEventHandler.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler should have been invoked");
+        assertFalse(hoverEventHandler.invoked, "Hover handler should NOT have been invoked");
     }
 
     @Test
@@ -110,11 +110,11 @@ public class EventBusTest extends PSuite {
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler2);
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(eventSource);
-        assertFalse("Click handler 1 should NOT have been invoked", clickEventHandler.invoked);
-        assertFalse("Click handler 2 should NOT have been invoked", clickEventHandler2.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler 1 should NOT have been invoked");
+        assertFalse(clickEventHandler2.invoked, "Click handler 2 should NOT have been invoked");
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertTrue("Click handler 1 should have been invoked", clickEventHandler.invoked);
-        assertTrue("Click handler 2 should have been invoked", clickEventHandler2.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler 1 should have been invoked");
+        assertTrue(clickEventHandler2.invoked, "Click handler 2 should have been invoked");
     }
 
     @Test
@@ -132,11 +132,11 @@ public class EventBusTest extends PSuite {
         };
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(eventSource);
-        assertFalse("Click handler 1 should NOT have been invoked", clickEventHandler.invoked);
-        assertFalse("Click handler 2 should NOT have been invoked", clickEventHandler2.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler 1 should NOT have been invoked");
+        assertFalse(clickEventHandler2.invoked, "Click handler 2 should NOT have been invoked");
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertTrue("Click handler 1 should have been invoked", clickEventHandler.invoked);
-        assertFalse("Click handler 2 should NOT have been invoked", clickEventHandler2.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler 1 should have been invoked");
+        assertFalse(clickEventHandler2.invoked, "Click handler 2 should NOT have been invoked");
     }
 
     @Test
@@ -155,11 +155,11 @@ public class EventBusTest extends PSuite {
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler);
         eventBus.addHandler(CLICK_EVENT_TYPE, clickEventHandler2);
         final Event<TestEventHandler> clickEvent = new ClickTestEvent(eventSource);
-        assertFalse("Click handler 1 should NOT have been invoked", clickEventHandler.invoked);
-        assertFalse("Click handler 2 should NOT have been invoked", clickEventHandler2.invoked);
+        assertFalse(clickEventHandler.invoked, "Click handler 1 should NOT have been invoked");
+        assertFalse(clickEventHandler2.invoked, "Click handler 2 should NOT have been invoked");
         eventBus.fireEventFromSource(clickEvent, eventSource);
-        assertTrue("Click handler 1 should have been invoked", clickEventHandler.invoked);
-        assertTrue("Click handler 2 should have been invoked", clickEventHandler2.invoked);
+        assertTrue(clickEventHandler.invoked, "Click handler 1 should have been invoked");
+        assertTrue(clickEventHandler2.invoked, "Click handler 2 should have been invoked");
     }
 
     private static class TestEventHandler implements EventHandler {

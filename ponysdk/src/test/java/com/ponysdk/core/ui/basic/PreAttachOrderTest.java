@@ -4,14 +4,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.test.PSuite;
@@ -25,12 +25,12 @@ public class PreAttachOrderTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }
@@ -62,7 +62,7 @@ public class PreAttachOrderTest extends PSuite {
         final int addFirst = indexOf(ServerToClientModel.TYPE_ADD, first.getID());
         final int insert = indexOf(ServerToClientModel.INSERT_ROW, 0);
         final int addSecond = indexOf(ServerToClientModel.TYPE_ADD, second.getID());
-        assertTrue("add, insert, add: " + writer.models(), addFirst < insert && insert < addSecond);
+        assertTrue(addFirst < insert && insert < addSecond, "add, insert, add: " + writer.models());
         assertEquals(2, table.getRowCount()); // the server's view: second at row 0, first at row 1
         assertEquals(first, table.getWidget(1, 0));
     }
@@ -96,13 +96,13 @@ public class PreAttachOrderTest extends PSuite {
 
         PWindow.getMain().add(tabs);
 
-        assertTrue("the tab widgets exist", tabOfA.isInitialized() && tabOfC.isInitialized());
+        assertTrue(tabOfA.isInitialized() && tabOfC.isInitialized(), "the tab widgets exist");
         assertTrue(indexOf(ServerToClientModel.TYPE_CREATE, tabOfA.getID()) < indexOf(ServerToClientModel.TAB_WIDGET, tabOfA.getID()));
         assertTrue(indexOf(ServerToClientModel.TYPE_CREATE, tabOfC.getID()) < indexOf(ServerToClientModel.TAB_WIDGET, tabOfC.getID()));
         final List<Object> added = writer.valuesOf(ServerToClientModel.TYPE_ADD);
         final List<Object> tabsAdded = added.stream().filter(id -> List.of(a.getID(), b.getID(), c.getID()).contains(id)).toList();
-        assertEquals("in their final order", List.of(c.getID(), a.getID(), b.getID()), tabsAdded);
-        assertEquals("no index: the order is the adds'", 0, writer.count(ServerToClientModel.BEFORE_INDEX));
+        assertEquals(List.of(c.getID(), a.getID(), b.getID()), tabsAdded, "in their final order");
+        assertEquals(0, writer.count(ServerToClientModel.BEFORE_INDEX), "no index: the order is the adds'");
     }
 
     @Test

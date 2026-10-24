@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.server.concurrent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -32,9 +32,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
-
 import com.ponysdk.core.server.application.UIContext;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Non-regression tests for {@link UIDelegate}: a {@link java.util.function.Consumer} wrapper that
@@ -58,7 +58,7 @@ public class UIDelegateTest {
         delegate.accept("payload");
 
         verify(uiContext).execute(any(Runnable.class));
-        assertEquals("consumer must receive the value, dispatched via UIContext.execute", "payload", received.get());
+        assertEquals("payload", received.get(), "consumer must receive the value, dispatched via UIContext.execute");
     }
 
     @Test
@@ -71,6 +71,6 @@ public class UIDelegateTest {
         delegate.accept("payload");
 
         verify(uiContext).execute(any(Runnable.class));
-        assertNull("consumer must only run through UIContext.execute, never directly", received.get());
+        assertNull(received.get(), "consumer must only run through UIContext.execute, never directly");
     }
 }

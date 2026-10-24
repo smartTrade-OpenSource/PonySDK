@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -43,9 +39,9 @@ import jakarta.json.spi.JsonProvider;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -65,7 +61,7 @@ public class WebSocketTest {
 
     private final List<Pair<ServerToClientModel, Object>> encodedValues = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         webSocket = new WebSocket() {
 
@@ -121,7 +117,7 @@ public class WebSocketTest {
      * {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}.
      */
     @Test
-    @Ignore
+    @Disabled
     public void testRoundTrip() {
         for (int i = 0; i < 10; i++) { // Warmup
             webSocket.sendRoundTrip();
@@ -138,7 +134,7 @@ public class WebSocketTest {
      * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}
      */
     @Test
-    @Ignore
+    @Disabled
     public void testOnWebSocketTextRoundTripLatency() {
         encodedValues.clear();
         final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
@@ -288,8 +284,8 @@ public class WebSocketTest {
 
         webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
-        assertFalse("Default mode: UIContext should be destroyed on close", uiContext.isAlive());
-        assertFalse("Default mode: UIContext should NOT be suspended", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "Default mode: UIContext should be destroyed on close");
+        assertFalse(uiContext.isSuspended(), "Default mode: UIContext should NOT be suspended");
     }
 
     /**
@@ -301,7 +297,7 @@ public class WebSocketTest {
 
         webSocket.onWebSocketError(new Exception("network failure"));
 
-        assertFalse("Default mode: UIContext should be destroyed on error", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "Default mode: UIContext should be destroyed on error");
         assertFalse(uiContext.isSuspended());
     }
 
@@ -354,8 +350,8 @@ public class WebSocketTest {
 
         setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
-        assertTrue("Reconnection mode: UIContext should still be alive", setup.uiContext().isAlive());
-        assertTrue("Reconnection mode: UIContext should be suspended", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isAlive(), "Reconnection mode: UIContext should still be alive");
+        assertTrue(setup.uiContext().isSuspended(), "Reconnection mode: UIContext should be suspended");
     }
 
     /** A pong is a sign of life, as a message is. */
@@ -426,7 +422,7 @@ public class WebSocketTest {
         // Error on old socket — should NOT destroy
         setup.webSocket().onWebSocketError(new Exception("broken pipe on old socket"));
 
-        assertTrue("Suspended UIContext should survive old socket errors", setup.uiContext().isAlive());
+        assertTrue(setup.uiContext().isAlive(), "Suspended UIContext should survive old socket errors");
         assertTrue(setup.uiContext().isSuspended());
     }
 
@@ -472,7 +468,7 @@ public class WebSocketTest {
         // Wait for timeout
         Thread.sleep(500);
 
-        assertFalse("UIContext should be destroyed after reconnection timeout", ctx.isAlive());
+        assertFalse(ctx.isAlive(), "UIContext should be destroyed after reconnection timeout");
         assertFalse(ctx.isSuspended());
     }
 
@@ -495,8 +491,8 @@ public class WebSocketTest {
         setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         // Despite the listener exception, UIContext should be suspended
-        assertTrue("UIContext should still be alive", setup.uiContext().isAlive());
-        assertTrue("UIContext should be suspended despite listener exception", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isAlive(), "UIContext should still be alive");
+        assertTrue(setup.uiContext().isSuspended(), "UIContext should be suspended despite listener exception");
     }
 
     /**
@@ -509,8 +505,8 @@ public class WebSocketTest {
 
         setup.webSocket().onWebSocketClose(StatusCode.ABNORMAL, "Abnormal disconnect", Callback.NOOP);
 
-        assertTrue("UIContext should be alive after abnormal close", setup.uiContext().isAlive());
-        assertTrue("UIContext should be suspended after abnormal close", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isAlive(), "UIContext should be alive after abnormal close");
+        assertTrue(setup.uiContext().isSuspended(), "UIContext should be suspended after abnormal close");
     }
 
     /**
@@ -547,7 +543,7 @@ public class WebSocketTest {
 
         Mockito.verify(callback, Mockito.times(1)).succeed();
         Mockito.verify(callback, Mockito.never()).fail(Mockito.any());
-        assertFalse("Default mode should destroy the UIContext", uiContext.isAlive());
+        assertFalse(uiContext.isAlive(), "Default mode should destroy the UIContext");
     }
 
     /**
@@ -584,8 +580,8 @@ public class WebSocketTest {
         setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", callback);
 
         Mockito.verify(callback, Mockito.times(1)).succeed();
-        assertTrue("Reconnection mode keeps the UIContext alive", setup.uiContext().isAlive());
-        assertTrue("Reconnection mode suspends the UIContext", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isAlive(), "Reconnection mode keeps the UIContext alive");
+        assertTrue(setup.uiContext().isSuspended(), "Reconnection mode suspends the UIContext");
     }
 
     /**
@@ -603,7 +599,7 @@ public class WebSocketTest {
         setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", callback);
 
         Mockito.verify(callback, Mockito.times(1)).succeed();
-        assertTrue("Suspension must still happen despite the listener exception", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isSuspended(), "Suspension must still happen despite the listener exception");
     }
 
     /**
@@ -634,11 +630,11 @@ public class WebSocketTest {
 
         assertFalse(setup.uiContext().isSuspended());
         setup.webSocket().onWebSocketError(new java.nio.channels.ClosedChannelException());
-        assertTrue("an error alone does not end the context", setup.uiContext().isAlive());
+        assertTrue(setup.uiContext().isAlive(), "an error alone does not end the context");
 
         setup.webSocket().onWebSocketClose(StatusCode.ABNORMAL, "Session Closed", Callback.NOOP);
         assertTrue(setup.uiContext().isAlive());
-        assertTrue("suspended, waiting for its client", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isSuspended(), "suspended, waiting for its client");
     }
 
     // ---- Reconnection path in onWebSocketOpen: edge cases ----
@@ -819,7 +815,7 @@ public class WebSocketTest {
 
             Mockito.verify(sess2).close(Mockito.eq(WebSocket.CLOSE_RECONNECTION_HELD), Mockito.anyString(), Mockito.any());
             Mockito.verify(setup.appManager(), Mockito.never()).startApplication(Mockito.any(UIContext.class));
-            assertTrue("still waiting for its client", suspended.isSuspended());
+            assertTrue(suspended.isSuspended(), "still waiting for its client");
         } finally {
             com.ponysdk.core.server.servlet.SessionManager.get().unregisterApplication(application);
         }
@@ -842,9 +838,9 @@ public class WebSocketTest {
             throw new RuntimeException("handler crash");
         });
 
-        assertFalse("execute() should return false when runnable throws", result);
-        assertTrue("UIContext should still be alive after runnable exception", setup.uiContext().isAlive());
-        assertTrue("UIContext should still be suspended", setup.uiContext().isSuspended());
+        assertFalse(result, "execute() should return false when runnable throws");
+        assertTrue(setup.uiContext().isAlive(), "UIContext should still be alive after runnable exception");
+        assertTrue(setup.uiContext().isSuspended(), "UIContext should still be suspended");
     }
 
     /**
@@ -863,8 +859,8 @@ public class WebSocketTest {
             setup.webSocket().onWebSocketError(new Exception("error " + i));
         }
 
-        assertTrue("UIContext should survive all old socket errors", setup.uiContext().isAlive());
-        assertTrue("UIContext should remain suspended", setup.uiContext().isSuspended());
+        assertTrue(setup.uiContext().isAlive(), "UIContext should survive all old socket errors");
+        assertTrue(setup.uiContext().isSuspended(), "UIContext should remain suspended");
     }
 
     /**
@@ -888,12 +884,12 @@ public class WebSocketTest {
 
         setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
-        assertSame("Listener should receive the correct UIContext",
-                setup.uiContext(), capturedCtx.get());
-        assertFalse("UIContext should NOT be suspended when listener is called",
-                wasSuspendedDuringCallback.get());
-        assertTrue("UIContext should be suspended AFTER listener returns",
-                setup.uiContext().isSuspended());
+        assertSame(setup.uiContext(),
+                capturedCtx.get(), "Listener should receive the correct UIContext");
+        assertFalse(wasSuspendedDuringCallback.get(),
+                "UIContext should NOT be suspended when listener is called");
+        assertTrue(setup.uiContext().isSuspended(),
+                "UIContext should be suspended AFTER listener returns");
     }
 
     // ---- Additional coverage: message handling edge cases ----
@@ -929,7 +925,7 @@ public class WebSocketTest {
         webSocket.onWebSocketText("this is not json {{{");
 
         // UIContext should still be alive (error is logged, not fatal)
-        assertTrue("UIContext should survive invalid JSON", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "UIContext should survive invalid JSON");
     }
 
     /**
@@ -942,7 +938,7 @@ public class WebSocketTest {
 
         webSocket.onWebSocketText("{}");
 
-        assertTrue("UIContext should survive empty JSON", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "UIContext should survive empty JSON");
     }
 
     /**
@@ -1071,11 +1067,11 @@ public class WebSocketTest {
         uiContext.onMessageSent(); // just flushed: more data is coming
         encodedValues.clear();
         webSocket.sendRoundTrip();
-        assertEquals("deferred to the next data frame", 0, roundTrips());
+        assertEquals(0, roundTrips(), "deferred to the next data frame");
         webSocket.flush();
         assertEquals(1, roundTrips());
         webSocket.flush();
-        assertEquals("consumed once", 1, roundTrips());
+        assertEquals(1, roundTrips(), "consumed once");
     }
 
     @Test
@@ -1086,7 +1082,7 @@ public class WebSocketTest {
         webSocket.sendRoundTrip(); // next check: still pending -> standalone now
         assertEquals(1, roundTrips());
         webSocket.flush();
-        assertEquals("nothing left pending", 1, roundTrips());
+        assertEquals(1, roundTrips(), "nothing left pending");
     }
 
     /**
@@ -1157,7 +1153,7 @@ public class WebSocketTest {
             webSocket.onWebSocketText(job.build().toString());
         }
 
-        assertTrue("UIContext should survive rapid messages", uiContext.isAlive());
+        assertTrue(uiContext.isAlive(), "UIContext should survive rapid messages");
     }
 
     /**
@@ -1180,9 +1176,9 @@ public class WebSocketTest {
         job.add(ClientToServerModel.OBJECT_ID.toStringValue(), 1);
         webSocket.onWebSocketText(job.build().toString());
 
-        assertTrue("onMessageReceived should be called", received.get());
-        assertTrue("onMessageProcessed should be called", processed.get());
-        assertTrue("onMessageUnprocessed should be called", unprocessed.get());
+        assertTrue(received.get(), "onMessageReceived should be called");
+        assertTrue(processed.get(), "onMessageProcessed should be called");
+        assertTrue(unprocessed.get(), "onMessageUnprocessed should be called");
     }
 
     // ====================================================================
@@ -1208,8 +1204,8 @@ public class WebSocketTest {
     public void testClose_UIContextDestroyedAndDeadAfterClose() {
         assertTrue(uiContext.isAlive());
         webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
-        assertFalse("UIContext should be dead after close", uiContext.isAlive());
-        assertFalse("UIContext should not be suspended", uiContext.isSuspended());
+        assertFalse(uiContext.isAlive(), "UIContext should be dead after close");
+        assertFalse(uiContext.isSuspended(), "UIContext should not be suspended");
     }
 
     /**

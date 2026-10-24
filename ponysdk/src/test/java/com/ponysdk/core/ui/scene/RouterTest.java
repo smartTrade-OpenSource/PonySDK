@@ -26,9 +26,10 @@ package com.ponysdk.core.ui.scene;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.*;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class RouterTest extends PSuite {
 

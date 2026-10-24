@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** The parser-free fast path for the terminal's latency message must accept exactly {"h":<integer>} and {"h":<integer>,"x":<integer>}. */
 public class WebSocketControlMessageTest {
@@ -53,7 +53,7 @@ public class WebSocketControlMessageTest {
         for (final String m : new String[] { "{\"h\":}", "{\"h\":-}", "{\"h\": 12}", "{\"h\":12 }", "{\"h\":1.5}",
                 "{\"h\":12,\"y\":1}", "{\"h\":12,\"x\":}", "{\"h\":12,\"x\":1.5}", "{\"h\":,\"x\":1}", "{\"v\":0}", "{\"h\":\"12\"}", "{\"h\":12", "\"h\":12}", "",
                 "{\"h\":9999999999999999999}" /* would overflow */, "{\"hh\":1}" }) {
-            assertEquals(m, NO, WebSocket.parseLatencyMessage(m));
+            assertEquals(NO, WebSocket.parseLatencyMessage(m), m);
         }
     }
 }

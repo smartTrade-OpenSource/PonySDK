@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Non-regression tests for {@link ScheduledTaskHandler} — the public cancellation handle wrapping

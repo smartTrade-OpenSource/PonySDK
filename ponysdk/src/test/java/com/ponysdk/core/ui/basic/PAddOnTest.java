@@ -23,10 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -34,9 +31,9 @@ import java.util.logging.Level;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -68,12 +65,12 @@ public class PAddOnTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }
@@ -105,7 +102,7 @@ public class PAddOnTest extends PSuite {
         assertEquals(List.of(addOn.getSignature()), writer.valuesOf(ServerToClientModel.FACTORY));
         assertArrayEquals(new Object[] { 1, 2L, 3.5, true, "s" },
                 (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
-        assertEquals("no JSON form", 0, writer.count(ServerToClientModel.PADDON_CREATION));
+        assertEquals(0, writer.count(ServerToClientModel.PADDON_CREATION), "no JSON form");
     }
 
     @Test
@@ -138,7 +135,7 @@ public class PAddOnTest extends PSuite {
         addOn.call("zoom", 2, "x");
 
         assertEquals(List.of("refresh", "zoom"), writer.valuesOf(ServerToClientModel.PADDON_METHOD));
-        assertEquals("no args block for a no-arg call", 1, writer.count(ServerToClientModel.PADDON_ARGUMENTS));
+        assertEquals(1, writer.count(ServerToClientModel.PADDON_ARGUMENTS), "no args block for a no-arg call");
         assertArrayEquals(new Object[] { 2, "x" }, (Object[]) writer.valuesOf(ServerToClientModel.PADDON_ARGUMENTS).get(0));
     }
 
@@ -146,13 +143,13 @@ public class PAddOnTest extends PSuite {
     public void callsBeforeAttachAreDeliveredAfterCreation() {
         final BinaryAddOn addOn = new BinaryAddOn();
         addOn.call("init", 1);
-        assertTrue("stacked, not sent", writer.valuesOf(ServerToClientModel.PADDON_METHOD).isEmpty());
+        assertTrue(writer.valuesOf(ServerToClientModel.PADDON_METHOD).isEmpty(), "stacked, not sent");
 
         addOn.attach(PWindow.getMain());
 
         final List<ServerToClientModel> models = writer.models();
-        assertTrue("method sent after the CREATE",
-                models.indexOf(ServerToClientModel.TYPE_CREATE) < models.indexOf(ServerToClientModel.PADDON_METHOD));
+        assertTrue(models.indexOf(ServerToClientModel.TYPE_CREATE) < models.indexOf(ServerToClientModel.PADDON_METHOD),
+                "method sent after the CREATE");
     }
 
     @Test
@@ -199,7 +196,7 @@ public class PAddOnTest extends PSuite {
         final PLabel label = Element.newPLabel("later");
         final JsonObject args = Json.createObjectBuilder().add("k", "v").build();
         new LabelAddOn(label, args);
-        assertEquals("not created before its widget", 0, writer.count(ServerToClientModel.FACTORY));
+        assertEquals(0, writer.count(ServerToClientModel.FACTORY), "not created before its widget");
 
         PWindow.getMain().add(label);
 

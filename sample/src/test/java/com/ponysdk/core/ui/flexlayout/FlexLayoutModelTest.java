@@ -1,12 +1,12 @@
 package com.ponysdk.core.ui.flexlayout;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import java.io.StringReader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FlexLayoutModelTest {
 

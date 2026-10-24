@@ -1,11 +1,11 @@
 package com.ponysdk.driver;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** The no-arg driver must not hand a null bandwidth listener to its deflate extension. */
 public class PonySDKWebDriverDefaultsTest {

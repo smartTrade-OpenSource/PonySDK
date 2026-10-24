@@ -25,11 +25,13 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PSuite;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import org.jsoup.Jsoup;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
 
 public class PElementTest extends PSuite {
 

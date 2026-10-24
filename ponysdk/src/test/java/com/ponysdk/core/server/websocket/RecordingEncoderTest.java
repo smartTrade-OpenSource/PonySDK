@@ -4,15 +4,17 @@
 package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import org.junit.Test;
 
 import java.lang.ref.WeakReference;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link RecordingEncoder} — the core of the transparent reconnection engine.
@@ -142,7 +144,7 @@ public class RecordingEncoderTest {
 
         final int sizeBefore = rec.size();
         rec.compact();
-        assertTrue("Compaction should reduce entry count", rec.size() < sizeBefore);
+        assertTrue(rec.size() < sizeBefore, "Compaction should reduce entry count");
 
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
@@ -150,15 +152,15 @@ public class RecordingEncoderTest {
         // After merge: one block with HTML="second" and WIDGET_VISIBLE=true
         long htmlCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.HTML).count();
-        assertEquals("Merged block should have exactly one HTML entry", 1, htmlCount);
+        assertEquals(1, htmlCount, "Merged block should have exactly one HTML entry");
 
         String htmlValue = (String) cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.HTML)
                 .findFirst().orElseThrow().value();
-        assertEquals("Last value wins", "second", htmlValue);
+        assertEquals("second", htmlValue, "Last value wins");
 
-        assertTrue("WIDGET_VISIBLE should be present",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.WIDGET_VISIBLE));
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.WIDGET_VISIBLE),
+                "WIDGET_VISIBLE should be present");
     }
 
     @Test
@@ -215,7 +217,7 @@ public class RecordingEncoderTest {
                 (e.model() == ServerToClientModel.TYPE_CREATE || e.model() == ServerToClientModel.TYPE_UPDATE
                         || e.model() == ServerToClientModel.TYPE_REMOVE)
                         && Integer.valueOf(50).equals(e.value()));
-        assertFalse("Create+Remove pair should be cancelled", hasObj50);
+        assertFalse(hasObj50, "Create+Remove pair should be cancelled");
     }
 
     @Test
@@ -232,11 +234,11 @@ public class RecordingEncoderTest {
 
         boolean has51 = cap.captured.stream().anyMatch(e ->
                 e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(51).equals(e.value()));
-        assertTrue("Object 51 should survive", has51);
+        assertTrue(has51, "Object 51 should survive");
 
         boolean has50 = cap.captured.stream().anyMatch(e ->
                 e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value()));
-        assertFalse("Object 50 should be cancelled", has50);
+        assertFalse(has50, "Object 50 should be cancelled");
     }
 
     // ---- Structural operations preserved in order ----
@@ -287,8 +289,8 @@ public class RecordingEncoderTest {
             rec.encode(ServerToClientModel.HTML, "v" + i);
         }
 
-        assertTrue("Overflow handler should have fired", fired.get());
-        assertTrue("Reported count should exceed max", reportedCount.get() > 5);
+        assertTrue(fired.get(), "Overflow handler should have fired");
+        assertTrue(reportedCount.get() > 5, "Reported count should exceed max");
         assertEquals(5, reportedMax.get());
         assertTrue(rec.isOverflowed());
     }
@@ -303,7 +305,7 @@ public class RecordingEncoderTest {
         }
 
         // Size should be frozen near the overflow point (4 = 3 + the one that triggered)
-        assertTrue("Should stop recording after overflow", rec.size() <= 5);
+        assertTrue(rec.size() <= 5, "Should stop recording after overflow");
         assertTrue(rec.isOverflowed());
     }
 
@@ -328,7 +330,7 @@ public class RecordingEncoderTest {
             rec.encode(ServerToClientModel.HTML, "v" + i);
         }
 
-        assertEquals("Overflow handler should fire exactly once", 1, fireCount.get());
+        assertEquals(1, fireCount.get(), "Overflow handler should fire exactly once");
     }
 
     // ---- Edge cases ----
@@ -381,7 +383,7 @@ public class RecordingEncoderTest {
                         || e.model() == ServerToClientModel.TYPE_UPDATE
                         || e.model() == ServerToClientModel.TYPE_GC)
                         && Integer.valueOf(60).equals(e.value()));
-        assertFalse("Create+GC pair should be cancelled", hasObj60);
+        assertFalse(hasObj60, "Create+GC pair should be cancelled");
     }
 
     // ---- Edge cases: batch cancellation (multiple objects created+removed) ----
@@ -400,12 +402,12 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertFalse("Object 70 should be cancelled", cap.captured.stream().anyMatch(e ->
-                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(70).equals(e.value())));
-        assertFalse("Object 71 should be cancelled", cap.captured.stream().anyMatch(e ->
-                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(71).equals(e.value())));
-        assertTrue("Object 72 should survive", cap.captured.stream().anyMatch(e ->
-                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(72).equals(e.value())));
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(70).equals(e.value())), "Object 70 should be cancelled");
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(71).equals(e.value())), "Object 71 should be cancelled");
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(72).equals(e.value())), "Object 72 should survive");
     }
 
     // ---- Edge cases: FRAME_ID preserved in merged update blocks ----
@@ -433,9 +435,9 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // FRAME_ID should be present in the merged block
-        assertTrue("FRAME_ID should be preserved after merge",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.FRAME_ID && Integer.valueOf(99).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.FRAME_ID && Integer.valueOf(99).equals(e.value())),
+                "FRAME_ID should be preserved after merge");
         // Only one HTML entry (merged)
         assertEquals(1, cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.HTML).count());
@@ -462,10 +464,10 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("TYPE_HISTORY block should survive compaction",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_HISTORY));
-        assertTrue("Update block should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_UPDATE));
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_HISTORY),
+                "TYPE_HISTORY block should survive compaction");
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_UPDATE),
+                "Update block should survive");
     }
 
     // ---- Edge cases: UPDATE after structural op on same object should NOT merge ----
@@ -491,7 +493,7 @@ public class RecordingEncoderTest {
                 .filter(e -> e.model() == ServerToClientModel.HTML)
                 .map(e -> (String) e.value())
                 .toList();
-        assertEquals("Both HTML values should survive", List.of("before", "after"), htmlValues);
+        assertEquals(List.of("before", "after"), htmlValues, "Both HTML values should survive");
 
         // Verify order: UPDATE(before) → ADD → UPDATE(after)
         List<ServerToClientModel> types = cap.captured.stream()
@@ -521,9 +523,9 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // REMOVE should survive (no matching CREATE during this suspension window)
-        assertTrue("REMOVE without CREATE should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(80).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(80).equals(e.value())),
+                "REMOVE without CREATE should survive");
     }
 
     // ---- Edge cases: only CREATE without REMOVE should NOT be cancelled ----
@@ -540,9 +542,9 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("CREATE without REMOVE should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(90).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(90).equals(e.value())),
+                "CREATE without REMOVE should survive");
     }
 
     // ---- Edge cases: overflow at exact boundary ----
@@ -556,13 +558,13 @@ public class RecordingEncoderTest {
         for (int i = 0; i < 5; i++) {
             rec.encode(ServerToClientModel.HTML, "v" + i);
         }
-        assertFalse("Exactly at limit should NOT overflow", fired.get());
+        assertFalse(fired.get(), "Exactly at limit should NOT overflow");
         assertFalse(rec.isOverflowed());
         assertEquals(5, rec.size());
 
         // One more — should overflow
         rec.encode(ServerToClientModel.HTML, "overflow");
-        assertTrue("One past limit should overflow", fired.get());
+        assertTrue(fired.get(), "One past limit should overflow");
         assertTrue(rec.isOverflowed());
     }
 
@@ -647,12 +649,12 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // Both REMOVE and CREATE should survive
-        assertTrue("REMOVE should survive (came before CREATE)",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(50).equals(e.value())));
-        assertTrue("CREATE should survive (came after REMOVE)",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(50).equals(e.value())),
+                "REMOVE should survive (came before CREATE)");
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())),
+                "CREATE should survive (came after REMOVE)");
 
         // Verify order: REMOVE before CREATE
         int removePos = -1, createPos = -1;
@@ -662,7 +664,7 @@ public class RecordingEncoderTest {
             if (cap.captured.get(i).model() == ServerToClientModel.TYPE_CREATE
                     && Integer.valueOf(50).equals(cap.captured.get(i).value())) createPos = i;
         }
-        assertTrue("REMOVE should come before CREATE", removePos < createPos);
+        assertTrue(removePos < createPos, "REMOVE should come before CREATE");
     }
 
     /**
@@ -682,12 +684,12 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertFalse("CREATE+REMOVE (in order) should be cancelled",
-                cap.captured.stream().anyMatch(e ->
+        assertFalse(cap.captured.stream().anyMatch(e ->
                         (e.model() == ServerToClientModel.TYPE_CREATE
                                 || e.model() == ServerToClientModel.TYPE_REMOVE
                                 || e.model() == ServerToClientModel.TYPE_UPDATE)
-                                && Integer.valueOf(50).equals(e.value())));
+                                && Integer.valueOf(50).equals(e.value())),
+                "CREATE+REMOVE (in order) should be cancelled");
     }
 
     /**
@@ -711,12 +713,12 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("GC should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_GC && Integer.valueOf(50).equals(e.value())));
-        assertTrue("CREATE should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_GC && Integer.valueOf(50).equals(e.value())),
+                "GC should survive");
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())),
+                "CREATE should survive");
     }
 
     /**
@@ -747,9 +749,9 @@ public class RecordingEncoderTest {
         // The first REMOVE (block 0) must survive — it removes the pre-suspension object.
         // Since first-REMOVE(0) < first-CREATE(1), cancellation does NOT apply.
         // All blocks survive — safe behavior.
-        assertTrue("First REMOVE must survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(50).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_REMOVE && Integer.valueOf(50).equals(e.value())),
+                "First REMOVE must survive");
     }
 
     /**
@@ -775,7 +777,7 @@ public class RecordingEncoderTest {
             long count = cap.captured.stream()
                     .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE && Integer.valueOf(o).equals(e.value()))
                     .count();
-            assertEquals("Object " + obj + " should have exactly 1 merged update", 1, count);
+            assertEquals(1, count, "Object " + obj + " should have exactly 1 merged update");
         }
 
         // Each object should have the "b" value (last wins)
@@ -788,14 +790,14 @@ public class RecordingEncoderTest {
                     for (int j = i + 1; j < cap.captured.size(); j++) {
                         if (cap.captured.get(j).model() == ServerToClientModel.END) break;
                         if (cap.captured.get(j).model() == ServerToClientModel.HTML) {
-                            assertEquals("Object " + o + " should have last value",
-                                    "val-" + o + "-b", cap.captured.get(j).value());
+                            assertEquals("val-" + o + "-b",
+                                    cap.captured.get(j).value(), "Object " + o + " should have last value");
                             found = true;
                         }
                     }
                 }
             }
-            assertTrue("Object " + obj + " HTML should be found", found);
+            assertTrue(found, "Object " + obj + " HTML should be found");
         }
     }
 
@@ -820,10 +822,10 @@ public class RecordingEncoderTest {
         final long elapsed = System.currentTimeMillis() - start;
 
         // 100 objects × 100 updates → should compact to 100 blocks (one per object)
-        assertTrue("Compaction should reduce size significantly (before=" + sizeBefore
-                + ", after=" + rec.size() + ")", rec.size() < sizeBefore / 5);
-        assertTrue("Compaction of 10K blocks should complete in < 2s, took " + elapsed + "ms",
-                elapsed < 2000);
+        assertTrue(rec.size() < sizeBefore / 5, "Compaction should reduce size significantly (before=" + sizeBefore
+                + ", after=" + rec.size() + ")");
+        assertTrue(elapsed < 2000,
+                "Compaction of 10K blocks should complete in < 2s, took " + elapsed + "ms");
     }
 
     /**
@@ -848,10 +850,10 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("TYPE_ADD_HANDLER should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_ADD_HANDLER));
-        assertTrue("TYPE_REMOVE_HANDLER should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_REMOVE_HANDLER));
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_ADD_HANDLER),
+                "TYPE_ADD_HANDLER should survive");
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_REMOVE_HANDLER),
+                "TYPE_REMOVE_HANDLER should survive");
     }
 
     // ====================================================================
@@ -885,13 +887,13 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap2 = new CapturingEncoder();
         rec.replayTo(cap2);
 
-        assertEquals("Double compact should produce same size", sizeAfterFirst, sizeAfterSecond);
-        assertEquals("Double compact should produce same entries", cap1.captured.size(), cap2.captured.size());
+        assertEquals(sizeAfterFirst, sizeAfterSecond, "Double compact should produce same size");
+        assertEquals(cap1.captured.size(), cap2.captured.size(), "Double compact should produce same entries");
         for (int i = 0; i < cap1.captured.size(); i++) {
-            assertEquals("Entry " + i + " model should match",
-                    cap1.captured.get(i).model(), cap2.captured.get(i).model());
-            assertEquals("Entry " + i + " value should match",
-                    cap1.captured.get(i).value(), cap2.captured.get(i).value());
+            assertEquals(cap1.captured.get(i).model(),
+                    cap2.captured.get(i).model(), "Entry " + i + " model should match");
+            assertEquals(cap1.captured.get(i).value(),
+                    cap2.captured.get(i).value(), "Entry " + i + " value should match");
         }
     }
 
@@ -921,7 +923,7 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("Should have pre-overflow entries", cap.captured.size() >= 3);
+        assertTrue(cap.captured.size() >= 3, "Should have pre-overflow entries");
         assertEquals(ServerToClientModel.HTML, cap.captured.get(0).model());
         assertEquals("before1", cap.captured.get(0).value());
         assertEquals(ServerToClientModel.TEXT, cap.captured.get(1).model());
@@ -948,8 +950,8 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // The empty block should survive (type=OTHER, objectId=-1)
-        assertTrue("Normal update should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_UPDATE));
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.TYPE_UPDATE),
+                "Normal update should survive");
     }
 
     /**
@@ -987,8 +989,8 @@ public class RecordingEncoderTest {
         long updateCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE).count();
         // Document actual behavior: merged into 1 block
-        assertEquals("Consecutive updates on same objectID are merged (even with different FRAME_ID)",
-                1, updateCount);
+        assertEquals(1,
+                updateCount, "Consecutive updates on same objectID are merged (even with different FRAME_ID)");
     }
 
     /**
@@ -1023,17 +1025,17 @@ public class RecordingEncoderTest {
         // All 1000 objects should be cancelled
         for (int i = 1000; i < 2000; i++) {
             final int objId = i;
-            assertFalse("Object " + objId + " should be cancelled",
-                    cap.captured.stream().anyMatch(e ->
-                            e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(objId).equals(e.value())));
+            assertFalse(cap.captured.stream().anyMatch(e ->
+                            e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(objId).equals(e.value())),
+                    "Object " + objId + " should be cancelled");
         }
 
         // Survivor should remain
-        assertTrue("Survivor should remain",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_UPDATE && Integer.valueOf(1).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_UPDATE && Integer.valueOf(1).equals(e.value())),
+                "Survivor should remain");
 
-        assertTrue("Mass cancellation should complete in < 2s, took " + elapsed + "ms", elapsed < 2000);
+        assertTrue(elapsed < 2000, "Mass cancellation should complete in < 2s, took " + elapsed + "ms");
     }
 
     /**
@@ -1064,7 +1066,7 @@ public class RecordingEncoderTest {
         // Consecutive updates on same objectID → merged
         long updateCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE).count();
-        assertEquals("Should merge consecutive updates on same objectID", 1, updateCount);
+        assertEquals(1, updateCount, "Should merge consecutive updates on same objectID");
 
         // Last value wins
         assertEquals("win1", cap.captured.stream()
@@ -1090,10 +1092,10 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertTrue("DESTROY_CONTEXT block should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.DESTROY_CONTEXT));
-        assertTrue("Update with null HTML should survive",
-                cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.HTML && e.value() == null));
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.DESTROY_CONTEXT),
+                "DESTROY_CONTEXT block should survive");
+        assertTrue(cap.captured.stream().anyMatch(e -> e.model() == ServerToClientModel.HTML && e.value() == null),
+                "Update with null HTML should survive");
     }
 
     /**
@@ -1112,7 +1114,7 @@ public class RecordingEncoderTest {
         rec.clear();
         assertEquals(0, rec.size());
         // Overflow flag is NOT reset by clear — once overflowed, always overflowed
-        assertTrue("Overflow flag should persist after clear", rec.isOverflowed());
+        assertTrue(rec.isOverflowed(), "Overflow flag should persist after clear");
     }
 
     /**
@@ -1134,17 +1136,17 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // 100 cancelled (CREATE+REMOVE)
-        assertFalse("Object 100 should be cancelled",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(100).equals(e.value())));
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(100).equals(e.value())),
+                "Object 100 should be cancelled");
 
         // 101 survives (CREATE + ADD, no REMOVE)
-        assertTrue("Object 101 CREATE should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(101).equals(e.value())));
-        assertTrue("Object 101 ADD should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_ADD && Integer.valueOf(101).equals(e.value())));
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(101).equals(e.value())),
+                "Object 101 CREATE should survive");
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_ADD && Integer.valueOf(101).equals(e.value())),
+                "Object 101 ADD should survive");
     }
 
     // ====================================================================
@@ -1178,12 +1180,12 @@ public class RecordingEncoderTest {
         rec.replayTo(cap);
 
         // All blocks for object 50 should be eliminated (including ADD_HANDLER)
-        assertFalse("ADD_HANDLER on cancelled object should be eliminated",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_ADD_HANDLER && Integer.valueOf(50).equals(e.value())));
-        assertFalse("CREATE on cancelled object should be eliminated",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())));
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_ADD_HANDLER && Integer.valueOf(50).equals(e.value())),
+                "ADD_HANDLER on cancelled object should be eliminated");
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value())),
+                "CREATE on cancelled object should be eliminated");
     }
 
     /**
@@ -1213,15 +1215,15 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        assertFalse("Object 60 (CREATE+GC) should be cancelled",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(60).equals(e.value())));
-        assertFalse("Object 70 (CREATE+REMOVE) should be cancelled",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(70).equals(e.value())));
-        assertTrue("Object 80 (CREATE only) should survive",
-                cap.captured.stream().anyMatch(e ->
-                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(80).equals(e.value())));
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(60).equals(e.value())),
+                "Object 60 (CREATE+GC) should be cancelled");
+        assertFalse(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(70).equals(e.value())),
+                "Object 70 (CREATE+REMOVE) should be cancelled");
+        assertTrue(cap.captured.stream().anyMatch(e ->
+                        e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(80).equals(e.value())),
+                "Object 80 (CREATE only) should survive");
     }
 
     /**
@@ -1245,11 +1247,11 @@ public class RecordingEncoderTest {
         // After merge: HTML=null (last value wins)
         long htmlCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.HTML).count();
-        assertEquals("Should have exactly one HTML entry after merge", 1, htmlCount);
-        assertNull("HTML value should be null (last-write-wins)",
-                cap.captured.stream()
+        assertEquals(1, htmlCount, "Should have exactly one HTML entry after merge");
+        assertNull(cap.captured.stream()
                         .filter(e -> e.model() == ServerToClientModel.HTML)
-                        .findFirst().orElseThrow().value());
+                        .findFirst().orElseThrow().value(),
+                "HTML value should be null (last-write-wins)");
     }
 
     /**
@@ -1262,14 +1264,14 @@ public class RecordingEncoderTest {
 
         final int sizeBefore = rec.size();
         rec.compact();
-        assertEquals("Single block should not change size", sizeBefore, rec.size());
+        assertEquals(sizeBefore, rec.size(), "Single block should not change size");
 
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
-        assertEquals("HTML should be 'only'", "only",
-                cap.captured.stream()
+        assertEquals("only", cap.captured.stream()
                         .filter(e -> e.model() == ServerToClientModel.HTML)
-                        .findFirst().orElseThrow().value());
+                        .findFirst().orElseThrow().value(),
+                "HTML should be 'only'");
     }
 
     /**
@@ -1286,7 +1288,7 @@ public class RecordingEncoderTest {
         final int sizeBefore = rec.size();
         rec.compact();
         // No merging possible — size should be the same
-        assertEquals("Only structural blocks — no compaction", sizeBefore, rec.size());
+        assertEquals(sizeBefore, rec.size(), "Only structural blocks — no compaction");
     }
 
     /**
@@ -1310,7 +1312,7 @@ public class RecordingEncoderTest {
         // Pure property updates of different objects commute: one block per object, last value wins
         long updateCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE).count();
-        assertEquals("one merged block per object", 2, updateCount);
+        assertEquals(2, updateCount, "one merged block per object");
         assertEquals(List.of("a2", "b2"), cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.HTML).map(RecordingEncoder.Entry::value).toList());
     }
@@ -1335,7 +1337,7 @@ public class RecordingEncoderTest {
         // Recorder should be in overflow state
         assertTrue(rec.isOverflowed());
         // Entries recorded before overflow should still be accessible
-        assertTrue("Should have some entries", rec.size() > 0);
+        assertTrue(rec.size() > 0, "Should have some entries");
     }
 
     // ====================================================================
@@ -1360,7 +1362,7 @@ public class RecordingEncoderTest {
         };
 
         rec.replayTo(target);
-        assertFalse("replayTo should not call beginObject()", beginObjectCalled.get());
+        assertFalse(beginObjectCalled.get(), "replayTo should not call beginObject()");
     }
 
     /**
@@ -1392,13 +1394,13 @@ public class RecordingEncoderTest {
         long windowIdCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.WINDOW_ID)
                 .count();
-        assertEquals("Should have exactly one WINDOW_ID after merge", 1, windowIdCount);
+        assertEquals(1, windowIdCount, "Should have exactly one WINDOW_ID after merge");
 
         int windowId = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.WINDOW_ID)
                 .map(e -> (int) e.value())
                 .findFirst().orElse(-1);
-        assertEquals("Last WINDOW_ID should win in merge", 2, windowId);
+        assertEquals(2, windowId, "Last WINDOW_ID should win in merge");
 
         // HTML should be "second" (last value wins)
         String html = cap.captured.stream()
@@ -1437,8 +1439,8 @@ public class RecordingEncoderTest {
                 .anyMatch(e -> e.model() == ServerToClientModel.TYPE_ADD_HANDLER);
         boolean hasRemoveHandler = cap.captured.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.TYPE_REMOVE_HANDLER);
-        assertTrue("ADD_HANDLER should be preserved", hasAddHandler);
-        assertTrue("REMOVE_HANDLER should be preserved", hasRemoveHandler);
+        assertTrue(hasAddHandler, "ADD_HANDLER should be preserved");
+        assertTrue(hasRemoveHandler, "REMOVE_HANDLER should be preserved");
     }
 
     /**
@@ -1479,7 +1481,7 @@ public class RecordingEncoderTest {
                 .filter(e -> e.model() == ServerToClientModel.HTML)
                 .map(e -> (String) e.value())
                 .findFirst().orElse(null);
-        assertEquals("Last HTML value should win", "no-frame", html);
+        assertEquals("no-frame", html, "Last HTML value should win");
 
         // Only one TYPE_UPDATE block
         long updateCount = cap.captured.stream()
@@ -1503,7 +1505,7 @@ public class RecordingEncoderTest {
 
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
-        assertTrue("Replay after clear should produce no entries", cap.captured.isEmpty());
+        assertTrue(cap.captured.isEmpty(), "Replay after clear should produce no entries");
     }
 
     /**
@@ -1538,9 +1540,9 @@ public class RecordingEncoderTest {
         boolean hasRoundtrip = cap.captured.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.ROUNDTRIP_LATENCY);
 
-        assertTrue("DESTROY_CONTEXT block should be preserved", hasDestroy);
-        assertTrue("UPDATE block should be preserved", hasUpdate);
-        assertTrue("ROUNDTRIP block should be preserved", hasRoundtrip);
+        assertTrue(hasDestroy, "DESTROY_CONTEXT block should be preserved");
+        assertTrue(hasUpdate, "UPDATE block should be preserved");
+        assertTrue(hasRoundtrip, "ROUNDTRIP block should be preserved");
     }
 
     /**
@@ -1571,8 +1573,8 @@ public class RecordingEncoderTest {
         boolean hasCreate = cap.captured.stream()
                 .anyMatch(e -> e.model() == ServerToClientModel.TYPE_CREATE && Integer.valueOf(50).equals(e.value()));
 
-        assertTrue("GC should be preserved (came before CREATE)", hasGC);
-        assertTrue("CREATE should be preserved (came after GC)", hasCreate);
+        assertTrue(hasGC, "GC should be preserved (came before CREATE)");
+        assertTrue(hasCreate, "CREATE should be preserved (came after GC)");
 
         // Verify order: GC before CREATE
         int gcIdx = -1, createIdx = -1;
@@ -1580,7 +1582,7 @@ public class RecordingEncoderTest {
             if (cap.captured.get(i).model() == ServerToClientModel.TYPE_GC) gcIdx = i;
             if (cap.captured.get(i).model() == ServerToClientModel.TYPE_CREATE) createIdx = i;
         }
-        assertTrue("GC should come before CREATE", gcIdx < createIdx);
+        assertTrue(gcIdx < createIdx, "GC should come before CREATE");
     }
 
     /**
@@ -1600,7 +1602,7 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
         // May or may not have entries depending on implementation — just verify no crash
-        assertTrue("Size should be >= 0 after compact", rec.size() >= 0);
+        assertTrue(rec.size() >= 0, "Size should be >= 0 after compact");
     }
 
     /**
@@ -1626,13 +1628,13 @@ public class RecordingEncoderTest {
         rec.replayTo(after);
 
         // Should be identical
-        assertEquals("Compact should be no-op when nothing to merge",
-                before.captured.size(), after.captured.size());
+        assertEquals(before.captured.size(),
+                after.captured.size(), "Compact should be no-op when nothing to merge");
         for (int i = 0; i < before.captured.size(); i++) {
-            assertEquals("Entry " + i + " model should match",
-                    before.captured.get(i).model(), after.captured.get(i).model());
-            assertEquals("Entry " + i + " value should match",
-                    before.captured.get(i).value(), after.captured.get(i).value());
+            assertEquals(before.captured.get(i).model(),
+                    after.captured.get(i).model(), "Entry " + i + " model should match");
+            assertEquals(before.captured.get(i).value(),
+                    after.captured.get(i).value(), "Entry " + i + " value should match");
         }
     }
 
@@ -1671,10 +1673,10 @@ public class RecordingEncoderTest {
 
         // Before clear: should still be alive
         System.gc();
-        assertNotNull("Value should be retained before clear()", ref.get());
+        assertNotNull(ref.get(), "Value should be retained before clear()");
 
         rec.clear();
-        assertTrue("Value should be GC'd after clear()", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Value should be GC'd after clear()");
     }
 
     /**
@@ -1699,12 +1701,12 @@ public class RecordingEncoderTest {
 
         // Before compact: still referenced in entries
         System.gc();
-        assertNotNull("Payload should be retained before compact()", ref.get());
+        assertNotNull(ref.get(), "Payload should be retained before compact()");
 
         rec.compact();
 
         // After compact: create+remove cancelled, entries replaced
-        assertTrue("Cancelled payload should be GC'd after compact()", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Cancelled payload should be GC'd after compact()");
     }
 
     /**
@@ -1725,12 +1727,12 @@ public class RecordingEncoderTest {
 
         // Before compact: old value still in entries
         System.gc();
-        assertNotNull("Old value should be retained before compact()", ref.get());
+        assertNotNull(ref.get(), "Old value should be retained before compact()");
 
         rec.compact();
 
         // After compact: only "newValue" survives
-        assertTrue("Overwritten value should be GC'd after compact()", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Overwritten value should be GC'd after compact()");
     }
 
     /**
@@ -1747,7 +1749,7 @@ public class RecordingEncoderTest {
         }
 
         rec = null;
-        assertTrue("RecordingEncoder should be GC'd when dereferenced", tryCollect(ref));
+        assertTrue(tryCollect(ref), "RecordingEncoder should be GC'd when dereferenced");
     }
 
     /**
@@ -1767,7 +1769,7 @@ public class RecordingEncoderTest {
         assertTrue(overflowed.get());
 
         rec = null;
-        assertTrue("Overflowed encoder should be GC'd when dereferenced", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Overflowed encoder should be GC'd when dereferenced");
     }
 
     /**
@@ -1792,10 +1794,10 @@ public class RecordingEncoderTest {
 
         // Source still holds entries
         System.gc();
-        assertNotNull("Payload should be retained before source clear()", ref.get());
+        assertNotNull(ref.get(), "Payload should be retained before source clear()");
 
         rec.clear();
-        assertTrue("Payload should be GC'd after source clear()", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Payload should be GC'd after source clear()");
     }
 
     /**
@@ -1817,7 +1819,7 @@ public class RecordingEncoderTest {
 
         rec.compact();
         // After first compact, val1 should be released (overwritten)
-        assertTrue("First value should be GC'd after compact", tryCollect(ref1));
+        assertTrue(tryCollect(ref1), "First value should be GC'd after compact");
 
         // Add more data and compact again
         Object val2 = new byte[256 * 1024];
@@ -1827,7 +1829,7 @@ public class RecordingEncoderTest {
 
         recordUpdateBlock(rec, 2, ServerToClientModel.HTML, "newVal2");
         rec.compact();
-        assertTrue("Second value should be GC'd after second compact", tryCollect(ref2));
+        assertTrue(tryCollect(ref2), "Second value should be GC'd after second compact");
     }
 
     /**
@@ -1846,7 +1848,7 @@ public class RecordingEncoderTest {
         assertEquals(1, rec.size() > 0 ? 1 : 0); // at least some entries
 
         rec.clear();
-        assertTrue("Payload should be GC'd after compact+clear", tryCollect(ref));
+        assertTrue(tryCollect(ref), "Payload should be GC'd after compact+clear");
     }
 
     /**
@@ -1880,7 +1882,7 @@ public class RecordingEncoderTest {
             }
             if (collected >= 25) break; // at least half collected
         }
-        assertTrue("At least half of the values should be GC'd, got " + collected, collected >= 25);
+        assertTrue(collected >= 25, "At least half of the values should be GC'd, got " + collected);
     }
 
     /**
@@ -1901,7 +1903,7 @@ public class RecordingEncoderTest {
         for (int i = 0; i < 100; i++) {
             rec.encode(ServerToClientModel.HTML, new byte[1024]);
         }
-        assertEquals("Size should not grow after overflow", sizeAtOverflow, rec.size());
+        assertEquals(sizeAtOverflow, rec.size(), "Size should not grow after overflow");
     }
 
     // ---- Keyed properties, additive writes, commands, on-the-fly compaction ----
@@ -1981,11 +1983,11 @@ public class RecordingEncoderTest {
                 recordStyle(rec, cell, "color", rnd.nextBoolean() ? "green" : "red");
             }
         }
-        assertEquals("compacted on the way: the distinct state fits", 0, overflows.get());
+        assertEquals(0, overflows.get(), "compacted on the way: the distinct state fits");
         assertFalse(rec.isOverflowed());
         rec.compact();
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
-        assertTrue("at most one block per cell", values(cap, ServerToClientModel.TYPE_UPDATE).size() <= 240);
+        assertTrue(values(cap, ServerToClientModel.TYPE_UPDATE).size() <= 240, "at most one block per cell");
     }
 }

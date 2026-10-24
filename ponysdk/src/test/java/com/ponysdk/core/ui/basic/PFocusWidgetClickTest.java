@@ -4,14 +4,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
@@ -26,12 +26,12 @@ public class PFocusWidgetClickTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }
@@ -81,6 +81,6 @@ public class PFocusWidgetClickTest extends PSuite {
         button.removeDomHandler(handler, PClickEvent.TYPE);
         button.onClientData(click());
 
-        assertEquals("removed: not called", 0, calls[0]);
+        assertEquals(0, calls[0], "removed: not called");
     }
 }

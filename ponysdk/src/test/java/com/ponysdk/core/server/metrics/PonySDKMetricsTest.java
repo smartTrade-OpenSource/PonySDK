@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.metrics;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Verifies {@link PonySDKMetrics#utf8Length(String)} matches the real UTF-8 wire size
@@ -48,7 +48,7 @@ public class PonySDKMetricsTest {
     }
 
     private static void check(final String s) {
-        assertEquals("UTF-8 length mismatch for: " + s,
-            s.getBytes(StandardCharsets.UTF_8).length, PonySDKMetrics.utf8Length(s));
+        assertEquals(s.getBytes(StandardCharsets.UTF_8).length,
+            PonySDKMetrics.utf8Length(s), "UTF-8 length mismatch for: " + s);
     }
 }

@@ -18,9 +18,9 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.test.PSuite;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class DefaultDataGridViewTest extends PSuite {
     private DefaultDataGridView<String, String> view;
     private CapturingColumnDefinition column;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         column = new CapturingColumnDefinition();
         view = newView(column);
@@ -339,13 +339,13 @@ public class DefaultDataGridViewTest extends PSuite {
         final LabelColumnDefinition col = new LabelColumnDefinition();
         final DefaultDataGridView<String, String> v = newView(col);
         setDataOn(v, col, "a", "b");
-        Assert.assertNull("no editor before editing", editorOf(col.cells.get(1)));
+        Assertions.assertNull(editorOf(col.cells.get(1)), "no editor before editing");
 
         col.controllers.get(1).setExtendedMode();
 
         final PTextBox editor = editorOf(col.cells.get(1));
-        Assert.assertNotNull("editor shown once editing", editor);
-        Assert.assertEquals("b", editor.getText());
+        Assertions.assertNotNull(editor, "editor shown once editing");
+        Assertions.assertEquals("b", editor.getText());
     }
 
     /** Leaving the extended mode drops the editor: only cells being edited hold one. */
@@ -355,12 +355,12 @@ public class DefaultDataGridViewTest extends PSuite {
         final DefaultDataGridView<String, String> v = newView(col);
         setDataOn(v, col, "a", "b");
         col.controllers.get(0).setExtendedMode();
-        Assert.assertNotNull(editorOf(col.cells.get(0)));
+        Assertions.assertNotNull(editorOf(col.cells.get(0)));
 
         ((ExtendedCellController<String>) col.controllers.get(0)).setPrimaryMode();
 
-        Assert.assertNull(editorOf(col.cells.get(0)));
-        Assert.assertTrue("the label is shown again", col.cells.get(0).asWidget().isVisible());
+        Assertions.assertNull(editorOf(col.cells.get(0)));
+        Assertions.assertTrue(col.cells.get(0).asWidget().isVisible(), "the label is shown again");
     }
 
     /** The PTextBox the editor added to the cell, if any. */
@@ -403,7 +403,7 @@ public class DefaultDataGridViewTest extends PSuite {
         v.addDrawListener(rowCount -> latch.countDown());
         // Send all data in one batch to produce a single draw event
         v.getController().setData(List.of(values));
-        Assert.assertTrue("Timed out waiting for grid draw", latch.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        Assertions.assertTrue(latch.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS), "Timed out waiting for grid draw");
     }
 
     private CellController<String> getCellController(final int rowIndex) {
@@ -412,8 +412,8 @@ public class DefaultDataGridViewTest extends PSuite {
 
     private CellController<String> getCellControllerFrom(final CapturingColumnDefinition col, final int rowIndex) {
         final CellController<String> cc = col.getCellController(rowIndex);
-        Assert.assertNotNull("No CellController for row index " + rowIndex
-                + " — did you call setData() and wait for the draw?", cc);
+        Assertions.assertNotNull(cc, "No CellController for row index " + rowIndex
+                + " — did you call setData() and wait for the draw?");
         return cc;
     }
 
@@ -427,13 +427,13 @@ public class DefaultDataGridViewTest extends PSuite {
 
     private void assertSelectedOn(final DefaultDataGridView<String, String> v, final String... keys) {
         for (final String key : keys) {
-            Assert.assertTrue("Expected '" + key + "' to be selected", v.getController().isSelected(key));
+            Assertions.assertTrue(v.getController().isSelected(key), "Expected '" + key + "' to be selected");
         }
     }
 
     private void assertNotSelectedOn(final DefaultDataGridView<String, String> v, final String... keys) {
         for (final String key : keys) {
-            Assert.assertFalse("Expected '" + key + "' to not be selected", v.getController().isSelected(key));
+            Assertions.assertFalse(v.getController().isSelected(key), "Expected '" + key + "' to not be selected");
         }
     }
 

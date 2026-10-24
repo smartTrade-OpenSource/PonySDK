@@ -4,14 +4,12 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ByteBufferPoolTest {
 
@@ -45,6 +43,6 @@ public class ByteBufferPoolTest {
         final long before = threads.getCurrentThreadAllocatedBytes();
         for (int i = 0; i < 100_000; i++) pool.release(pool.acquire());
         final long allocated = threads.getCurrentThreadAllocatedBytes() - before;
-        assertTrue("allocated " + allocated + " B for 100,000 flushes", allocated < 100_000);
+        assertTrue(allocated < 100_000, "allocated " + allocated + " B for 100,000 flushes");
     }
 }

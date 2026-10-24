@@ -23,18 +23,16 @@
 
 package com.ponysdk.core.writer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -99,12 +97,12 @@ public class UpdateCoalescingTest {
         wire.clear();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         start(true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -229,7 +227,7 @@ public class UpdateCoalescingTest {
             b[0].evalTerminalScript("a()");
             b[0].evalTerminalScript("a()");
         });
-        assertEquals("boolean toggles are not deferred", 2, wire.count("ENABLED="));
+        assertEquals(2, wire.count("ENABLED="), "boolean toggles are not deferred");
         assertEquals(2, wire.count("EVAL=a()"));
     }
 
@@ -243,8 +241,8 @@ public class UpdateCoalescingTest {
                 for (int i = 0; i < cells.length; i++) cells[(i * 7 + round) % cells.length].setText("v" + round + "-" + i);
             }
         });
-        assertEquals("one update per cell", cells.length, wire.blocks.size());
-        for (final List<String> block : wire.blocks) assertTrue(block.get(1), block.get(1).startsWith("TEXT=v19-"));
+        assertEquals(cells.length, wire.blocks.size(), "one update per cell");
+        for (final List<String> block : wire.blocks) assertTrue(block.get(1).startsWith("TEXT=v19-"), block.get(1));
     }
 
     // ---- update runs (protocol 2) ----
@@ -351,7 +349,7 @@ public class UpdateCoalescingTest {
                 l.setStyleProperty("p2", "w" + tx); // overwrite inside a 7-slot chain
                 l.setText("b" + tx);
             });
-            assertEquals("tx " + t, 1, wire.blocks.size());
+            assertEquals(1, wire.blocks.size(), "tx " + t);
             assertEquals(1, wire.count("TEXT="));
             assertEquals(1, wire.count("TEXT=b" + t));
             assertEquals(6, wire.count("PUT_STYLE_KEY="));
@@ -380,7 +378,7 @@ public class UpdateCoalescingTest {
             wire.clear();
         }
         assertTrue(l.hasStyleName("up"));
-        assertFalse("replaced, not accumulated", l.hasStyleName("down"));
+        assertFalse(l.hasStyleName("down"), "replaced, not accumulated");
     }
 
     @Test
@@ -406,7 +404,7 @@ public class UpdateCoalescingTest {
         });
         assertEquals(1, wire.count("STYLE_NAME=main"));
         assertEquals(1, wire.count("ADD_STYLE_NAME=second"));
-        assertEquals("the earlier name is replaced", 0, wire.count("ADD_STYLE_NAME=extra"));
+        assertEquals(0, wire.count("ADD_STYLE_NAME=extra"), "the earlier name is replaced");
     }
 
     @Test
@@ -420,9 +418,9 @@ public class UpdateCoalescingTest {
                 l.addStyleName("up");
             }
         });
-        assertEquals("one block: class changes no longer cut the run", 1, wire.blocks.size());
+        assertEquals(1, wire.blocks.size(), "one block: class changes no longer cut the run");
         assertEquals(4, wire.count("ADD_STYLE_NAME=up"));
-        assertEquals("never added: nothing to remove", 0, wire.count("REMOVE_STYLE_NAME=down"));
+        assertEquals(0, wire.count("REMOVE_STYLE_NAME=down"), "never added: nothing to remove");
     }
 
     @Test
@@ -477,9 +475,9 @@ public class UpdateCoalescingTest {
                     l.setText("b" + r);
                 }
             });
-            assertEquals("round " + r, 5, wire.count("TEXT="));
-            assertEquals("round " + r, 5, wire.count("TEXT=b" + r));
-            assertEquals("round " + r, 5, wire.count("PUT_STYLE_KEY="));
+            assertEquals(5, wire.count("TEXT="), "round " + r);
+            assertEquals(5, wire.count("TEXT=b" + r), "round " + r);
+            assertEquals(5, wire.count("PUT_STYLE_KEY="), "round " + r);
         }
     }
 }

@@ -23,16 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertSame;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -80,8 +78,8 @@ public class StringDictionaryTest {
         final long first = dict.internOrGet("hello");
         final long second = dict.internOrGet("hello");
 
-        assertFalse("first occurrence is new", InternResult.isExisting(first));
-        assertTrue("second occurrence is existing", InternResult.isExisting(second));
+        assertFalse(InternResult.isExisting(first), "first occurrence is new");
+        assertTrue(InternResult.isExisting(second), "second occurrence is existing");
         assertEquals(InternResult.id(first), InternResult.id(second));
     }
 
@@ -107,7 +105,7 @@ public class StringDictionaryTest {
         assertTrue(dict.isFull());
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionRemovesLeastFrequentlyUsedEntry() {
         final StringDictionary dict = new StringDictionary(2, 1, 32);
         // "a" used 3 times, "b" once → "b" is the LFU
@@ -119,14 +117,14 @@ public class StringDictionaryTest {
         // Dictionary full → interning "c" must evict the LFU ("b"), reusing its id
         final long cResult = dict.internOrGet("c");
 
-        assertEquals("the frequent entry survives", 0, dict.getId("a"));
-        assertEquals("the LFU entry was evicted", StringDictionary.NOT_INTERNED, dict.getId("b"));
-        assertEquals("evicted id is reused", InternResult.id(bResult), InternResult.id(cResult));
+        assertEquals(0, dict.getId("a"), "the frequent entry survives");
+        assertEquals(StringDictionary.NOT_INTERNED, dict.getId("b"), "the LFU entry was evicted");
+        assertEquals(InternResult.id(bResult), InternResult.id(cResult), "evicted id is reused");
         assertEquals("c", dict.getString(InternResult.id(cResult)));
         assertEquals(2, dict.size());
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionBudgetCapsEvictionsPerFlushCycle() {
         final StringDictionary dict = new StringDictionary(1, 1, 1); // 1 eviction per flush
         dict.internOrGet("a");                 // fills the single slot
@@ -153,7 +151,7 @@ public class StringDictionaryTest {
         dict.intern("alpha"); // reference
         dict.intern("beta1"); // added
 
-        assertEquals("2 references out of 4 uses", 50, dict.getSessionHitRate());
+        assertEquals(50, dict.getSessionHitRate(), "2 references out of 4 uses");
     }
 
     @Test
@@ -172,7 +170,7 @@ public class StringDictionaryTest {
         assertEquals("beta", dict.getString(1));
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void preSeededEntriesAreNeverEvictedEvenWhenUsed() {
         // Regression: a full dictionary whose lowest-frequency bucket holds only pre-seeded
         // ids must NOT loop forever in evictLFU — it must refuse to evict and return NOT_INTERNED.
@@ -216,7 +214,7 @@ public class StringDictionaryTest {
 
     // ---- LFU scan (int-array, rotating cursor) ----
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionPicksTheColdestEntryWhateverItsPosition() {
         final StringDictionary dict = new StringDictionary(4, 1, 32);
         // ids a=0 b=1 c=2 d=3; counts a=3, b=3, c=2 (coldest, in the middle), d=3
@@ -232,14 +230,14 @@ public class StringDictionaryTest {
         assertEquals("c", dict.getString(cId));
         final long e = dict.internOrGet("e");
 
-        assertEquals("the coldest entry's id is recycled", cId, InternResult.id(e));
+        assertEquals(cId, InternResult.id(e), "the coldest entry's id is recycled");
         assertEquals(StringDictionary.NOT_INTERNED, dict.getId("c"));
         for (final String s : new String[] { "a", "b", "d" }) {
-            assertNotEquals(s + " survives", StringDictionary.NOT_INTERNED, dict.getId(s));
+            assertNotEquals(StringDictionary.NOT_INTERNED, dict.getId(s), s + " survives");
         }
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionRotatesAmongEquallyColdEntries() {
         // All entries used once: successive evictions must not keep recycling the same id
         final StringDictionary dict = new StringDictionary(3, 1, 32);
@@ -252,13 +250,13 @@ public class StringDictionaryTest {
         dict.internOrGet("x");
         final int second = InternResult.id(dict.internOrGet("y"));
 
-        assertNotEquals("the cursor advances after an eviction", first, second);
+        assertNotEquals(first, second, "the cursor advances after an eviction");
         assertEquals("x", dict.getString(first));
         assertEquals("y", dict.getString(second));
         assertEquals(3, dict.size());
     }
 
-    @Test(timeout = 5_000)
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionSkipsPreSeededEntriesButEvictsRegularOnes() {
         final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
         Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("seed0", "seed1"));
@@ -269,12 +267,12 @@ public class StringDictionaryTest {
         // Pre-seeded entries are never used here (count 0, colder than "regular") yet must not be evicted
         final int next = InternResult.id(dict.internOrGet("next"));
 
-        assertEquals("only the regular entry is evictable", regular, next);
+        assertEquals(regular, next, "only the regular entry is evictable");
         assertEquals(0, dict.intern("seed0"));
         assertEquals(1, dict.intern("seed1"));
     }
 
-    @Test(timeout = 10_000)
+    @Test @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void sustainedChurnKeepsMappingsConsistent() {
         // Full dictionary + steady stream of new strings: the forward and reverse maps must stay in sync
         final StringDictionary dict = new StringDictionary(64, 1, 1_000_000);
@@ -304,7 +302,7 @@ public class StringDictionaryTest {
         assertEquals(StringDictionary.NOT_INTERNED, dict.getId("payload"));
         // next use is a DICTIONARY_ADD again, with the same id
         final long again = dict.internOrGet("payload");
-        assertFalse("must be re-announced", InternResult.isExisting(again));
+        assertFalse(InternResult.isExisting(again), "must be re-announced");
         assertEquals(InternResult.id(first), InternResult.id(again));
         // ...and only once
         assertTrue(InternResult.isExisting(dict.internOrGet("payload")));
@@ -330,7 +328,7 @@ public class StringDictionaryTest {
         final StringDictionary d = new StringDictionary(64, 4);
         d.setAdmitOnSecondUse(true);
         assertEquals(StringDictionary.InternResult.NOT_FOUND, d.internOrGet("unique tooltip"));
-        assertEquals("nothing retained for a single use", 0, d.size());
+        assertEquals(0, d.size(), "nothing retained for a single use");
         final long second = d.internOrGet("unique tooltip");
         assertFalse(StringDictionary.InternResult.isExisting(second)); // DICTIONARY_ADD now
         assertTrue(StringDictionary.InternResult.isExisting(d.internOrGet("unique tooltip")));
@@ -370,6 +368,6 @@ public class StringDictionaryTest {
             for (int i = 0; i < 300; i++) d.internOrGet("price " + i);
         }
         for (int i = 0; i < 300; i++) if (d.getId("price " + i) != StringDictionary.NOT_INTERNED) admitted++;
-        assertTrue("repeated values admitted: " + admitted, admitted > 250);
+        assertTrue(admitted > 250, "repeated values admitted: " + admitted);
     }
 }

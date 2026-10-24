@@ -4,12 +4,7 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.http.HttpSession;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.servlet.SessionManager;
@@ -40,7 +35,7 @@ public class SessionAdminTest {
     /** Two tabs of one HTTP session, and a tab of another user. */
     private UIContext tab1, tab2, otherUser;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         config = new ApplicationConfiguration();
         config.setReconnectionTimeoutMs(5000);
@@ -52,7 +47,7 @@ public class SessionAdminTest {
         otherUser = context(application("other"));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         applications.forEach(SessionManager.get()::unregisterApplication);
         UIContext.remove();

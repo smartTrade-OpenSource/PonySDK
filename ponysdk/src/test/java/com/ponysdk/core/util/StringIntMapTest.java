@@ -23,16 +23,13 @@
 
 package com.ponysdk.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StringIntMapTest {
 
@@ -69,7 +66,7 @@ public class StringIntMapTest {
             for (int i = 0; i < keys.length; i++) m.put(keys[i], i);
             m.remove(keys[removed]);
             for (int i = 0; i < keys.length; i++) {
-                assertEquals("removed=" + removed + " key=" + keys[i], i == removed ? StringIntMap.MISSING : i, m.get(keys[i]));
+                assertEquals(i == removed ? StringIntMap.MISSING : i, m.get(keys[i]), "removed=" + removed + " key=" + keys[i]);
             }
         }
     }
@@ -132,8 +129,9 @@ public class StringIntMapTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void packedModeRejectsAValueAboveItsBound() {
-        new StringIntMap(4, 255).put("x", 1 << 20);
+        assertThrows(IllegalArgumentException.class, () ->
+            new StringIntMap(4, 255).put("x", 1 << 20));
     }
 }

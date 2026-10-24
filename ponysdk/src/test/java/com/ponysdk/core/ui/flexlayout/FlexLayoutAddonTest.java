@@ -23,15 +23,13 @@
 
 package com.ponysdk.core.ui.flexlayout;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 
-import org.junit.Test;
-
 import com.ponysdk.core.ui.basic.PAddOn;
+
+import org.junit.jupiter.api.Test;
 import com.ponysdk.test.PSuite;
 
 /**
@@ -56,11 +54,11 @@ public class FlexLayoutAddonTest extends PSuite {
         final Field binaryArgs = PAddOn.class.getDeclaredField("creationArgs");
         binaryArgs.setAccessible(true);
 
-        assertNull("the legacy JSON creation form must not be used", jsonArgs.get(addon));
+        assertNull(jsonArgs.get(addon), "the legacy JSON creation form must not be used");
 
         final Object[] creationArgs = (Object[]) binaryArgs.get(addon);
-        assertNotNull("creation args must be sent as a binary typed array", creationArgs);
-        assertArrayEquals("binary creation args must be [model, theme, borders]",
-            new Object[] { model, theme, null }, creationArgs);
+        assertNotNull(creationArgs, "creation args must be sent as a binary typed array");
+        assertArrayEquals(new Object[] { model, theme, null },
+            creationArgs, "binary creation args must be [model, theme, borders]");
     }
 }

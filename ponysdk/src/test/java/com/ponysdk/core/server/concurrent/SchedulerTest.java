@@ -24,9 +24,7 @@
 package com.ponysdk.core.server.concurrent;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +33,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link Scheduler} exercising the <strong>real</strong> {@code
@@ -52,7 +50,7 @@ public class SchedulerTest {
 
     private final Scheduler scheduler = new Scheduler(4);
 
-    @After
+    @AfterEach
     public void tearDown() throws InterruptedException {
         scheduler.shutdown();
         scheduler.awaitTermination(TIMEOUT_S * 1000);
@@ -65,7 +63,7 @@ public class SchedulerTest {
 
         ctx.execute(latch::countDown);
 
-        assertTrue("submitted task must run on the scheduler pool", latch.await(TIMEOUT_S, SECONDS));
+        assertTrue(latch.await(TIMEOUT_S, SECONDS), "submitted task must run on the scheduler pool");
     }
 
     @Test
@@ -86,7 +84,7 @@ public class SchedulerTest {
         assertTrue(latch.await(TIMEOUT_S, SECONDS));
         final List<Integer> expected = new ArrayList<>();
         for (int i = 0; i < n; i++) expected.add(i);
-        assertEquals("tasks of a single context must run in strict FIFO order", expected, order);
+        assertEquals(expected, order, "tasks of a single context must run in strict FIFO order");
     }
 
     @Test
@@ -96,7 +94,7 @@ public class SchedulerTest {
 
         ctx.executeAndWait(() -> ran.set(true));
 
-        assertTrue("executeAndWait must return only after the task has executed", ran.get());
+        assertTrue(ran.get(), "executeAndWait must return only after the task has executed");
     }
 
     @Test
@@ -106,7 +104,7 @@ public class SchedulerTest {
 
         ctx.executeLater(30, latch::countDown);
 
-        assertTrue("delayed task must eventually run", latch.await(TIMEOUT_S, SECONDS));
+        assertTrue(latch.await(TIMEOUT_S, SECONDS), "delayed task must eventually run");
     }
 
     @Test
@@ -118,7 +116,7 @@ public class SchedulerTest {
         handler.cancel(false); // cancel well before the 1s delay elapses
 
         Thread.sleep(300);
-        assertFalse("a cancelled delayed task must not run", ran.get());
+        assertFalse(ran.get(), "a cancelled delayed task must not run");
     }
 
     @Test
@@ -131,13 +129,13 @@ public class SchedulerTest {
         // Wait until it has ticked several times.
         final long deadline = System.nanoTime() + SECONDS.toNanos(TIMEOUT_S);
         while (count.get() < 3 && System.nanoTime() < deadline) Thread.sleep(10);
-        assertTrue("periodic task must run repeatedly", count.get() >= 3);
+        assertTrue(count.get() >= 3, "periodic task must run repeatedly");
 
         handler.cancel(false);
         Thread.sleep(100); // let any in-flight tick settle
         final int afterCancel = count.get();
         Thread.sleep(150);
-        assertEquals("cancelled periodic task must stop ticking", afterCancel, count.get());
+        assertEquals(afterCancel, count.get(), "cancelled periodic task must stop ticking");
     }
 
     @Test
@@ -155,13 +153,13 @@ public class SchedulerTest {
         Thread.sleep(100);
         final int afterDestroy = count.get();
         Thread.sleep(150);
-        assertEquals("destroying the context must cancel its periodic task", afterDestroy, count.get());
+        assertEquals(afterDestroy, count.get(), "destroying the context must cancel its periodic task");
     }
 
     @Test
     public void testShutdownThenAwaitTerminationReturnsTrue() throws InterruptedException {
         scheduler.createContext("ctx").execute(() -> {});
         scheduler.shutdown();
-        assertTrue("scheduler must terminate after shutdown", scheduler.awaitTermination(TIMEOUT_S * 1000));
+        assertTrue(scheduler.awaitTermination(TIMEOUT_S * 1000), "scheduler must terminate after shutdown");
     }
 }

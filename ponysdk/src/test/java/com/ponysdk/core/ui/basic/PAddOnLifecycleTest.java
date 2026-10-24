@@ -4,14 +4,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -32,7 +32,7 @@ public class PAddOnLifecycleTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -54,6 +54,6 @@ public class PAddOnLifecycleTest {
             ref[0] = new WeakReference<>(addon);
         });
 
-        assertTrue("collectable once destroyed and no longer referenced", WidgetLifecycleLeakTest.collected(ref[0]));
+        assertTrue(WidgetLifecycleLeakTest.collected(ref[0]), "collectable once destroyed and no longer referenced");
     }
 }

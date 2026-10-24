@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DateConverterTest {
 
@@ -51,7 +51,7 @@ public class DateConverterTest {
         int i = 0;
         for (final Long[] part : encoded) {
             for (final Long v : part) {
-                assertEquals("Index: " + i, v, timestamps.get(i++));
+                assertEquals(v, timestamps.get(i++), "Index: " + i);
             }
         }
         assertNull(DateConverter.encode((List<Date>) null));

@@ -23,11 +23,7 @@
 
 package com.ponysdk.impl.main;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -37,8 +33,9 @@ import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee11.servlet.ErrorHandler;
 import org.eclipse.jetty.server.Handler;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.aayushatharva.brotli4j.Brotli4jLoader;
@@ -97,7 +94,7 @@ public class PonySDKServerTest {
     public void testWebSocketDeflaterPoolUsesTheConfiguredLevel() throws Exception {
         final Object pool = webApp(new PonySDKServer()).getAttribute(PonySDKServer.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE);
         assertTrue(pool instanceof org.eclipse.jetty.util.compression.DeflaterPool);
-        org.junit.Assert.assertEquals("default level", 3, deflateLevelOf(pool));
+        Assertions.assertEquals(3, deflateLevelOf(pool), "default level");
     }
 
     @Test
@@ -111,8 +108,8 @@ public class PonySDKServerTest {
                 Mockito.mock(com.ponysdk.core.server.application.ApplicationManager.class);
         Mockito.when(manager.getConfiguration()).thenReturn(configuration);
         server.setApplicationManager(manager);
-        org.junit.Assert.assertNull(server.createWebApp().getAttribute(PonySDKServer.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE));
-        org.junit.Assert.assertThrows(IllegalArgumentException.class, () -> configuration.setWsDeflateLevel(10));
+        Assertions.assertNull(server.createWebApp().getAttribute(PonySDKServer.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> configuration.setWsDeflateLevel(10));
     }
 
     @Test
@@ -120,7 +117,7 @@ public class PonySDKServerTest {
         final PonySDKServer server = new PonySDKServer();
         assertTrue(server.isSessionCookieSecure());
         final var cookie = webApp(server).getSessionHandler().getSessionCookieConfig();
-        assertTrue("Secure by default (also behind a TLS-terminating proxy)", cookie.isSecure());
+        assertTrue(cookie.isSecure(), "Secure by default (also behind a TLS-terminating proxy)");
         assertTrue(cookie.isHttpOnly());
     }
 
@@ -130,7 +127,7 @@ public class PonySDKServerTest {
         server.setSessionCookieSecure(false);
         final var cookie = webApp(server).getSessionHandler().getSessionCookieConfig();
         assertFalse(cookie.isSecure());
-        assertTrue("HttpOnly is kept", cookie.isHttpOnly());
+        assertTrue(cookie.isHttpOnly(), "HttpOnly is kept");
     }
 
     @Test
@@ -139,38 +136,38 @@ public class PonySDKServerTest {
 
         final Handler handler = server.mainHandler();
 
-        assertTrue("main handler must be a Jetty 12.1 CompressionHandler", handler instanceof CompressionHandler);
+        assertTrue(handler instanceof CompressionHandler, "main handler must be a Jetty 12.1 CompressionHandler");
         final CompressionHandler compression = (CompressionHandler) handler;
-        assertSame("compression handler must wrap the application handler", server.appHandler, compression.getHandler());
+        assertSame(server.appHandler, compression.getHandler(), "compression handler must wrap the application handler");
 
         // An explicit default config must be set (not the empty "compress everything" config):
         // text is compressed, already-compressed content is skipped.
         final CompressionConfig config = compression.getConfiguration("/");
-        assertNotNull("a compression config must be set for '/'", config);
-        assertTrue("text/html must be compressed", config.isCompressMimeTypeSupported("text/html"));
-        assertFalse("already-compressed image/png must NOT be re-compressed",
-                config.isCompressMimeTypeSupported("image/png"));
+        assertNotNull(config, "a compression config must be set for '/'");
+        assertTrue(config.isCompressMimeTypeSupported("text/html"), "text/html must be compressed");
+        assertFalse(config.isCompressMimeTypeSupported("image/png"),
+                "already-compressed image/png must NOT be re-compressed");
 
         // removeCompression returns the registered Compression (non-null) → proves gzip was registered.
         // CompressionHandler keys by the HTTP content-coding token (getEncodingName()).
-        assertNotNull("gzip compression must be registered on the handler",
-                compression.removeCompression(new GzipCompression().getEncodingName()));
+        assertNotNull(compression.removeCompression(new GzipCompression().getEncodingName()),
+                "gzip compression must be registered on the handler");
         // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty picks gzip
-        assertEquals("Brotli preferred when the browser accepts both", List.of("br", "gzip"),
-                config.getCompressPreferredEncodings());
+        assertEquals(List.of("br", "gzip"), config.getCompressPreferredEncodings(),
+                "Brotli preferred when the browser accepts both");
     }
 
     @Test
     public void testCreateMainHandler_registersBrotliWhenNativeAvailable() {
         // Brotli is a progressive enhancement gated on the native lib: only assert it where loadable.
-        Assume.assumeTrue("Brotli native library not available on this platform", Brotli4jLoader.isAvailable());
+        Assumptions.assumeTrue(Brotli4jLoader.isAvailable(), "Brotli native library not available on this platform");
 
         final CompressionHandler compression = (CompressionHandler) new TestServer().mainHandler();
 
         final BrotliCompression brotli = (BrotliCompression) compression.removeCompression(new BrotliCompression().getEncodingName());
-        assertNotNull("Brotli must be registered when its native library is available", brotli);
-        assertEquals("a level that compresses each response in milliseconds, not hundreds",
-                PonySDKServer.BROTLI_LEVEL, brotli.getDefaultEncoderConfig().getCompressionLevel());
+        assertNotNull(brotli, "Brotli must be registered when its native library is available");
+        assertEquals(PonySDKServer.BROTLI_LEVEL,
+                brotli.getDefaultEncoderConfig().getCompressionLevel(), "a level that compresses each response in milliseconds, not hundreds");
     }
 
     @Test
@@ -178,7 +175,7 @@ public class PonySDKServerTest {
         final ErrorHandler errorHandler = new TestServer().errorHandler();
 
         assertNotNull(errorHandler);
-        assertFalse("error handler must not show stack traces", errorHandler.isShowStacks());
-        assertFalse("error handler must not show the message in the title", errorHandler.isShowMessageInTitle());
+        assertFalse(errorHandler.isShowStacks(), "error handler must not show stack traces");
+        assertFalse(errorHandler.isShowMessageInTitle(), "error handler must not show the message in the title");
     }
 }

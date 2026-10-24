@@ -28,20 +28,20 @@ import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.test.PSuite;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ModelWriterTest extends PSuite {
 
     private ModelWriter modelWriter;
     private WebsocketEncoder websocketEncoder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         websocketEncoder = Mockito.mock(WebsocketEncoder.class);
         modelWriter = new ModelWriter(websocketEncoder);

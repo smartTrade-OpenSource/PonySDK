@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.test.PSuite;
@@ -45,12 +45,12 @@ public class PWidgetProtocolTest extends PSuite {
 
     private CapturingModelWriter writer;
 
-    @Before
+    @BeforeEach
     public void captureWrites() {
         writer = CapturingModelWriter.install();
     }
 
-    @After
+    @AfterEach
     public void restoreWriter() {
         writer.uninstall();
     }
@@ -67,7 +67,7 @@ public class PWidgetProtocolTest extends PSuite {
 
         PWindow.getMain().add(button);
 
-        assertEquals("one CREATE, no extra update block", 0, writer.count(ServerToClientModel.TYPE_UPDATE));
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_UPDATE), "one CREATE, no extra update block");
         assertEquals(List.of("Confirm"), writer.valuesAfter(ServerToClientModel.PUT_ATTRIBUTE_KEY, "title"));
         assertEquals(List.of("red"), writer.valuesAfter(ServerToClientModel.PUT_STYLE_KEY, "color"));
         assertEquals(List.of("3"), writer.valuesAfter(ServerToClientModel.PUT_PROPERTY_KEY, "tabIndex"));
@@ -88,7 +88,7 @@ public class PWidgetProtocolTest extends PSuite {
 
         for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.PUT_ATTRIBUTE_KEY,
                 ServerToClientModel.REMOVE_ATTRIBUTE_KEY, ServerToClientModel.PUT_STYLE_KEY, ServerToClientModel.REMOVE_STYLE_KEY }) {
-            assertEquals(m + " must not be sent", 0, writer.count(m));
+            assertEquals(0, writer.count(m), m + " must not be sent");
         }
     }
 

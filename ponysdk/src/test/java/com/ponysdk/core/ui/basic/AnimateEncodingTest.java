@@ -4,7 +4,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.PUnit;
@@ -34,7 +34,7 @@ import com.ponysdk.core.server.websocket.WebsocketEncoder;
  */
 public class AnimateEncodingTest {
 
-    @After
+    @AfterEach
     public void tearDown() {
         UIContext.remove();
     }
@@ -70,7 +70,7 @@ public class AnimateEncodingTest {
             for (final PAnimatedLayout panel : panels) PWindow.getMain().add((PWidget) panel);
         }));
         for (final PAnimatedLayout panel : panels) {
-            assertTrue(panel.getClass().getSimpleName(), ctx.execute(() -> panel.animate(Duration.ofMillis(250))));
+            assertTrue(ctx.execute(() -> panel.animate(Duration.ofMillis(250))), panel.getClass().getSimpleName());
         }
     }
 }

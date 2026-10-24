@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link SharedDictionaryProvider} — disk persistence round-trip, frequency decay,
@@ -50,12 +48,12 @@ public class SharedDictionaryProviderTest {
     private Path tmpDir;
     private final List<SharedDictionaryProvider> providers = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         tmpDir = Files.createTempDirectory("pony-dict-test");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         // Stop the auto-persist schedulers before removing the temp directory.
         for (final SharedDictionaryProvider p : providers) {
@@ -91,11 +89,11 @@ public class SharedDictionaryProviderTest {
         final SharedDictionaryProvider p1 = newProvider(512);
         p1.recordBulkUsage(Map.of("hello", 10L));
         p1.persist();
-        assertTrue("frequent string is pre-seeded after persist", p1.getPreSeedStrings().contains("hello"));
+        assertTrue(p1.getPreSeedStrings().contains("hello"), "frequent string is pre-seeded after persist");
 
         // A fresh provider on the same directory must load the persisted dictionary.
         final SharedDictionaryProvider p2 = newProvider(512);
-        assertTrue("reloaded provider pre-seeds the persisted string", p2.getPreSeedStrings().contains("hello"));
+        assertTrue(p2.getPreSeedStrings().contains("hello"), "reloaded provider pre-seeds the persisted string");
     }
 
     @Test
@@ -130,7 +128,7 @@ public class SharedDictionaryProviderTest {
         p.persist();
 
         final List<String> preSeed = p.getPreSeedStrings();
-        assertEquals("pre-seed list is capped at preSeedSize", 2, preSeed.size());
-        assertEquals("ordered by frequency desc", List.of("a", "b"), preSeed);
+        assertEquals(2, preSeed.size(), "pre-seed list is capped at preSeedSize");
+        assertEquals(List.of("a", "b"), preSeed, "ordered by frequency desc");
     }
 }

@@ -1,17 +1,17 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-
 import com.ponysdk.test.PSuite;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.WidgetType;
 
 public class ElementTest extends PSuite {
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         Element.setElementFactory(new DefaultElementFactory());
     }

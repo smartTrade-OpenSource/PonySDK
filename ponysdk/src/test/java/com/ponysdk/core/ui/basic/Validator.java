@@ -24,8 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.test.PSuite;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
 import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
@@ -36,13 +36,13 @@ public class Validator extends PSuite {
     public void NotEmptyFieldValidator() {
         final StringListBoxFormField formField = new StringListBoxFormField();
         formField.setValidator(new NotEmptyFieldValidator());
-        Assert.assertFalse(formField.isValid().isValid());
+        Assertions.assertFalse(formField.isValid().isValid());
 
         formField.getWidget().addItem("Test");
-        Assert.assertFalse(formField.isValid().isValid());
+        Assertions.assertFalse(formField.isValid().isValid());
 
         formField.getWidget().setSelectedIndex(0);
-        Assert.assertTrue(formField.isValid().isValid());
+        Assertions.assertTrue(formField.isValid().isValid());
     }
 
 }

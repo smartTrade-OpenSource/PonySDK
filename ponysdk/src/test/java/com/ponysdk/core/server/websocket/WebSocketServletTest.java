@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -50,7 +46,7 @@ import jakarta.servlet.http.HttpSession;
 import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServletFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -79,8 +75,8 @@ public class WebSocketServletTest {
     @Test
     public void crossOriginIsRejected() {
         assertFalse(WebSocketServlet.isOriginAllowed("https://evil.example.com", "app.example.com", null));
-        assertFalse("different port is a different origin",
-            WebSocketServlet.isOriginAllowed("https://app.example.com:9999", "app.example.com:8443", null));
+        assertFalse(WebSocketServlet.isOriginAllowed("https://app.example.com:9999", "app.example.com:8443", null),
+            "different port is a different origin");
     }
 
     @Test
@@ -93,8 +89,8 @@ public class WebSocketServletTest {
 
     @Test
     public void malformedOriginOrMissingHostIsRejected() {
-        assertFalse("no scheme → cannot verify", WebSocketServlet.isOriginAllowed("app.example.com", "app.example.com", null));
-        assertFalse("null host → cannot verify", WebSocketServlet.isOriginAllowed("https://app.example.com", null, null));
+        assertFalse(WebSocketServlet.isOriginAllowed("app.example.com", "app.example.com", null), "no scheme → cannot verify");
+        assertFalse(WebSocketServlet.isOriginAllowed("https://app.example.com", null, null), "null host → cannot verify");
     }
 
     // ── configure() / createWebsocket() / configureWithSession() ──
@@ -219,12 +215,12 @@ public class WebSocketServletTest {
     public void protocolVersionIsNegotiatedDownToWhatBothSidesSupport() {
         final com.ponysdk.core.server.application.ApplicationConfiguration config =
                 new com.ponysdk.core.server.application.ApplicationConfiguration();
-        assertEquals("old terminal: no parameter", 1, WebSocketServlet.negotiateProtocolVersion(null, config));
+        assertEquals(1, WebSocketServlet.negotiateProtocolVersion(null, config), "old terminal: no parameter");
         assertEquals(1, WebSocketServlet.negotiateProtocolVersion("garbage", config));
         assertEquals(1, WebSocketServlet.negotiateProtocolVersion("-3", config));
         assertEquals(2, WebSocketServlet.negotiateProtocolVersion("2", config));
-        assertEquals("newer terminal", com.ponysdk.core.model.ProtocolVersion.CURRENT, WebSocketServlet.negotiateProtocolVersion("99", config));
+        assertEquals(com.ponysdk.core.model.ProtocolVersion.CURRENT, WebSocketServlet.negotiateProtocolVersion("99", config), "newer terminal");
         config.setMaxProtocolVersion(1);
-        assertEquals("server kill switch", 1, WebSocketServlet.negotiateProtocolVersion("2", config));
+        assertEquals(1, WebSocketServlet.negotiateProtocolVersion("2", config), "server kill switch");
     }
 }

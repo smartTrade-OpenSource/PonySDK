@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -62,9 +62,9 @@ public class BinaryArrayCodecRoundTripTest {
 
             final Object[] decoded = decodeWithDriver(encodeArrayMessage(input));
 
-            assertEquals("size " + size, size, decoded.length);
+            assertEquals(size, decoded.length, "size " + size);
             for (int i = 0; i < size; i++) {
-                assertEquals("size " + size + " idx " + i, i, ((Number) decoded[i]).intValue());
+                assertEquals(i, ((Number) decoded[i]).intValue(), "size " + size + " idx " + i);
             }
         }
     }
@@ -180,8 +180,8 @@ public class BinaryArrayCodecRoundTripTest {
                     p.encode(ServerToClientModel.END, null);
                 });
                 final List<List<PonyFrame>> messages = decodeAll(wire);
-                assertEquals("length " + length + " dict=" + withDictionary, 1, messages.size());
-                assertEquals("length " + length + " dict=" + withDictionary, value, valueOf(messages.get(0), ServerToClientModel.TEXT));
+                assertEquals(1, messages.size(), "length " + length + " dict=" + withDictionary);
+                assertEquals(value, valueOf(messages.get(0), ServerToClientModel.TEXT), "length " + length + " dict=" + withDictionary);
             }
         }
     }

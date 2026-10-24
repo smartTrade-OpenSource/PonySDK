@@ -4,15 +4,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.ref.WeakReference;
 
-import org.junit.Test;
-
 import com.ponysdk.test.PSuite;
+
+import org.junit.jupiter.api.Test;
 
 /** Objects whose life ended must not stay reachable from longer-lived ones (window, parent, listeners). */
 public class WidgetLifecycleLeakTest extends PSuite {
@@ -51,7 +49,7 @@ public class WidgetLifecycleLeakTest extends PSuite {
 
         PWindow.getMain().add(table);
 
-        assertNotNull("attached with its table", label.getWindow());
+        assertNotNull(label.getWindow(), "attached with its table");
     }
 
     @Test
@@ -67,7 +65,7 @@ public class WidgetLifecycleLeakTest extends PSuite {
         final WeakReference<PObject.InitializeListener> ref = new WeakReference<>(listener);
         listener = null;
 
-        assertTrue("released by the initialized widget", collected(ref));
+        assertTrue(collected(ref), "released by the initialized widget");
         assertNotNull(label.getWindow());
     }
 }

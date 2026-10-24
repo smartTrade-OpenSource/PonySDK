@@ -25,9 +25,10 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PSuite;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class PAnchorTest extends PSuite {
 

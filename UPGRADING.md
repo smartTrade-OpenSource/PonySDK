@@ -28,6 +28,10 @@
 
 The `UIContext` constructors no longer take the upgrade request; `PSuite` builds its context accordingly.
 
+`PSuite` moves from JUnit 4 to JUnit 6 (Jupiter): its setup runs as `@BeforeAll` / `@AfterAll`, and the `ponysdk`
+artifact depends on `junit-jupiter-api` instead of `junit:junit`. Tests that extend `PSuite` run on the JUnit
+Platform (`useJUnitPlatform()` in Gradle).
+
 ## The terminal
 
 The GWT terminal is replaced by a TypeScript one ([ADR-0002](docs/decisions/0002-javascript-terminal.md)). The Java
