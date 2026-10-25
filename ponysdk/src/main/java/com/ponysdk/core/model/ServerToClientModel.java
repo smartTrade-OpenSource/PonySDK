@@ -295,7 +295,10 @@ public enum ServerToClientModel {
 
     // DOM events by name (protocol >= ProtocolVersion.LISTENERS, ADR-0003)
     LISTEN_EVENT(ValueTypeModel.STRING),     // JSON {"name", "fields", "throttle", "debounce", "prevent", "stop", "capture"}
-    UNLISTEN_EVENT(ValueTypeModel.STRING);   // the event's name
+    UNLISTEN_EVENT(ValueTypeModel.STRING),   // the event's name
+
+    // An embedded application's element (ADR-0008): a CustomEvent dispatched on it, [type, detail as JSON or null]
+    DISPATCH_EVENT(ValueTypeModel.ARRAY);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

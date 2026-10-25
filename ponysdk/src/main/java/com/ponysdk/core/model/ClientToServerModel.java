@@ -107,7 +107,11 @@ public enum ClientToServerModel {
 
     // In the answer to the roundtrip probe: ms from the arrival of the probe's message to the answer (ADR-0005).
     // Appended: ClientBinaryReader reads the keys by ordinal
-    TERMINAL_TIME("x");
+    TERMINAL_TIME("x"),
+
+    // An embedded application's element (ADR-0008): its attributes, a JSON object of name to value (null: removed),
+    // all of them in the handshake, the changes in a message
+    HOST_ATTRIBUTES("y");
 
     private final String key;
 
