@@ -1,5 +1,14 @@
 package com.ponysdk.impl.java;
 
+import java.util.Set;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.ResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
@@ -14,6 +23,10 @@ public class ShowcaseMain {
 
     /** Application attribute key to share metrics with UIContexts. */
     public static final String METRICS_KEY = "ponysdk.metrics";
+    /** The portal of the embedding demo: a page of another origin with <pony-app> elements (ADR-0008). */
+    public static final int PORTAL_PORT = 8082;
+
+    private static final Logger log = LoggerFactory.getLogger(ShowcaseMain.class);
 
     public static void main(final String[] args) throws Exception {
         final ApplicationConfiguration configuration = new ApplicationConfiguration();
@@ -28,6 +41,9 @@ public class ShowcaseMain {
         configuration.setApplicationContextName("sample");
         configuration.setSessionTimeout(60);
         configuration.setReconnectionTimeoutMs(10_000); // 10s transparent reconnect window
+        // The pages allowed to embed the showcase: the portal (docs/decisions/0008-embedded-application.md)
+        configuration.setWsAllowedOrigins(Set.of("http://[::1]:" + PORTAL_PORT, "http://localhost:" + PORTAL_PORT,
+            "http://127.0.0.1:" + PORTAL_PORT));
         configuration.setEntryPointClass(UISampleEntryPoint.class);
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
@@ -67,5 +83,21 @@ public class ShowcaseMain {
         server.setUseSSL(false);
         server.setSessionCookieSecure(false); // plain-http dev server (see PonySDKServer)
         server.start();
+        startPortal();
+    }
+
+    /** The portal: static files of another origin, no PonySDK in them but the <pony-app> elements. */
+    private static void startPortal() throws Exception {
+        final Server portal = new Server();
+        final ServerConnector connector = new ServerConnector(portal);
+        connector.setPort(PORTAL_PORT);
+        portal.addConnector(connector);
+        final ResourceHandler files = new ResourceHandler();
+        files.setBaseResource(ResourceFactory.of(portal).newClassLoaderResource("portal/"));
+        files.setWelcomeFiles("index.html");
+        files.setDirAllowed(false);
+        portal.setHandler(files);
+        portal.start();
+        log.info("Embedding demo: http://[::1]:{}/ embeds the showcase from another origin", PORTAL_PORT);
     }
 }

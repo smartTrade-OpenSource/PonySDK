@@ -40,6 +40,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PHost;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
@@ -65,10 +66,17 @@ public class UISampleEntryPoint implements EntryPoint {
             OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
             return;
         }
+        // In a <pony-app> element of another page (docs/decisions/0008-embedded-application.md)
+        final PHost host = PHost.get();
+        if (host != null && EmbeddedTicket.VIEW.equals(host.getAttribute("view"))) {
+            EmbeddedTicket.build(uiContext, host);
+            return;
+        }
 
         // Styles: css/showcase.css (declared in ShowcaseMain)
-        // Favicon: the "P" monogram of the top bar, inline SVG (no extra request)
-        PScript.execute(PWindow.getMain(), "var l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';"
+        // Favicon: the "P" monogram of the top bar, inline SVG (no extra request); an embedded showcase leaves the
+        // host page's
+        if (host == null) PScript.execute(PWindow.getMain(), "var l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';"
             + "l.href='data:image/svg+xml,'+encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">"
             + "<rect width=\"32\" height=\"32\" rx=\"8\" fill=\"#0f172a\"/><text x=\"16\" y=\"22\" font-family=\"Arial\" "
             + "font-size=\"17\" font-weight=\"700\" fill=\"#fff\" text-anchor=\"middle\">P</text></svg>');"
@@ -150,7 +158,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"⋯", "Misc"},
             {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
-            {"</>", "Code"},
+            {"⧉", "Embedding"}, {"</>", "Code"},
             {"▦", "FlexLayout"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -214,7 +222,7 @@ public class UISampleEntryPoint implements EntryPoint {
             activeTab[0] = idx;
             showCrumb.accept(idx);
             uiContext.getHistory().newItem(slugs[idx], false);
-            PScript.execute(PWindow.getMain(), "window.scrollTo(0,0)");
+            if (host == null) PScript.execute(PWindow.getMain(), "window.scrollTo(0,0)"); // embedded: the host's scroll
         };
         // back / forward buttons of the browser
         uiContext.getHistory().addValueChangeHandler(e -> {
@@ -253,7 +261,8 @@ public class UISampleEntryPoint implements EntryPoint {
             case 8 -> CostsPage.build();
             case 9 -> BinaryProtocolPage.build(schedulers);
             case 10 -> ReconnectionPage.build(uiContext, schedulers);
-            case 11 -> CodePage.build(schedulers);
+            case 11 -> EmbeddingPage.build(uiContext, schedulers);
+            case 12 -> CodePage.build(schedulers);
             default -> FlexLayoutPage.build();
         };
     }

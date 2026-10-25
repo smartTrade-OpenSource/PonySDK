@@ -3,9 +3,11 @@
  * One accent colour (indigo), neutral slate greys, hairline borders, numbers in tabular figures.
  * Loaded last, after the framework's style/ponysdk.css and style/flexlayout.css: !important is only used where a
  * widget or the Java code sets the property inline.
+ * In a <pony-app> element of another page (docs/decisions/0008-embedded-application.md) the rules of the page apply
+ * to :host, the element.
  */
 
-:root {
+:root, :host {
     --bg: #ffffff;
     --bg-subtle: #f8fafc;
     --bg-muted: #f1f5f9;
@@ -36,7 +38,7 @@
 
 * { box-sizing: border-box; }
 
-html, body {
+html, body, :host {
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -47,7 +49,7 @@ html, body {
     -webkit-font-smoothing: antialiased;
 }
 
-body, table td, select, button { font-family: var(--sans); font-size: 14px; }
+body, :host, table td, select, button { font-family: var(--sans); font-size: 14px; }
 
 a, a:visited { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -171,21 +173,25 @@ a:hover { text-decoration: underline; }
     border-radius: 50%;
     animation: reco-spin .8s linear infinite;
 }
-body:has(#reconnection[style*="block"]) .pony-header { z-index: 1001; }
-body:has(#reconnection[style*="block"]) .pony-badge {
+body:has(#reconnection[style*="block"]) .pony-header,
+[data-pony-body]:has(#reconnection[style*="block"]) .pony-header { z-index: 1001; }
+body:has(#reconnection[style*="block"]) .pony-badge,
+[data-pony-body]:has(#reconnection[style*="block"]) .pony-badge {
     gap: 0;
     font-size: 0;
     color: var(--warn);
     background: #fffbeb;
     border-color: #fcd34d;
 }
-body:has(#reconnection[style*="block"]) .pony-badge::before {
+body:has(#reconnection[style*="block"]) .pony-badge::before,
+[data-pony-body]:has(#reconnection[style*="block"]) .pony-badge::before {
     margin-right: 6px;
     background: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
     animation: reco-pulse 1.2s ease-in-out infinite;
 }
-body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnecting"; font-size: 12px; }
+body:has(#reconnection[style*="block"]) .pony-badge::after,
+[data-pony-body]:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnecting"; font-size: 12px; }
 
 @media (max-width: 960px) {
     #reconnecting { top: auto; bottom: 24px; } /* the tab bar sits under the top bar */
@@ -197,7 +203,8 @@ body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnect
 @keyframes reco-pulse { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) {
     #reconnection, #reconnecting, #reconnecting::before,
-    body:has(#reconnection[style*="block"]) .pony-badge::before { animation: none; }
+    body:has(#reconnection[style*="block"]) .pony-badge::before,
+    [data-pony-body]:has(#reconnection[style*="block"]) .pony-badge::before { animation: none; }
 }
 
 /* ── Shell: sidebar + content ────────────────────────────────────────────── */
@@ -912,3 +919,55 @@ div.selected-row { background-color: #e0e7ff; }
 .pony-content .fl-demo-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .pony-content .fl-demo-toolbar > .pony-Label, .pony-content .fl-demo-toolbar > .pony-Button { white-space: nowrap; }
 .pony-content .fl-demo-toolbar > .pony-Button, .pony-content .fl-demo-toolbar > .pony-ListBox { height: 30px; padding-top: 0; padding-bottom: 0; }
+
+/* ── Embedded in a <pony-app> element (docs/decisions/0008-embedded-application.md) ──────────────────────────── */
+
+/* The element is the page: the veil covers it, not the host's */
+:host #reconnection { position: absolute; }
+:host .pony-shell { min-height: 0; }
+:host .pony-nav { height: auto; }
+
+/* The ticket of <pony-app view="ticket"> (EmbeddedTicket) */
+.pony-ticket {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    box-shadow: var(--shadow);
+}
+.pony-ticket-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pony-ticket-instrument { font-size: 18px; font-weight: 700; color: var(--text); }
+.pony-ticket-tag { font-size: 12px; color: var(--text-3); }
+.pony-ticket-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+.pony-ticket .pony-ticket-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    color: var(--text-2);
+    cursor: pointer;
+    text-align: left;
+}
+.pony-ticket-side span { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.pony-ticket-side b { font: 600 22px/1.2 var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+.pony-ticket .pony-ticket-sell:hover { border-color: #fca5a5; background: #fef2f2; }
+.pony-ticket .pony-ticket-buy:hover { border-color: #6ee7b7; background: var(--good-soft); }
+.pony-ticket-sell span { color: var(--bad); }
+.pony-ticket-buy span { color: var(--good); }
+.pony-ticket-amount { display: flex; align-items: center; gap: 10px; }
+.pony-ticket-amount .pony-Label { font-size: 13px; color: var(--text-3); }
+.pony-ticket-quantity { flex: 1; min-width: 0; font: 500 14px var(--mono); padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 8px; }
+.pony-ticket-last { display: block; margin-top: 12px; font-size: 13px; color: var(--text-2); }
+.pony-ticket-origin { margin-top: 4px; font-size: 12px; color: var(--text-4); }
+.pony-ticket-dialog { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-lg); }
+.pony-ticket-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* The Embedding page */
+.pony-embedding-live { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: start; margin-bottom: 28px; }
+@media (max-width: 760px) { .pony-embedding-live { grid-template-columns: minmax(0, 1fr); } }
+.pony-embedding-trades { font: 12.5px/1.6 var(--mono); color: var(--text-2); max-height: 180px; overflow-y: auto; }
+.pony-embedding-trade { border-bottom: 1px solid var(--border); padding: 2px 0; }
