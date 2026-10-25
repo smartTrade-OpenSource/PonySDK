@@ -17,3 +17,12 @@ export { BaseObject } from './runtime/object.ts';
 export { Widget } from './runtime/widget.ts';
 export { FocusWidget } from './objects/focus-widget.ts';
 export { POPUP_CLASS } from './objects/popup.ts';
+// The <pony-app> element (docs/decisions/0008-embedded-application.md)
+export { WidgetType } from '#model';
+export { customEventMessage } from './objects/web-component.ts';
+export { registerAddOnFactory } from './runtime/dispatcher.ts';
+export { defineCreator } from './runtime/factory.ts';
+export { BrowserHistory, decode } from './runtime/history.ts';
+export { log } from './runtime/log.ts';
+export { adoptStyles, installStyles } from './runtime/styles.ts';
+export { Terminal } from './terminal.ts';

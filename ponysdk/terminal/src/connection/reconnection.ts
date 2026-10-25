@@ -3,40 +3,28 @@
  */
 
 import { log } from '../runtime/log.ts';
+import type { Mount } from '../runtime/mount.ts';
 
 const RETRY_TIMEOUT = 30_000;
 const RETRY_PERIOD = 2_000;
 
-/** What the page may define to take part (ponysdk.js, BootstrapServlet, the application). */
-interface PageHooks {
-    ponyReconnectMode?: boolean;
-    onPonyReconnected?: () => void;
-    showReconnectionInformation?: () => void;
-}
-
-/** Reloads the page, through ponysdk.js when it is there. */
-export function reload(): void {
-    const doReload = (document as unknown as { doReload?: () => void }).doReload;
-    if (typeof doReload === 'function') doReload();
-    else location.reload();
-}
-
 /**
- * Notices a lost connection and gets it back. The page is told (the
- * element #reconnection, or showReconnectionInformation), then the server is pinged every 2 s. Once it answers: with
- * transparent reconnection (ponyReconnectMode), a new socket resumes the context; else onPonyReconnected runs, or
- * the page reloads.
+ * Notices a lost connection and gets it back. The page or the host is told (Mount.connectionLost, else the element
+ * #reconnection), then the server is pinged every 2 s. Once it answers: with transparent reconnection, a new socket
+ * resumes the context; else the mount decides (Mount.serverBack: a hook, or a reload).
  */
 export class Reconnection {
     private readonly baseURL: () => string;
     private readonly reconnect: () => void;
+    private readonly mount: Mount;
     private errorDetected = false;
     /** A new socket is on its way: its own failure must not start a second cycle. */
     private isReconnecting = false;
 
-    constructor(baseURL: () => string, reconnect: () => void) {
+    constructor(baseURL: () => string, reconnect: () => void, mount: Mount) {
         this.baseURL = baseURL;
         this.reconnect = reconnect;
+        this.mount = mount;
     }
 
     get reconnecting(): boolean {
@@ -47,7 +35,7 @@ export class Reconnection {
     succeeded(): void {
         this.isReconnecting = false;
         this.errorDetected = false;
-        const notice = document.getElementById('reconnection');
+        const notice = this.mount.byId('reconnection');
         if (notice !== null) notice.style.display = 'none';
     }
 
@@ -66,27 +54,17 @@ export class Reconnection {
         if (this.errorDetected || this.isReconnecting) return;
         this.errorDetected = true;
         log.error('Connection to the server lost');
-        const listeners = (document as unknown as { onConnectionLostListeners?: (() => void)[] }).onConnectionLostListeners ?? [];
-        for (const listener of listeners) {
-            try {
-                listener();
-            } catch (e) {
-                log.error('A connection-lost listener failed', e);
-            }
-        }
-        const hooks = window as unknown as PageHooks;
-        if (typeof hooks.showReconnectionInformation === 'function') {
-            hooks.showReconnectionInformation();
-        } else {
-            const notice = document.getElementById('reconnection');
+        if (!this.mount.connectionLost()) {
+            const notice = this.mount.byId('reconnection');
             if (notice !== null) notice.style.display = 'block';
-            const text = document.getElementById('reconnecting');
+            const text = this.mount.byId('reconnecting');
             if (text !== null) text.innerHTML = 'Connection to server lost<br>Reconnecting ...';
         }
         setTimeout(() => this.ping(), RETRY_PERIOD);
     }
 
     private ping(): void {
+        if (this.mount.signal?.aborted === true) return; // the terminal is gone: its element left the page
         const request = new XMLHttpRequest();
         request.open('GET', `${this.baseURL()}?ping=${Date.now()}&retry`);
         request.timeout = RETRY_TIMEOUT;
@@ -100,14 +78,11 @@ export class Reconnection {
 
     private serverReachable(): void {
         this.errorDetected = false;
-        const hooks = window as unknown as PageHooks;
-        if (hooks.ponyReconnectMode === true) {
+        if (this.mount.transparentReconnection) {
             this.isReconnecting = true;
             this.reconnect();
-        } else if (typeof hooks.onPonyReconnected === 'function') {
-            hooks.onPonyReconnected();
         } else {
-            reload();
+            this.mount.serverBack();
         }
     }
 }

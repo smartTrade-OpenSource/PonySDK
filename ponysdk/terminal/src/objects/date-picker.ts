@@ -537,7 +537,7 @@ export class DateBox extends Widget {
         this.popup.style.left = `${r.left + window.scrollX}px`;
         this.popup.style.top = `${r.bottom + window.scrollY}px`;
         if (this.showingPicker) return;
-        if (!this.popup.isConnected) document.body.append(this.popup);
+        if (!this.popup.isConnected) this.context.session.body.append(this.popup);
         this.popup.showPopover();
         const below = this.popup.getBoundingClientRect();
         if (below.bottom > document.documentElement.clientHeight && r.top >= below.height) {
@@ -547,7 +547,7 @@ export class DateBox extends Widget {
         this.input.setAttribute('aria-expanded', 'true');
         this.whileShown = new AbortController();
         document.addEventListener('pointerdown', e => this.context.guard(() => {
-            const target = e.target as Node;
+            const target = e.composedPath()[0] as Node; // the target in a shadow root, not its host
             if (!this.popup.contains(target)) this.hide();
         }), { capture: true, signal: this.whileShown.signal });
         this.picker.showing();

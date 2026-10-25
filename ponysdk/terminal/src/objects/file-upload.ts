@@ -78,7 +78,8 @@ export class FileUpload extends Widget {
             + `&${C.STREAM_REQUEST_ID}=${streamRequestId}`;
         const data = new FormData();
         for (const file of this.input.files ?? []) data.append(this.input.name, file);
-        fetch(url, { method: 'POST', body: data, credentials: 'same-origin' })
+        // The application's origin: the host's in a page, another in a <pony-app> element (ADR-0008)
+        fetch(url, { method: 'POST', body: data, credentials: 'include' })
             .catch(e => log.error(`${this}: upload failed`, e))
             .finally(() => this.context.guard(() => {
                 const message = about(this.id);

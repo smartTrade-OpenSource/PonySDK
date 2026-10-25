@@ -6,24 +6,27 @@
 // - terminal.js, the core, an ES module; it loads each module on demand from chunks/<name>.js, and exports what they
 //   use of it (src/core-api.ts);
 // - chunks/<name>.js, one per module loaded on demand, importing the core from terminal.js: they share no code of
-//   their own, so terminal.js imports nothing before the page is built;
+//   their own, so terminal.js imports nothing before the page is built; pony-app.js, the <pony-app> element, is one
+//   (docs/decisions/0008-embedded-application.md);
 // - legacy.js, the legacy layer, a classic script.
 import { build } from 'esbuild';
 import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
 const OUT = 'build/dist';
-const ON_DEMAND = ['date-picker', 'rich-text', 'layout', 'stack-layout-panel', 'tree', 'menu', 'suggest'];
+const ON_DEMAND = ['date-picker', 'rich-text', 'layout', 'stack-layout-panel', 'tree', 'menu', 'suggest']
+    .map(name => `src/objects/${name}.ts`).concat('src/pony-app.ts');
 /** Modules a chunk keeps for itself: no other module uses them. */
-const OWNED = new Set([resolve('src/runtime/date-format.ts')]);
+const OWNED = new Set(['src/runtime/date-format.ts', 'src/objects/host.ts', 'src/runtime/embedding.ts', 'src/runtime/memory-history.ts']
+    .map(f => resolve(f)));
 const common = { bundle: true, target: 'es2022', minify: true, sourcemap: true, logLevel: 'warning', metafile: true };
-const onDemand = new Set(ON_DEMAND.map(name => resolve(`src/objects/${name}.ts`)));
+const onDemand = new Set(ON_DEMAND.map(file => resolve(file)));
 
 /** In the core, an import of a module loaded on demand goes to its chunk. */
 const toChunks = {
     name: 'to-chunks',
     setup(b) {
-        b.onResolve({ filter: /^\.\.\/objects\// }, args => {
+        b.onResolve({ filter: /^\.\.?\// }, args => {
             const path = resolve(args.resolveDir, args.path);
             if (!onDemand.has(path)) return undefined;
             if (args.kind !== 'dynamic-import') throw new Error(`${args.importer} imports ${args.path} statically`);
@@ -49,7 +52,7 @@ const fromCore = {
 const core = await build({ ...common, entryPoints: { terminal: 'src/main.ts' }, format: 'esm', outdir: OUT, plugins: [toChunks] });
 const chunks = await build({
     ...common, format: 'esm', outdir: OUT, plugins: [fromCore],
-    entryPoints: Object.fromEntries(ON_DEMAND.map(name => [`chunks/${name}`, `src/objects/${name}.ts`])),
+    entryPoints: Object.fromEntries(ON_DEMAND.map(file => [`chunks/${basename(file, '.ts')}`, file])),
 });
 await build({ ...common, entryPoints: { legacy: 'src/legacy.ts' }, format: 'iife', outdir: OUT });
 

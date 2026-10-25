@@ -140,7 +140,7 @@ export class PopupPanel extends Widget {
 
     show(): void {
         if (this.showing) return;
-        if (!this.element.isConnected) document.body.append(this.element);
+        if (!this.element.isConnected) this.context.session.body.append(this.element);
         this.showing = true;
         this.whileShown = new AbortController(); // aborted when hidden, and by destroy() through close()
         const signal = this.whileShown.signal;
@@ -168,7 +168,7 @@ export class PopupPanel extends Widget {
         const glass = document.createElement('div');
         glass.setAttribute('popover', 'manual');
         glass.className = `pony-Glass ${this.glassStyleName}`.trim();
-        document.body.append(glass);
+        this.context.session.body.append(glass);
         glass.showPopover(); // before the popup: under it in the top layer
         glass.addEventListener('pointerdown', () => this.context.guard(() => {
             if (this.autoHide && this.showing) this.hide();
@@ -176,9 +176,12 @@ export class PopupPanel extends Widget {
         this.glass = glass;
     }
 
-    /** A press outside the popup; on a modal one, a press on its backdrop targets the dialog itself. */
+    /**
+     * A press outside the popup; on a modal one, a press on its backdrop targets the dialog itself. Read on the
+     * composed path: at the document, a press inside a <pony-app> element's shadow root targets the element.
+     */
     private isOutside(event: PointerEvent): boolean {
-        const target = event.target as Node | null;
+        const target = (event.composedPath()[0] ?? null) as Node | null;
         if (target === this.element) {
             const r = this.element.getBoundingClientRect();
             return event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom;

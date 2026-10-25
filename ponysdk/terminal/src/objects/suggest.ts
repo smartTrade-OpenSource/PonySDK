@@ -152,7 +152,7 @@ export class SuggestBox extends Widget {
         this.list.setAttribute('role', 'listbox');
         this.list.id = `pony-suggestions-${++listIds}`;
         this.list.className = `${POPUP_CLASS} pony-SuggestPopup`;
-        document.body.append(this.list);
+        context.session.body.append(this.list);
         this.input.setAttribute('role', 'combobox');
         this.input.setAttribute('aria-autocomplete', 'list');
         this.input.setAttribute('aria-expanded', 'false');
@@ -166,7 +166,7 @@ export class SuggestBox extends Widget {
             this.context.send(message);
         }, this.input);
         this.listen<PointerEvent>('pointerdown', e => {
-            const target = e.target as Node;
+            const target = e.composedPath()[0] as Node; // the target in a shadow root, not its host
             if (!this.list.contains(target) && target !== this.input) this.hideList();
         }, document);
         this.listen<MouseEvent>('click', e => {

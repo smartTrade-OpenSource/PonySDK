@@ -155,7 +155,7 @@ function align(child: HTMLElement, horizontal: boolean, alignment: number): void
 export class RootLayoutPanel extends LayoutPanel {
     static override create(context: Context, id: number, type: number, _reader: Reader): RootLayoutPanel {
         const element = document.createElement('div');
-        document.body.append(element);
+        context.session.body.append(element);
         return new RootLayoutPanel(context, id, type, element, 'pony-RootLayoutPanel');
     }
 

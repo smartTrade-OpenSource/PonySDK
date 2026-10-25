@@ -3,8 +3,10 @@ var pony;
 document.ponyLoaded = false;
 
 document.onPonyLoadedListeners = [];
+// After the load, at once: a <pony-app> element loads its application's scripts once pony is there (ADR-0008)
 document.onPonyLoaded = function (callback) {
-    document.onPonyLoadedListeners.push(callback);
+    if (document.ponyLoaded) callback(pony);
+    else document.onPonyLoadedListeners.push(callback);
 };
 
 document.onConnectionLostListeners = [];
@@ -138,9 +140,25 @@ AbstractAddon.prototype.setLogLevel = function (logLevel) {
     this.logLevel = parseInt(logLevel);
 };
 
+// Through the addon's own terminal: a page with <pony-app> elements runs one per element (ADR-0008)
 AbstractAddon.prototype.sendDataToServer = function (params, callback) {
-    pony.sendDataToServer(this.id, params, callback);
+    (this.terminal || pony).sendDataToServer(this.id, params, callback);
 };
+
+// The element of this id in the addon's tree: the document, or the shadow root of a <pony-app> element (ADR-0008)
+AbstractAddon.prototype.elementById = function (id) {
+    var root = this.element ? this.element.getRootNode() : document;
+    return (typeof root.getElementById === 'function' ? root : document).getElementById(id);
+};
+
+// The element of an event's composed path under the page's body, or under a <pony-app> element's container
+function ponyTopElement(path) {
+    for (var i = 0; i < path.length; i++) {
+        var parent = path[i].parentNode;
+        if (parent && (parent === document.body || (parent.hasAttribute && parent.hasAttribute('data-pony-body')))) return path[i];
+    }
+    return null;
+}
 
 AbstractAddon.prototype.log = function () {
     var args = Array.prototype.splice.call(arguments, 0);
@@ -978,7 +996,7 @@ else window['AbstractAddon'] = AbstractAddon;
             // Else return false
             let isNested = function (element) {
                 while (element && element.getAttribute('multilvl-parent')) {
-                    element = document.getElementById(element.getAttribute('multilvl-parent'));
+                    element = that.elementById(element.getAttribute('multilvl-parent'));
                     if (!element) break;
                     if (element.id === that.element.id) return true;
                 }
@@ -987,11 +1005,9 @@ else window['AbstractAddon'] = AbstractAddon;
             this.mouseDownEventListener = function (event) {
                 if (that.visible) {
                     // Cancel event if the target is a nested dropdown
-                    // 5 is an optimization to start to loop after : window, document, html, body
-                    let path = event.composedPath();
-                    if (isNested(path[path.length - 5])) return;
+                    if (isNested(ponyTopElement(event.composedPath()))) return;
 
-                    if (!that.parentElement) that.parentElement = document.getElementById(that.parentId);
+                    if (!that.parentElement) that.parentElement = that.elementById(that.parentId);
                     var parentRect = that.parentElement.getBoundingClientRect();
                     var rect = that.element.getBoundingClientRect();
                     var x = event.clientX;
@@ -1080,7 +1096,7 @@ else window['AbstractAddon'] = AbstractAddon;
         },
 
         updatePosition: function () {
-            if (!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+            if (!this.parentElement) this.parentElement = this.elementById(this.parentId);
             this.element.style.top = '0px';
             var offsets = this.parentElement.getBoundingClientRect();
             this.element.style.width = offsets.width + 'px';
@@ -1150,7 +1166,7 @@ else window['AbstractAddon'] = AbstractAddon;
         },
 
         adjustPosition: function () {
-            if (!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+            if (!this.parentElement) this.parentElement = this.elementById(this.parentId);
             var offsets = this.parentElement.getBoundingClientRect();
             this.element.style.width = offsets.width + 'px';
             // Down or top display

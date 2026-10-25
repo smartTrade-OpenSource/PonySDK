@@ -17,8 +17,14 @@ import {
 import type { Message } from '../src/protocol/messages.ts';
 import { Reader } from '../src/protocol/reader.ts';
 import { Dispatcher, type HistoryPort, type Host } from '../src/runtime/dispatcher.ts';
-import { BaseObject, type Context, type ObjectFactory, type TerminalObject } from '../src/runtime/object.ts';
+import { BaseObject, type Context, type ObjectFactory, type Session, type TerminalObject } from '../src/runtime/object.ts';
 import { fixture } from './fixtures.ts';
+
+/** A page's session, without a document: the tests create no element. */
+const SESSION: Session = {
+    contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '',
+    body: null as unknown as HTMLElement, byId: () => null, embedding: null,
+};
 
 function value(reader: Reader): unknown {
     switch (ServerToClientModelTypeModel[reader.key]) {
@@ -91,7 +97,7 @@ function run(name: string): Run {
         if (type === W.BROWSER) context.windows.mainWindowId = id;
         return new Recorded(context, id, type, log);
     };
-    const dispatcher = new Dispatcher(host, factory, { contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '' }, history);
+    const dispatcher = new Dispatcher(host, factory, SESSION, history);
     for (const frame of fixture(name).frames) dispatcher.receive(frame);
     return { log, sent };
 }
@@ -156,7 +162,7 @@ test('a block creating a type whose module loads later waits, and the blocks aft
             labels = true;
         });
     };
-    const dispatcher = new Dispatcher(host, factory, { contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '' },
+    const dispatcher = new Dispatcher(host, factory, SESSION,
         history, undefined, loader);
     for (const frame of fixture('page-v3').frames) dispatcher.receive(frame);
     const before = log.length;
@@ -182,7 +188,7 @@ test('the answer to the probe tells how long it waited in the terminal (ADR-0005
     const factory: ObjectFactory = () => {
         throw new Error('no object in this message');
     };
-    const dispatcher = new Dispatcher(host, factory, { contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '' }, history);
+    const dispatcher = new Dispatcher(host, factory, SESSION, history);
     const probe = new Uint8Array(10); // [ROUNDTRIP_LATENCY long][END]
     probe[0] = K.ROUNDTRIP_LATENCY;
     new DataView(probe.buffer).setBigInt64(1, 123n);

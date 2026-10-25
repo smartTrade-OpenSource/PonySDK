@@ -86,7 +86,7 @@ export class MenuBar extends Widget {
         if (root.outside === null) {
             root.outside = new AbortController();
             document.addEventListener('pointerdown', e => this.context.guard(() => {
-                if (!root.element.contains(e.target as Node)) root.closeSubmenus();
+                if (!root.element.contains(e.composedPath()[0] as Node)) root.closeSubmenus(); // the target in a shadow root
             }), { capture: true, signal: root.outside.signal }); // aborted when the menus close, and by destroy()
         }
     }

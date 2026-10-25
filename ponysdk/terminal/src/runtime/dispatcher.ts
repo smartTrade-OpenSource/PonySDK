@@ -31,6 +31,17 @@ export interface Host {
     streamRequested(requestId: number): void;
 }
 
+/**
+ * The addon factories, one table per page: ponysdk.js registers them on the page, and the terminals of the page's
+ * <pony-app> elements create their addons from them (ADR-0008).
+ */
+const addOnFactories = new Map<string, AddOnFactory>();
+
+/** Registers an addon factory for the terminals of the page (AbstractAddon.defineAddon, through window.pony). */
+export function registerAddOnFactory(signature: string, factory: AddOnFactory): void {
+    addOnFactories.set(signature, factory);
+}
+
 /** A block creates an object whose module is not loaded yet: the block runs again once it is. */
 class Pending {
     readonly loading: Promise<void>;
@@ -51,7 +62,6 @@ export class Dispatcher implements Context {
     readonly reader: Reader;
     readonly windows = new Windows();
     private readonly objects = new Map<number, TerminalObject>();
-    private readonly addOnFactories = new Map<string, AddOnFactory>();
     private readonly host: Host;
     private readonly factory: ObjectFactory;
     /** The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md). */
@@ -440,11 +450,23 @@ export class Dispatcher implements Context {
     }
 
     registerAddOnFactory(signature: string, factory: AddOnFactory): void {
-        this.addOnFactories.set(signature, factory);
+        registerAddOnFactory(signature, factory);
     }
 
     addOnFactory(signature: string): AddOnFactory | undefined {
-        return this.addOnFactories.get(signature);
+        return addOnFactories.get(signature);
+    }
+
+    /** The terminal goes (its <pony-app> element left the page): every object releases what it holds on the page. */
+    destroyAll(): void {
+        for (const object of [...this.objects.values()].reverse()) {
+            try {
+                object.destroy();
+            } catch (e) {
+                log.warn(`Cannot destroy ${object}: ${describe(e)}`);
+            }
+        }
+        this.objects.clear();
     }
 
     setReady(id: number, kind: 'window' | 'frame'): void {

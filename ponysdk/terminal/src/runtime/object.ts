@@ -6,6 +6,7 @@ import { WidgetType } from '#model';
 import { nameOf } from './names.ts';
 import type { Message } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
+import type { Embedding } from './embedding.ts';
 import type { Windows } from './windows.ts';
 
 /** The JavaScript object an addon factory returns (AbstractAddon in ponysdk.js). */
@@ -15,6 +16,8 @@ export interface AddOn {
     onDetached(): void;
     update(method: string, args: unknown): void;
     destroy(): void;
+    /** The terminal it sends through, set once created (ADR-0008). */
+    terminal?: Session;
 }
 
 /** Registered by ponysdk.js for each AbstractAddon.defineAddon. */
@@ -26,6 +29,12 @@ export interface Session {
     readonly tabindexOnlyFormField: boolean;
     /** The URL of the page without its file, query and hash: where the server's paths start. */
     readonly hostPageBaseURL: string;
+    /** Where the root panel, popups and lists go: the page's body, or the container of a <pony-app> element. */
+    readonly body: HTMLElement;
+    /** The element of this id: in the document, or in the shadow root of a <pony-app> element. */
+    byId(id: string): HTMLElement | null;
+    /** The <pony-app> element this terminal runs in, null in a page (ADR-0008). */
+    readonly embedding: Embedding | null;
 }
 
 /** A window opened by the server, or a frame: a terminal of its own, fed by this one. */

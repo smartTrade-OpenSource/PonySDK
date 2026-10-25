@@ -10,14 +10,15 @@ import { Widget } from '../runtime/widget.ts';
 
 /**
  * PRootPanel: the body, or the element of ROOT_ID; the widgets of a window are added to it. It is in the document
- * from the start, and reports whether the document is visible.
+ * from the start, and reports whether the document is visible. In a <pony-app> element, the body is the element's
+ * container and ROOT_ID is looked up in its shadow root (ADR-0008).
  */
 export class RootPanel extends Widget {
     static create(context: Context, id: number, type: number, reader: Reader): RootPanel {
         reader.read();
-        let element: HTMLElement | null = document.body;
+        let element: HTMLElement | null = context.session.body;
         if (reader.key === K.ROOT_ID) {
-            element = document.getElementById(reader.str ?? '');
+            element = context.session.byId(reader.str ?? '');
             if (element === null) throw new Error(`No element #${reader.str} for root panel #${id}`);
         } else {
             reader.rewind();

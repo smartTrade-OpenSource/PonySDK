@@ -156,9 +156,18 @@ export function loadingOf(type: number): Promise<void> | null {
 
 const failed = new Set<() => Promise<Creators>>();
 
-/** Loads the modules not loaded yet: when the browser is idle, so that a first rare widget does not wait. */
+/**
+ * Loads the modules not loaded yet: when the browser is idle, so that a first rare widget does not wait. With them,
+ * the <pony-app> element, for a page that embeds another application (ADR-0008).
+ */
 export function loadAll(): void {
     for (const [, module] of ON_DEMAND) load(module).catch(() => failed.add(module));
+    import('../pony-app.ts').then(m => m.definePonyApp(), e => log.error('<pony-app> did not load', e));
+}
+
+/** A type whose module was loaded otherwise: HOST, with the <pony-app> element (ADR-0008). */
+export function defineCreator(type: number, create: Creator): void {
+    CREATORS.set(type, create);
 }
 
 export const createObject: ObjectFactory = (type, context, id, reader) => {

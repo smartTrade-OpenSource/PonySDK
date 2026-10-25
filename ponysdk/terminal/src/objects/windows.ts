@@ -4,7 +4,7 @@
 
 import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
 import { about, FLAG } from '../protocol/messages.ts';
-import type { Reader } from '../protocol/reader.ts';
+import { Reader } from '../protocol/reader.ts';
 import type { Windows } from '../runtime/windows.ts';
 import { log } from '../runtime/log.ts';
 import { apply, BaseObject, type ChildTerminal, type Context, type Setters } from '../runtime/object.ts';
@@ -40,12 +40,30 @@ const WINDOW: Setters<Window> = new Map<number, (w: Window, r: Reader) => void>(
     }],
 ]);
 
-/** PBrowser: the window of this page, whose blocks the dispatcher runs itself. */
+/**
+ * PBrowser: the window of this page, whose blocks the dispatcher runs itself. In a <pony-app> element, the page is the
+ * host's (ADR-0008): RELOAD starts the application again in the element, the title and the location stay the host's.
+ */
 export class Browser extends AbstractWindow {
     constructor(context: Context, id: number, type: number) {
         super(context, id, type);
         this.window = window;
         context.windows.mainWindowId = id;
+    }
+
+    override update(reader: Reader): boolean {
+        const embedding = this.context.session.embedding;
+        if (embedding !== null) {
+            if (reader.key === K.RELOAD) {
+                embedding.restart();
+                return true;
+            }
+            if (reader.key === K.WINDOW_TITLE || reader.key === K.WINDOW_LOCATION_REPLACE) {
+                this.context.warn(`${Reader.keyName(reader.key)} ignored: the page is the host's`, this.id);
+                return true;
+            }
+        }
+        return super.update(reader);
     }
 }
 
@@ -100,13 +118,15 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
     }
 
     private open(): void {
-        this.window = window.open(this.url, this.name, this.features);
+        // In a <pony-app> element, the window's terminal could not reach this one from another origin (ADR-0008)
+        this.window = this.context.session.embedding === null ? window.open(this.url, this.name, this.features) : null;
         if (this.window === null) {
             // The browser blocked the popup
             const message = about(this.id);
             message[C.HANDLER_DESTROY] = FLAG;
             this.context.send(message);
-            this.context.warn(`Can't open PTWindow #${this.id}. Check the browser's settings`, this.id);
+            this.context.warn(this.context.session.embedding === null ? `Can't open PTWindow #${this.id}. Check the browser's settings`
+                : `PTWindow #${this.id} refused: an embedded application opens no window (ADR-0008)`, this.id);
             return;
         }
         this.window.addEventListener('unload', () => this.onClose());
@@ -150,11 +170,15 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
     }
 }
 
-/** Every second, the windows closed without an unload event (a crash, a blocked event) are noticed. */
-export function watchWindows(windows: Windows): void {
-    setInterval(() => {
+/**
+ * Every second, the windows closed without an unload event (a crash, a blocked event) are noticed; until signal is
+ * aborted, when given (the terminal of a <pony-app> element goes).
+ */
+export function watchWindows(windows: Windows, signal?: AbortSignal): void {
+    const timer = setInterval(() => {
         for (const window of windows.all()) {
             if (window instanceof PopupWindow && window.closed) window.onClose();
         }
     }, 1000);
+    signal?.addEventListener('abort', () => clearInterval(timer));
 }

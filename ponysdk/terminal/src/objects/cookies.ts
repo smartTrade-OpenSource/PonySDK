@@ -11,13 +11,17 @@ const EXPIRED = 'Fri, 02-Jan-1970 00:00:00 GMT';
 
 /**
  * The cookies, object #0: created by the terminal, which sends the page's cookies to the server first thing. The
- * server then sets and removes cookies through it.
+ * server then sets and removes cookies through it. In a <pony-app> element, document.cookie is the host page's, not
+ * the application's: none is sent and none is written (ADR-0008); the server reads the handshake's.
  */
 export class Cookies extends BaseObject {
+    private readonly embedded: boolean;
+
     constructor(context: Context) {
         super(context, 0, -1);
+        this.embedded = context.session.embedding !== null;
         const message = about(0);
-        message[C.COOKIES] = [...readCookies()].map(([name, value]) => ({ [C.COOKIE_NAME]: name, [C.COOKIE_VALUE]: value }));
+        message[C.COOKIES] = [...(this.embedded ? new Map<string, string>() : readCookies())].map(([name, value]) => ({ [C.COOKIE_NAME]: name, [C.COOKIE_VALUE]: value }));
         context.send(message);
     }
 
@@ -37,16 +41,21 @@ export class Cookies extends BaseObject {
             if (path) cookie += `;path=${path}`;
             if (secure) cookie += ';secure';
             if (sameSite) cookie += `;SameSite=${sameSite}`;
-            document.cookie = cookie;
+            this.write(cookie);
             return true;
         }
         if (reader.key === K.REMOVE_COOKIE) {
             const name = encodeURIComponent(reader.str ?? '');
             const path = optional(reader, K.COOKIE_PATH)?.str;
-            document.cookie = path ? `${name}=;path=${path};expires=${EXPIRED}` : `${name}=;expires=${EXPIRED}`;
+            this.write(path ? `${name}=;path=${path};expires=${EXPIRED}` : `${name}=;expires=${EXPIRED}`);
             return true;
         }
         return super.update(reader);
+    }
+
+    private write(cookie: string): void {
+        if (this.embedded) this.context.warn('A cookie write ignored: the page is the host\'s', this.id);
+        else document.cookie = cookie;
     }
 }
 

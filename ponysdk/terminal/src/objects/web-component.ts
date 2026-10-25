@@ -3,7 +3,7 @@
  */
 
 import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
-import { about } from '../protocol/messages.ts';
+import { about, type Message } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { apply, type Context, type Setters, type TerminalObject } from '../runtime/object.ts';
 import { Widget } from '../runtime/widget.ts';
@@ -44,11 +44,7 @@ export class WebComponent extends Widget {
         this.listeners.set(name, controller);
         const signal = controller.signal;
         this.element.addEventListener(name, event => this.context.guard(() => {
-            const message = about(this.id);
-            message[C.WC_EVENT_NAME] = name;
-            const detail = (event as CustomEvent).detail as unknown;
-            if (detail !== undefined && detail !== null) message[C.WC_EVENT_DETAIL] = toJson(detail);
-            this.context.send(message);
+            this.context.send(customEventMessage(this.id, name, event));
         }), { signal });
     }
 
@@ -92,6 +88,15 @@ export class WebComponent extends Widget {
         const fn = (this.element as unknown as Record<string, unknown>)[method];
         if (typeof fn === 'function') fn.apply(this.element, args ?? []);
     }
+}
+
+/** A custom event for the server: its name, and its detail as JSON when it has one (PWebComponent, PHost). */
+export function customEventMessage(id: number, name: string, event: Event): Message {
+    const message = about(id);
+    message[C.WC_EVENT_NAME] = name;
+    const detail = (event as CustomEvent).detail as unknown;
+    if (detail !== undefined && detail !== null) message[C.WC_EVENT_DETAIL] = toJson(detail);
+    return message;
 }
 
 function toJson(detail: unknown): string {

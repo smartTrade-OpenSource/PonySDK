@@ -24,6 +24,8 @@ export class Frame extends Widget implements ChildTerminal {
         const session = context.session;
         url += `${url.includes('?') ? '&' : '?'}${C.UI_CONTEXT_ID}=${session.contextId}&${C.FRAME_ID}=${id}`;
         if (session.tabindexOnlyFormField) url += `&${C.OPTION_TABINDEX_ACTIVATED}=true`;
+        // In a <pony-app> element, relative to the application, not to the host page (ADR-0008)
+        if (session.embedding !== null) url = new URL(url, session.hostPageBaseURL).href;
         return new Frame(context, id, type, url);
     }
 

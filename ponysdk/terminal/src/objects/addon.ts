@@ -27,6 +27,15 @@ function factory(context: Context, reader: Reader): (id: number, args: unknown, 
 }
 
 /**
+ * The addon sends through its own terminal (AbstractAddon.sendDataToServer): a page with <pony-app> elements has one
+ * per element, and a window.pony that is none of them (ADR-0008).
+ */
+function bind(addOn: AddOn, context: Context): AddOn {
+    addOn.terminal = context.session;
+    return addOn;
+}
+
+/**
  * PAddOn: a JavaScript object defined by AbstractAddon.defineAddon in the page, created by its factory and driven by
  * method calls (PADDON_METHOD with PADDON_ARGUMENTS).
  */
@@ -39,7 +48,7 @@ export class AddOnObject extends BaseObject {
         const args = creationArguments(reader);
         const object = new AddOnObject(context, id, type);
         try {
-            object.addOn = create(id, args, null, null);
+            object.addOn = bind(create(id, args, null, null), context);
             object.addOn.onInit();
         } catch (e) {
             log.error(`${object} could not be created`, e);
@@ -116,7 +125,7 @@ export class AddOnComposite extends AddOnObject {
             }
         });
         try {
-            object.addOn = create(id, args, String(widgetId), widget.element);
+            object.addOn = bind(create(id, args, String(widgetId), widget.element), context);
             object.addOn.onInit();
             if (widget.attached) object.addOn.onAttached();
             object.initialized = true;

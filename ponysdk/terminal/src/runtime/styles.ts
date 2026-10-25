@@ -51,6 +51,17 @@ const RULES = `
 :where(.pony-RichTextToolbar [aria-pressed=true]){background:Highlight;color:HighlightText}
 `;
 
+let sheet: CSSStyleSheet | undefined;
+
+/** The same rules in the shadow root of a <pony-app> element: one sheet, shared by the elements (ADR-0008). */
+export function adoptStyles(root: ShadowRoot): void {
+    if (sheet === undefined) {
+        sheet = new CSSStyleSheet();
+        sheet.replaceSync(RULES);
+    }
+    root.adoptedStyleSheets = [sheet];
+}
+
 export function installStyles(): void {
     if (document.querySelector('style[data-pony-terminal]') !== null) return;
     const style = document.createElement('style');

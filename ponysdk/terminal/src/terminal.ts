@@ -3,15 +3,17 @@
  */
 
 import { ClientToServerModel as C, MappingPath, ProtocolVersion } from '#model';
-import { reload, Reconnection } from './connection/reconnection.ts';
+import { Reconnection } from './connection/reconnection.ts';
 import { Socket, type SocketListener } from './connection/socket.ts';
 import { Cookies } from './objects/cookies.ts';
 import { watchWindows } from './objects/windows.ts';
 import type { Message } from './protocol/messages.ts';
 import { Dispatcher, type Host } from './runtime/dispatcher.ts';
 import { createObject, loadAll, loadingOf } from './runtime/factory.ts';
-import { BrowserHistory } from './runtime/history.ts';
+import type { Embedding } from './runtime/embedding.ts';
+import type { History } from './runtime/history.ts';
 import { log } from './runtime/log.ts';
+import { type Mount, PageMount } from './runtime/mount.ts';
 import type { AddOnFactory, Session } from './runtime/object.ts';
 import { installStyles } from './runtime/styles.ts';
 
@@ -28,7 +30,8 @@ interface ParentTerminal {
 
 /**
  * The terminal of a page: the main window's, connected to the server by its WebSocket,
- * or that of a window or a frame opened by the server, fed by its opener or its parent.
+ * or that of a window or a frame opened by the server, fed by its opener or its parent;
+ * or the terminal of a <pony-app> element in another page (its Mount, docs/decisions/0008-embedded-application.md).
  *
  * Its public methods are window.pony, which ponysdk.js, the addons and the child terminals call: their names are a
  * contract.
@@ -37,7 +40,8 @@ export class Terminal implements Session, Host {
     contextId = 0;
     tabindexOnlyFormField = false;
     readonly dispatcher: Dispatcher;
-    private readonly history = new BrowserHistory();
+    private readonly mount: Mount;
+    private readonly history: History;
     private started = false;
     private socket: Socket | undefined;
     private reconnection: Reconnection | undefined;
@@ -47,7 +51,9 @@ export class Terminal implements Session, Host {
     private chunksScheduled = false;
     private heartbeat: ReturnType<typeof setInterval> | undefined;
 
-    constructor() {
+    constructor(mount: Mount = new PageMount()) {
+        this.mount = mount;
+        this.history = mount.history;
         this.dispatcher = new Dispatcher(this, createObject, this, this.history, id => this.parent?.dictionaryEntry(id),
             loadingOf);
     }
@@ -55,18 +61,23 @@ export class Terminal implements Session, Host {
     start(): void {
         if (this.started) return;
         this.started = true;
-        installStyles();
-        const parameters = new URLSearchParams(location.search);
-        if (parameters.has(C.UI_CONTEXT_ID)) this.startChild(parameters);
-        else this.startMain();
-        watchWindows(this.dispatcher.windows);
+        const embedded = this.mount.embedding !== null;
+        if (!embedded) installStyles(); // a <pony-app> element installs them where it renders
+        const parameters = new URLSearchParams(this.mount.url.search);
+        if (!embedded && parameters.has(C.UI_CONTEXT_ID)) this.startChild(parameters);
+        else this.startMain(embedded);
+        watchWindows(this.dispatcher.windows, this.mount.signal);
     }
 
-    private startMain(): void {
-        window.addEventListener('pagehide', event => this.close(!event.persisted));
-        this.reconnection = new Reconnection(() => this.hostPageBaseURL, () => this.reconnectSocket(this.buildReconnectUrl()));
-        this.socket = Socket.connect(this.socketUrl(''), this.socketListener());
-        log.info('PonySDK TypeScript terminal is started');
+    private startMain(embedded: boolean): void {
+        const signal = this.mount.signal;
+        window.addEventListener('pagehide', event => this.close(!event.persisted), signal === undefined ? undefined : { signal });
+        this.reconnection = new Reconnection(() => this.hostPageBaseURL, () => this.reconnectSocket(this.buildReconnectUrl()),
+            this.mount);
+        const url = this.socketUrl('');
+        // The early socket of the bootstrap page is its own terminal's, never a <pony-app> element's
+        this.socket = embedded ? new Socket(new WebSocket(url), this.socketListener()) : Socket.connect(url, this.socketListener());
+        log.info(embedded ? `PonySDK terminal started for ${this.mount.url.href}` : 'PonySDK TypeScript terminal is started');
     }
 
     /** A window or a frame opened by the server: its opener or its parent feeds it and relays its messages. */
@@ -123,6 +134,7 @@ export class Terminal implements Session, Host {
             });
         }
         this.dispatcher.register(new Cookies(this.dispatcher));
+        if (this.mount.embedding !== null) return; // the element shows its own children until the first widget
         const loading = document.getElementById('loading');
         if (loading !== null) {
             loading.style.width = '0px';
@@ -147,9 +159,10 @@ export class Terminal implements Session, Host {
     }
 
     private socketUrl(parameters: string): string {
-        const l = location;
+        const l = this.mount.url;
         return `${l.protocol.replace('http', 'ws')}//${l.host}${l.pathname}${MappingPath.WEBSOCKET}?${C.TYPE_HISTORY}=`
-            + `${this.history.token}${parameters}&${C.PROTOCOL_VERSION}=${ProtocolVersion.CURRENT}${l.search.replace('?', '&')}`;
+            + `${this.history.token}${parameters}&${C.PROTOCOL_VERSION}=${ProtocolVersion.CURRENT}${l.search.replace('?', '&')}`
+            + this.mount.handshake;
     }
 
     // ---- Host --------------------------------------------------------------------------------------------------------
@@ -185,7 +198,7 @@ export class Terminal implements Session, Host {
     streamRequested(requestId: number): void {
         const frame = document.createElement('iframe');
         frame.style.cssText = 'width:0;height:0;border:0;visibility:hidden;position:fixed';
-        document.body.appendChild(frame);
+        this.mount.body.appendChild(frame);
         setTimeout(() => {
             frame.src = `${this.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${this.contextId}`
                 + `&${C.STREAM_REQUEST_ID}=${requestId}`;
@@ -194,7 +207,17 @@ export class Terminal implements Session, Host {
 
     private destroy(): void {
         this.dispatcher.windows.closeAll();
-        reload();
+        this.mount.reload();
+    }
+
+    /**
+     * A <pony-app> element's terminal goes: its socket closes as a page left (the server destroys the context at once,
+     * ADR-0005), its objects release what they hold on the page. The element aborts its Mount's signal.
+     */
+    dispose(): void {
+        this.close(true);
+        clearInterval(this.heartbeat);
+        this.dispatcher.destroyAll();
     }
 
     // ---- Session -----------------------------------------------------------------------------------------------------
@@ -203,10 +226,22 @@ export class Terminal implements Session, Host {
         return this.getHostPageBaseURL();
     }
 
+    get body(): HTMLElement {
+        return this.mount.body;
+    }
+
+    byId(id: string): HTMLElement | null {
+        return this.mount.byId(id);
+    }
+
+    get embedding(): Embedding | null {
+        return this.mount.embedding;
+    }
+
     // ---- window.pony -------------------------------------------------------------------------------------------------
 
     getHostPageBaseURL(): string {
-        let url = location.href;
+        let url = this.mount.url.href;
         const hash = url.indexOf('#');
         if (hash !== -1) url = url.substring(0, hash);
         const query = url.indexOf('?');
@@ -231,7 +266,8 @@ export class Terminal implements Session, Host {
         }
         const request = new XMLHttpRequest();
         request.onload = () => callback(request.responseText);
-        request.open('GET', MappingPath.AJAX);
+        request.open('GET', this.hostPageBaseURL + MappingPath.AJAX);
+        request.withCredentials = this.mount.embedding !== null; // the session cookie, from the host's origin
         // The server reads these two by their enum names
         request.setRequestHeader('UI_CONTEXT_ID', String(this.contextId));
         request.setRequestHeader('OBJECT_ID', String(id));
@@ -330,8 +366,7 @@ export class Terminal implements Session, Host {
 
     onReconnected(): void {
         log.info(`Transparent reconnection succeeded for context #${this.contextId}`);
-        const hook = (window as unknown as { onPonyReconnected?: () => void }).onPonyReconnected;
-        if (typeof hook === 'function') hook();
+        this.mount.reconnected();
     }
 
     buildReconnectUrl(): string {

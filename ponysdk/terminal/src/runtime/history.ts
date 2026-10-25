@@ -4,21 +4,27 @@
 
 import type { HistoryPort } from './dispatcher.ts';
 
+/** A terminal's history: the token, its changes by the user, and the server's new items. */
+export interface History extends HistoryPort {
+    onChange(listener: (token: string) => void): void;
+}
+
 /**
  * The history token: the URL fragment, decoded. As GWT's History, the token changes first, then the hash, so that
  * the hashchange this causes fires nothing; only the user's navigation and a newItem asked to do so fire.
  */
-export class BrowserHistory implements HistoryPort {
+export class BrowserHistory implements History {
     private current = decode(location.hash);
     private readonly listeners: ((token: string) => void)[] = [];
 
-    constructor() {
+    /** signal: aborted when the terminal goes, a <pony-app> element's (ADR-0008). */
+    constructor(signal?: AbortSignal) {
         window.addEventListener('hashchange', () => {
             const token = decode(location.hash);
             if (token === this.current) return;
             this.current = token;
             this.fire(token);
-        });
+        }, signal === undefined ? undefined : { signal });
     }
 
     get token(): string {
@@ -45,7 +51,8 @@ export class BrowserHistory implements HistoryPort {
     }
 }
 
-function decode(hash: string): string {
+/** The token of a URL fragment. */
+export function decode(hash: string): string {
     const token = hash.startsWith('#') ? hash.substring(1) : hash;
     try {
         return decodeURI(token.replaceAll('%23', '#'));
@@ -53,3 +60,4 @@ function decode(hash: string): string {
         return token;
     }
 }
+
