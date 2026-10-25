@@ -29,11 +29,12 @@ of the same registrable domain) sends it, a page of another site does not.
 
 ## Decision
 
-1. `terminal.js` defines the custom element `<pony-app src="…">`. A host page loads the application's `terminal.js`
-   as a module and writes the element. The terminal starts a page terminal when the page opened the early socket (the
-   bootstrap page), is a child window or frame (`UI_CONTEXT_ID` in its query), or is under the application's path
-   (`new URL('..', import.meta.url)`, a custom page); a host page is none of these. One module, so the chunks keep
-   importing one core (ADR-0004).
+1. A host page loads the application's `terminal.js` as a module and writes the custom element `<pony-app src="…">`.
+   The terminal starts a page terminal when the page opened the early socket (the bootstrap page), is a child window
+   or frame (`UI_CONTEXT_ID` in its query), or is under the application's path (`new URL('..', import.meta.url)`, a
+   custom page); a host page is none of these, and loads the element from `chunks/pony-app.js` at once. An
+   application's page loads that chunk with the other modules on demand (ADR-0004), for an element it creates
+   itself. One core module, which the chunks import.
 2. Each element runs a terminal of its own: its socket goes to the base of `src`, with its own context and the query of
    `src` as parameters. A page may hold several elements, of one application or of several running the same PonySDK
    version. Changing `src` restarts the element.
@@ -87,8 +88,11 @@ of the same registrable domain) sends it, a page of another site does not.
    socket with 4002: the server destroys the context (ADR-0005). `pagehide` closes every terminal of the page, as for a
    page.
 8. `wsAllowedOrigins` lists the origins allowed to embed the application; without it, none (same origin only, as
-   today). `PonySDKServer` answers CORS with credentials for these origins (Jetty's `CrossOriginHandler`): the module
-   scripts, the manifest, the reconnection ping and the addons' AJAX requests need it.
+   today). `PonySDKServer` answers CORS with credentials for these origins, through a servlet filter
+   (`CrossOriginFilter`): the module scripts, the manifest, the reconnection ping and the addons' AJAX requests need
+   it. A preflight gets the headers it asks for: an addon's AJAX request carries its data as headers whose names only
+   the addon knows. Jetty's `CrossOriginHandler` answers a fixed list of headers, and refuses the WebSocket upgrade of
+   an origin it does not list, the application's own page included.
 9. Same site only: the session is the cookie's. A host of another site needs a token at the handshake instead of the
    cookie: a decision of its own.
 
@@ -106,16 +110,19 @@ of the same registrable domain) sends it, a page of another site does not.
 
 ## Consequences
 
-- A page runs as before. `terminal.js` grows by the element's code, measured with the implementation (bytes, gzip);
-  nothing changes on the message path.
+- A page runs as before: the same handshake, no message more, nothing on the message path. Measured on the
+  implementation: `terminal.js` 89 074 → 91 826 bytes, 27 024 → 27 912 gzip (+888 bytes, the mount of a terminal and
+  the shared addon registry); `chunks/pony-app.js` 6 982 bytes, 2 811 gzip, loaded when the browser is idle.
 - In a shadow root, addons that search the document (`getElementById`, jQuery selectors from `document`) do not find
   what is inside: such an application uses `isolation="none"`. The drop-down addon of `ponysdk.js`
   (`document.getElementById`, `ponysdk.js:981`) is changed to search its root node.
 - A stylesheet written for a page matches nothing inside the shadow root with its `:root`, `html` and `body` rules:
   an application to be embedded adds `:host` to them (the showcase's stylesheet has 8 such rules).
 - `PScript` and the application's scripts run in the host page's global scope, as they run in the bootstrap page's.
-- Fonts: Chromium has ignored `@font-face` declared inside a shadow root. To measure; if it still does, the host page
-  declares the application's fonts.
+- Fonts: an `@font-face` declared inside a shadow root is ignored by Chrome 148 and Firefox 157, applied by WebKit 27.2
+  (measured on 2026-10-25, a system font as a data URL): the host page declares the application's fonts.
+- `document.onPonyLoaded` called once `pony` is loaded runs its callback at once, for the application scripts the
+  element loads after the page's (it was never run).
 - Two PonySDK versions on one page share the globals of `ponysdk.js`: not supported.
 - The sample gets a host page on another port, with two embedded tickets and the showcase, and an E2E test on the three
   browsers.

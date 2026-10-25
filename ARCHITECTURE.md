@@ -19,6 +19,7 @@
     - [11.4 Observability — OpenTelemetry & Dynatrace](#114-observability--opentelemetry--dynatrace)
     - [11.5 Transparent WebSocket Reconnection](#115-transparent-websocket-reconnection-opt-in)
     - [11.6 Security Model](#116-security-model)
+    - [11.7 Embedding in another page (`<pony-app>`)](#117-embedding-in-another-page-pony-app)
 12. [Package Structure](#12-package-structure)
 13. [Configuration Reference](#13-configuration-reference)
 14. [Jetty 12 / Jakarta EE Migration Notes](#14-jetty-12--jakarta-ee-migration-notes)
@@ -1927,6 +1928,61 @@ Untrusted client values (the reconnection parameter, malformed inbound frames) a
 - Transparent reconnection **off** by default — no silent resume of stale state (important for trading apps, where stale market data must never be replayed unnoticed).
 
 > Each item above is backed by dedicated tests (the Origin matrix, cross-session denial, path-safety, and the configuration defaults), so the secure defaults cannot silently regress.
+
+### 11.7 Embedding in another page (`<pony-app>`)
+
+An application runs inside a page it does not own: a portal, a client's web application, a desktop container
+([ADR-0008](docs/decisions/0008-embedded-application.md)). The host page loads the application's terminal and writes
+the element; each element runs its own terminal on its own context.
+
+```html
+<script type="module" src="https://fx.example.com/app/ponyterminal/terminal.js"></script>
+<pony-app src="https://fx.example.com/app/" view="ticket" instrument="EURUSD">Loading…</pony-app>
+```
+
+| Attribute | Values | Effect |
+|---|---|---|
+| `src` | the application's URL | its query: the application's parameters; its fragment: the first history token |
+| `isolation` | `shadow` (default), `none` | an open shadow root, or the host's document (for addons that search the document) |
+| `history` | `memory` (default), `hash` | the token stays in the element, or the page's fragment is the application's |
+| any other | | the application's, read through `PHost` |
+
+The host and the application talk through attributes and events, in both directions:
+
+```java
+final PHost host = PHost.get();                                      // null when the application runs as a page
+label.setText(host.getAttribute("instrument"));                      // attributes in, at the handshake
+host.addAttributeListener("instrument", label::setText);             // then each change
+host.addEventListener("reset", detail -> quantity.setText("1000000")); // the host's CustomEvents
+host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build()); // events out
+```
+
+```javascript
+ticket.addEventListener('trade', e => blotter.add(e.detail));
+ticket.setAttribute('instrument', 'USDJPY');
+ticket.dispatchEvent(new CustomEvent('reset'));
+```
+
+- **Loading.** `terminal.js` starts a page terminal only in the application's own page (the early socket of the
+  bootstrap page, a child window or frame, or a page under the application's path). Elsewhere it loads
+  `chunks/pony-app.js` (2.8 KB gzip), which defines the element; an application's page loads it with the other modules
+  on demand. The element reads `<application>/ponyapp.json` (stylesheets, scripts, shared web-component sheets,
+  transparent reconnection), loads the scripts into the host page once, and puts the stylesheets in its shadow root.
+- **Server.** `wsAllowedOrigins` lists the pages allowed to embed the application; `PonySDKServer` answers their CORS
+  requests with credentials (`CrossOriginFilter`). Same site only: the session is the session cookie's.
+- **What stays the host's.** The page's fragment (unless `history="hash"`), its title and location (ignored with a
+  warning), its cookies (`PCookies` sees none; the server reads the handshake's). A lost context or `RELOAD` restarts
+  the element instead of reloading the page; the element dispatches `pony-connection-lost` and `pony-reconnected`. A
+  `PWindow` is refused: its page could not reach the element's terminal from another origin.
+- **Leaving.** An element out of the page at the next task closes its socket with 4002: the server destroys the
+  context (ADR-0005).
+- **Limits.** In a shadow root, a stylesheet's `:root`, `html` and `body` rules match nothing (add `:host`), addons
+  that search the document find nothing (`isolation="none"`), and Chrome and Firefox ignore `@font-face` (the host page
+  declares the fonts). The application's scripts run in the host page's global scope.
+
+The showcase's **Embedding** page embeds the ticket in the showcase itself; `ShowcaseMain` also serves a portal of
+another origin on port 8082 (`sample/src/main/resources/portal`), which embeds two tickets and the whole showcase
+(`sample/tests/embedding.spec.js`).
 
 ---
 

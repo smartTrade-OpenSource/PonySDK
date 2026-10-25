@@ -54,6 +54,8 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
   the application's origin.
 - Its page opens the WebSocket in an inline script; a custom page without it connects as before.
 - It sends `Cache-Control` and `Last-Modified` and answers conditional requests.
+- `ponyapp.json` is the manifest of an embedded application ([ADR-0008](docs/decisions/0008-embedded-application.md)):
+  a resource of the application by that name is no longer served.
 
 ## Behaviour changes
 
@@ -61,6 +63,7 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `PHTMLTable.iterator()` returns the cell widgets (it was empty): the children of `PFlexTable` and `PGrid` are
   attached and destroyed with their table.
 - `PTabLayoutPanel` and `PTabPanel` attach their children with the panel, as `PComplexPanel` does.
+- `document.onPonyLoaded(callback)` called once `pony` is loaded runs the callback at once (it was never run).
 - `PAddOn.destroy()` also unregisters the addon from its window: it no longer receives `onDestroy()` when that
   window closes. `addInitializeListener` after initialization does nothing (it was stored and never called).
 - `PFocusWidget` registers click handlers as given; `END_OF_PROCESSING` is sent once per click.
