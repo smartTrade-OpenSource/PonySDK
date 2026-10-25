@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind Treasury portal</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="portal.js" defer></script>
+</head>
+<body>
+<!--
+  U4, U6, U7 and U8 of the gallery (index.html): a page of another origin, with no PonySDK in it but the <pony-app>
+  elements (docs/decisions/0008-embedded-application.md, 0009-embedding-limits.md). portal.js loads the application's
+  terminal.js and gives each element its src: http://<this host>:8081/sample/, or the query's app.
+-->
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">This page is not PonySDK: it embeds PonySDK applications with &lt;pony-app&gt;.</div>
+  <span id="status" class="portal-status" role="status">Connected</span>
+</header>
+
+<main>
+  <section class="portal-toolbar">
+    <label>Instrument of the first ticket
+      <select id="instrument">
+        <option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>USDCHF</option>
+      </select>
+    </label>
+    <button id="reset" type="button">Reset the tickets</button>
+  </section>
+
+  <section class="portal-tickets">
+    <figure class="portal-ticket">
+      <figcaption id="ticket-1-title">Ticket 1</figcaption>
+      <pony-app id="ticket-1" view="ticket" instrument="EURUSD" quantity="1000000">Loading the ticket…</pony-app>
+    </figure>
+    <figure class="portal-ticket">
+      <figcaption id="ticket-2-title">Ticket 2</figcaption>
+      <pony-app id="ticket-2" view="ticket" instrument="USDJPY" quantity="500000">Loading the ticket…</pony-app>
+    </figure>
+  </section>
+
+  <section class="portal-blotter">
+    <h2>Blotter <small>the portal's own table, fed by the tickets' trade events</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>Ticket</th><th>Side</th><th>Quantity</th><th>Instrument</th><th>Price</th></tr></thead>
+      <tbody id="trades"><tr class="portal-empty"><td colspan="6">No trade yet</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="portal-app">
+    <h2>An existing application, unchanged: the showcase</h2>
+    <pony-app id="showcase" class="portal-showcase">Loading the showcase…</pony-app>
+  </section>
+</main>
+</body>
+</html>

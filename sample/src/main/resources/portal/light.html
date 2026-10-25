@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>In the page's document</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="gallery.js" defer></script>
+</head>
+<body data-embeds>
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">U5 · In the page's document</div>
+</header>
+<main>
+  <section class="gallery-intro">
+    <h1>In the page's document</h1>
+    <p>With <code>isolation="none"</code> the ticket renders in this page's document, not in a shadow root: an
+      addon that searches the document (<code>document.getElementById</code>, jQuery) finds it. The styles meet:
+      this page's broad rules reach the ticket where its own are not more specific, and the application's page rules
+      (<code>:root</code>, <code>body</code>) are rewritten to apply to the element only.</p>
+    <pre class="snippet">&lt;pony-app src="https://fx.example.com/sample/" isolation="none" view="ticket"&gt;&lt;/pony-app&gt;</pre>
+  </section>
+  <div class="gallery-row">
+    <pony-app id="light" isolation="none" view="ticket" instrument="USDCHF" data-src="{app}">Loading the ticket…</pony-app>
+    <p class="gallery-aside">In the document: <code>document.querySelector('#light .pony-ticket')</code> finds the
+      ticket's element, which it would not inside a shadow root.</p>
+  </div>
+</main>
+</body>
+</html>

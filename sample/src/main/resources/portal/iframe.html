@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>In an iframe</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="gallery.js" defer></script>
+</head>
+<body>
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">U3 · In an iframe</div>
+</header>
+<main>
+  <section class="gallery-intro">
+    <h1>In an iframe</h1>
+    <p>The showcase is another document: nothing to change in it nor in this page. What the frame costs shows below:
+      its height is this page's guess, a dialog or a date picker stops at its edge, and the page's styles stay out.</p>
+    <pre class="snippet">&lt;iframe src="https://fx.example.com/sample/" style="height: 640px"&gt;&lt;/iframe&gt;</pre>
+  </section>
+  <iframe class="gallery-frame" title="The showcase" data-src="{app}#inputs"></iframe>
+</main>
+</body>
+</html>

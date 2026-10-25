@@ -73,3 +73,28 @@ th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--lin
 
 /* The embedded showcase scrolls in its own box */
 .portal-showcase { height: 640px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+
+/* The gallery: the ways to integrate PonySDK (index.html), and the page of each */
+a.portal-brand { color: inherit; text-decoration: none; }
+h1 { font-size: 26px; margin: 0 0 8px; }
+code { font: 13px ui-monospace, Menlo, Consolas, monospace; background: rgba(157, 23, 77, .07); padding: 1px 4px; border-radius: 3px; }
+.gallery-intro { max-width: 820px; }
+.gallery-intro p { margin: 0 0 12px; }
+.snippet { margin: 0; padding: 12px 14px; overflow-x: auto; background: #1f2937; color: #f9fafb; border-radius: 6px;
+    font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.gallery { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.case { display: flex; flex-direction: column; gap: 6px; padding: 18px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 6px; }
+.case h2 { margin: 0; }
+.case p { margin: 0; }
+.case-code { align-self: flex-start; font: 600 12px ui-monospace, Menlo, monospace; color: var(--brand);
+    border: 1px solid var(--brand); border-radius: 999px; padding: 0 8px; }
+.case-when { color: #6b7280; font-size: 14px; font-style: italic; }
+.case-open { margin-top: auto; padding-top: 6px; color: var(--brand); font-weight: bold; }
+.case-open + .case-open { margin-top: 0; padding-top: 0; }
+.gallery-frame { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.gallery-row { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; }
+.gallery-aside { margin: 0; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
+.gallery-aside dt { font-weight: bold; }
+.gallery-aside dd { margin: 6px 0 0; overflow-wrap: anywhere; }

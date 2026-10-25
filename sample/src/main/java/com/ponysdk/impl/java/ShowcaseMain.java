@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.slf4j.Logger;
@@ -86,18 +88,27 @@ public class ShowcaseMain {
         startPortal();
     }
 
-    /** The portal: static files of another origin, no PonySDK in them but the <pony-app> elements. */
+    /**
+     * The portal: static files of another origin, the gallery of the ways to integrate PonySDK, no PonySDK in them but
+     * the <pony-app> elements; and its own copy of PonySDK's terminal under vendor/, as a product of another version
+     * would bring it (the gallery's U9).
+     */
     private static void startPortal() throws Exception {
         final Server portal = new Server();
         final ServerConnector connector = new ServerConnector(portal);
         connector.setPort(PORTAL_PORT);
         portal.addConnector(connector);
+        final ResourceFactory resources = ResourceFactory.of(portal);
         final ResourceHandler files = new ResourceHandler();
-        files.setBaseResource(ResourceFactory.of(portal).newClassLoaderResource("portal/"));
+        files.setBaseResource(resources.newClassLoaderResource("portal/"));
         files.setWelcomeFiles("index.html");
         files.setDirAllowed(false);
-        portal.setHandler(files);
+        final ResourceHandler terminal = new ResourceHandler();
+        terminal.setBaseResource(resources.newClassLoaderResource("ponyterminal/"));
+        terminal.setDirAllowed(false);
+        portal.setHandler(new ContextHandlerCollection(new ContextHandler(terminal, "/vendor/ponysdk/ponyterminal"),
+            new ContextHandler(files, "/")));
         portal.start();
-        log.info("Embedding demo: http://[::1]:{}/ embeds the showcase from another origin", PORTAL_PORT);
+        log.info("Integrating PonySDK, the gallery: http://[::1]:{}/ shows the showcase from another origin", PORTAL_PORT);
     }
 }

@@ -9,7 +9,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 /** The portal: same host as the showcase, so the same site (ADR-0008, decision 9). */
 const PORTAL_URL = process.env.PORTAL_URL || (() => {
   const url = new URL(BASE_URL);
-  return `${url.protocol}//${url.hostname}:8082/`;
+  return `${url.protocol}//${url.hostname}:8082/portal.html`;
 })();
 
 /**
@@ -19,7 +19,7 @@ const PORTAL_URL = process.env.PORTAL_URL || (() => {
 const OTHER_SITE_PORTAL = (() => {
   const url = new URL(BASE_URL);
   const host = url.hostname === '127.0.0.1' ? 'localhost' : '127.0.0.1';
-  return `${url.protocol}//${host}:8082/?app=${encodeURIComponent(BASE_URL)}`;
+  return `${url.protocol}//${host}:8082/portal.html?app=${encodeURIComponent(BASE_URL)}`;
 })();
 
 /** Page errors and console errors, the portal's missing favicon aside. */
