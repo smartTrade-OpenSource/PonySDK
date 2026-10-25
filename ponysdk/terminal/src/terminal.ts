@@ -259,6 +259,13 @@ export class Terminal implements Session, Host {
         });
     }
 
+    /** Fetched from the application's origin with its cookies, by an embedded terminal: the response sets one there. */
+    cookieRequested(requestId: number): void {
+        const headers: Record<string, string> = this.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: this.contextKey };
+        fetch(this.streamUrl(requestId), { credentials: 'include', headers })
+            .catch(e => log.error('A cookie of the application could not be set', e));
+    }
+
     streamUrl(requestId: number): string {
         const url = `${this.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${this.contextId}`
             + `&${C.STREAM_REQUEST_ID}=${requestId}`;

@@ -513,6 +513,27 @@ public class UIContext {
     }
 
     /**
+     * Registers a {@link StreamHandler} that the terminal of an embedded application fetches with its credentials
+     * from the application's origin, without showing it: what a response sets there, cookies, is the application's
+     * (docs/decisions/0009-embedding-limits.md, decision 7).
+     *
+     * @param streamListener the stream handler
+     */
+    public void stackCookieRequest(final StreamHandler streamListener) {
+        final int streamRequestID = nextStreamRequestID();
+
+        final ModelWriter writer = getWriter();
+        writer.beginObject(PWindow.getMain());
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, 0);
+        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_COOKIE_REQUEST.getValue());
+        writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.endObject();
+
+        if (streamListenerByID == null) streamListenerByID = new HashMap<>(INITIAL_STREAM_MAP_CAPACITY);
+        streamListenerByID.put(streamRequestID, streamListener);
+    }
+
+    /**
      * Generates the new stream id
      *
      * @return the new ID
@@ -802,6 +823,11 @@ public class UIContext {
      */
     public ContextKeys getKeys() {
         return keys;
+    }
+
+    /** Whether the terminal runs in a {@code <pony-app>} element of another page (ADR-0008), not in its own page. */
+    public boolean isEmbedded() {
+        return keys != null;
     }
 
     /**

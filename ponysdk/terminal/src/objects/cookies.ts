@@ -12,7 +12,8 @@ const EXPIRED = 'Fri, 02-Jan-1970 00:00:00 GMT';
 /**
  * The cookies, object #0: created by the terminal, which sends the page's cookies to the server first thing. The
  * server then sets and removes cookies through it. In a <pony-app> element, document.cookie is the host page's, not
- * the application's: none is sent and none is written (ADR-0008); the server reads the handshake's.
+ * the application's: none is sent and none is written here; the server reads those of the handshake, and writes
+ * through a request to the application's origin (HANDLER_COOKIE_REQUEST, ADR-0009).
  */
 export class Cookies extends BaseObject {
     private readonly embedded: boolean;

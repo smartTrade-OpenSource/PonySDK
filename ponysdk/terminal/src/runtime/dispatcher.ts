@@ -29,6 +29,8 @@ export interface Host {
     contextDestroyed(): void;
     /** HANDLER_STREAM_REQUEST: the server has a file for this page. */
     streamRequested(requestId: number): void;
+    /** HANDLER_COOKIE_REQUEST: a cookie of an embedded application, set by the response to this request (ADR-0009). */
+    cookieRequested(requestId: number): void;
 }
 
 /**
@@ -390,9 +392,10 @@ export class Dispatcher implements Context {
         const r = this.reader;
         r.read(); // HANDLER_TYPE
         const handler = r.int;
-        if (handler === H.HANDLER_STREAM_REQUEST) {
+        if (handler === H.HANDLER_STREAM_REQUEST || handler === H.HANDLER_COOKIE_REQUEST) {
             r.read(); // STREAM_REQUEST_ID
-            this.host.streamRequested(r.int);
+            if (handler === H.HANDLER_STREAM_REQUEST) this.host.streamRequested(r.int);
+            else this.host.cookieRequested(r.int);
             r.read(); // END
             return;
         }

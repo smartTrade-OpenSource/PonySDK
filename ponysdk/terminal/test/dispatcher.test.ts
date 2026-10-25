@@ -90,6 +90,7 @@ function run(name: string): Run {
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
         streamRequested: () => undefined,
+        cookieRequested: () => undefined,
     };
     const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
     const factory: ObjectFactory = (type, context, id) => {
@@ -143,6 +144,7 @@ test('a block creating a type whose module loads later waits, and the blocks aft
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
         streamRequested: () => undefined,
+        cookieRequested: () => undefined,
     };
     const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
     const factory: ObjectFactory = (type, context, id) => {
@@ -183,6 +185,7 @@ test('the answer to the probe tells how long it waited in the terminal (ADR-0005
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
         streamRequested: () => undefined,
+        cookieRequested: () => undefined,
     };
     const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
     const factory: ObjectFactory = () => {

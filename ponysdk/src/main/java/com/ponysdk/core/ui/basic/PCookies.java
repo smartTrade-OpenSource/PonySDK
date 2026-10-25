@@ -30,11 +30,24 @@ import com.ponysdk.core.writer.ModelWriter;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The cookies of the page. In a {@code <pony-app>} element of another page, those of the application's origin
+ * (docs/decisions/0009-embedding-limits.md, decision 7): read from the WebSocket upgrade, the session cookie aside, and
+ * written by a request the terminal makes to the application's origin, answered with {@code Set-Cookie}. From a page of
+ * another site, the browser's rules for third-party cookies apply.
+ */
 public class PCookies {
 
     private static final int ID = 0; // reserved
@@ -59,7 +72,14 @@ public class PCookies {
     }
 
     public String removeCookie(final String name, final String path) {
-        final ModelWriter writer = UIContext.get().getWriter();
+        final UIContext uiContext = UIContext.get();
+        if (uiContext.isEmbedded()) {
+            final Cookie cookie = cookie(name, "", path);
+            cookie.setMaxAge(0);
+            uiContext.stackCookieRequest(setting(cookie));
+            return cachedCookies.remove(name);
+        }
+        final ModelWriter writer = uiContext.getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.REMOVE_COOKIE, name);
@@ -89,7 +109,17 @@ public class PCookies {
                           final boolean secure, String sameSite) {
         cachedCookies.put(name, value);
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final UIContext uiContext = UIContext.get();
+        if (uiContext.isEmbedded()) {
+            final Cookie cookie = cookie(name, value, path);
+            if (expires != null) cookie.setMaxAge((int) Math.max(0, (expires.getTime() - System.currentTimeMillis()) / 1000));
+            if (domain != null) cookie.setDomain(domain);
+            cookie.setSecure(secure);
+            if (sameSite != null) cookie.setAttribute("SameSite", sameSite);
+            uiContext.stackCookieRequest(setting(cookie));
+            return;
+        }
+        final ModelWriter writer = uiContext.getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.ADD_COOKIE, name);
@@ -104,6 +134,14 @@ public class PCookies {
 
     public void onClientData(final JsonObject event) {
         final JsonArray cookies = event.getJsonArray(ClientToServerModel.COOKIES.toStringValue());
+        final UIContext uiContext = UIContext.get();
+        // An embedded terminal sends none: document.cookie is the host page's
+        if (uiContext != null && uiContext.isEmbedded()) {
+            final String session = sessionCookieName(uiContext.getSession());
+            for (final java.net.HttpCookie cookie : uiContext.getRequestCookies()) {
+                if (!cookie.getName().equals(session)) cachedCookies.put(decode(cookie.getName()), decode(cookie.getValue()));
+            }
+        }
 
         for (int i = 0; i < cookies.size(); i++) {
             final JsonObject object = cookies.getJsonObject(i);
@@ -130,5 +168,39 @@ public class PCookies {
 
     public Collection<String> getNames() {
         return cachedCookies.keySet();
+    }
+
+    /** As the terminal writes them in a page: name and value URI-encoded. */
+    private static Cookie cookie(final String name, final String value, final String path) {
+        final Cookie cookie = new Cookie(encode(name), encode(value));
+        if (path != null) cookie.setPath(path);
+        return cookie;
+    }
+
+    /** What the terminal's request gets: the cookie, and nothing else. */
+    private static com.ponysdk.core.ui.eventbus.StreamHandler setting(final Cookie cookie) {
+        return (request, response, uiContext) -> {
+            response.addCookie(cookie);
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        };
+    }
+
+    private static String sessionCookieName(final HttpSession session) {
+        final String name = session != null ? session.getServletContext().getSessionCookieConfig().getName() : null;
+        return name != null ? name : "JSESSIONID";
+    }
+
+    /** As encodeURIComponent: a space is %20, not +. */
+    private static String encode(final String text) {
+        return URLEncoder.encode(text, StandardCharsets.UTF_8).replace("+", "%20");
+    }
+
+    /** As decodeURIComponent: a + stays. */
+    private static String decode(final String text) {
+        try {
+            return URLDecoder.decode(text.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (final IllegalArgumentException e) {
+            return text;
+        }
     }
 }

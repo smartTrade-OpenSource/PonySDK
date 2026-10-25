@@ -340,6 +340,29 @@ test('a page of an origin the application does not list can neither feed its chi
   await expect.poll(() => errors.some(e => /not a parent of this application/.test(e))).toBe(true);
 });
 
+test('an embedded application\'s cookies are its origin\'s: written and read again by a new context (ADR-0009)', async ({ page, context }) => {
+  await openPortal(page);
+  const src = await page.locator('#ticket-1').getAttribute('src');
+  // The Misc page counts its loads with a cookie: an element of its own each time, so a context of its own
+  const load = async () => {
+    await page.evaluate(url => {
+      document.getElementById('misc')?.remove();
+      const app = document.createElement('pony-app');
+      app.id = 'misc';
+      app.setAttribute('src', url + '#misc');
+      document.querySelector('.portal-app').append(app);
+    }, src);
+    const label = page.locator('#misc .misc-cookie');
+    await expect(label).toHaveText(/^Loaded \d+ time/, { timeout: 15000 });
+    return Number(/\d+/.exec(await label.innerText())[0]);
+  };
+  const first = await load();
+  // By name: WebKit gives an IPv6 host's cookies the domain ::1, which a URL filter of [::1] misses
+  await expect.poll(async () => (await context.cookies()).find(c => c.name === 'showcase-visits')?.value).toBe(String(first));
+  expect(await page.evaluate(() => document.cookie)).not.toContain('showcase-visits'); // not the portal's own
+  expect(await load()).toBe(first + 1);
+});
+
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(BASE_URL + '#embedding');

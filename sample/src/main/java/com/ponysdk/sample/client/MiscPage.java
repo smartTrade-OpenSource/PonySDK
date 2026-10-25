@@ -39,6 +39,7 @@ import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
 final class MiscPage {
 
     private static final Logger log = LoggerFactory.getLogger(MiscPage.class);
+    private static final String VISITS = "showcase-visits";
 
     private MiscPage() {
     }
@@ -97,9 +99,22 @@ final class MiscPage {
         p.add(frame);
 
         p.add(sectionTitle("Cookies"));
-        final PCookies cookies = new PCookies();
-        cookies.setCookie("showcase", "true");
-        final PLabel cookieLabel = Element.newPLabel("Cookie 'showcase' set to: true");
+        // The cookies of the application's origin, in its page or in an element of another page (ADR-0009)
+        final PCookies cookies = UIContext.get().getCookies();
+        final PLabel cookieLabel = Element.newPLabel();
+        cookieLabel.addStyleName("misc-cookie");
+        final Runnable count = () -> {
+            int visits;
+            try {
+                visits = Integer.parseInt(String.valueOf(cookies.getCookie(VISITS))) + 1;
+            } catch (final NumberFormatException e) {
+                visits = 1;
+            }
+            cookies.setCookie(VISITS, String.valueOf(visits));
+            cookieLabel.setText("Loaded " + visits + " time(s) in this browser: the cookie " + VISITS + " counts them");
+        };
+        if (cookies.isInitialized()) count.run();
+        else cookies.setListener(count::run);
         p.add(cookieLabel);
 
         return p;
