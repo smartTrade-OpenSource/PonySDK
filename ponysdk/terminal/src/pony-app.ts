@@ -25,6 +25,9 @@ interface Manifest {
     reconnection: boolean;
     /** GWT's class names: the legacy layer's script, null without (ADR-0009, decision 8). */
     legacy: string | null;
+    /** The application's terminal, and the version of mountPonyApp's contract it has (ADR-0009, decision 10). */
+    terminal?: string;
+    mount?: number;
 }
 
 /** What the page's scripts reach as window.pony when no page terminal runs: the addons' registry. */
@@ -118,7 +121,12 @@ function loadLegacy(url: string): Promise<void> {
 async function loadApplication(manifest: Manifest, base: string): Promise<void> {
     const globals = globalThis as PonyGlobals;
     const [ponysdk, ...others] = manifest.scripts.map(script => new URL(script, base).href);
-    await loadScripts(typeof globals.onPonySDKModuleLoaded === 'function' || ponysdk === undefined ? others : [ponysdk, ...others]);
+    const loaded = typeof globals.onPonySDKModuleLoaded === 'function';
+    if (loaded && ponysdk !== undefined && ![...document.scripts].some(script => script.src === ponysdk)) {
+        // Its globals are the addons' API: one per page (ADR-0009, decision 10)
+        log.warn(`${ponysdk} not loaded: the page's ponysdk.js serves the addons of every application`);
+    }
+    await loadScripts(loaded || ponysdk === undefined ? others : [ponysdk, ...others]);
     if (manifest.legacy !== null) await loadLegacy(new URL(manifest.legacy, base).href);
     const page = document as PonyDocument;
     for (const sheet of manifest.sharedSheets) {
@@ -163,65 +171,58 @@ function stylesheet(href: string, id: string, origin: string, root: string): HTM
     return link;
 }
 
+/** The terminal of this element's module: an application whose manifest names another runs on that one. */
+const OWN_TERMINAL = new URL('../terminal.js', import.meta.url).href;
+
+/** The contract of mount 1 (ADR-0009, decision 10), frozen: what terminal.js of every version exports. */
+type MountPonyApp = (element: HTMLElement, src: string) => Promise<{ stop(): void }>;
+
+/** What a host page may give an element: its credential. */
+type HostElement = HTMLElement & { credential?: (() => string | Promise<string>) | undefined };
+
 /**
- * <pony-app src="…">: a PonySDK application in another page (docs/decisions/0008-embedded-application.md). Each
- * element runs a terminal of its own, on a context of its own.
- * - src: the application's URL. Its query gives the application's parameters, its fragment the first history token.
- * - isolation: shadow (the default), the application renders in a shadow root; none, in the page.
- * - history: memory (the default), the token stays in the element; hash, the page's fragment is the application's.
- * Its other attributes are the application's (PHost). Its children show until the application's first widget. It
- * dispatches pony-connection-lost and pony-reconnected; pony-title and pony-location, the window title and the
- * location the application asks for (ADR-0009).
- * - credential, a property: a function returning the credential of the user (a JWT, an OAuth access token) or a
- *   promise of it, called before each start; the application reads it with PHost.getCredential()
- *   (docs/decisions/0009-embedding-limits.md). A property, never an attribute: the DOM is every script's to read.
+ * An application in an element: run by this module's terminal, or, when the application's manifest names the terminal
+ * of another PonySDK version (another URL), by that one, which the element hands itself to (mountPonyApp).
  */
-export class PonyApp extends HTMLElement {
-    static readonly observedAttributes = ['src', 'isolation', 'history'];
-
-    // Declared only: a field would replace the value a host set before the element was defined
-    declare credential: (() => string | Promise<string>) | undefined;
-
+class ElementApplication {
+    private readonly element: HostElement;
+    private readonly src: () => string | null;
+    /** Whether an application of another terminal is handed to it: false in the terminal it is handed to. */
+    private readonly delegating: boolean;
     private terminal: Terminal | undefined;
+    /** The application of another terminal, running. */
+    private delegate: { stop(): void } | undefined;
     private lifetime: AbortController | undefined;
     private body: HTMLElement | undefined;
     /** Started, or starting: the manifest and the scripts load before the terminal. */
-    private active = false;
+    active = false;
     /** Bumped by each stop: a start that awaited meanwhile gives up. */
     private generation = 0;
     private restartScheduled = false;
 
-    connectedCallback(): void {
-        if (!this.active) void this.start(); // a move puts the element back at once: it keeps running
+    constructor(element: HostElement, src: () => string | null, delegating: boolean) {
+        this.element = element;
+        this.src = src;
+        this.delegating = delegating;
     }
 
-    /** Stops if still out of the page at the next task: a move removes the element and puts it back at once. */
-    disconnectedCallback(): void {
-        setTimeout(() => {
-            if (!this.isConnected) this.stop();
-        });
-    }
-
-    /** A running application starts again; one still starting reads isolation and history when it runs. */
-    attributeChangedCallback(name: string, previous: string | null, value: string | null): void {
-        if (previous === value || !this.isConnected) return;
-        if (this.terminal !== undefined || (this.active && name === 'src')) this.restartLater();
-        else if (!this.active) void this.start();
+    get running(): boolean {
+        return this.terminal !== undefined || this.delegate !== undefined;
     }
 
     /** Starts the application again on a new context, out of the current task (it may be the terminal's). */
-    private restartLater(): void {
+    restartLater(): void {
         if (this.restartScheduled) return;
         this.restartScheduled = true;
         setTimeout(() => {
             this.restartScheduled = false;
             this.stop();
-            if (this.isConnected) void this.start();
+            if (this.element.isConnected) void this.start();
         });
     }
 
-    private async start(): Promise<void> {
-        const src = this.getAttribute('src');
+    async start(): Promise<void> {
+        const src = this.src();
         if (src === null || src === '') return;
         this.active = true;
         const generation = this.generation;
@@ -230,9 +231,14 @@ export class PonyApp extends HTMLElement {
         const base = new URL('.', url).href;
         try {
             const manifest = await manifestOf(base);
+            const terminal = manifest.terminal === undefined ? OWN_TERMINAL : new URL(manifest.terminal, base).href;
+            if (this.delegating && terminal !== OWN_TERMINAL) {
+                await this.handOver(terminal, src, generation);
+                return;
+            }
             await loadApplication(manifest, base);
             const credential = await this.credentialForStart();
-            if (generation !== this.generation || !this.isConnected) return;
+            if (generation !== this.generation || !this.element.isConnected) return;
             this.run(url, base, manifest, credential);
         } catch (e) {
             log.error(`<pony-app src="${src}"> cannot start`, e);
@@ -240,12 +246,23 @@ export class PonyApp extends HTMLElement {
         }
     }
 
+    /** Another PonySDK's application: its own terminal runs it in this element (ADR-0009, decision 10). */
+    private async handOver(terminal: string, src: string, generation: number): Promise<void> {
+        const other = await import(terminal) as { mountPonyApp?: MountPonyApp };
+        if (typeof other.mountPonyApp !== 'function') throw new Error(`${terminal} runs no application in an element of another version`);
+        if (generation !== this.generation || !this.element.isConnected) return;
+        const delegate = await other.mountPonyApp(this.element, src);
+        if (generation === this.generation) this.delegate = delegate;
+        else delegate.stop(); // stopped meanwhile
+    }
+
     /** The host's credential for a new context; none when the host gave none, or its function failed. */
     private async credentialForStart(): Promise<string | null> {
-        if (typeof this.credential !== 'function') return null;
+        const credential = this.element.credential;
+        if (typeof credential !== 'function') return null;
         try {
-            const credential = await this.credential();
-            return typeof credential === 'string' ? credential : null;
+            const value = await credential.call(this.element);
+            return typeof value === 'string' ? value : null;
         } catch (e) {
             log.error('<pony-app>: the credential function failed, the application starts without one', e);
             return null;
@@ -253,7 +270,8 @@ export class PonyApp extends HTMLElement {
     }
 
     private run(url: URL, base: string, manifest: Manifest, credential: string | null): void {
-        const shadow = this.getAttribute('isolation') !== 'none';
+        const element = this.element;
+        const shadow = element.getAttribute('isolation') !== 'none';
         const body = document.createElement('div');
         body.setAttribute('data-pony-body', '');
         body.setAttribute('part', 'body');
@@ -261,7 +279,7 @@ export class PonyApp extends HTMLElement {
             shadow ? ':host' : 'pony-app'));
         let byId: (id: string) => HTMLElement | null;
         if (shadow) {
-            const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
+            const root = element.shadowRoot ?? element.attachShadow({ mode: 'open' });
             adoptStyles(root);
             const rules = document.createElement('style');
             rules.textContent = SHADOW_RULES;
@@ -280,20 +298,20 @@ export class PonyApp extends HTMLElement {
                 pageStyles.add(link.href);
                 document.head.append(link);
             }
-            if (this.shadowRoot !== null) { // isolation was shadow: the shadow root only shows the element's children
-                this.shadowRoot.adoptedStyleSheets = [];
-                this.shadowRoot.replaceChildren(document.createElement('slot'));
+            if (element.shadowRoot !== null) { // isolation was shadow: the shadow root only shows the element's children
+                element.shadowRoot.adoptedStyleSheets = [];
+                element.shadowRoot.replaceChildren(document.createElement('slot'));
             }
-            this.append(body);
+            element.append(body);
             byId = id => document.getElementById(id);
         }
 
         const lifetime = new AbortController();
-        const attributes = hostAttributes(this);
+        const attributes = hostAttributes(element);
         const notify = (type: string, detail?: unknown) =>
-            this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
+            element.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
         const embedding: Embedding = {
-            element: this, attributes, restart: () => this.restartLater(), notify,
+            element, attributes, restart: () => this.restartLater(), notify,
             get children() {
                 return children; // made with the terminal, used once it runs
             },
@@ -302,7 +320,7 @@ export class PonyApp extends HTMLElement {
             url,
             body,
             byId,
-            history: this.getAttribute('history') === 'hash' ? new BrowserHistory(lifetime.signal) : new MemoryHistory(url.hash),
+            history: element.getAttribute('history') === 'hash' ? new BrowserHistory(lifetime.signal) : new MemoryHistory(url.hash),
             embedding,
             transparentReconnection: manifest.reconnection,
             handshake: `&${C.HOST_ATTRIBUTES}=${encodeURIComponent(JSON.stringify(attributes))}`,
@@ -326,17 +344,72 @@ export class PonyApp extends HTMLElement {
     }
 
     /** The application goes: its context is destroyed (ADR-0005), its objects release the page; the children show. */
-    private stop(): void {
+    stop(): void {
         this.generation++;
         this.active = false;
+        this.delegate?.stop();
+        this.delegate = undefined;
         this.terminal?.dispose();
         this.terminal = undefined;
         this.lifetime?.abort();
         this.lifetime = undefined;
         this.body?.remove();
         this.body = undefined;
-        this.shadowRoot?.replaceChildren(document.createElement('slot'));
+        this.element.shadowRoot?.replaceChildren(document.createElement('slot'));
     }
+}
+
+/**
+ * <pony-app src="…">: a PonySDK application in another page (docs/decisions/0008-embedded-application.md). Each
+ * element runs a terminal of its own, on a context of its own: that of the application's PonySDK version, which may
+ * not be the one that defined the element (ADR-0009).
+ * - src: the application's URL. Its query gives the application's parameters, its fragment the first history token.
+ * - isolation: shadow (the default), the application renders in a shadow root; none, in the page.
+ * - history: memory (the default), the token stays in the element; hash, the page's fragment is the application's.
+ * Its other attributes are the application's (PHost). Its children show until the application's first widget. It
+ * dispatches pony-connection-lost and pony-reconnected; pony-title and pony-location, the window title and the
+ * location the application asks for (ADR-0009).
+ * - credential, a property: a function returning the credential of the user (a JWT, an OAuth access token) or a
+ *   promise of it, called before each start; the application reads it with PHost.getCredential()
+ *   (docs/decisions/0009-embedding-limits.md). A property, never an attribute: the DOM is every script's to read.
+ */
+export class PonyApp extends HTMLElement {
+    static readonly observedAttributes = ['src', 'isolation', 'history'];
+
+    // Declared only: a field would replace the value a host set before the element was defined
+    declare credential: (() => string | Promise<string>) | undefined;
+
+    private readonly application = new ElementApplication(this, () => this.getAttribute('src'), true);
+
+    connectedCallback(): void {
+        if (!this.application.active) void this.application.start(); // a move puts the element back at once: it keeps running
+    }
+
+    /** Stops if still out of the page at the next task: a move removes the element and puts it back at once. */
+    disconnectedCallback(): void {
+        setTimeout(() => {
+            if (!this.isConnected) this.application.stop();
+        });
+    }
+
+    /** A running application starts again; one still starting reads isolation and history when it runs. */
+    attributeChangedCallback(name: string, previous: string | null, value: string | null): void {
+        if (previous === value || !this.isConnected) return;
+        const application = this.application;
+        if (application.running || (application.active && name === 'src')) application.restartLater();
+        else if (!application.active) void application.start();
+    }
+}
+
+/**
+ * Runs the application of src in a <pony-app> element that another PonySDK version defined: the contract of mount 1
+ * (ADR-0009, decision 10), which terminal.js exports. This version's terminals create PHost's object.
+ */
+export async function mountPonyApp(element: HTMLElement, src: string): Promise<{ stop(): void }> {
+    defineCreator(W.HOST, HostObject.create);
+    const application = new ElementApplication(element, () => src, false);
+    await application.start();
+    return { stop: () => application.stop() };
 }
 
 /**

@@ -35,9 +35,11 @@ export interface Host {
 
 /**
  * The addon factories, one table per page: ponysdk.js registers them on the page, and the terminals of the page's
- * <pony-app> elements create their addons from them (ADR-0008).
+ * <pony-app> elements create their addons from them (ADR-0008), whichever PonySDK version each terminal is: the
+ * table is the page's, not this module's (ADR-0009, decision 10).
  */
-const addOnFactories = new Map<string, AddOnFactory>();
+const addOnFactories: Map<string, AddOnFactory> =
+    (globalThis as { ponyAddOnFactories?: Map<string, AddOnFactory> }).ponyAddOnFactories ??= new Map();
 
 /** Registers an addon factory for the terminals of the page (AbstractAddon.defineAddon, through window.pony). */
 export function registerAddOnFactory(signature: string, factory: AddOnFactory): void {

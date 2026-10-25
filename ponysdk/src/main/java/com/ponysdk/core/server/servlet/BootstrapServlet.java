@@ -270,7 +270,11 @@ public class BootstrapServlet extends HttpServlet {
             .add("styles", styles)
             .add("scripts", scripts)
             .add("sharedSheets", sheets)
-            .add("reconnection", configuration.getReconnectionTimeoutMs() > 0);
+            .add("reconnection", configuration.getReconnectionTimeoutMs() > 0)
+            // The terminal that runs it, and the contract of its mountPonyApp: an element another PonySDK version
+            // defined hands itself to it (ADR-0009, decision 10)
+            .add("terminal", rootPath + "ponyterminal/terminal.js")
+            .add("mount", 1);
         // The legacy layer, which the element runs on its container (ADR-0009); null without
         if (configuration.isLegacyClassNames()) manifest.add("legacy", rootPath + "ponyterminal/legacy.js");
         else manifest.addNull("legacy");

@@ -385,6 +385,34 @@ test('the legacy class names of an embedded application: on its container, not o
   await expect(page.locator('html')).not.toHaveAttribute('data-pony-legacy');
 });
 
+test('two PonySDK versions on a page: each application runs on its own version\'s terminal (ADR-0009)', async ({ page }) => {
+  // Another version: the same files under another URL, which the application's manifest names as its terminal
+  await page.route(/\/sample\/v2\/ponyterminal\//, async route => route.fulfill({
+    response: await route.fetch({ url: route.request().url().replace('/sample/v2/ponyterminal/', '/sample/ponyterminal/') }) }));
+  await page.route('**/sample/ponyapp.json', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, json: { ...(await response.json()), terminal: 'v2/ponyterminal/terminal.js' } });
+  });
+  const requested = [];
+  page.on('request', request => requested.push(new URL(request.url()).pathname));
+  const { first } = await openPortal(page);
+  expect(requested).toContain('/sample/ponyterminal/chunks/pony-app.js'); // the element, the page's terminal's
+  expect(requested).toContain('/sample/v2/ponyterminal/chunks/pony-app.js'); // the application, its own terminal's
+
+  await page.locator('#instrument').selectOption('GBPUSD'); // attributes and events, through the other terminal
+  await expect(first.getByText('GBP / USD')).toBeVisible();
+  await first.locator('.pony-ticket-buy').click();
+  await expect(page.locator('#trades tr').first()).toContainText('BUY');
+
+  // An addon of the application: registered by the page's ponysdk.js, created by the other terminal
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src') + '#binary-protocol');
+    document.querySelector('.portal-app').append(app);
+  });
+  await expect.poll(() => page.evaluate(() => window.__createLen), { timeout: 15000 }).toBe(5);
+});
+
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(BASE_URL + '#embedding');

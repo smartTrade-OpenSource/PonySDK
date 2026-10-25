@@ -34,4 +34,12 @@ if (!applicationPage()) {
     }
 }
 
+/**
+ * Runs the application of src in a <pony-app> element that another PonySDK version defined: the contract of mount 1
+ * (docs/decisions/0009-embedding-limits.md, decision 10). Frozen: its name, its arguments and its result stay.
+ */
+export function mountPonyApp(element: HTMLElement, src: string): Promise<{ stop(): void }> {
+    return import('./pony-app.ts').then(m => m.mountPonyApp(element, src));
+}
+
 export * from './core-api.ts';

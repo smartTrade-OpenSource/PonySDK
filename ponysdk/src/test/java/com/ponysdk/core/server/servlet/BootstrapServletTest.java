@@ -339,6 +339,8 @@ public class BootstrapServletTest {
         assertEquals("[\"css/shared.css\"]", manifest.getJsonArray("sharedSheets").toString());
         assertTrue(manifest.getBoolean("reconnection"));
         assertTrue(manifest.isNull("legacy"));
+        assertEquals("ctx/ponyterminal/terminal.js", manifest.getString("terminal"), "under the root path, as ponysdk.js");
+        assertEquals(1, manifest.getInt("mount"));
     }
 
     @Test
@@ -352,7 +354,7 @@ public class BootstrapServletTest {
 
         Mockito.verify(response).setContentType("application/json;charset=UTF-8");
         Mockito.verify(response).setHeader("Cache-Control", "no-cache");
-        assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false,\"legacy\":null}",
+        assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false,\"terminal\":\"ponyterminal/terminal.js\",\"mount\":1,\"legacy\":null}",
             body.toString());
     }
 }
