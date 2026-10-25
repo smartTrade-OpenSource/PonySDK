@@ -35,6 +35,8 @@ export interface Session {
     byId(id: string): HTMLElement | null;
     /** The <pony-app> element this terminal runs in, null in a page (ADR-0008). */
     readonly embedding: Embedding | null;
+    /** GWT's class names on the DOM: the legacy layer (legacy.ts) watches this terminal's widgets. */
+    readonly legacy: boolean;
     /** The key that proves this context in a header, for an embedded terminal; null otherwise (ADR-0009). */
     readonly contextKey: string | null;
     /** The URL of a stream the server holds for this context, with its stream key when it has one (ADR-0009). */

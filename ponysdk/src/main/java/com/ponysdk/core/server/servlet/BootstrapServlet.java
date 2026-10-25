@@ -29,6 +29,7 @@ import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,12 +266,15 @@ public class BootstrapServlet extends HttpServlet {
         final JsonArrayBuilder sheets = Json.createArrayBuilder();
         final Set<String> configuredSheets = configuration.getWcSharedSheets();
         if (configuredSheets != null) configuredSheets.forEach(sheets::add);
-        return Json.createObjectBuilder()
+        final JsonObjectBuilder manifest = Json.createObjectBuilder()
             .add("styles", styles)
             .add("scripts", scripts)
             .add("sharedSheets", sheets)
-            .add("reconnection", configuration.getReconnectionTimeoutMs() > 0)
-            .build().toString();
+            .add("reconnection", configuration.getReconnectionTimeoutMs() > 0);
+        // The legacy layer, which the element runs on its container (ADR-0009); null without
+        if (configuration.isLegacyClassNames()) manifest.add("legacy", rootPath + "ponyterminal/legacy.js");
+        else manifest.addNull("legacy");
+        return manifest.build().toString();
     }
 
     protected String addHeader(final HttpServletRequest request) {

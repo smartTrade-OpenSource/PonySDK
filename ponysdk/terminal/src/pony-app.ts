@@ -23,6 +23,8 @@ interface Manifest {
     scripts: string[];
     sharedSheets: string[];
     reconnection: boolean;
+    /** GWT's class names: the legacy layer's script, null without (ADR-0009, decision 8). */
+    legacy: string | null;
 }
 
 /** What the page's scripts reach as window.pony when no page terminal runs: the addons' registry. */
@@ -92,6 +94,23 @@ function loadScripts(urls: string[]): Promise<void> {
     })).then(() => undefined);
 }
 
+/** The legacy layer, once per page, told not to start on the host's document: each element gives it its container. */
+function loadLegacy(url: string): Promise<void> {
+    let loading = scripts.get(url);
+    if (loading === undefined) {
+        loading = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.setAttribute('data-pony-legacy', 'element');
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`${url} did not load`));
+            document.head.append(script);
+        });
+        scripts.set(url, loading);
+    }
+    return loading;
+}
+
 /**
  * The application's scripts, ponysdk.js first unless the page has it, then ponysdk.js is handed the page's addon
  * registry as window.pony, unless a page terminal already is.
@@ -100,6 +119,7 @@ async function loadApplication(manifest: Manifest, base: string): Promise<void> 
     const globals = globalThis as PonyGlobals;
     const [ponysdk, ...others] = manifest.scripts.map(script => new URL(script, base).href);
     await loadScripts(typeof globals.onPonySDKModuleLoaded === 'function' || ponysdk === undefined ? others : [ponysdk, ...others]);
+    if (manifest.legacy !== null) await loadLegacy(new URL(manifest.legacy, base).href);
     const page = document as PonyDocument;
     for (const sheet of manifest.sharedSheets) {
         const href = new URL(sheet, base).href;
@@ -287,6 +307,7 @@ export class PonyApp extends HTMLElement {
             transparentReconnection: manifest.reconnection,
             handshake: `&${C.HOST_ATTRIBUTES}=${encodeURIComponent(JSON.stringify(attributes))}`,
             credential,
+            legacy: manifest.legacy !== null,
             signal: lifetime.signal,
             connectionLost: () => {
                 notify('pony-connection-lost');
@@ -300,6 +321,7 @@ export class PonyApp extends HTMLElement {
         this.body = body;
         this.terminal = new Terminal(mount);
         const children = new ParentBridge(this.terminal, url.origin, lifetime.signal);
+        if (mount.legacy) (window as unknown as { ponyLegacy?: { observe(root: Element): void } }).ponyLegacy?.observe(body);
         this.terminal.start();
     }
 

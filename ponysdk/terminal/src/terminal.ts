@@ -305,6 +305,10 @@ export class Terminal implements Session, Host {
         return this.mount.embedding;
     }
 
+    get legacy(): boolean {
+        return this.mount.legacy;
+    }
+
     // ---- window.pony -------------------------------------------------------------------------------------------------
 
     getHostPageBaseURL(): string {

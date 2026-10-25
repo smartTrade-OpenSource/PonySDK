@@ -363,6 +363,28 @@ test('an embedded application\'s cookies are its origin\'s: written and read aga
   expect(await load()).toBe(first + 1);
 });
 
+test('the legacy class names of an embedded application: on its container, not on the host page (ADR-0009)', async ({ page }) => {
+  // The showcase runs without the legacy layer: its manifest is given one
+  await page.route('**/sample/ponyapp.json', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, json: { ...(await response.json()), legacy: 'ponyterminal/legacy.js' } });
+  });
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.id = 'legacy';
+    app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src') + '#oracle-legacy');
+    document.querySelector('.portal-app').append(app);
+  });
+  const app = page.locator('#legacy');
+  const name = n => new RegExp(`(^|\\s)${n}(\\s|$)`);
+  await expect(app.getByRole('button', { name: 'Plain' })).toHaveClass(name('gwt-Button'), { timeout: 15000 });
+  const styled = app.getByRole('button', { name: 'Styled', exact: true });
+  await expect(styled).toHaveClass(name('app-button')); // the server's style name in place of the primary name
+  await expect(styled).not.toHaveClass(name('gwt-Button'));
+  await expect(page.locator('html')).not.toHaveAttribute('data-pony-legacy');
+});
+
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(BASE_URL + '#embedding');

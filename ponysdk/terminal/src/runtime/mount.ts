@@ -24,6 +24,8 @@ export interface Mount {
     readonly handshake: string;
     /** The credential the host gave for this start, offered with the handshake (ADR-0009); null in a page. */
     readonly credential: string | null;
+    /** The legacy layer watches this terminal's widgets: in a page, it marks the document; in an element, its manifest. */
+    readonly legacy: boolean;
     /** Aborted when the terminal goes: its listeners on the window. */
     readonly signal: AbortSignal | undefined;
     /** The connection is lost: tells the page or the host. True when the page shows its own notice. */
@@ -54,6 +56,10 @@ export class PageMount implements Mount {
 
     get body(): HTMLElement {
         return document.body;
+    }
+
+    get legacy(): boolean {
+        return document.documentElement.hasAttribute('data-pony-legacy');
     }
 
     byId(id: string): HTMLElement | null {

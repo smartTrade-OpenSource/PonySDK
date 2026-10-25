@@ -338,6 +338,7 @@ public class BootstrapServletTest {
             "ponysdk.js first, as in the bootstrap page");
         assertEquals("[\"css/shared.css\"]", manifest.getJsonArray("sharedSheets").toString());
         assertTrue(manifest.getBoolean("reconnection"));
+        assertTrue(manifest.isNull("legacy"));
     }
 
     @Test
@@ -351,7 +352,7 @@ public class BootstrapServletTest {
 
         Mockito.verify(response).setContentType("application/json;charset=UTF-8");
         Mockito.verify(response).setHeader("Cache-Control", "no-cache");
-        assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false}",
+        assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false,\"legacy\":null}",
             body.toString());
     }
 }

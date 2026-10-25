@@ -385,7 +385,7 @@ export class Widget extends BaseObject {
      */
     setStyleName(names: string): void {
         this.element.className = this.typeClass === null ? names : `${this.typeClass} ${names}`.trim();
-        if (document.documentElement.hasAttribute('data-pony-legacy')) {
+        if (this.context.session.legacy) {
             this.element.setAttribute('data-gwt-primary', names.trim().split(/\s+/)[0] ?? '');
         }
     }

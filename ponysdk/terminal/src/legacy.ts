@@ -187,8 +187,17 @@ function decorateAround(e: Element): void {
     }
 }
 
-function start(): void {
-    decorateTree(document.documentElement);
+/** The document, and the shadow roots of <pony-app> elements, whose pointer and focus events are listened to. */
+const listened = new WeakSet<Node>();
+
+/**
+ * Decorates root's elements, those added and those changed after: the document in the application's page, the
+ * container of a <pony-app> element otherwise (docs/decisions/0009-embedding-limits.md, decision 8). The pointer and
+ * focus events are listened to on root's root node, the document or the element's shadow root, where they are not
+ * retargeted to the element.
+ */
+function observe(root: Element): void {
+    decorateTree(root);
     new MutationObserver(records => {
         for (const record of records) {
             if (record.type === 'childList') {
@@ -197,11 +206,14 @@ function start(): void {
                 decorateAround(record.target);
             }
         }
-    }).observe(document.documentElement, {
+    }).observe(root, {
         subtree: true, childList: true, attributes: true,
         attributeFilter: ['class', 'data-gwt-primary', 'aria-selected', 'aria-disabled', 'aria-expanded', 'aria-orientation',
             'aria-current', 'aria-invalid', 'data-filler', 'disabled', 'readonly', 'open'],
     });
+    const node = root.getRootNode();
+    if (listened.has(node)) return;
+    listened.add(node);
     const track = (event: Event, over: boolean): void => {
         const target = (event.target as Element | null)?.closest?.(HOVERED);
         if (target === null || target === undefined) return;
@@ -211,16 +223,21 @@ function start(): void {
         if (target.classList.contains('pony-MenuItem')) for (const item of siblingItems(target)) decorate(item);
         else decorate(target);
     };
-    document.addEventListener('pointerover', e => track(e, true), true);
-    document.addEventListener('pointerout', e => track(e, false), true);
+    node.addEventListener('pointerover', e => track(e, true), true);
+    node.addEventListener('pointerout', e => track(e, false), true);
     const focus = (event: Event): void => {
         const target = (event.target as Element | null)?.closest?.('.pony-MenuItem');
         if (target !== null && target !== undefined) decorate(target);
     };
-    document.addEventListener('focusin', focus, true);
-    document.addEventListener('focusout', e => setTimeout(() => focus(e)), true);
+    node.addEventListener('focusin', focus, true);
+    node.addEventListener('focusout', e => setTimeout(() => focus(e)), true);
 }
 
-document.documentElement.setAttribute('data-pony-legacy', '');
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-else start();
+(window as unknown as { ponyLegacy: { observe(root: Element): void } }).ponyLegacy = { observe };
+
+// The application's page; a <pony-app> element that loads this script observes its container instead
+if (document.currentScript?.getAttribute('data-pony-legacy') !== 'element') {
+    document.documentElement.setAttribute('data-pony-legacy', '');
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => observe(document.documentElement));
+    else observe(document.documentElement);
+}
