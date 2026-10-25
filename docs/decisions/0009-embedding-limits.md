@@ -44,7 +44,7 @@ The same page on the same site passes everything on the three browsers.
   server's heap after GC (52 to 60 MB, back to 52 MB when they close), about 80 KB per context; Chrome 148 holds 103
   sockets open to one host.
 - L10. A page's stylesheet matches nothing inside the shadow root with its `:root`, `html` and `body` rules: the
-  showcase added `:host` to 8 of them by hand.
+  showcase added `:host` to 3 of them by hand.
 
 ## Decision
 
@@ -105,7 +105,8 @@ once each is loaded:
   `pony-app` and `pony-app>[data-pony-body]`, so that they leave the host page alone. A selector that cannot be written
   so (`:root:has(…)`, which `:host()` does not take) stays as it is, with a warning.
 
-The showcase's stylesheet drops its 8 `:host` additions: it runs embedded as written for its page.
+The showcase's stylesheet drops its 3 `:host` additions: its page rules run embedded as written. It keeps the 3 rules
+written for the element (`:host #reconnection`, the shell's height).
 
 ### 5. Title and location (L3)
 

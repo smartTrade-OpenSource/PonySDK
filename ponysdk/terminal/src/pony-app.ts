@@ -3,6 +3,7 @@
  */
 
 import { ClientToServerModel as C, WidgetType as W } from '#model';
+import { adaptStylesheet } from './embedded-styles.ts';
 import { HostObject } from './objects/host.ts';
 import { registerAddOnFactory } from './runtime/dispatcher.ts';
 import { type Embedding, hostAttributes } from './runtime/embedding.ts';
@@ -117,6 +118,31 @@ async function loadApplication(manifest: Manifest, base: string): Promise<void> 
 }
 
 /**
+ * A stylesheet of the application, read with CORS so that it is adapted to the element once loaded (ADR-0009,
+ * decision 4); one the CORS refuses loads again as it is, unadapted.
+ */
+function stylesheet(href: string, id: string, origin: string, root: string): HTMLLinkElement {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.id = id;
+    link.crossOrigin = new URL(href).origin === origin ? 'use-credentials' : 'anonymous';
+    link.href = href;
+    link.addEventListener('load', () => {
+        if (link.sheet !== null) adaptStylesheet(link.sheet, root);
+    }, { once: true });
+    link.addEventListener('error', () => {
+        if (!link.isConnected) return;
+        log.warn(`${href}: refused with CORS, loaded as it is: written for a page, not adapted to the element`);
+        const plain = document.createElement('link');
+        plain.rel = 'stylesheet';
+        plain.id = id;
+        plain.href = href;
+        link.replaceWith(plain);
+    }, { once: true });
+    return link;
+}
+
+/**
  * <pony-app src="…">: a PonySDK application in another page (docs/decisions/0008-embedded-application.md). Each
  * element runs a terminal of its own, on a context of its own.
  * - src: the application's URL. Its query gives the application's parameters, its fragment the first history token.
@@ -209,13 +235,8 @@ export class PonyApp extends HTMLElement {
         const body = document.createElement('div');
         body.setAttribute('data-pony-body', '');
         body.setAttribute('part', 'body');
-        const stylesheets = manifest.styles.map(({ id, href }) => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.id = id;
-            link.href = new URL(href, base).href;
-            return link;
-        });
+        const stylesheets = manifest.styles.map(({ id, href }) => stylesheet(new URL(href, base).href, id, url.origin,
+            shadow ? ':host' : 'pony-app'));
         let byId: (id: string) => HTMLElement | null;
         if (shadow) {
             const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });

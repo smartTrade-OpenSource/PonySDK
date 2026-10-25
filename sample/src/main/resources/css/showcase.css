@@ -3,11 +3,11 @@
  * One accent colour (indigo), neutral slate greys, hairline borders, numbers in tabular figures.
  * Loaded last, after the framework's style/ponysdk.css and style/flexlayout.css: !important is only used where a
  * widget or the Java code sets the property inline.
- * In a <pony-app> element of another page (docs/decisions/0008-embedded-application.md) the rules of the page apply
- * to :host, the element.
+ * Written for its page: in a <pony-app> element of another page, the element rewrites :root and html to the element,
+ * body to its container (docs/decisions/0009-embedding-limits.md).
  */
 
-:root, :host {
+:root {
     --bg: #ffffff;
     --bg-subtle: #f8fafc;
     --bg-muted: #f1f5f9;
@@ -38,7 +38,7 @@
 
 * { box-sizing: border-box; }
 
-html, body, :host {
+html, body {
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -49,7 +49,7 @@ html, body, :host {
     -webkit-font-smoothing: antialiased;
 }
 
-body, :host, table td, select, button { font-family: var(--sans); font-size: 14px; }
+body, table td, select, button { font-family: var(--sans); font-size: 14px; }
 
 a, a:visited { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }

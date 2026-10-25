@@ -2,6 +2,7 @@
 // Applications embedded in another page with <pony-app> (docs/decisions/0008-embedded-application.md): the portal,
 // a plain page of another origin that ShowcaseMain serves on port 8082, and the showcase's Embedding page.
 //   ./gradlew :sample:runShowcase    then    BASE_URL='http://[::1]:8081/sample/' npx playwright test embedding
+const fs = require('node:fs');
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
@@ -55,10 +56,47 @@ test('the portal embeds two tickets and the showcase, each on its own context, t
   await expect(first.locator('.pony-ticket-buy')).not.toHaveCSS('background-color', 'rgb(219, 39, 119)');
   await expect(first.locator('.pony-ticket-instrument')).not.toHaveCSS('font-family', /Georgia/);
   await expect(page.locator('.portal-brand')).toHaveCSS('font-family', /Georgia/);
+  // The showcase's page rules, written for its page, apply in the element: :root's variables on :host (ADR-0009)
+  await expect(first.locator('.pony-ticket-buy span')).toHaveCSS('color', 'rgb(4, 120, 87)');
   // The elements' own children (their loading text) are hidden once the applications show
   expect(await page.evaluate(() => [...document.querySelectorAll('pony-app')]
     .map(app => getComputedStyle(app.shadowRoot.querySelector('slot')).display))).toEqual(['none', 'none', 'none']);
   expect(errors).toEqual([]);
+});
+
+/** A font of the system, for a stylesheet's @font-face: none is in the repository. */
+const SYSTEM_FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+  '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 'C:/Windows/Fonts/arial.ttf'].find(f => fs.existsSync(f));
+
+test('a font the application declares in its stylesheet shows in the shadow root (ADR-0009)', async ({ page }) => {
+  test.skip(SYSTEM_FONT === undefined, 'no system font to serve');
+  // The showcase's stylesheet declares a font by a URL relative to it; Chrome and Firefox ignore an @font-face of a
+  // shadow root: the element declares it to the document
+  await page.route('**/sample/css/showcase.css', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: await response.text()
+      + '\n@font-face { font-family: PonyTestFont; src: url("../fonts/pony-test.ttf"); }'
+      + '\n.pony-test-font { font: 20px PonyTestFont, monospace; }' });
+  });
+  await page.route('**/sample/fonts/pony-test.ttf', route => route.fulfill({
+    body: fs.readFileSync(SYSTEM_FONT), contentType: 'font/ttf', headers: { 'Access-Control-Allow-Origin': '*' } }));
+  const { first } = await openPortal(page);
+  const widths = await first.evaluate(async element => {
+    const span = style => {
+      const s = document.createElement('span');
+      s.textContent = 'iiiiiiWWWWWW';
+      if (style === 'test') s.className = 'pony-test-font';
+      else s.style.font = '20px monospace';
+      element.shadowRoot.querySelector('[data-pony-body]').append(s);
+      return s;
+    };
+    const declared = span('test');
+    const fallback = span('fallback');
+    await document.fonts.load('20px PonyTestFont');
+    await new Promise(requestAnimationFrame);
+    return [declared.offsetWidth, fallback.offsetWidth];
+  });
+  expect(widths[0], 'the declared font, not the monospace fallback').not.toBe(widths[1]);
 });
 
 test('attributes in: the host changes the instrument, the application follows', async ({ page }) => {
@@ -152,6 +190,9 @@ test('isolation="none": the application renders in the host\'s document', async 
     document.querySelector('.portal-tickets').append(app);
   });
   await expect(page.locator('#light').getByText('USD / CHF')).toBeVisible({ timeout: 15000 });
+  // The showcase's :root and body rules are the element's, not the host page's (ADR-0009)
+  await expect(page.locator('#light .pony-ticket-buy span')).toHaveCSS('color', 'rgb(4, 120, 87)');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   expect(await page.evaluate(() => {
     const app = document.getElementById('light');
     return app.shadowRoot === null && document.querySelector('#light > [data-pony-body] .pony-ticket') !== null;
