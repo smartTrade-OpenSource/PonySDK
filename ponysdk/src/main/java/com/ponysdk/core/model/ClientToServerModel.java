@@ -111,7 +111,12 @@ public enum ClientToServerModel {
 
     // An embedded application's element (ADR-0008): its attributes, a JSON object of name to value (null: removed),
     // all of them in the handshake, the changes in a message
-    HOST_ATTRIBUTES("y");
+    HOST_ATTRIBUTES("y"),
+
+    // An embedded terminal's context (ADR-0009): its key K, as the name of an HTTP header (AJAX, uploads), and its
+    // stream key S, as the parameter of a stream fetched by its URL
+    CONTEXT_KEY("ck"),
+    STREAM_KEY("sk");
 
     private final String key;
 

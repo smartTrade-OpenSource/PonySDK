@@ -31,6 +31,7 @@ import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.websocket.api.Callback;
@@ -94,6 +95,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     private UIContext uiContext;
     private Listener listener;
     private int reconnectContextId = -1; // -1 = normal connect, ≥0 = reconnect attempt
+    private String reconnectKey;
     private final AtomicBoolean closeHandled = new AtomicBoolean();
     /** An error was reported on this socket: a 1001 after it is the server's own close, not the browser's (ADR-0007). */
     private volatile boolean failed;
@@ -113,6 +115,19 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     public void setReconnectContextId(final int id) {
         this.reconnectContextId = id;
+    }
+
+    /** The context key an embedded terminal offers with its reconnection (ADR-0009), null otherwise. */
+    public void setReconnectKey(final String key) {
+        this.reconnectKey = key;
+    }
+
+    /** The context to resume: in the caller's session, or by the key an embedded terminal offers (ADR-0009). */
+    private UIContext reconnectable() {
+        final Application application = context.getApplication();
+        final UIContext inSession = application != null ? application.getUIContext(reconnectContextId) : null;
+        return inSession != null || reconnectKey == null ? inSession
+                : SessionManager.get().getUIContextByKey(reconnectContextId, reconnectKey);
     }
 
     // Jetty 12 WebSocket connection, resolved at open, exposing true post-compression wire byte
@@ -144,8 +159,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
             // Transparent reconnection: resume a suspended UIContext instead of creating a new one
             if (reconnectContextId >= 0) {
-                final Application application = context.getApplication();
-                UIContext suspended = application != null ? application.getUIContext(reconnectContextId) : null;
+                UIContext suspended = reconnectable();
                 if (suspended != null && suspended.isReconnectionHeld()) {
                     // An administrator keeps this client away (SessionAdmin): refuse, the terminal retries
                     log.info("Reconnection of UIContext #{} held — refused", reconnectContextId);
@@ -161,7 +175,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                     while (suspended.isAlive() && !suspended.isSuspended() && System.currentTimeMillis() < deadline) {
                         try { Thread.sleep(RECONNECT_SUSPEND_POLL_MS); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); break; }
                     }
-                    suspended = application.getUIContext(reconnectContextId); // re-fetch after wait
+                    suspended = reconnectable(); // re-fetch after wait
                 }
                 if (suspended != null && suspended.isSuspended()) {
                     this.uiContext = suspended;
@@ -182,6 +196,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), upgradeRequestData,
                     applicationManager.getSharedDictionaryProvider());
             log.info("Creating a new {}", uiContext);
+            SessionManager.get().registerKeys(uiContext); // before its terminal can use them
 
             if (uiContext.getStringDictionary() != null) {
                 websocketPusher.setStringDictionary(uiContext.getStringDictionary());
@@ -204,6 +219,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
                 encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
+                // An embedded terminal's keys, last: a page's terminal reads the three models above in this order
+                if (uiContext.getKeys() != null) encode(ServerToClientModel.CONTEXT_KEYS, uiContext.getKeys().encoded());
                 endObject();
                 if (isAlive()) flush0();
                 initFlushOk = true;

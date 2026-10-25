@@ -87,7 +87,10 @@ final class EmbeddedTicket {
         final PElement origin = Element.newDiv();
         origin.addStyleName("pony-ticket-origin");
         final String hostOrigin = uiContext.getHeader("Origin");
-        origin.setInnerText("Embedded in " + (hostOrigin != null ? hostOrigin : "this page") + " · context #" + uiContext.getID());
+        // The host's credential (ADR-0009): a real application validates it here, a JWT's signature for instance
+        final String credential = host.getCredential();
+        origin.setInnerText("Embedded in " + (hostOrigin != null ? hostOrigin : "this page") + " · "
+            + (credential != null ? "signed in as " + credential : "no credential") + " · context #" + uiContext.getID());
 
         ticket.add(head, prices, amount, last, origin);
         PWindow.getMain().add(ticket);

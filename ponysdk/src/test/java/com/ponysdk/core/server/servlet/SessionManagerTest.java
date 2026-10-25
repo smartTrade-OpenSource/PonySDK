@@ -35,8 +35,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ContextDestroyListener;
+import com.ponysdk.core.server.application.ContextKeys;
 import com.ponysdk.core.server.application.UIContext;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Non-regression tests for {@link SessionManager} — the registry of live applications and the
@@ -136,5 +141,51 @@ public class SessionManagerTest {
         when(application.countUIContexts()).thenReturn(3);
 
         assertEquals(before + 3, manager.countUIContexts());
+    }
+
+    // ---- the contexts of embedded terminals, found by key (ADR-0009) ----
+
+    private static UIContext keyedContext(final int id, final List<ContextDestroyListener> listeners) {
+        final UIContext uiContext = mock(UIContext.class);
+        final ContextKeys keys = ContextKeys.create();
+        when(uiContext.getID()).thenReturn(id);
+        when(uiContext.getKeys()).thenReturn(keys);
+        org.mockito.Mockito.doAnswer(invocation -> listeners.add(invocation.getArgument(0)))
+            .when(uiContext).addContextDestroyListener(org.mockito.ArgumentMatchers.any());
+        return uiContext;
+    }
+
+    private static HttpServletRequest requestWith(final String header, final String parameter) {
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader(ClientToServerModel.CONTEXT_KEY.name())).thenReturn(header);
+        when(request.getParameter(ClientToServerModel.STREAM_KEY.toStringValue())).thenReturn(parameter);
+        return request;
+    }
+
+    @Test
+    public void aContextWithKeysIsFoundByThemUntilDestroyed() {
+        final List<ContextDestroyListener> listeners = new ArrayList<>();
+        final UIContext uiContext = keyedContext(-1001, listeners);
+        manager.registerKeys(uiContext);
+        final String[] keys = uiContext.getKeys().encoded().split("\\.");
+
+        assertSame(uiContext, manager.getUIContextByKey(-1001, keys[0]));
+        assertNull(manager.getUIContextByKey(-1001, keys[1]), "the stream key proves a stream only");
+        assertNull(manager.getUIContextByKey(-1002, keys[0]), "another id");
+        assertSame(uiContext, manager.getUIContext(requestWith(keys[0], null), -1001, false), "K in its header");
+        assertNull(manager.getUIContext(requestWith(null, keys[1]), -1001, false), "S is not for AJAX nor uploads");
+        assertSame(uiContext, manager.getUIContext(requestWith(null, keys[1]), -1001, true), "S for a pending stream");
+        assertNull(manager.getUIContext(requestWith("wrong", "wrong"), -1001, true));
+
+        listeners.forEach(listener -> listener.onBeforeDestroy(uiContext));
+        assertNull(manager.getUIContextByKey(-1001, keys[0]), "gone with its context");
+    }
+
+    @Test
+    public void aPageContextHasNoKeys() {
+        final UIContext uiContext = mock(UIContext.class);
+        when(uiContext.getID()).thenReturn(-1003);
+        manager.registerKeys(uiContext);
+        assertNull(manager.getUIContext(requestWith("any", "any"), -1003, true));
     }
 }

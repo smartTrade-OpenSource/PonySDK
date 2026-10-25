@@ -22,7 +22,7 @@ export interface Host {
     /** Where messages go: the WebSocket, or the terminal of the opener or the parent frame. */
     send(message: Message): void;
     /** CREATE_CONTEXT. False when nothing more must be read: the page reloads. */
-    contextCreated(id: number, tabindexOnlyFormField: boolean, heartbeatSeconds: number): boolean;
+    contextCreated(id: number, tabindexOnlyFormField: boolean, heartbeatSeconds: number, keys: string | null): boolean;
     /** RECONNECT_CONTEXT: the server resumed this context. */
     contextResumed(): void;
     /** DESTROY_CONTEXT: the server ended this context. */
@@ -126,8 +126,13 @@ export class Dispatcher implements Context {
             const tabindexOnlyFormField = r.bool;
             r.read();
             const heartbeatSeconds = r.int;
-            r.read(); // END
-            if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds)) return false;
+            r.read(); // END, or first an embedded terminal's keys (ADR-0009)
+            let keys: string | null = null;
+            if (r.key === K.CONTEXT_KEYS) {
+                keys = r.str ?? null;
+                r.read(); // END
+            }
+            if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds, keys)) return false;
         } else if (key === K.RECONNECT_CONTEXT) {
             this.host.contextResumed();
             r.read(); // END

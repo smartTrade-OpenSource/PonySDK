@@ -2,7 +2,7 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-import { ClientToServerModel as C, HandlerModel as H, MappingPath, ServerToClientModel as K } from '#model';
+import { HandlerModel as H, ServerToClientModel as K } from '#model';
 import type { Reader } from '../protocol/reader.ts';
 import type { Context } from '../runtime/object.ts';
 import { Widget } from '../runtime/widget.ts';
@@ -48,8 +48,6 @@ export class Image extends Widget {
             return;
         }
         reader.read(); // STREAM_REQUEST_ID
-        const session = this.context.session;
-        (this.element as HTMLImageElement).src = `${session.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=`
-            + `${session.contextId}&${C.STREAM_REQUEST_ID}=${reader.int}`;
+        (this.element as HTMLImageElement).src = this.context.session.streamUrl(reader.int);
     }
 }

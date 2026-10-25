@@ -14,11 +14,21 @@ import type { Embedding } from './runtime/embedding.ts';
 import type { History } from './runtime/history.ts';
 import { log } from './runtime/log.ts';
 import { type Mount, PageMount } from './runtime/mount.ts';
-import type { AddOnFactory, Session } from './runtime/object.ts';
+import { type AddOnFactory, CONTEXT_KEY_HEADER, type Session } from './runtime/object.ts';
 import { installStyles } from './runtime/styles.ts';
 
 /** WebSocket.CLOSE_PAGE_LEFT on the server: the page goes for good, and its context with it (ADR-0005). */
 const CLOSE_PAGE_LEFT = 4002;
+
+/** The subprotocol an embedded terminal offers, which the server accepts (Subprotocols.java, ADR-0009). */
+const SUBPROTOCOL = 'ponysdk';
+
+/** Base64url of the text's UTF-8: a subprotocol is a token, which a credential need not be. */
+function base64url(text: string): string {
+    let binary = '';
+    for (const byte of new TextEncoder().encode(text)) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 
 /** The terminal of the opener or of the parent frame, as a child terminal calls it. */
 interface ParentTerminal {
@@ -39,6 +49,9 @@ interface ParentTerminal {
 export class Terminal implements Session, Host {
     contextId = 0;
     tabindexOnlyFormField = false;
+    /** An embedded terminal's keys (ADR-0009): K proves its context in a header or a subprotocol, S in a URL. */
+    contextKey: string | null = null;
+    private streamKey: string | null = null;
     readonly dispatcher: Dispatcher;
     private readonly mount: Mount;
     private readonly history: History;
@@ -76,7 +89,8 @@ export class Terminal implements Session, Host {
             this.mount);
         const url = this.socketUrl('');
         // The early socket of the bootstrap page is its own terminal's, never a <pony-app> element's
-        this.socket = embedded ? new Socket(new WebSocket(url), this.socketListener()) : Socket.connect(url, this.socketListener());
+        this.socket = embedded ? new Socket(new WebSocket(url, this.subprotocols(false)), this.socketListener())
+            : Socket.connect(url, this.socketListener());
         log.info(embedded ? `PonySDK terminal started for ${this.mount.url.href}` : 'PonySDK TypeScript terminal is started');
     }
 
@@ -171,7 +185,7 @@ export class Terminal implements Session, Host {
         this.transport(message);
     }
 
-    contextCreated(id: number, tabindexOnlyFormField: boolean, heartbeatSeconds: number): boolean {
+    contextCreated(id: number, tabindexOnlyFormField: boolean, heartbeatSeconds: number, keys: string | null): boolean {
         if (this.reconnection?.reconnecting) {
             // The server could not resume this context (restarted, or the window is over) and started a new one,
             // whose page follows on this socket: reload, instead of stacking it under the old page
@@ -181,8 +195,22 @@ export class Terminal implements Session, Host {
         }
         this.contextId = id;
         this.tabindexOnlyFormField = tabindexOnlyFormField;
+        const [contextKey, streamKey] = keys?.split('.') ?? [];
+        this.contextKey = contextKey ?? null;
+        this.streamKey = streamKey ?? null;
         this.setHeartBeatPeriod(heartbeatSeconds);
         return true;
+    }
+
+    /**
+     * What an embedded terminal offers with its handshake, out of the URL (ADR-0009): its context's key to resume
+     * it, or its host's credential to start one. Nothing for a page's.
+     */
+    private subprotocols(reconnecting: boolean): string[] | undefined {
+        if (this.mount.embedding === null) return undefined;
+        if (reconnecting && this.contextKey !== null) return [SUBPROTOCOL, `${SUBPROTOCOL}.key.${this.contextKey}`];
+        const credential = this.mount.credential;
+        return credential === null ? [SUBPROTOCOL] : [SUBPROTOCOL, `${SUBPROTOCOL}.credential.${base64url(credential)}`];
     }
 
     contextResumed(): void {
@@ -200,9 +228,14 @@ export class Terminal implements Session, Host {
         frame.style.cssText = 'width:0;height:0;border:0;visibility:hidden;position:fixed';
         this.mount.body.appendChild(frame);
         setTimeout(() => {
-            frame.src = `${this.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${this.contextId}`
-                + `&${C.STREAM_REQUEST_ID}=${requestId}`;
+            frame.src = this.streamUrl(requestId);
         });
+    }
+
+    streamUrl(requestId: number): string {
+        const url = `${this.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${this.contextId}`
+            + `&${C.STREAM_REQUEST_ID}=${requestId}`;
+        return this.streamKey === null ? url : `${url}&${C.STREAM_KEY}=${this.streamKey}`;
     }
 
     private destroy(): void {
@@ -268,7 +301,8 @@ export class Terminal implements Session, Host {
         request.onload = () => callback(request.responseText);
         request.open('GET', this.hostPageBaseURL + MappingPath.AJAX);
         request.withCredentials = this.mount.embedding !== null; // the session cookie, from the host's origin
-        // The server reads these two by their enum names
+        // The server reads these by their enum names; the key, when the cookie does not come (ADR-0009)
+        if (this.contextKey !== null) request.setRequestHeader(CONTEXT_KEY_HEADER, this.contextKey);
         request.setRequestHeader('UI_CONTEXT_ID', String(this.contextId));
         request.setRequestHeader('OBJECT_ID', String(id));
         for (const [key, value] of Object.entries(data)) {
@@ -374,6 +408,6 @@ export class Terminal implements Session, Host {
     }
 
     reconnectSocket(url: string): void {
-        this.socket = new Socket(new WebSocket(url), this.socketListener());
+        this.socket = new Socket(new WebSocket(url, this.subprotocols(true)), this.socketListener());
     }
 }

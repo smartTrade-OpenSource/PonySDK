@@ -23,7 +23,7 @@ import { fixture } from './fixtures.ts';
 /** A page's session, without a document: the tests create no element. */
 const SESSION: Session = {
     contextId: 1, tabindexOnlyFormField: false, hostPageBaseURL: '',
-    body: null as unknown as HTMLElement, byId: () => null, embedding: null,
+    body: null as unknown as HTMLElement, byId: () => null, embedding: null, contextKey: null, streamUrl: () => '',
 };
 
 function value(reader: Reader): unknown {

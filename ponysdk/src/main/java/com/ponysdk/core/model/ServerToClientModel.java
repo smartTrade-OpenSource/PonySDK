@@ -298,7 +298,10 @@ public enum ServerToClientModel {
     UNLISTEN_EVENT(ValueTypeModel.STRING),   // the event's name
 
     // An embedded application's element (ADR-0008): a CustomEvent dispatched on it, [type, detail as JSON or null]
-    DISPATCH_EVENT(ValueTypeModel.ARRAY);
+    DISPATCH_EVENT(ValueTypeModel.ARRAY),
+
+    // With CREATE_CONTEXT, to an embedded terminal only (ADR-0009): its context's keys, "K.S"
+    CONTEXT_KEYS(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

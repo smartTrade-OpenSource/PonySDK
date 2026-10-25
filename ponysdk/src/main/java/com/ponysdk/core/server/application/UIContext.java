@@ -146,6 +146,9 @@ public class UIContext {
     // so parameter map, User-Agent and session are all served from this immutable snapshot.
     private final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData;
 
+    /** The keys of an embedded terminal's context, whose handshake carries the host's attributes; null for a page's. */
+    private final ContextKeys keys;
+
     private final StringDictionary stringDictionary;
 
     /** Optional OTel metrics — null if not configured. */
@@ -180,6 +183,8 @@ public class UIContext {
         } else {
             this.upgradeRequestData = upgradeRequestData;
         }
+        this.keys = this.upgradeRequestData.getParameterMap().containsKey(ClientToServerModel.HOST_ATTRIBUTES.toStringValue())
+                ? ContextKeys.create() : null;
 
         // Initialize StringDictionary based on configuration
         if (configuration.isStringDictionaryEnabled()) {
@@ -787,6 +792,16 @@ public class UIContext {
      */
     public Map<String, List<String>> getParameterMap() {
         return upgradeRequestData.getParameterMap();
+    }
+
+    /**
+     * The keys of an embedded terminal's context (docs/decisions/0009-embedding-limits.md), what proves it to the
+     * servlets and to a reconnection without the session cookie.
+     *
+     * @return the keys, null for a page's context
+     */
+    public ContextKeys getKeys() {
+        return keys;
     }
 
     /**

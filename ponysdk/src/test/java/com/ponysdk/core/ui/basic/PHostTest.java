@@ -38,6 +38,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.websocket.Subprotocols;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -62,6 +63,7 @@ public class PHostTest extends PSuite {
         writer.uninstall();
         UIContext.get().removeAttribute(PHost.class.getName());
         Mockito.doReturn(Map.of()).when(UIContext.get()).getParameterMap();
+        Mockito.doReturn(null).when(UIContext.get()).getHeader(Subprotocols.HEADER);
     }
 
     private static void handshake(final String attributesJson) {
@@ -78,6 +80,21 @@ public class PHostTest extends PSuite {
         Mockito.doReturn(Map.of()).when(UIContext.get()).getParameterMap();
         assertNull(PHost.get());
         assertTrue(writer.isEmpty(), "nothing created");
+    }
+
+    @Test
+    public void theCredentialIsTheHostsForThisContext() {
+        handshake("{}");
+        Mockito.doReturn("ponysdk, ponysdk.credential." + java.util.Base64.getUrlEncoder().withoutPadding()
+            .encodeToString("token-1".getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+            .when(UIContext.get()).getHeader(Subprotocols.HEADER);
+        assertEquals("token-1", PHost.get().getCredential());
+    }
+
+    @Test
+    public void noCredentialWhenTheHostGaveNone() {
+        handshake("{}");
+        assertNull(PHost.get().getCredential());
     }
 
     @Test

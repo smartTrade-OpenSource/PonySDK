@@ -22,6 +22,8 @@ export interface Mount {
     readonly transparentReconnection: boolean;
     /** Query parameters the handshake adds, '&' first: the host's attributes. */
     readonly handshake: string;
+    /** The credential the host gave for this start, offered with the handshake (ADR-0009); null in a page. */
+    readonly credential: string | null;
     /** Aborted when the terminal goes: its listeners on the window. */
     readonly signal: AbortSignal | undefined;
     /** The connection is lost: tells the page or the host. True when the page shows its own notice. */
@@ -47,6 +49,7 @@ export class PageMount implements Mount {
     readonly history = new BrowserHistory();
     readonly embedding = null;
     readonly handshake = '';
+    readonly credential = null;
     readonly signal = undefined;
 
     get body(): HTMLElement {

@@ -33,7 +33,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class AjaxServlet extends HttpServlet {
@@ -61,11 +60,9 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            // Resolve the UIContext within the caller's HTTP session only — never globally.
+            // Resolve the UIContext within the caller's HTTP session, or by its key — never by its id alone.
             // A global lookup would let a client reach another session's context by guessing its id (IDOR).
-            final HttpSession session = req.getSession(false);
-            final UIContext uiContext = session == null ? null
-                    : SessionManager.get().getUIContext(session.getId(), uiContextID);
+            final UIContext uiContext = SessionManager.get().getUIContext(req, uiContextID, false);
             if (uiContext != null) {
                 final int objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {

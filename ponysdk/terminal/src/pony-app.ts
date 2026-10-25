@@ -124,9 +124,15 @@ async function loadApplication(manifest: Manifest, base: string): Promise<void> 
  * - history: memory (the default), the token stays in the element; hash, the page's fragment is the application's.
  * Its other attributes are the application's (PHost). Its children show until the application's first widget. It
  * dispatches pony-connection-lost and pony-reconnected.
+ * - credential, a property: a function returning the credential of the user (a JWT, an OAuth access token) or a
+ *   promise of it, called before each start; the application reads it with PHost.getCredential()
+ *   (docs/decisions/0009-embedding-limits.md). A property, never an attribute: the DOM is every script's to read.
  */
 export class PonyApp extends HTMLElement {
     static readonly observedAttributes = ['src', 'isolation', 'history'];
+
+    // Declared only: a field would replace the value a host set before the element was defined
+    declare credential: (() => string | Promise<string>) | undefined;
 
     private terminal: Terminal | undefined;
     private lifetime: AbortController | undefined;
@@ -177,15 +183,28 @@ export class PonyApp extends HTMLElement {
         try {
             const manifest = await manifestOf(base);
             await loadApplication(manifest, base);
+            const credential = await this.credentialForStart();
             if (generation !== this.generation || !this.isConnected) return;
-            this.run(url, base, manifest);
+            this.run(url, base, manifest, credential);
         } catch (e) {
             log.error(`<pony-app src="${src}"> cannot start`, e);
             this.active = false;
         }
     }
 
-    private run(url: URL, base: string, manifest: Manifest): void {
+    /** The host's credential for a new context; none when the host gave none, or its function failed. */
+    private async credentialForStart(): Promise<string | null> {
+        if (typeof this.credential !== 'function') return null;
+        try {
+            const credential = await this.credential();
+            return typeof credential === 'string' ? credential : null;
+        } catch (e) {
+            log.error('<pony-app>: the credential function failed, the application starts without one', e);
+            return null;
+        }
+    }
+
+    private run(url: URL, base: string, manifest: Manifest, credential: string | null): void {
         const shadow = this.getAttribute('isolation') !== 'none';
         const body = document.createElement('div');
         body.setAttribute('data-pony-body', '');
@@ -238,6 +257,7 @@ export class PonyApp extends HTMLElement {
             embedding,
             transparentReconnection: manifest.reconnection,
             handshake: `&${C.HOST_ATTRIBUTES}=${encodeURIComponent(JSON.stringify(attributes))}`,
+            credential,
             signal: lifetime.signal,
             connectionLost: () => {
                 events('pony-connection-lost');

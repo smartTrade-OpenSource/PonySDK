@@ -40,6 +40,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.websocket.Subprotocols;
 
 import jakarta.json.Json;
 import jakarta.json.JsonException;
@@ -73,11 +74,13 @@ public final class PHost extends PObject {
     private static final String EVENT_DETAIL_KEY = ClientToServerModel.WC_EVENT_DETAIL.toStringValue();
 
     private final Map<String, String> attributes;
+    private final String credential;
     private Map<String, List<Consumer<String>>> attributeListeners;
     private Map<String, List<Consumer<JsonValue>>> eventListeners;
 
-    private PHost(final Map<String, String> attributes) {
+    private PHost(final Map<String, String> attributes, final String credential) {
         this.attributes = attributes;
+        this.credential = credential;
     }
 
     /**
@@ -90,7 +93,7 @@ public final class PHost extends PObject {
         if (existing != null) return existing;
         final List<String> handshake = uiContext.getParameterMap().get(ATTRIBUTES_KEY);
         if (handshake == null || handshake.isEmpty()) return null;
-        final PHost host = new PHost(parse(handshake.get(0)));
+        final PHost host = new PHost(parse(handshake.get(0)), Subprotocols.credential(uiContext.getHeader(Subprotocols.HEADER)));
         uiContext.setAttribute(KEY, host);
         host.attach(PWindow.getMain(), null);
         return host;
@@ -111,6 +114,16 @@ public final class PHost extends PObject {
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.HOST;
+    }
+
+    /**
+     * The credential the host page gave the element (its property {@code credential}) for the handshake that created
+     * this context: an opaque string, a JWT or an OAuth access token, that the application validates as it sees fit
+     * (docs/decisions/0009-embedding-limits.md). Null when the host gave none. A credential renewed while the
+     * application runs comes as an event: {@link #addEventListener(String, Consumer)}.
+     */
+    public String getCredential() {
+        return credential;
     }
 
     /** The attribute's value, null when the element does not have it. */

@@ -109,6 +109,12 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             }
         }
 
+        // An embedded terminal offers the subprotocol "ponysdk" (ADR-0009): a browser that offers some fails an upgrade
+        // that accepts none
+        final String protocols = request.getHeader(Subprotocols.HEADER);
+        if (Subprotocols.offered(protocols)) response.setAcceptedSubProtocol(Subprotocols.PONYSDK);
+        final String reconnectKey = Subprotocols.key(protocols);
+
         // Optionally disable permessage-deflate (frame compression) for this connection. Useful for
         // CPU/latency-sensitive deployments, and required by clients that cannot decode compressed
         // frames (e.g. the headless Pony driver).
@@ -133,11 +139,9 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         webSocket.setContext(context);
 
         // Transparent reconnection: the client may request resuming a suspended UIContext by id.
-        // The resume is authorized strictly by the caller's HTTP session (see
-        // WebSocket.onWebSocketOpen -> Application.getUIContext), so the id alone grants nothing.
-        // It travels as a query parameter because browsers cannot set custom headers on the
-        // WebSocket handshake; moving it off the URL would require a transport change
-        // (subprotocol or post-open handshake) on the terminal.
+        // The resume is authorized by the caller's HTTP session (see WebSocket.onWebSocketOpen ->
+        // Application.getUIContext), or for an embedded terminal by its context's key, offered as a
+        // subprotocol, out of the URL (ADR-0009): the id alone grants nothing.
         webSocket.setProtocolVersion(negotiateProtocolVersion(
                 request.getHttpServletRequest().getParameter(ClientToServerModel.PROTOCOL_VERSION.toStringValue()), config));
 
@@ -147,6 +151,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             try {
                 final int uiContextId = Integer.parseInt(reconnectIdParam);
                 webSocket.setReconnectContextId(uiContextId);
+                webSocket.setReconnectKey(reconnectKey);
             } catch (final NumberFormatException e) {
                 // Do not echo the raw client-supplied value into the logs (log-injection vector).
                 log.warn("Ignoring malformed reconnect uiContextId parameter");
@@ -157,9 +162,10 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             // The Application is keyed on the session of the snapshot, the one UIContext.getSession() serves. Asking the
             // request again could create another one if the first was invalidated in between (a page reload closing the
             // previous socket). Only an override of captureUpgradeData that did not create it falls back to the request.
+            // A reconnection by key without the cookie has none, and needs none: its context keeps its own (ADR-0009)
             final HttpSession session = upgradeRequestData.getSession() != null ? upgradeRequestData.getSession()
-                    : (HttpSession) request.getSession();
-            configureWithSession(session, context);
+                    : reconnectKey != null ? null : (HttpSession) request.getSession();
+            if (session != null) configureWithSession(session, context);
         }
 
         return webSocket;
@@ -167,7 +173,9 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     /**
      * Snapshots everything the application reads from the upgrade request while it is still live, and creates the
-     * HTTP session that the snapshot holds when the servlet context has a SessionHandler. Protected so that a subclass
+     * HTTP session that the snapshot holds when the servlet context has a SessionHandler, unless the upgrade is a
+     * reconnection by key that sends no cookie: that session would be left without a context (ADR-0009). Protected so
+     * that a subclass
      * can adjust the snapshot: an override should start from {@code super.captureUpgradeData(request)}, the step that
      * creates the session.
      * <p>
@@ -228,7 +236,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             // (12.1.13 delegates to HttpServletRequest.getSession(), which creates). A context without a
             // SessionHandler has no session to create: getSession(true) would only throw "No SessionManager".
             if (hasSessionHandler(request)) {
-                session = request.getHttpServletRequest().getSession(true);
+                session = request.getHttpServletRequest().getSession(Subprotocols.key(request.getHeader(Subprotocols.HEADER)) == null);
             }
         } catch (final Throwable t) {
             log.warn("Cannot read session from upgrade request", t);

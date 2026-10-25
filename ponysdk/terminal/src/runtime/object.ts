@@ -35,7 +35,14 @@ export interface Session {
     byId(id: string): HTMLElement | null;
     /** The <pony-app> element this terminal runs in, null in a page (ADR-0008). */
     readonly embedding: Embedding | null;
+    /** The key that proves this context in a header, for an embedded terminal; null otherwise (ADR-0009). */
+    readonly contextKey: string | null;
+    /** The URL of a stream the server holds for this context, with its stream key when it has one (ADR-0009). */
+    streamUrl(requestId: number): string;
 }
+
+/** The header of the context's key: the server reads it by its enum name, as UI_CONTEXT_ID (ADR-0009). */
+export const CONTEXT_KEY_HEADER = 'CONTEXT_KEY';
 
 /** A window opened by the server, or a frame: a terminal of its own, fed by this one. */
 export interface ChildTerminal {

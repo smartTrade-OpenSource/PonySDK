@@ -11,6 +11,16 @@ const PORTAL_URL = process.env.PORTAL_URL || (() => {
   return `${url.protocol}//${url.hostname}:8082/`;
 })();
 
+/**
+ * The portal on another site than the application's (ADR-0009): 127.0.0.1 for [::1] or localhost, localhost for
+ * 127.0.0.1. Chrome and WebKit then neither keep nor send the session cookie.
+ */
+const OTHER_SITE_PORTAL = (() => {
+  const url = new URL(BASE_URL);
+  const host = url.hostname === '127.0.0.1' ? 'localhost' : '127.0.0.1';
+  return `${url.protocol}//${host}:8082/?app=${encodeURIComponent(BASE_URL)}`;
+})();
+
 /** Page errors and console errors, the portal's missing favicon aside. */
 function trackErrors(page) {
   const errors = [];
@@ -168,6 +178,41 @@ test('a lost connection: the host is told, then the applications resume their co
   await expect(first.locator('.pony-ticket-origin')).toHaveText(before); // the same context
   await page.locator('#instrument').selectOption('USDCHF');
   await expect(first.getByText('USD / CHF')).toBeVisible();
+});
+
+test('another site: the credential reaches the application, its context key keeps uploads and the reconnection', async ({ page }) => {
+  const errors = trackErrors(page);
+  const sockets = [];
+  let offline = false;
+  await page.routeWebSocket(/\/sample\/ws\b/, ws => {
+    if (offline) return ws.close({ code: 4000, reason: 'still offline' });
+    ws.connectToServer();
+    sockets.push(ws);
+  });
+  await page.goto(OTHER_SITE_PORTAL);
+  const first = page.locator('#ticket-1');
+  await expect(first.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
+  await expect(first.locator('.pony-ticket-origin')).toContainText('signed in as alice@northwind');
+
+  // An upload of the embedded showcase: found by its key, not by a cookie
+  const showcase = page.locator('#showcase');
+  const input = showcase.locator('input[type=file]').first();
+  await input.setInputFiles({ name: 'a.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
+  const upload = page.waitForResponse(r => r.url().includes('/sample/stream'));
+  await showcase.getByRole('button', { name: 'Submit' }).first().click();
+  expect((await upload).status()).toBe(200);
+  expect(errors).toEqual([]); // the drop below logs the lost connection
+
+  // A lost connection resumes the same contexts
+  const before = await page.locator('pony-app .pony-ticket-origin').allInnerTexts();
+  offline = true;
+  for (const ws of sockets.splice(0)) await ws.close({ code: 4000, reason: 'simulated network drop' });
+  await expect(page.locator('#status')).toHaveAttribute('data-state', 'lost');
+  offline = false;
+  await expect(page.locator('#status')).toHaveAttribute('data-state', 'back', { timeout: 15000 });
+  await expect.poll(() => page.locator('pony-app .pony-ticket-origin').allInnerTexts()).toEqual(before);
+  await page.locator('#instrument').selectOption('GBPUSD');
+  await expect(first.getByText('GBP / USD')).toBeVisible();
 });
 
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {

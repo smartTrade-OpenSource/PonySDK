@@ -7,7 +7,12 @@
     import(app + 'ponyterminal/terminal.js');
 
     var tickets = [document.getElementById('ticket-1'), document.getElementById('ticket-2')];
-    tickets.forEach(function (ticket) { ticket.setAttribute('src', app); });
+    tickets.forEach(function (ticket) {
+        // Who the user is, from the portal's own sign-in (docs/decisions/0009-embedding-limits.md): a property, never
+        // an attribute. A real portal returns its identity provider's token here, which the application validates
+        ticket.credential = function () { return Promise.resolve('alice@northwind'); };
+        ticket.setAttribute('src', app);
+    });
     document.getElementById('showcase').setAttribute('src', app + '#inputs');
 
     // Attributes in: the first ticket follows the portal's instrument

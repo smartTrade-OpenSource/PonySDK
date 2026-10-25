@@ -2,11 +2,11 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-import { ClientToServerModel as C, HandlerModel as H, MappingPath, ServerToClientModel as K } from '#model';
+import { ClientToServerModel as C, HandlerModel as H, ServerToClientModel as K } from '#model';
 import { about, FLAG } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { log } from '../runtime/log.ts';
-import type { Context } from '../runtime/object.ts';
+import { CONTEXT_KEY_HEADER, type Context } from '../runtime/object.ts';
 import { Widget } from '../runtime/widget.ts';
 
 /**
@@ -74,12 +74,12 @@ export class FileUpload extends Widget {
 
     private submit(streamRequestId: number): void {
         const session = this.context.session;
-        const url = `${session.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${session.contextId}`
-            + `&${C.STREAM_REQUEST_ID}=${streamRequestId}`;
         const data = new FormData();
         for (const file of this.input.files ?? []) data.append(this.input.name, file);
-        // The application's origin: the host's in a page, another in a <pony-app> element (ADR-0008)
-        fetch(url, { method: 'POST', body: data, credentials: 'include' })
+        // The application's origin: the host's in a page, another in a <pony-app> element (ADR-0008), whose context's
+        // key proves it when the session cookie does not come (ADR-0009)
+        const headers: Record<string, string> = session.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: session.contextKey };
+        fetch(session.streamUrl(streamRequestId), { method: 'POST', body: data, credentials: 'include', headers })
             .catch(e => log.error(`${this}: upload failed`, e))
             .finally(() => this.context.guard(() => {
                 const message = about(this.id);
