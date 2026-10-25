@@ -284,6 +284,23 @@ public class BootstrapServletTest {
         assertEquals(-1L, servlet.getLastModified(request), "generated per request: no modification time");
     }
 
+    /**
+     * A client that never sends the cookie back (a page of another site, a health check) would leave a session per
+     * request: Jetty never expires them by default. The WebSocket upgrade creates the session (ADR-0009, F3).
+     */
+    @Test
+    public void noRequestCreatesASession() throws IOException {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        final TestableBootstrapServlet servlet = servletWith(config);
+        for (final String path : new String[] { "/index.html", "/ponyapp.json", "/script/ponysdk.js" }) {
+            final HttpServletRequest request = request("", path);
+            servlet.handleRequest(request, response(new ByteArrayOutputStream()), path);
+            Mockito.verify(request, Mockito.never()).getSession();
+            Mockito.verify(request, Mockito.never()).getSession(true);
+        }
+    }
+
     // ---- the manifest of an embedded application (ADR-0008) ----
 
     @Test

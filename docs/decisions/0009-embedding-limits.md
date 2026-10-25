@@ -23,9 +23,12 @@ The same page on the same site passes everything on the three browsers.
   through the caller's session fail: streams (`StreamServiceServlet.java:64`), the addons' AJAX (`AjaxServlet.java:66`),
   the reconnection (`WebSocket.onWebSocketOpen`, through the session's `Application`). Nor does the application know
   who the user is: the session the user logged in with is not there.
-- F3. `ponyapp.json` creates an HTTP session (`BootstrapServlet.java:157`). From another site the browser does not
-  keep it: each element loaded leaves a session that no context will ever invalidate (`Application.deregisterUIContext`
-  invalidates the session of its last context only).
+- F3. Every request `BootstrapServlet` answers creates an HTTP session when it has none (`BootstrapServlet.java:157`):
+  the page, `terminal.js`, `ponysdk.js`, the stylesheets, `ponyapp.json` (measured with curl: one `Set-Cookie` each).
+  Jetty 12.1.14 never expires a session by default (`AbstractSessionManager._dftMaxIdleSecs = -1`), and only the last
+  context of an `Application` invalidates its session (`Application.deregisterUIContext`). So each session of a client
+  that does not send the cookie back stays: from another site, every resource of every element; from any client, a
+  health check of the page.
 - L2. An `@font-face` declared in a shadow root is ignored by Chrome 148 and Firefox 157, applied by WebKit 27.2.
 - L3. The window title and `WINDOW_LOCATION_REPLACE` are dropped with a warning: the host never knows.
 - L4. `PWindow` is refused and `PFrame` runs no child terminal: a child page reaches its parent's terminal through
@@ -84,9 +87,11 @@ A property, not an attribute: attributes are in the DOM, which every script of t
 tools record. Not in the URL: the access logs. Its size is bounded by the server's request headers (8 KiB with Jetty's
 defaults).
 
-### 3. The manifest creates no session (F3)
+### 3. Only the upgrade creates a session (F3)
 
-`ponyapp.json` is answered without a session. The bootstrap page keeps creating one.
+`BootstrapServlet` creates none. The WebSocket upgrade already creates it (`WebSocketServlet.captureUpgradeData`), and
+the browsers keep the cookie of its response for the requests that follow (streams, AJAX): checked on the three
+browsers by the E2E tests.
 
 ### 4. The application's stylesheets (L2, L10)
 

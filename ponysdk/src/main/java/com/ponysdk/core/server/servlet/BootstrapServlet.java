@@ -152,10 +152,8 @@ public class BootstrapServlet extends HttpServlet {
             return;
         }
 
-        // Force session creation if there is no session
-        // TODO Verify if needed
-        request.getSession();
-
+        // No session here: the WebSocket upgrade creates it. A client that never sends the cookie back (a page of
+        // another site, a health check) would leave one per request, which Jetty never expires (ADR-0009, F3)
         if (path.equals(MANIFEST_URL)) {
             response.setContentType("application/json;charset=UTF-8");
             response.setHeader("Cache-Control", REVALIDATE);
