@@ -56,8 +56,22 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - It sends `Cache-Control` and `Last-Modified` and answers conditional requests.
 - `ponyapp.json` is the manifest of an embedded application ([ADR-0008](docs/decisions/0008-embedded-application.md)):
   a resource of the application by that name is no longer served.
+- `BootstrapServlet` creates no HTTP session: the WebSocket upgrade does, and the browser keeps its cookie. An
+  application that reads the session while its page loads (a filter, a servlet) creates it there
+  ([ADR-0009](docs/decisions/0009-embedding-limits.md)).
+- With `wsAllowedOrigins`, the page lists them in `<meta name="pony-parent-origins">`: the pages a window or a frame
+  of an embedded application accepts as its parent.
+- A page with a file name (`index.html`, a custom page under the application's path) connects to the socket at its
+  directory; it used to build `…/index.htmlws`.
+- `legacy.js` loaded with `data-pony-legacy="element"` does not start on the document; `window.ponyLegacy.observe(root)`
+  decorates a root it is given.
 
 ## Behaviour changes
+
+- A terminal posts the blocks of its windows and frames to its own origin, no longer to `*`: a window or a frame that
+  navigated to another origin receives nothing.
+- The addon factories are a table of the page (`window.ponyAddOnFactories`), shared by the terminals of the page's
+  PonySDK versions.
 
 - `setStyleName(name)` replaces all style names before attachment too (it used to add before attachment).
 - `PHTMLTable.iterator()` returns the cell widgets (it was empty): the children of `PFlexTable` and `PGrid` are

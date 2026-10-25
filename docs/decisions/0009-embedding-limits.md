@@ -95,14 +95,14 @@ browsers by the E2E tests.
 
 ### 4. The application's stylesheets (L2, L10)
 
-The element loads them with `crossorigin="use-credentials"`, so their rules are readable (the CORS of ADR-0008), and
-once each is loaded:
+The element loads them with CORS, so their rules are readable (ADR-0008): `use-credentials` on the application's
+origin, `anonymous` on another; one the CORS refuses loads again without, unadapted. Once each is loaded:
 
 - its `@font-face` rules go to the document, in one constructed stylesheet that the page adopts, with their URLs made
-  absolute on the stylesheet's, once per stylesheet URL;
+  absolute on the stylesheet's, each rule once;
 - the selectors that name the page are rewritten in place, in every nested rule: in a shadow root `:root` and `html`
-  become `:host` (`:host(<compound>)` when they carry one), `body` becomes `[data-pony-body]`; with `isolation="none"`,
-  `pony-app` and `pony-app>[data-pony-body]`, so that they leave the host page alone. A selector that cannot be written
+  become `:host` (`:host(<compound>)` when they carry one), with `isolation="none"` `pony-app`; `body` becomes
+  `[data-pony-body]`, the container, which only an element has: they leave the host page alone. A selector that cannot be written
   so (`:root:has(…)`, which `:host()` does not take) stays as it is, with a warning.
 
 The showcase's stylesheet drops its 3 `:host` additions: its page rules run embedded as written. It keeps the 3 rules
@@ -138,9 +138,11 @@ decide. On another site, the browser's rules for third-party cookies apply (Chro
 
 ### 8. Legacy class names (L6)
 
-`legacy.js` watches a root it is given: the document in the application's page, as today; the element's container when
-the manifest says `legacy: true`, the element loading `legacy.js` once per page without letting it start on the host's
-document. The terminal reads the legacy flag from its mount, not from `<html data-pony-legacy>`.
+`legacy.js` watches a root it is given, listening to the pointer and focus events on that root's root node, where they
+are not retargeted: the document in the application's page, as today; the element's container when the manifest names
+the script (`legacy`, null without), the element loading it once per page with `data-pony-legacy="element"` so that it
+does not start on the host's document. The terminal reads the legacy flag from its mount, not from
+`<html data-pony-legacy>`.
 
 ### 9. Addons that search the document (L7): not lifted
 
@@ -149,11 +151,12 @@ the answer, as in ADR-0008.
 
 ### 10. Two versions on one page (L8)
 
-`ponyapp.json` gives the application's PonySDK version and its terminal. An element whose application is of another
-version imports that application's terminal and hands it the element: the module exports
-`mountPonyApp(element, src)`, which returns `{ stop() }`; the manifest's `mount: 1` names this contract, which stays
-frozen. `ponysdk.js` is one per page, the first loaded (its globals are the addons' API): a version that differs is
-logged.
+`ponyapp.json` names the application's terminal. An element whose application's terminal is another URL than its own
+imports it and hands it the element: the module exports `mountPonyApp(element, src)`, which returns `{ stop() }`; the
+manifest's `mount: 1` names this contract, which stays frozen. The URL, not a version number, decides: each application
+runs exactly its server's terminal, and two servers of one version cost a second download of the terminal.
+`ponysdk.js` is one per page, the first loaded (its globals are the addons' API): one of another URL is not loaded,
+with a warning, and the addon factories are a table of the page, not of a terminal module.
 
 ### 11. A context per element (L9): kept
 
@@ -183,3 +186,15 @@ The portal (`ShowcaseMain`, port 8082) becomes a gallery, one page per case, eac
 - A page runs as before: no key, no subprotocol, no journal.
 - The keys are readable by every script of the host page, as is everything its terminal holds: a host page is trusted
   by the application that lists it in `wsAllowedOrigins`.
+- Measured on the implementation (2026-10-25), from `127.0.0.1` embedding `[::1]` on Chrome 148, Firefox 157 and
+  WebKit 27.2: upload 200 and the context resumed (404 and a new context before, on Chrome and WebKit). A page that
+  embeds nothing loads `terminal.js` of 94 608 bytes, 28 920 gzip (91 826 and 27 912 with ADR-0008: +1 008); the
+  element's chunk is 12 979 bytes, 4 948 gzip (6 982 and 2 811); the child pages of an embedded terminal load
+  `chunks/child-bridge.js`, 695 bytes gzip. On the message path, a dictionary entry the reader adds tells its
+  `onEntry`, undefined without a bridged child: no cost on a reference.
+- Checked by mutation: on the served bundle, without the declaration to the document a font of the application does
+  not show on Chrome and Firefox, and without the rewrite `:root`'s variables are missing on the three browsers; with a
+  table of addon factories per module, the Node test of two instances of the dispatcher's module fails.
+- Found on the way, fixed with a test first: every request answered by `BootstrapServlet` created a session (F3); a
+  page with a file name built its socket's URL on it, `…/index.htmlws` (F6); with `isolation="none"`, a text node among
+  the host's children stayed above the application (F7).
