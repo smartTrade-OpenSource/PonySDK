@@ -51,11 +51,12 @@ test('U3, in an iframe: another document, the showcase as it is', async ({ page 
   await expect(page.locator('.gallery-frame').contentFrame().locator('.pony-logo')).toHaveText('PonySDK', { timeout: 15000 });
 });
 
-test('U5, in the page\'s document: the ticket is the document\'s', async ({ page }) => {
+test('U5, in the page\'s document: the ticket is the document\'s, the loading text gone', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(GALLERY + 'light.html');
   await expect(page.locator('#light').getByText('USD / CHF')).toBeVisible({ timeout: 15000 });
   expect(await page.evaluate(() => document.querySelector('#light .pony-ticket') !== null)).toBe(true);
+  await expect(page.locator('#light')).not.toContainText('Loading the ticket', { useInnerText: true });
   expect(errors).toEqual([]);
 });
 

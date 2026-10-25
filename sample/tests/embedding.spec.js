@@ -211,8 +211,31 @@ test('isolation="none": the application renders in the host\'s document', async 
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   expect(await page.evaluate(() => {
     const app = document.getElementById('light');
-    return app.shadowRoot === null && document.querySelector('#light > [data-pony-body] .pony-ticket') !== null;
+    // In the document: its shadow root only places the container (a slot), and the host's children
+    return app.shadowRoot.querySelector('[data-pony-body]') === null
+      && document.querySelector('#light > [data-pony-body] .pony-ticket') !== null;
   })).toBe(true);
+});
+
+test('isolation="none": the host\'s loading text, a text node, goes once the application shows', async ({ page }) => {
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.id = 'light-text';
+    app.setAttribute('isolation', 'none');
+    app.setAttribute('view', 'ticket');
+    app.append('Loading the light ticket…');
+    app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src'));
+    document.querySelector('.portal-tickets').append(app);
+  });
+  await expect(page.locator('#light-text .pony-ticket')).toBeVisible({ timeout: 15000 });
+  // A text node: no selector hides it; its box is empty once hidden
+  const height = () => page.evaluate(() => {
+    const range = document.createRange();
+    range.selectNode([...document.getElementById('light-text').childNodes].find(n => n.nodeType === Node.TEXT_NODE));
+    return range.getBoundingClientRect().height;
+  });
+  await expect.poll(height).toBe(0);
 });
 
 test('a lost connection: the host is told, then the applications resume their contexts', async ({ page }) => {

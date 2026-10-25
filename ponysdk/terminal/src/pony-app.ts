@@ -54,9 +54,13 @@ const pageStyles = new Set<string>();
 /** In the shadow root: the element is a block, its container shows once the application has put something in it. */
 const SHADOW_RULES = ':host{display:block;position:relative}[data-pony-body]{position:relative;height:100%}'
     + '[data-pony-body]:not(:empty)+slot{display:none}';
-/** In the page, for isolation="none": the same, the host's children hidden instead of a slot. */
-const PAGE_RULES = 'pony-app{display:block;position:relative}pony-app>[data-pony-body]{position:relative;height:100%}'
-    + 'pony-app:has(>[data-pony-body]:not(:empty))>:not([data-pony-body]){display:none}';
+/** In the page, for isolation="none": the container, in the host's document. */
+const PAGE_RULES = 'pony-app>[data-pony-body]{position:relative;height:100%}';
+/**
+ * In the shadow root of an element whose application is in the page: two slots, the container's and the host's
+ * children, hidden once the application shows, a text node among them too, which no selector of the page hides.
+ */
+const LIGHT_SHADOW_RULES = ':host{display:block;position:relative}slot[hidden]{display:none}';
 
 function manifestOf(base: string): Promise<Manifest> {
     let manifest = manifests.get(base);
@@ -298,10 +302,22 @@ class ElementApplication {
                 pageStyles.add(link.href);
                 document.head.append(link);
             }
-            if (element.shadowRoot !== null) { // isolation was shadow: the shadow root only shows the element's children
-                element.shadowRoot.adoptedStyleSheets = [];
-                element.shadowRoot.replaceChildren(document.createElement('slot'));
-            }
+            // The container stays in the document; the shadow root only places it and the host's children
+            const root = element.shadowRoot ?? element.attachShadow({ mode: 'open' });
+            root.adoptedStyleSheets = [];
+            const rules = document.createElement('style');
+            rules.textContent = LIGHT_SHADOW_RULES;
+            const content = document.createElement('slot');
+            content.name = 'pony-body';
+            const children = document.createElement('slot');
+            root.replaceChildren(rules, content, children);
+            body.slot = 'pony-body';
+            const shown = new MutationObserver(() => {
+                if (body.firstChild === null) return;
+                children.hidden = true;
+                shown.disconnect();
+            });
+            shown.observe(body, { childList: true });
             element.append(body);
             byId = id => document.getElementById(id);
         }
