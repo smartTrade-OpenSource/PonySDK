@@ -27,6 +27,8 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +47,8 @@ import java.util.Set;
 public class BootstrapServlet extends HttpServlet {
 
     private static final String INDEX_URL = "/index.html";
+    /** What a {@code <pony-app>} element of another page loads (docs/decisions/0008-embedded-application.md). */
+    private static final String MANIFEST_URL = "/ponyapp.json";
     /** Files named after their content (*.cache.*) never change under the same name. */
     private static final String IMMUTABLE = "public, max-age=31536000, immutable";
     /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
@@ -152,6 +156,15 @@ public class BootstrapServlet extends HttpServlet {
         // TODO Verify if needed
         request.getSession();
 
+        if (path.equals(MANIFEST_URL)) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.setHeader("Cache-Control", REVALIDATE);
+            try (OutputStream out = response.getOutputStream()) {
+                out.write(buildManifest(request).getBytes(StandardCharsets.UTF_8));
+            }
+            return;
+        }
+
         final InputStream inputStream = getInputStreamFromPath(path);
 
         final String mimeType = getServletContext().getMimeType(path);
@@ -235,6 +248,31 @@ public class BootstrapServlet extends HttpServlet {
         sb.append("</html>").append(NEW_LINE);
 
         return sb.toString();
+    }
+
+    /**
+     * What a {@code <pony-app>} element of another page loads before it connects, as the bootstrap page loads it
+     * (docs/decisions/0008-embedded-application.md): the stylesheets, the scripts with ponysdk.js first, the shared
+     * web-component sheets, paths relative to the application; and whether transparent reconnection is on.
+     */
+    protected String buildManifest(final HttpServletRequest request) {
+        final JsonArrayBuilder styles = Json.createArrayBuilder();
+        final Map<String, String> configuredStyles = configuration.getStyle();
+        if (configuredStyles != null) {
+            configuredStyles.forEach((id, href) -> styles.add(Json.createObjectBuilder().add("id", id).add("href", href)));
+        }
+        final JsonArrayBuilder scripts = Json.createArrayBuilder().add(rootPath + "script/ponysdk.js");
+        final Set<String> configuredScripts = configuration.getJavascript();
+        if (configuredScripts != null) configuredScripts.forEach(scripts::add);
+        final JsonArrayBuilder sheets = Json.createArrayBuilder();
+        final Set<String> configuredSheets = configuration.getWcSharedSheets();
+        if (configuredSheets != null) configuredSheets.forEach(sheets::add);
+        return Json.createObjectBuilder()
+            .add("styles", styles)
+            .add("scripts", scripts)
+            .add("sharedSheets", sheets)
+            .add("reconnection", configuration.getReconnectionTimeoutMs() > 0)
+            .build().toString();
     }
 
     protected String addHeader(final HttpServletRequest request) {

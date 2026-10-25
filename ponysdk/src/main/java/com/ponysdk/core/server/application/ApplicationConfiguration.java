@@ -86,7 +86,7 @@ public class ApplicationConfiguration {
     // ── WebSocket transport hardening ─────────────────────────────────────
     /** When true, the WebSocket upgrade validates the Origin header (anti-CSWSH). */
     private boolean wsOriginCheckEnabled = true;
-    /** Explicit allow-list of accepted Origins. When empty, only same-origin is accepted. */
+    /** Explicit allow-list of accepted Origins: the pages allowed to embed the application. When empty, only same-origin. */
     private Set<String> wsAllowedOrigins;
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
     private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
@@ -594,6 +594,10 @@ public class ApplicationConfiguration {
      * Sets the allow-list of accepted WebSocket Origins (e.g. {@code "https://app.example.com"}).
      * When null/empty, the upgrade only accepts same-origin requests (Origin authority == Host).
      * Requests without an Origin header (non-browser clients) are always allowed.
+     * <p>
+     * These are also the pages allowed to embed the application in a {@code <pony-app>} element: PonySDKServer
+     * answers their CORS requests with credentials (docs/decisions/0008-embedded-application.md). A host of the same
+     * site only: the session is the session cookie's.
      */
     public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
         this.wsAllowedOrigins = wsAllowedOrigins;

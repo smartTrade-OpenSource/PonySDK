@@ -283,4 +283,45 @@ public class BootstrapServletTest {
         Mockito.verify(response).setHeader("Cache-Control", "no-cache");
         assertEquals(-1L, servlet.getLastModified(request), "generated per request: no modification time");
     }
+
+    // ---- the manifest of an embedded application (ADR-0008) ----
+
+    @Test
+    public void theManifestListsWhatTheBootstrapPageLoads() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        final Map<String, String> styles = new java.util.LinkedHashMap<>();
+        styles.put("base", "style/base.css");
+        styles.put("theme", "css/theme.css");
+        Mockito.when(config.getStyle()).thenReturn(styles);
+        Mockito.when(config.getJavascript()).thenReturn(new java.util.LinkedHashSet<>(java.util.List.of("script/a.js", "script/b.js")));
+        Mockito.when(config.getWcSharedSheets()).thenReturn(Set.of("css/shared.css"));
+        Mockito.when(config.getReconnectionTimeoutMs()).thenReturn(10_000L);
+        final TestableBootstrapServlet servlet = servletWith(config);
+        servlet.setRootPath("ctx/");
+
+        final jakarta.json.JsonObject manifest = jakarta.json.Json.createReader(
+            new java.io.StringReader(servlet.buildManifest(request("", "/ponyapp.json")))).readObject();
+
+        assertEquals("[{\"id\":\"base\",\"href\":\"style/base.css\"},{\"id\":\"theme\",\"href\":\"css/theme.css\"}]",
+            manifest.getJsonArray("styles").toString(), "in the configured order");
+        assertEquals("[\"ctx/script/ponysdk.js\",\"script/a.js\",\"script/b.js\"]", manifest.getJsonArray("scripts").toString(),
+            "ponysdk.js first, as in the bootstrap page");
+        assertEquals("[\"css/shared.css\"]", manifest.getJsonArray("sharedSheets").toString());
+        assertTrue(manifest.getBoolean("reconnection"));
+    }
+
+    @Test
+    public void theManifestIsServedAsJsonAndRevalidated() throws IOException {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        final TestableBootstrapServlet servlet = servletWith(config);
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        final HttpServletResponse response = response(body);
+
+        servlet.handleRequest(request("", "/ponyapp.json"), response, "/ponyapp.json");
+
+        Mockito.verify(response).setContentType("application/json;charset=UTF-8");
+        Mockito.verify(response).setHeader("Cache-Control", "no-cache");
+        assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false}",
+            body.toString());
+    }
 }

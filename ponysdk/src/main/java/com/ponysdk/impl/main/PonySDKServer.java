@@ -27,6 +27,7 @@ import org.eclipse.jetty.util.compression.CompressionPool;
 import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.jetty.server.Handler;
@@ -35,6 +36,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.ee11.servlet.ErrorHandler;
+import org.eclipse.jetty.ee11.servlet.FilterHolder;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
@@ -45,6 +47,7 @@ import org.eclipse.jetty.compression.brotli.BrotliCompression;
 import org.eclipse.jetty.compression.brotli.BrotliEncoderConfig;
 import com.aayushatharva.brotli4j.Brotli4jLoader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import jakarta.servlet.DispatcherType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +56,7 @@ import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
+import com.ponysdk.core.server.servlet.CrossOriginFilter;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
 
@@ -233,6 +237,9 @@ public class PonySDKServer {
         }
         JettyWebSocketServletContainerInitializer.configure(context, null);
 
+        // The pages allowed to embed the application in a <pony-app> element (ADR-0008)
+        context.addFilter(new FilterHolder(new CrossOriginFilter(configuration::getWsAllowedOrigins)), "/*",
+            EnumSet.of(DispatcherType.REQUEST));
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
