@@ -61,6 +61,8 @@ export class Reader {
     private size = 0;
     private readonly dictionary: string[] = [];
     private readonly fallback: ((id: number) => string | undefined) | undefined;
+    /** Told of each entry this reader adds: a terminal that feeds a child by postMessage forwards them (ADR-0009). */
+    onEntry: ((id: number) => void) | undefined = undefined;
 
     /** @param fallback where an id this reader never received is looked up: a child window asks its opener. */
     constructor(fallback?: (id: number) => string | undefined) {
@@ -179,6 +181,19 @@ export class Reader {
         return nameOf(K, key) ?? `#${key}`;
     }
 
+    private define(id: number, value: string): string {
+        this.dictionary[id] = value;
+        this.onEntry?.(id);
+        return value;
+    }
+
+    /** The entries this reader holds: for a child fed by postMessage, which cannot ask for them (ADR-0009). */
+    entries(): [number, string][] {
+        const entries: [number, string][] = [];
+        this.dictionary.forEach((value, id) => entries.push([id, value])); // forEach skips the holes
+        return entries;
+    }
+
     /** The dictionary entry an id names. */
     entry(id: number): string {
         const value = this.dictionary[id] ?? this.fallback?.(id);
@@ -237,10 +252,7 @@ export class Reader {
         const tag = this.uint8();
         if (tag === T.STRING_DICTIONARY_REF) return this.entry(this.uint31());
         if (tag === T.STRING_DICTIONARY_ADD) {
-            const id = this.uint31();
-            const value = this.inlineString(this.uint8()) ?? '';
-            this.dictionary[id] = value;
-            return value;
+            return this.define(this.uint31(), this.inlineString(this.uint8()) ?? '');
         }
         return this.inlineString(tag);
     }
@@ -299,9 +311,7 @@ export class Reader {
                 return json(this.entry(this.uint31()));
             case A.STRING_DICTIONARY_ADD: {
                 const id = this.uint31();
-                const value = this.arrayString(this.int8());
-                this.dictionary[id] = value;
-                return json(value);
+                return json(this.define(id, this.arrayString(this.int8())));
             }
             default:
                 return json(this.arrayString(type));
@@ -389,7 +399,7 @@ export class Reader {
             const start = this.position;
             const length = this.uint8();
             if (keepEntries) {
-                this.dictionary[id] = this.inlineString(length) ?? '';
+                this.define(id, this.inlineString(length) ?? '');
             } else {
                 this.position = start;
                 this.skipString(false);
@@ -412,7 +422,7 @@ export class Reader {
                 this.uint31();
             } else if (type === A.STRING_DICTIONARY_ADD) {
                 const id = this.uint31();
-                if (keepEntries) this.dictionary[id] = this.arrayString(this.int8());
+                if (keepEntries) this.define(id, this.arrayString(this.int8()));
                 else this.skipArrayString(this.int8());
             } else if (type >= A.STRING_ASCII_UINT8_LENGTH) {
                 this.skipArrayString(type);

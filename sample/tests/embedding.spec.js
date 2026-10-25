@@ -272,6 +272,74 @@ test('another site: the credential reaches the application, its context key keep
   await expect(first.getByText('GBP / USD')).toBeVisible();
 });
 
+test('a ticket popped out in a window of its own talks to its element by postMessage (ADR-0009)', async ({ page, context }) => {
+  const { first } = await openPortal(page);
+  const opened = context.waitForEvent('page');
+  await first.locator('.pony-ticket-pop-out').click();
+  const popup = await opened;
+  const prices = popup.locator('.pony-ticket-popped-prices');
+  await expect(prices).toHaveText(/^\d+\.\d+ \/ \d+\.\d+$/, { timeout: 15000 });
+  await expect(popup).toHaveTitle('EUR/USD ticket');
+  const before = await prices.innerText();
+  await expect(prices).not.toHaveText(before); // pushed by the server through the element's terminal
+  await popup.locator('.pony-ticket-popped-buy').click();
+  await expect(page.locator('#trades tr').first()).toContainText('BUY'); // from the window, to the portal's blotter
+
+  await expect(first.locator('.pony-ticket-pop-out')).toHaveText(/^Popped out/);
+  await popup.close(); // the server is told: popping out again opens another window
+  await expect(first.locator('.pony-ticket-pop-out')).toHaveText('Pop out');
+  const again = context.waitForEvent('page');
+  await first.locator('.pony-ticket-pop-out').click();
+  await expect((await again).locator('.pony-ticket-popped-prices')).toHaveText(/\d/, { timeout: 15000 });
+});
+
+test('another site: a popped out ticket proves its context with the element\'s keys', async ({ page, context }) => {
+  await page.goto(OTHER_SITE_PORTAL);
+  const first = page.locator('#ticket-1');
+  await expect(first.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
+  const opened = context.waitForEvent('page');
+  await first.locator('.pony-ticket-pop-out').click();
+  const popup = await opened;
+  await expect(popup.locator('.pony-ticket-popped-prices')).toHaveText(/\d/, { timeout: 15000 });
+  await popup.locator('.pony-ticket-popped-buy').click();
+  await expect(page.locator('#trades tr').first()).toContainText('BUY');
+});
+
+test('a frame of an embedded application runs a terminal of its own, fed by postMessage (ADR-0009)', async ({ page }) => {
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.id = 'framed';
+    app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src') + '#oracle-frame');
+    document.querySelector('.portal-app').append(app);
+  });
+  const frame = page.locator('#framed iframe').contentFrame();
+  await frame.getByRole('button', { name: 'Inside' }).click({ timeout: 15000 });
+  await expect(frame.getByRole('button', { name: 'Clicked' })).toBeVisible();
+});
+
+test('a page of an origin the application does not list can neither feed its child page nor hear from it', async ({ page, context }) => {
+  const errors = [];
+  context.on('page', p => p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }));
+  await page.goto('data:text/html,<title>another origin</title>');
+  // A window page of the application, as an embedded terminal opens it: WINDOW_ID, UI_CONTEXT_ID, BRIDGED
+  const child = new URL('?2=1&1=1&br=1', BASE_URL).href;
+  const received = await page.evaluate(async url => {
+    const got = [];
+    const ready = new Promise(resolve => window.addEventListener('message', e => {
+      got.push(e.data);
+      resolve();
+    }));
+    const opened = window.open(url);
+    await ready;
+    opened.postMessage({ pony: 'init', keys: null, title: 'fed', entries: [] }, '*');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return got;
+  }, child);
+  expect(received).toEqual([{ pony: 'ready' }]); // nothing else: its messages wait for an accepted parent
+  await expect.poll(() => errors.some(e => /not a parent of this application/.test(e))).toBe(true);
+});
+
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(BASE_URL + '#embedding');

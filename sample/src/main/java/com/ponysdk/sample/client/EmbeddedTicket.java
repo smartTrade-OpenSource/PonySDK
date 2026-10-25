@@ -47,7 +47,11 @@ final class EmbeddedTicket {
     private final PButton buy = Element.newPButton();
     private final PTextBox quantity = Element.newPTextBox();
     private final PLabel last = Element.newPLabel("No trade yet");
+    private final PAnchor popOut = Element.newPAnchor("Pop out");
     private PDialogBox dialog;
+    /** The ticket popped out in a window of its own, and its prices; null when closed. */
+    private PWindow popped;
+    private PLabel poppedPrices;
     private final PLabel question = Element.newPLabel();
     /** The bid the open dialog asks to sell at. */
     private double sellPrice;
@@ -96,10 +100,14 @@ final class EmbeddedTicket {
         // The full application, where the host decides: in a page the location changes, in an element the host is
         // told (pony-location, ADR-0009)
         final PAnchor full = Element.newPAnchor("Open the full application");
+        full.addStyleName("pony-ticket-link");
         full.addStyleName("pony-ticket-full");
         full.addClickHandler(event -> PWindow.getMain().getLocation().replace("./"));
+        popOut.addStyleName("pony-ticket-link");
+        popOut.addStyleName("pony-ticket-pop-out");
+        popOut.addClickHandler(event -> popOut());
 
-        ticket.add(head, prices, amount, last, origin, full);
+        ticket.add(head, prices, amount, last, origin, full, popOut);
         PWindow.getMain().add(ticket);
 
         setInstrument(host.getAttribute("instrument"));
@@ -138,6 +146,40 @@ final class EmbeddedTicket {
         ask = mid + spread;
         sell.setHTML("<span>Sell</span><b>" + price(bid) + "</b>");
         buy.setHTML("<span>Buy</span><b>" + price(ask) + "</b>");
+        if (poppedPrices != null) poppedPrices.setText(price(bid) + " / " + price(ask));
+    }
+
+    /**
+     * The ticket in a window of its own, on the same context: its page is the application's, whatever the host page's
+     * origin, and talks to this terminal by postMessage (docs/decisions/0009-embedding-limits.md, decision 6).
+     */
+    private void popOut() {
+        if (popped != null) {
+            popped.focus();
+            return;
+        }
+        final String name = instrument.substring(0, 3) + "/" + instrument.substring(3) + " ticket";
+        popped = Element.newPWindow(name, "width=380,height=300");
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.addStyleName("pony-ticket");
+        box.addStyleName("pony-ticket-popped");
+        final PLabel title = Element.newPLabel(name);
+        title.addStyleName("pony-ticket-instrument");
+        poppedPrices = Element.newPLabel();
+        poppedPrices.addStyleName("pony-ticket-popped-prices");
+        final PButton buyHere = Element.newPButton("Buy " + quantity.getText());
+        buyHere.addStyleName("pony-ticket-popped-buy");
+        buyHere.addClickHandler(event -> trade("BUY", ask));
+        box.add(title, poppedPrices, buyHere);
+        popped.add(box);
+        popped.addCloseHandler(event -> {
+            popped = null;
+            poppedPrices = null;
+            popOut.setText("Pop out");
+        });
+        popped.open();
+        popOut.setText("Popped out: bring it to the front");
+        tick();
     }
 
     private String price(final double value) {

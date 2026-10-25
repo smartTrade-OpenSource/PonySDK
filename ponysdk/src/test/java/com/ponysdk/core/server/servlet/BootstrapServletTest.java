@@ -301,6 +301,19 @@ public class BootstrapServletTest {
         }
     }
 
+    /** A window or a frame of an embedded terminal accepts these pages only as its parent (ADR-0009). */
+    @Test
+    public void theBootstrapPageListsThePagesAllowedToEmbedIt() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        Mockito.when(config.getWsAllowedOrigins()).thenReturn(Set.of("https://b.example", "https://a.example"));
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("<meta name=\"pony-parent-origins\" content=\"https://a.example https://b.example\">"), html);
+
+        Mockito.when(config.getWsAllowedOrigins()).thenReturn(Set.of());
+        assertFalse(servletWith(config).buildIndexHTML(request("", "/index.html")).contains("pony-parent-origins"));
+    }
+
     // ---- the manifest of an embedded application (ADR-0008) ----
 
     @Test

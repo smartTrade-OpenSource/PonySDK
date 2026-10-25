@@ -26,3 +26,5 @@ export { BrowserHistory, decode } from './runtime/history.ts';
 export { log } from './runtime/log.ts';
 export { adoptStyles, installStyles } from './runtime/styles.ts';
 export { Terminal } from './terminal.ts';
+// The children of an embedded terminal (docs/decisions/0009-embedding-limits.md)
+export { applyWindowOperation } from './objects/windows.ts';

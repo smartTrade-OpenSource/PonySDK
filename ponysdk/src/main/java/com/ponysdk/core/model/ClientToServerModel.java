@@ -116,7 +116,11 @@ public enum ClientToServerModel {
     // An embedded terminal's context (ADR-0009): its key K, as the name of an HTTP header (AJAX, uploads), and its
     // stream key S, as the parameter of a stream fetched by its URL
     CONTEXT_KEY("ck"),
-    STREAM_KEY("sk");
+    STREAM_KEY("sk"),
+
+    // In the URL of a window or a frame of an embedded terminal (ADR-0009): its parent talks to it by postMessage
+    // only. Read by the child terminal, never by the server
+    BRIDGED("br");
 
     private final String key;
 

@@ -5,6 +5,7 @@
 import { ClientToServerModel as C, WidgetType as W } from '#model';
 import { adaptStylesheet } from './embedded-styles.ts';
 import { HostObject } from './objects/host.ts';
+import { ParentBridge } from './parent-bridge.ts';
 import { registerAddOnFactory } from './runtime/dispatcher.ts';
 import { type Embedding, hostAttributes } from './runtime/embedding.ts';
 import { defineCreator } from './runtime/factory.ts';
@@ -271,7 +272,12 @@ export class PonyApp extends HTMLElement {
         const attributes = hostAttributes(this);
         const notify = (type: string, detail?: unknown) =>
             this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
-        const embedding: Embedding = { element: this, attributes, restart: () => this.restartLater(), notify };
+        const embedding: Embedding = {
+            element: this, attributes, restart: () => this.restartLater(), notify,
+            get children() {
+                return children; // made with the terminal, used once it runs
+            },
+        };
         const mount: Mount = {
             url,
             body,
@@ -293,6 +299,7 @@ export class PonyApp extends HTMLElement {
         this.lifetime = lifetime;
         this.body = body;
         this.terminal = new Terminal(mount);
+        const children = new ParentBridge(this.terminal, url.origin, lifetime.signal);
         this.terminal.start();
     }
 

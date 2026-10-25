@@ -31,7 +31,7 @@ function base64url(text: string): string {
 }
 
 /** The terminal of the opener or of the parent frame, as a child terminal calls it. */
-interface ParentTerminal {
+export interface ParentTerminal {
     setReadyWindow(id: number | string): void;
     setReadyFrame(id: number | string): void;
     sendDataToServerFromWindow(json: string): void;
@@ -94,7 +94,10 @@ export class Terminal implements Session, Host {
         log.info(embedded ? `PonySDK terminal started for ${this.mount.url.href}` : 'PonySDK TypeScript terminal is started');
     }
 
-    /** A window or a frame opened by the server: its opener or its parent feeds it and relays its messages. */
+    /**
+     * A window or a frame opened by the server: its opener or its parent feeds it and relays its messages. That of an
+     * embedded terminal, maybe of another origin, talks to it by postMessage only (child-bridge.ts, ADR-0009).
+     */
     private startChild(parameters: URLSearchParams): void {
         this.contextId = Number(parameters.get(C.UI_CONTEXT_ID));
         const tabindex = parameters.get(C.OPTION_TABINDEX_ACTIVATED);
@@ -102,14 +105,28 @@ export class Terminal implements Session, Host {
         const windowId = parameters.get(C.WINDOW_ID);
         const frameId = parameters.get(C.FRAME_ID) ?? '';
         const source = (windowId !== null ? window.opener : window.parent) as (Window & { pony?: ParentTerminal }) | null;
+        if (source !== null && parameters.has(C.BRIDGED)) {
+            import('./child-bridge.ts').then(m => m.bridgeToParent(this, source, windowId, frameId),
+                e => log.error('The bridge to the parent terminal did not load', e));
+            return;
+        }
         const parent = source?.pony;
         if (source === null || parent === undefined) {
             log.error('No terminal opened this page');
             return;
         }
+        this.attachToParent(parent, source, windowId, frameId, () => true);
+    }
+
+    /**
+     * A child terminal fed by its parent: the blocks come by postMessage from source, those accept takes; the messages
+     * go through parent.
+     */
+    attachToParent(parent: ParentTerminal, source: Window, windowId: string | null, frameId: string,
+                   accept: (event: MessageEvent) => boolean): void {
         this.parent = parent;
         window.addEventListener('message', event => {
-            if (event.source !== source || !(event.data instanceof Uint8Array)) return;
+            if (event.source !== source || !(event.data instanceof Uint8Array) || !accept(event)) return;
             const bytes = event.data;
             this.dispatcher.guard(() => {
                 if (windowId !== null) this.dispatcher.receiveInWindow(bytes);
@@ -195,11 +212,21 @@ export class Terminal implements Session, Host {
         }
         this.contextId = id;
         this.tabindexOnlyFormField = tabindexOnlyFormField;
+        this.useKeys(keys);
+        this.setHeartBeatPeriod(heartbeatSeconds);
+        return true;
+    }
+
+    /** The context's keys, K.S (ADR-0009): its own, or for a child terminal its parent's. */
+    useKeys(keys: string | null): void {
         const [contextKey, streamKey] = keys?.split('.') ?? [];
         this.contextKey = contextKey ?? null;
         this.streamKey = streamKey ?? null;
-        this.setHeartBeatPeriod(heartbeatSeconds);
-        return true;
+    }
+
+    /** The context's keys as useKeys takes them, for a child terminal fed by postMessage; null without. */
+    get contextKeys(): string | null {
+        return this.contextKey === null ? null : `${this.contextKey}.${this.streamKey}`;
     }
 
     /**

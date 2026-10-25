@@ -304,7 +304,19 @@ public class BootstrapServlet extends HttpServlet {
             }
         }
 
+        // The pages allowed to embed the application: a window or a frame of an embedded terminal accepts them as its
+        // parent, and no other page (ADR-0009, decision 6)
+        final Set<String> parents = configuration.getWsAllowedOrigins();
+        if (parents != null && !parents.isEmpty()) {
+            sb.append(String.format(META_PATTERN, "name=\"pony-parent-origins\" content=\""
+                    + escapeAttribute(String.join(" ", new java.util.TreeSet<>(parents))) + "\"")).append(NEW_LINE);
+        }
+
         return sb.toString();
+    }
+
+    private static String escapeAttribute(final String value) {
+        return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;");
     }
 
     protected String addStyle(final HttpServletRequest request) {

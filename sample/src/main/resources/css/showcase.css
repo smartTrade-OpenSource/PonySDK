@@ -963,7 +963,10 @@ div.selected-row { background-color: #e0e7ff; }
 .pony-ticket-quantity { flex: 1; min-width: 0; font: 500 14px var(--mono); padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 8px; }
 .pony-ticket-last { display: block; margin-top: 12px; font-size: 13px; color: var(--text-2); }
 .pony-ticket-origin { margin-top: 4px; font-size: 12px; color: var(--text-4); }
-.pony-ticket-full { display: inline-block; margin-top: 8px; font-size: 13px; cursor: pointer; }
+.pony-ticket-link { display: inline-block; margin-top: 8px; margin-right: 12px; font-size: 13px; cursor: pointer; }
+.pony-ticket-popped { margin: 16px; }
+.pony-ticket-popped-prices { display: block; margin: 12px 0; font: 600 22px var(--mono); font-variant-numeric: tabular-nums; }
+.pony-ticket-popped-buy { width: 100%; padding: 10px; border: 1px solid var(--good); border-radius: 8px; background: var(--good-soft); color: var(--good); font-weight: 600; cursor: pointer; }
 .pony-ticket-dialog { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-lg); }
 .pony-ticket-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 

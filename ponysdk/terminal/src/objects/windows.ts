@@ -5,40 +5,78 @@
 import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
 import { about, FLAG } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
+import type { BridgedChild, ChildBridge } from '../runtime/embedding.ts';
 import type { Windows } from '../runtime/windows.ts';
 import { log } from '../runtime/log.ts';
-import { apply, BaseObject, type ChildTerminal, type Context, type Setters } from '../runtime/object.ts';
+import { BaseObject, type ChildTerminal, type Context } from '../runtime/object.ts';
 
-/** What the server does to a browser window: print, reload, resize, move, focus, title. */
-abstract class AbstractWindow extends BaseObject {
-    protected window: Window | null = null;
-
-    override update(reader: Reader): boolean {
-        return (this.window !== null && apply(WINDOW, this.window, reader)) || super.update(reader);
-    }
-}
+/** What the server asks of a browser window, as read: its key and its values. */
+export type WindowOperation = [key: number, values: (string | number | boolean)[]];
 
 function nextNumber(reader: Reader): number {
     reader.read();
     return reader.number;
 }
 
-const WINDOW: Setters<Window> = new Map<number, (w: Window, r: Reader) => void>([
-    [K.PRINT, w => w.print()],
-    [K.RELOAD, w => w.location.reload()],
-    [K.WINDOW_LOCATION_REPLACE, (w, r) => w.location.replace(r.str ?? '')],
-    [K.RESIZE_BY_X, (w, r) => w.resizeBy(Math.trunc(r.number), Math.trunc(nextNumber(r)))],
-    [K.RESIZE_TO_WIDTH, (w, r) => w.resizeTo(r.number, nextNumber(r))],
-    [K.MOVE_BY_X, (w, r) => w.moveBy(Math.trunc(r.number), Math.trunc(nextNumber(r)))],
-    [K.MOVE_TO_X, (w, r) => w.moveTo(Math.trunc(r.number), Math.trunc(nextNumber(r)))],
-    [K.FOCUS, (w, r) => {
-        if (r.bool) w.focus();
-        else w.blur();
-    }],
-    [K.WINDOW_TITLE, (w, r) => {
-        w.document.title = r.str ?? '';
-    }],
-]);
+/** The window operation of the model just read: print, reload, location, resize, move, focus, title; else null. */
+function readWindowOperation(reader: Reader): WindowOperation | null {
+    const key = reader.key;
+    switch (key) {
+        case K.PRINT:
+        case K.RELOAD:
+            return [key, []];
+        case K.WINDOW_LOCATION_REPLACE:
+        case K.WINDOW_TITLE:
+            return [key, [reader.str ?? '']];
+        case K.RESIZE_BY_X:
+        case K.RESIZE_TO_WIDTH:
+        case K.MOVE_BY_X:
+        case K.MOVE_TO_X:
+            return [key, [reader.number, nextNumber(reader)]]; // x, then y (or width, then height)
+        case K.FOCUS:
+            return [key, [reader.bool]];
+        default:
+            return null;
+    }
+}
+
+/**
+ * Runs a window operation on a window: the opener's for its own windows, a window's own when its opener is another
+ * origin's, which a cross-origin WindowProxy refuses most of them (ADR-0009).
+ */
+export function applyWindowOperation(w: Window, [key, values]: WindowOperation): void {
+    const [a, b] = values as [number, number];
+    switch (key) {
+        case K.PRINT: w.print(); break;
+        case K.RELOAD: w.location.reload(); break;
+        case K.WINDOW_LOCATION_REPLACE: w.location.replace(values[0] as string); break;
+        case K.RESIZE_BY_X: w.resizeBy(Math.trunc(a), Math.trunc(b)); break;
+        case K.RESIZE_TO_WIDTH: w.resizeTo(a, b); break;
+        case K.MOVE_BY_X: w.moveBy(Math.trunc(a), Math.trunc(b)); break;
+        case K.MOVE_TO_X: w.moveTo(Math.trunc(a), Math.trunc(b)); break;
+        case K.FOCUS:
+            if (values[0] === true) w.focus();
+            else w.blur();
+            break;
+        case K.WINDOW_TITLE: w.document.title = values[0] as string; break;
+    }
+}
+
+/** What the server does to a browser window: print, reload, resize, move, focus, title. */
+abstract class AbstractWindow extends BaseObject {
+    protected window: Window | null = null;
+
+    override update(reader: Reader): boolean {
+        const operation = readWindowOperation(reader);
+        if (operation === null) return super.update(reader);
+        this.operate(operation);
+        return true;
+    }
+
+    protected operate(operation: WindowOperation): void {
+        if (this.window !== null) applyWindowOperation(this.window, operation);
+    }
+}
 
 /**
  * PBrowser: the window of this page, whose blocks the dispatcher runs itself. In a <pony-app> element, the page is the
@@ -76,11 +114,14 @@ export class Browser extends AbstractWindow {
  * PWindow: a browser window opened by the server, running a terminal of its own on the same context. This terminal
  * hands it the blocks of the window; it says when it is ready, and sends its messages through this one.
  */
-export class PopupWindow extends AbstractWindow implements ChildTerminal {
+export class PopupWindow extends AbstractWindow implements ChildTerminal, BridgedChild {
+    readonly kind = 'window';
     private readonly url: string;
     private readonly name: string;
     private readonly features: string;
     private readonly windows: Windows;
+    /** An embedded terminal's window of the application: talked to by postMessage only (ADR-0009). */
+    private readonly bridge: ChildBridge | null;
     private isReady = false;
 
     static create(context: Context, id: number, type: number, reader: Reader): PopupWindow {
@@ -92,22 +133,42 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
         const name = reader.str ?? '';
         reader.read();
         const features = reader.str ?? '';
+        const session = context.session;
+        const bridge = relative ? session.embedding?.children ?? null : null;
         if (relative) {
-            const session = context.session;
             url = `${session.hostPageBaseURL}${url}?${C.WINDOW_ID}=${id}&${C.UI_CONTEXT_ID}=${session.contextId}`;
             if (session.tabindexOnlyFormField) url += `&${C.OPTION_TABINDEX_ACTIVATED}=true`;
+            if (bridge !== null) url += `&${C.BRIDGED}=1`;
         }
-        return new PopupWindow(context, id, type, url, name, features);
+        return new PopupWindow(context, id, type, url, name, features, bridge);
     }
 
     private constructor(context: Context, id: number, type: number, url: string,
-                        name: string, features: string) {
+                        name: string, features: string, bridge: ChildBridge | null) {
         super(context, id, type);
         this.url = url;
         this.name = name;
         this.features = features;
+        this.bridge = bridge;
         this.windows = context.windows;
         this.windows.register(id, this);
+    }
+
+    get title(): string {
+        return this.name;
+    }
+
+    get target(): Window | null {
+        return this.window;
+    }
+
+    closing(): void {
+        this.onClose();
+    }
+
+    protected override operate(operation: WindowOperation): void {
+        if (this.bridge !== null) this.bridge.operate(this, operation);
+        else super.operate(operation);
     }
 
     override update(reader: Reader): boolean {
@@ -123,18 +184,18 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
     }
 
     private open(): void {
-        // In a <pony-app> element, the window's terminal could not reach this one from another origin (ADR-0008)
-        this.window = this.context.session.embedding === null ? window.open(this.url, this.name, this.features) : null;
+        this.window = window.open(this.url, this.name, this.features);
         if (this.window === null) {
             // The browser blocked the popup
             const message = about(this.id);
             message[C.HANDLER_DESTROY] = FLAG;
             this.context.send(message);
-            this.context.warn(this.context.session.embedding === null ? `Can't open PTWindow #${this.id}. Check the browser's settings`
-                : `PTWindow #${this.id} refused: an embedded application opens no window (ADR-0008)`, this.id);
+            this.context.warn(`Can't open PTWindow #${this.id}. Check the browser's settings`, this.id);
             return;
         }
-        this.window.addEventListener('unload', () => this.onClose());
+        // A window of another origin is not listened to: it says when it goes (closing), and watchWindows sees it closed
+        if (this.bridge !== null) this.bridge.register(this);
+        else this.window.addEventListener('unload', () => this.onClose());
     }
 
     get ready(): boolean {
@@ -151,12 +212,16 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
 
     postMessage(bytes: Uint8Array): void {
         if (this.isReady && this.closed) this.onClose();
-        if (this.isReady) this.window?.postMessage(bytes.slice(), '*');
+        if (!this.isReady) return;
+        // To this page's origin, never to any: a window that navigated elsewhere gets nothing
+        if (this.bridge !== null) this.bridge.post(this, bytes);
+        else this.window?.postMessage(bytes.slice(), location.origin);
     }
 
     setReady(): void {
         this.isReady = true;
-        if (this.window !== null) this.window.document.title = this.name; // Chrome keeps the opener's title otherwise
+        // Chrome keeps the opener's title otherwise; a bridged window gets it with its init
+        if (this.window !== null && this.bridge === null) this.window.document.title = this.name;
         const message = about(this.id);
         message[C.HANDLER_OPEN] = this.url;
         this.context.send(message);
@@ -166,6 +231,7 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal {
     onClose(): void {
         if (!this.isReady || this.window === null) return;
         this.isReady = false;
+        this.bridge?.unregister(this);
         this.window = null;
         this.windows.unregister(this.id);
         const message = about(this.id);
