@@ -189,9 +189,11 @@ export class Terminal implements Session, Host {
         };
     }
 
+    /** At the page's directory: a page may have a file name (index.html, a custom page), the socket is the application's. */
     private socketUrl(parameters: string): string {
         const l = this.mount.url;
-        return `${l.protocol.replace('http', 'ws')}//${l.host}${l.pathname}${MappingPath.WEBSOCKET}?${C.TYPE_HISTORY}=`
+        const directory = l.pathname.substring(0, l.pathname.lastIndexOf('/') + 1);
+        return `${l.protocol.replace('http', 'ws')}//${l.host}${directory}${MappingPath.WEBSOCKET}?${C.TYPE_HISTORY}=`
             + `${this.history.token}${parameters}&${C.PROTOCOL_VERSION}=${ProtocolVersion.CURRENT}${l.search.replace('?', '&')}`
             + this.mount.handshake;
     }

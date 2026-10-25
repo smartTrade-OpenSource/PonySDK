@@ -38,3 +38,12 @@ test('every showcase tab renders without client errors', async ({ page }) => {
   await page.locator('.pony-tab', { hasText: 'Web Components' }).click();
   await expect(page.locator('my-card')).toContainText('Card body text set from server via property API.');
 });
+
+// The page has a file name: the socket is the application's, at the page's directory, not under the file
+test('the bootstrap page at index.html connects', async ({ page }) => {
+  const sockets = [];
+  page.on('websocket', ws => sockets.push(new URL(ws.url()).pathname));
+  await page.goto(BASE_URL + 'index.html', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.pony-tab').first()).toBeVisible({ timeout: 10000 });
+  expect(sockets).toEqual([new URL('ws', BASE_URL).pathname]);
+});

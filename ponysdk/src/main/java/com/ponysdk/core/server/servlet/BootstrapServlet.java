@@ -353,7 +353,7 @@ public class BootstrapServlet extends HttpServlet {
             + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
             + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
             + "e={opened:false,messages:[],times:[],closeEvent:null};"
-            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname+'" + MappingPath.WEBSOCKET + "?"
+            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname.replace(/[^/]*$/,'')+'" + MappingPath.WEBSOCKET + "?"
             + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
             + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
             + "e.socket.binaryType='arraybuffer';"
