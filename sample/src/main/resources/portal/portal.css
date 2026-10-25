@@ -55,6 +55,9 @@ main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap
     gap: 16px;
 }
 
+.portal-ticket { margin: 0; }
+.portal-ticket figcaption { margin: 0 0 6px; font-size: 13px; color: #6b7280; }
+
 .portal-blotter, .portal-app {
     background: var(--card);
     border: 1px solid var(--line);

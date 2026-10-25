@@ -4,7 +4,7 @@
 
 import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
 import { about, FLAG } from '../protocol/messages.ts';
-import { Reader } from '../protocol/reader.ts';
+import type { Reader } from '../protocol/reader.ts';
 import type { Windows } from '../runtime/windows.ts';
 import { log } from '../runtime/log.ts';
 import { apply, BaseObject, type ChildTerminal, type Context, type Setters } from '../runtime/object.ts';
@@ -42,7 +42,8 @@ const WINDOW: Setters<Window> = new Map<number, (w: Window, r: Reader) => void>(
 
 /**
  * PBrowser: the window of this page, whose blocks the dispatcher runs itself. In a <pony-app> element, the page is the
- * host's (ADR-0008): RELOAD starts the application again in the element, the title and the location stay the host's.
+ * host's (ADR-0008): RELOAD starts the application again in the element; the title and the location are the host's to
+ * decide, told by the events pony-title and pony-location (ADR-0009).
  */
 export class Browser extends AbstractWindow {
     constructor(context: Context, id: number, type: number) {
@@ -58,8 +59,12 @@ export class Browser extends AbstractWindow {
                 embedding.restart();
                 return true;
             }
-            if (reader.key === K.WINDOW_TITLE || reader.key === K.WINDOW_LOCATION_REPLACE) {
-                this.context.warn(`${Reader.keyName(reader.key)} ignored: the page is the host's`, this.id);
+            if (reader.key === K.WINDOW_TITLE) {
+                embedding.notify('pony-title', reader.str ?? '');
+                return true;
+            }
+            if (reader.key === K.WINDOW_LOCATION_REPLACE) {
+                embedding.notify('pony-location', new URL(reader.str ?? '', this.context.session.hostPageBaseURL).href);
                 return true;
             }
         }

@@ -963,6 +963,7 @@ div.selected-row { background-color: #e0e7ff; }
 .pony-ticket-quantity { flex: 1; min-width: 0; font: 500 14px var(--mono); padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 8px; }
 .pony-ticket-last { display: block; margin-top: 12px; font-size: 13px; color: var(--text-2); }
 .pony-ticket-origin { margin-top: 4px; font-size: 12px; color: var(--text-4); }
+.pony-ticket-full { display: inline-block; margin-top: 8px; font-size: 13px; cursor: pointer; }
 .pony-ticket-dialog { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-lg); }
 .pony-ticket-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 

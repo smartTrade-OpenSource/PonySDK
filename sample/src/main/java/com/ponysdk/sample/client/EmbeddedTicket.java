@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PElement;
@@ -92,7 +93,13 @@ final class EmbeddedTicket {
         origin.setInnerText("Embedded in " + (hostOrigin != null ? hostOrigin : "this page") + " · "
             + (credential != null ? "signed in as " + credential : "no credential") + " · context #" + uiContext.getID());
 
-        ticket.add(head, prices, amount, last, origin);
+        // The full application, where the host decides: in a page the location changes, in an element the host is
+        // told (pony-location, ADR-0009)
+        final PAnchor full = Element.newPAnchor("Open the full application");
+        full.addStyleName("pony-ticket-full");
+        full.addClickHandler(event -> PWindow.getMain().getLocation().replace("./"));
+
+        ticket.add(head, prices, amount, last, origin, full);
         PWindow.getMain().add(ticket);
 
         setInstrument(host.getAttribute("instrument"));
@@ -115,6 +122,7 @@ final class EmbeddedTicket {
         instrument = value != null && MIDS.containsKey(value) ? value : DEFAULT_INSTRUMENT;
         mid = MIDS.get(instrument);
         instrumentLabel.setText(instrument.substring(0, 3) + " / " + instrument.substring(3));
+        PWindow.getMain().setTitle(instrument.substring(0, 3) + "/" + instrument.substring(3) + " ticket"); // pony-title
         tick();
     }
 

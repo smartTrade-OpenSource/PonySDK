@@ -12,6 +12,8 @@ export interface Embedding {
     readonly attributes: Readonly<Record<string, string>>;
     /** Starts the application again in the element, on a new context: a lost context, RELOAD. */
     restart(): void;
+    /** Tells the host: a CustomEvent on the element, bubbling and composed (pony-title, pony-location, ADR-0009). */
+    notify(type: string, detail?: unknown): void;
 }
 
 /** The element's attributes but the terminal's own: those the application reads through PHost. */

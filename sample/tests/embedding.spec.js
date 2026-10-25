@@ -116,6 +116,22 @@ test('events out: a trade lands in the host page\'s own blotter', async ({ page 
   await expect(row).toContainText('EURUSD');
 });
 
+test('title and location: the application asks, the host decides (ADR-0009)', async ({ page, context }) => {
+  const { first } = await openPortal(page);
+  await expect(page.locator('#ticket-1-title')).toHaveText('EUR/USD ticket'); // pony-title
+  await page.locator('#instrument').selectOption('USDCHF');
+  await expect(page.locator('#ticket-1-title')).toHaveText('USD/CHF ticket');
+  expect(await page.title()).toBe('Northwind Treasury portal'); // the host's own
+
+  const opened = context.waitForEvent('page'); // pony-location: the portal opens a tab
+  await first.locator('.pony-ticket-full').click();
+  const tab = await opened;
+  await tab.waitForLoadState('domcontentloaded');
+  expect(tab.url().split('#')[0]).toBe(new URL('./', await first.getAttribute('src')).href);
+  expect(page.url()).toBe(PORTAL_URL); // the portal stays
+  await tab.close();
+});
+
 test('events in: the host\'s reset event reaches the application', async ({ page }) => {
   const { second } = await openPortal(page);
   const quantity = second.locator('.pony-ticket-quantity');

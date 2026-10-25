@@ -42,6 +42,16 @@
         trades.insertBefore(row, trades.firstChild);
     });
 
+    // The title and the location an application asks for: the portal's to decide (docs/decisions/0009-embedding-limits.md).
+    // A ticket's title captions it; a location opens in a tab of its own, the portal stays
+    document.addEventListener('pony-title', function (event) {
+        var caption = document.getElementById(event.target.id + '-title');
+        if (caption) caption.textContent = event.detail;
+    });
+    document.addEventListener('pony-location', function (event) {
+        window.open(event.detail, '_blank', 'noopener');
+    });
+
     // The applications' connection
     var status = document.getElementById('status');
     document.addEventListener('pony-connection-lost', function (event) {

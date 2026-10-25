@@ -149,7 +149,8 @@ function stylesheet(href: string, id: string, origin: string, root: string): HTM
  * - isolation: shadow (the default), the application renders in a shadow root; none, in the page.
  * - history: memory (the default), the token stays in the element; hash, the page's fragment is the application's.
  * Its other attributes are the application's (PHost). Its children show until the application's first widget. It
- * dispatches pony-connection-lost and pony-reconnected.
+ * dispatches pony-connection-lost and pony-reconnected; pony-title and pony-location, the window title and the
+ * location the application asks for (ADR-0009).
  * - credential, a property: a function returning the credential of the user (a JWT, an OAuth access token) or a
  *   promise of it, called before each start; the application reads it with PHost.getCredential()
  *   (docs/decisions/0009-embedding-limits.md). A property, never an attribute: the DOM is every script's to read.
@@ -268,8 +269,9 @@ export class PonyApp extends HTMLElement {
 
         const lifetime = new AbortController();
         const attributes = hostAttributes(this);
-        const embedding: Embedding = { element: this, attributes, restart: () => this.restartLater() };
-        const events = (type: string) => this.dispatchEvent(new CustomEvent(type, { bubbles: true, composed: true }));
+        const notify = (type: string, detail?: unknown) =>
+            this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
+        const embedding: Embedding = { element: this, attributes, restart: () => this.restartLater(), notify };
         const mount: Mount = {
             url,
             body,
@@ -281,10 +283,10 @@ export class PonyApp extends HTMLElement {
             credential,
             signal: lifetime.signal,
             connectionLost: () => {
-                events('pony-connection-lost');
+                notify('pony-connection-lost');
                 return false; // the application's #reconnection notice, if it has one
             },
-            reconnected: () => events('pony-reconnected'),
+            reconnected: () => notify('pony-reconnected'),
             serverBack: () => this.restartLater(),
             reload: () => this.restartLater(),
         };
