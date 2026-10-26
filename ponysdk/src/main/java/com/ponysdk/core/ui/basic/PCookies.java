@@ -38,6 +38,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class PCookies {
 
     private boolean isInitialized = false;
 
+    /** Called once the browser's cookies are known: {@link #getCookie} reads them from then on. */
     public interface CookiesListener {
 
         void onInitialized();
@@ -63,18 +65,31 @@ public class PCookies {
 
     private CookiesListener listener;
 
+    /** The cookie's value, null when the browser has none of that name or the cookies are not known yet. */
     public String getCookie(final String name) {
         return cachedCookies.get(name);
     }
 
+    /** Removes the cookie of that name, without a path or a domain. @return its last value, null for none */
     public String removeCookie(final String name) {
-        return removeCookie(name, null);
+        return removeCookie(name, null, null);
     }
 
+    /** Removes the cookie of that name and path. @return its last value, null for none */
     public String removeCookie(final String name, final String path) {
+        return removeCookie(name, path, null);
+    }
+
+    /**
+     * Removes the cookie of that name, path and domain: a cookie set with a domain is removed only with it.
+     *
+     * @return its last value, null for none
+     */
+    public String removeCookie(final String name, final String path, final String domain) {
         final UIContext uiContext = UIContext.get();
         if (uiContext.isEmbedded()) {
             final Cookie cookie = cookie(name, "", path);
+            if (domain != null) cookie.setDomain(domain);
             cookie.setMaxAge(0);
             uiContext.stackCookieRequest(setting(cookie));
             return cachedCookies.remove(name);
@@ -83,28 +98,39 @@ public class PCookies {
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.REMOVE_COOKIE, name);
+        // the order of ADD_COOKIE: the domain, then the path
+        if (domain != null) writer.write(ServerToClientModel.COOKIE_DOMAIN, domain);
         if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
         writer.endObject();
 
         return cachedCookies.remove(name);
     }
 
+    /** Sets a session cookie, for the page's path. */
     public void setCookie(final String name, final String value) {
         setCookie(name, value, null, null);
     }
 
+    /** Sets a session cookie for that path. */
     public void setCookie(final String name, final String value, final String path) {
         setCookie(name, value, null, path);
     }
 
+    /** Sets a cookie that expires then. */
     public void setCookie(final String name, final String value, final Date expires) {
         setCookie(name, value, expires, null);
     }
 
+    /** Sets a cookie that expires then, for that path. */
     public void setCookie(final String name, final String value, final Date expires, final String path) {
         setCookie(name, value, expires, path, null, false, null);
     }
 
+    /**
+     * Sets a cookie with all its attributes; each but the name and the value may be null (false for secure).
+     *
+     * @param sameSite {@code Strict}, {@code Lax} or {@code None}
+     */
     public void setCookie(final String name, final String value, final Date expires, final String domain, final String path,
                           final boolean secure, String sameSite) {
         cachedCookies.put(name, value);
@@ -132,6 +158,7 @@ public class PCookies {
         writer.endObject();
     }
 
+    /** The browser's cookies, sent by the terminal at its start: called by the framework. */
     public void onClientData(final JsonObject event) {
         final JsonArray cookies = event.getJsonArray(ClientToServerModel.COOKIES.toStringValue());
         final UIContext uiContext = UIContext.get();
@@ -158,16 +185,20 @@ public class PCookies {
         }
     }
 
+    /** True once the browser's cookies are known. */
     public boolean isInitialized() {
         return isInitialized;
     }
 
+    /** Called once the cookies are known; at once when they already are. */
     public void setListener(final CookiesListener listener) {
         this.listener = listener;
+        if (isInitialized && listener != null) listener.onInitialized();
     }
 
+    /** The names of the cookies known, read-only. */
     public Collection<String> getNames() {
-        return cachedCookies.keySet();
+        return Collections.unmodifiableSet(cachedCookies.keySet());
     }
 
     /** As the terminal writes them in a page: name and value URI-encoded. */

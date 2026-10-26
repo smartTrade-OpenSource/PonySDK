@@ -46,9 +46,12 @@ export class Cookies extends BaseObject {
             return true;
         }
         if (reader.key === K.REMOVE_COOKIE) {
-            const name = encodeURIComponent(reader.str ?? '');
+            let cookie = `${encodeURIComponent(reader.str ?? '')}=`;
+            const domain = optional(reader, K.COOKIE_DOMAIN)?.str; // a cookie set with a domain is removed with it
             const path = optional(reader, K.COOKIE_PATH)?.str;
-            this.write(path ? `${name}=;path=${path};expires=${EXPIRED}` : `${name}=;expires=${EXPIRED}`);
+            if (domain) cookie += `;domain=${domain}`;
+            if (path) cookie += `;path=${path}`;
+            this.write(`${cookie};expires=${EXPIRED}`);
             return true;
         }
         return super.update(reader);
