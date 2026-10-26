@@ -129,6 +129,15 @@ jobs:
           npx playwright test tests/oracle.spec.js tests/reconnection.spec.js -g "oracle|terminal objects" --retries=0
           npx playwright test tests/typescript-terminal.spec.js tests/legacy.spec.js --retries=0
 
+      - name: Showcase, Web Components, reconnection, embedding and integration gallery
+        working-directory: sample
+        env:
+          BASE_URL: 'http://localhost:8081/sample/'
+        # The embedding and gallery specs reach the portal ShowcaseMain serves on port 8082, as another site
+        run: |
+          npx playwright test tests/showcase-smoke.spec.js tests/webcomponents.spec.js tests/embedding.spec.js tests/integration-gallery.spec.js
+          npx playwright test tests/reconnection.spec.js --grep-invert "oracle|terminal objects"
+
       - name: Showcase log
         if: failure()
         run: cat showcase.log || true
