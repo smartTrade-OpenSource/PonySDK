@@ -171,7 +171,7 @@ final class Costs {
         }, (w, i) -> w.setStyleProperty("opacity", i % 2 == 0 ? "0.9" : "1"), "style"));
         l.add(new CostSpec("PWebComponent <my-counter>", () -> {
             final PWebComponent wc = new PWebComponent("my-counter");
-            wc.attr("label", "Clicks");
+            wc.setAttribute("label", "Clicks");
             wc.property("count").set(0);
             return wc;
         }, (w, i) -> ((PWebComponent) w).property("count").set(i), "property"));

@@ -39,6 +39,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.websocket.Subprotocols;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -148,10 +149,8 @@ public class PHostTest extends PSuite {
         final PHost host = PHost.get();
         writer.clear();
         final List<JsonValue> seen = new ArrayList<>();
-        final java.util.function.Consumer<JsonValue> first = seen::add;
-        final java.util.function.Consumer<JsonValue> second = seen::add;
-        host.addEventListener("refresh", first);
-        host.addEventListener("refresh", second);
+        final HandlerRegistration first = host.addEventListener("refresh", seen::add);
+        final HandlerRegistration second = host.addEventListener("refresh", seen::add);
         assertEquals(List.of("refresh"), writer.valuesOf(ServerToClientModel.WC_LISTEN_EVENT), "listened once");
 
         fromTerminal(host, Json.createObjectBuilder()
@@ -164,9 +163,24 @@ public class PHostTest extends PSuite {
         assertEquals(5, ((JsonObject) seen.get(0)).getInt("depth"));
         assertEquals(JsonValue.NULL, seen.get(2), "an event without detail");
 
-        host.removeEventListener("refresh", first);
+        first.removeHandler();
         assertEquals(0, writer.count(ServerToClientModel.WC_UNLISTEN_EVENT));
-        host.removeEventListener("refresh", second);
+        second.removeHandler();
         assertEquals(List.of("refresh"), writer.valuesOf(ServerToClientModel.WC_UNLISTEN_EVENT));
+    }
+
+    @Test
+    public void anAttributeListenerGivenAsAMethodReferenceIsRemovedByItsRegistration() {
+        // label::setText is a new object at each evaluation: removal by identity removed nothing
+        handshake("{\"instrument\":\"EURUSD\"}");
+        final PHost host = PHost.get();
+        final List<String> seen = new ArrayList<>();
+        final HandlerRegistration registration = host.addAttributeListener("instrument", seen::add);
+        fromTerminal(host, Json.createObjectBuilder().add(ClientToServerModel.HOST_ATTRIBUTES.toStringValue(),
+            Json.createObjectBuilder().add("instrument", "USDJPY")).build());
+        registration.removeHandler();
+        fromTerminal(host, Json.createObjectBuilder().add(ClientToServerModel.HOST_ATTRIBUTES.toStringValue(),
+            Json.createObjectBuilder().add("instrument", "GBPUSD")).build());
+        assertEquals(List.of("USDJPY"), seen);
     }
 }

@@ -79,8 +79,8 @@ final class WebComponentsPage {
         contentPanel.add(Element.newPLabel("PLabel inside 'content' slot"), searchBox);
         dashboard.slotContent().add(contentPanel);
         dashboard.slotFooter().add(statusLabel);
-        refreshBtn.addClickHandler(e -> { statusLabel.setText("Refreshed at " + new java.util.Date()); dashboard.setThemeAttribute("light"); });
-        exportBtn.addClickHandler(e -> { statusLabel.setText("Export triggered!"); dashboard.setThemeAttribute("dark"); });
+        refreshBtn.addClickHandler(e -> { statusLabel.setText("Refreshed at " + new java.util.Date()); dashboard.setThemeAttribute(PMyDashboard.Theme.LIGHT); });
+        exportBtn.addClickHandler(e -> { statusLabel.setText("Export triggered!"); dashboard.setThemeAttribute(PMyDashboard.Theme.DARK); });
 
         // my-card
         final PMyCard card = new PMyCard();

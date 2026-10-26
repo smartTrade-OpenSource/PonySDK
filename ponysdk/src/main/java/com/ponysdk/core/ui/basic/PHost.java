@@ -41,6 +41,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.websocket.Subprotocols;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 import jakarta.json.Json;
 import jakarta.json.JsonException;
@@ -59,10 +60,13 @@ import jakarta.json.JsonValue;
  * </ul>
  * <pre>
  * final PHost host = PHost.get(); // null when the application runs as a page
- * label.setText(host.getAttribute("instrument"));
- * host.addAttributeListener("instrument", label::setText);
- * host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build());
+ * if (host != null) {
+ *     label.setText(host.getAttribute("instrument"));
+ *     final HandlerRegistration following = host.addAttributeListener("instrument", label::setText);
+ *     host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build());
+ * }
  * </pre>
+ * Each listener comes with its {@link HandlerRegistration}, which removes it (docs/decisions/0011-one-way-to-listen.md).
  */
 public final class PHost extends PObject {
 
@@ -89,6 +93,7 @@ public final class PHost extends PObject {
      */
     public static PHost get() {
         final UIContext uiContext = UIContext.get();
+        if (uiContext == null) throw new IllegalStateException("PHost.get() needs a UIContext: call it on the UI thread");
         final PHost existing = uiContext.getAttribute(KEY);
         if (existing != null) return existing;
         final List<String> handshake = uiContext.getParameterMap().get(ATTRIBUTES_KEY);
@@ -136,13 +141,19 @@ public final class PHost extends PObject {
         return Collections.unmodifiableMap(attributes);
     }
 
-    /** Called with the attribute's new value each time the host changes it, with null when it removes it. */
-    public void addAttributeListener(final String name, final Consumer<String> listener) {
+    /**
+     * Called with the attribute's new value each time the host changes it, with null when it removes it.
+     *
+     * @return removes the listener
+     */
+    public HandlerRegistration addAttributeListener(final String name, final Consumer<String> listener) {
+        Objects.requireNonNull(listener, "listener");
         if (attributeListeners == null) attributeListeners = new HashMap<>(4);
         attributeListeners.computeIfAbsent(name, n -> new ArrayList<>(1)).add(listener);
+        return () -> removeAttributeListener(name, listener);
     }
 
-    public void removeAttributeListener(final String name, final Consumer<String> listener) {
+    private void removeAttributeListener(final String name, final Consumer<String> listener) {
         if (attributeListeners == null) return;
         final List<Consumer<String>> listeners = attributeListeners.get(name);
         if (listeners != null && listeners.remove(listener) && listeners.isEmpty()) attributeListeners.remove(name);
@@ -150,16 +161,21 @@ public final class PHost extends PObject {
 
     /**
      * Called with the detail of each {@code CustomEvent} of this type the host dispatches on the element:
-     * {@link JsonValue#NULL} without detail. The events this application dispatches are not delivered to it.
+     * {@link JsonValue#NULL} without detail, a JSON string when the detail is not JSON. The events this application
+     * dispatches are not delivered to it.
+     *
+     * @return removes the listener; the last one of a type removed, the terminal stops listening
      */
-    public void addEventListener(final String type, final Consumer<JsonValue> listener) {
+    public HandlerRegistration addEventListener(final String type, final Consumer<JsonValue> listener) {
+        Objects.requireNonNull(listener, "listener");
         if (eventListeners == null) eventListeners = new HashMap<>(4);
         final List<Consumer<JsonValue>> listeners = eventListeners.computeIfAbsent(type, t -> new ArrayList<>(1));
         if (listeners.isEmpty()) saveUpdate(writer -> writer.write(ServerToClientModel.WC_LISTEN_EVENT, type));
         listeners.add(listener);
+        return () -> removeEventListener(type, listener);
     }
 
-    public void removeEventListener(final String type, final Consumer<JsonValue> listener) {
+    private void removeEventListener(final String type, final Consumer<JsonValue> listener) {
         if (eventListeners == null) return;
         final List<Consumer<JsonValue>> listeners = eventListeners.get(type);
         if (listeners == null || !listeners.remove(listener) || !listeners.isEmpty()) return;

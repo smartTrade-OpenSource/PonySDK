@@ -6,11 +6,9 @@ package com.ponysdk.sample.client;
 
 import static com.ponysdk.sample.client.Ui.*;
 
-import java.io.StringReader;
 import java.util.List;
 import java.util.Locale;
 
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
@@ -24,7 +22,7 @@ import com.ponysdk.impl.java.ShowcaseMain;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
 
 /**
  * Embedding (docs/decisions/0008-embedded-application.md): a PonySDK application inside a page it does not own. This
@@ -33,7 +31,6 @@ import jakarta.json.JsonReader;
  */
 final class EmbeddingPage {
 
-    private static final String DETAIL = ClientToServerModel.WC_EVENT_DETAIL.toStringValue();
 
     private EmbeddingPage() {
     }
@@ -51,28 +48,28 @@ final class EmbeddingPage {
             + uiContext.getConfiguration().getApplicationContextName() + "/";
         final PWebComponent ticket = new PWebComponent("pony-app");
         ticket.addStyleName("pony-embedding-ticket");
-        ticket.attr("src", self);
-        ticket.attr("view", EmbeddedTicket.VIEW);
-        ticket.attr("instrument", "EURUSD");
+        ticket.setAttribute("src", self);
+        ticket.setAttribute("view", EmbeddedTicket.VIEW);
+        ticket.setAttribute("instrument", "EURUSD");
         ticket.add(Element.newPLabel("Loading the ticket…"));
 
         final PListBox instrument = Element.newPListBox();
         for (final String name : List.of("EURUSD", "GBPUSD", "USDJPY", "USDCHF")) instrument.addItem(name);
-        instrument.addChangeHandler(event -> ticket.attr("instrument", instrument.getSelectedItem()));
+        instrument.addChangeHandler(event -> ticket.setAttribute("instrument", instrument.getSelectedItem()));
         final PTextBox quantity = Element.newPTextBox();
         quantity.setText("1000000");
-        quantity.addValueChangeHandler(event -> ticket.attr("quantity", quantity.getText()));
+        quantity.addValueChangeHandler(event -> ticket.setAttribute("quantity", quantity.getText()));
 
         final PFlowPanel trades = Element.newPFlowPanel();
         trades.addStyleName("pony-embedding-trades");
         final PElement none = Element.newDiv();
         none.setInnerText("No trade yet: the ticket's trade events show here.");
         trades.add(none);
-        ticket.onEvent("trade", event -> {
+        ticket.addEventListener("trade", trade -> {
             if (none.getParent() != null) none.removeFromParent();
             final PElement row = Element.newDiv();
             row.addStyleName("pony-embedding-trade");
-            row.setInnerText(describe(event.getString(DETAIL, "{}")));
+            row.setInnerText(describe(trade));
             trades.insert(row, 0);
         });
 
@@ -108,13 +105,13 @@ final class EmbeddingPage {
         return page;
     }
 
-    private static String describe(final String json) {
-        try (JsonReader reader = Json.createReader(new StringReader(json))) {
-            final JsonObject trade = reader.readObject();
+    private static String describe(final JsonValue detail) {
+        if (!(detail instanceof JsonObject trade)) return detail.toString();
+        try {
             return String.format(Locale.ROOT, "%s  %s %,d %s at %s", trade.getString("time", ""), trade.getString("side", ""),
                 trade.getJsonNumber("quantity").longValue(), trade.getString("instrument", ""), trade.getJsonNumber("price"));
         } catch (final RuntimeException e) {
-            return json;
+            return trade.toString();
         }
     }
 

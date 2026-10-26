@@ -139,6 +139,7 @@ public final class WebComponentGenerator {
         private final Map<String, List<String>> enumLiterals = new HashMap<>();
         private final Set<String> signatures = new HashSet<>();
         private boolean usesEvents;
+        private boolean usesJson;
 
         ElementClass(final String javaPackage, final String origin, final JsonObject declaration) {
             this.javaPackage = javaPackage;
@@ -178,7 +179,8 @@ public final class WebComponentGenerator {
             if (!javaPackage.isEmpty()) out.append("package ").append(javaPackage).append(";\n\n");
             if (usesEvents) out.append("import java.util.function.Consumer;\n\n");
             out.append("import com.ponysdk.core.ui.basic.PWebComponent;\n");
-            if (usesEvents) out.append("\nimport jakarta.json.JsonValue;\n");
+            if (usesEvents) out.append("import com.ponysdk.core.ui.eventbus.HandlerRegistration;\n");
+            if (usesEvents || usesJson) out.append("\nimport jakarta.json.JsonValue;\n");
             out.append('\n');
             javadoc(out, "", "{@code <" + tag + ">}" + text(declaration).map(d -> ": " + d).orElse(""));
             deprecated(out, "", declaration);
@@ -234,18 +236,22 @@ public final class WebComponentGenerator {
             final String q = quote(name);
             if (type.kind == Kind.BOOLEAN) {
                 method(attribute, "set" + capitalize(camel(name)), List.of("boolean"), "void", List.of("value"),
-                    "        if (value) attr(" + q + ", \"\");\n        else removeAttr(" + q + ");\n", null);
+                    "        if (value) setAttribute(" + q + ", \"\");\n        else removeAttribute(" + q + ");\n", null);
+            } else if (type.kind == Kind.ENUM) {
+                final String javaType = type.java(this, capitalize(camel(name)));
+                method(attribute, "set" + capitalize(camel(name)) + "Attribute", List.of(javaType), "void", List.of("value"),
+                    "        if (value == null) removeAttribute(" + q + ");\n        else setAttribute(" + q + ", value.literal);\n", null);
             } else {
                 method(attribute, "set" + capitalize(camel(name)) + "Attribute", List.of("String"), "void", List.of("value"),
-                    "        if (value == null) removeAttr(" + q + ");\n        else attr(" + q + ", value);\n", null);
+                    "        if (value == null) removeAttribute(" + q + ");\n        else setAttribute(" + q + ", value);\n", null);
             }
         }
 
         private void event(final JsonObject event) {
             usesEvents = true;
             final String name = event.getString("name");
-            method(event, "on" + capitalize(camel(name)), List.of("Consumer<JsonValue>"), "void", List.of("listener"),
-                "        onEvent(" + quote(name) + ", event -> listener.accept(detailOf(event)));\n", null);
+            method(event, "on" + capitalize(camel(name)), List.of("Consumer<JsonValue>"), "HandlerRegistration",
+                List.of("listener"), "        return addEventListener(" + quote(name) + ", listener);\n", null);
         }
 
         private void methodOf(final JsonObject member) {
@@ -264,7 +270,9 @@ public final class WebComponentGenerator {
                 for (final JsonObject parameter : parameters.subList(0, count)) {
                     final String parameterName = identifier(camel(parameter.getString("name")));
                     final Type type = Type.parse(parameter.getBoolean("rest", false) ? null : typeText(parameter));
-                    types.add(type.java(this, capitalize(camel(parameter.getString("name")))));
+                    // An object or an array as a JsonValue: the terminal parses an array element that is JSON
+                    if (type.kind == Kind.JSON) usesJson = true;
+                    types.add(type.kind == Kind.JSON ? "JsonValue" : type.java(this, capitalize(camel(parameter.getString("name")))));
                     names.add(parameterName);
                     args.add(type.kind == Kind.ENUM ? parameterName + " == null ? null : " + parameterName + ".literal" : parameterName);
                 }
@@ -305,13 +313,20 @@ public final class WebComponentGenerator {
         private String method(final String name, final List<String> types, final String returns,
                               final List<String> names, final String code, final String doc, final JsonObject deprecation) {
             String javaName = name;
-            if (INHERITED.contains(signature(javaName, types))) javaName = name + "Property";
+            String docText = doc;
+            if (INHERITED.contains(signature(javaName, types))) {
+                javaName = name + "Property";
+                System.err.println("WebComponentGenerator: <" + tag + "> " + className + "." + signature(name, types)
+                    + " is PWebComponent's: generated as " + javaName);
+                docText = (doc == null ? "" : doc + "\n") + "Named {@code " + javaName + "}: {@code " + name
+                    + "} is PWebComponent's.";
+            }
             final String signature = signature(javaName, types);
             if (INHERITED.contains(signature) || !signatures.add(signature)) {
                 throw new IllegalArgumentException("<" + tag + ">: two members give " + className + "." + signature);
             }
             body.append('\n');
-            if (doc != null) javadoc(body, "    ", doc);
+            if (docText != null) javadoc(body, "    ", docText);
             if (deprecation != null) deprecated(body, "    ", deprecation);
             body.append("    public ").append(returns).append(' ').append(javaName).append('(');
             for (int i = 0; i < types.size(); i++) {

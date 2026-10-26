@@ -5,6 +5,7 @@
 package com.ponysdk.core.ui.basic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -108,12 +109,14 @@ public class PEventListenerTest extends PSuite {
     }
 
     @Test
-    public void belowProtocol4TheTerminalIsNotTold() {
+    public void belowProtocol4ListeningFailsInsteadOfNeverFiring() {
         speak(ProtocolVersion.CREATE_IN_PARENT);
         final PTextBox box = attachedBox();
-        box.addEventListener("input", PEventOptions.NONE, e -> {
-        }).removeHandler();
-        assertEquals(0, writer.count(ServerToClientModel.LISTEN_EVENT) + writer.count(ServerToClientModel.UNLISTEN_EVENT));
+        final IllegalStateException e = assertThrows(IllegalStateException.class,
+            () -> box.addEventListener("input", PEventOptions.NONE, event -> {
+            }));
+        assertTrue(e.getMessage().contains("needs protocol 4, the context speaks 3"), e.getMessage());
+        assertEquals(0, writer.count(ServerToClientModel.LISTEN_EVENT));
     }
 
     @Test

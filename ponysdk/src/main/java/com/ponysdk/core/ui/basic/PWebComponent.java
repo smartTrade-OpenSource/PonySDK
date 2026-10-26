@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.util.CompactStringMap;
 import com.ponysdk.core.util.OffHeapJsonStore;
 import com.ponysdk.core.writer.ModelWriter;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -56,7 +56,7 @@ import java.util.function.Consumer;
  * var dataset = chart.property("dataset").offHeap().withPatch();  // off-heap + delta
  * var stream  = chart.property("stream").stateless();             // fire & forget
  *
- * // Then use uniformly
+ * // Then use uniformly: values are JSON text, a string in quotes
  * title.set("\"Revenue Q4\"");
  * theme.set("\"dark\"");
  * dataset.set(hugeJson);       // off-heap + patch automatically
@@ -65,14 +65,15 @@ import java.util.function.Consumer;
  * // Read back
  * String t = title.get();      // works for on-heap and off-heap
  *
- * // Events
- * chart.onEvent("point-click", event -> { ... });
+ * // Events: the custom event's detail; the registration removes the listener
+ * HandlerRegistration clicks = chart.addEventListener("point-click", detail -> { ... });
  *
- * // Attributes
- * chart.attr("aria-label", "Chart");
+ * // Attributes, as on any widget
+ * chart.setAttribute("aria-label", "Chart");
  *
  * flowPanel.add(chart);
  * }</pre>
+ * A library's Custom Elements Manifest gives typed classes of its elements: {@link com.ponysdk.core.tools.WebComponentGenerator}.
  */
 public class PWebComponent extends PComplexPanel {
 
@@ -106,10 +107,8 @@ public class PWebComponent extends PComplexPanel {
     // Tracks which properties have patch enabled (subset of ON_HEAP and OFF_HEAP)
     private Set<String> patchEnabled;
 
-    // Attributes — lazy
-    private CompactStringMap wcAttributes;
-    // Event listeners — lazy
-    private Map<String, List<Consumer<JsonObject>>> wcEventListeners;
+    // Custom event listeners, by event name — lazy
+    private Map<String, List<Consumer<JsonValue>>> wcEventListeners;
 
     // ======== PropertyHandle — the unified property API ========
 
@@ -127,21 +126,24 @@ public class PWebComponent extends PComplexPanel {
             this.name = name;
         }
 
-        /** Store this property off-heap (direct ByteBuffer). Ideal for large JSON. */
+        /** Store this property off-heap (direct ByteBuffer). Ideal for large JSON. Before the first {@link #set}. */
         public PropertyHandle offHeap() {
+            requireNoValue("offHeap()");
             this.mode = StorageMode.OFF_HEAP;
             return this;
         }
 
-        /** Don't cache this property server-side. No delta, no replay. */
+        /** Don't cache this property server-side. No delta, no replay. Before the first {@link #set}. */
         public PropertyHandle stateless() {
+            requireNoValue("stateless()");
             this.mode = StorageMode.STATELESS;
             this.patch = false;
             return this;
         }
 
-        /** Enable JSON merge-patch for incremental updates (default for ON_HEAP/OFF_HEAP). */
+        /** Enable JSON merge-patch for incremental updates (default for ON_HEAP/OFF_HEAP). Before the first {@link #set}. */
         public PropertyHandle withPatch() {
+            requireNoValue("withPatch()");
             if (mode == StorageMode.STATELESS) throw new IllegalStateException("Cannot enable patch on stateless property");
             this.patch = true;
             if (patchEnabled == null) patchEnabled = new HashSet<>();
@@ -156,7 +158,11 @@ public class PWebComponent extends PComplexPanel {
             return this;
         }
 
-        /** Sets the property value. Behavior depends on the storage mode. */
+        /**
+         * Sets the property to a JSON text: {@code "\"dark\""} for the string dark, {@code "42"}, {@code "{\"a\":1}"}.
+         * The text is not checked: a string without its quotes reaches the element as that string only if it is not
+         * valid JSON. Behavior depends on the storage mode.
+         */
         public void set(final String value) {
             switch (mode) {
                 case STATELESS -> sendFull(name, value);
@@ -194,6 +200,13 @@ public class PWebComponent extends PComplexPanel {
             if (removed && !notCreatedYet()) {
                 saveUpdate(writer -> writer.write(ServerToClientModel.WC_REMOVE_PROPERTY, name));
             }
+        }
+
+        /** The storage is chosen before the first value: a value held would stay in the storage left. */
+        private void requireNoValue(final String method) {
+            final boolean held = onHeapValues != null && onHeapValues.get(name) != null
+                    || offHeapValues != null && offHeapValues.readValue(name) != null;
+            if (held) throw new IllegalStateException(method + " on property '" + name + "', which holds a value: choose the storage before the first set");
         }
 
         public String getName() { return name; }
@@ -409,13 +422,6 @@ public class PWebComponent extends PComplexPanel {
                 }
             }
         }
-        // Replay attributes
-        if (wcAttributes != null) {
-            for (final var entry : wcAttributes.entrySet()) {
-                writer.write(ServerToClientModel.WC_SET_ATTRIBUTE, entry.getKey());
-                writer.write(ServerToClientModel.WC_ATTRIBUTE_VALUE, entry.getValue());
-            }
-        }
         // Replay event listeners
         if (wcEventListeners != null) {
             for (final String eventName : wcEventListeners.keySet()) {
@@ -529,7 +535,7 @@ public class PWebComponent extends PComplexPanel {
     }
 
     /** The detail of a custom event the terminal sent, {@link JsonValue#NULL} when it has none. */
-    protected static JsonValue detailOf(final JsonObject event) {
+    private static JsonValue detailOf(final JsonObject event) {
         if (!(event.get(WC_EVENT_DETAIL_KEY) instanceof JsonString detail)) return JsonValue.NULL;
         final JsonValue value = readJson(detail.getString());
         return value != null ? value : JSON.createValue(detail.getString()); // not JSON: the terminal's String(detail)
@@ -557,78 +563,36 @@ public class PWebComponent extends PComplexPanel {
         }
     }
 
-    // ======== Attribute API ========
-
-    /**
-     * Sets an HTML attribute on the web component element.
-     */
-    public void attr(final String name, final String value) {
-        if (wcAttributes == null) wcAttributes = new CompactStringMap();
-        wcAttributes.put(name, value);
-        if (notCreatedYet()) return;
-        saveUpdate(writer -> {
-            writer.write(ServerToClientModel.WC_SET_ATTRIBUTE, name);
-            writer.write(ServerToClientModel.WC_ATTRIBUTE_VALUE, value);
-        });
-    }
-
-    /**
-     * Removes an HTML attribute from the web component element.
-     */
-    public void removeAttr(final String name) {
-        if (wcAttributes != null) wcAttributes.remove(name);
-        if (notCreatedYet()) return;
-        saveUpdate(writer -> writer.write(ServerToClientModel.WC_REMOVE_ATTRIBUTE, name));
-    }
-
-    /**
-     * Returns the cached value of an HTML attribute, or null.
-     */
-    public String getAttr(final String name) {
-        return wcAttributes != null ? wcAttributes.get(name) : null;
-    }
-
     // ======== Event API ========
 
     /**
-     * Registers a listener for a custom event dispatched by the web component.
+     * Listens to a custom event the element dispatches: the listener receives its {@code detail}, parsed;
+     * {@link JsonValue#NULL} without one, a JSON string when the detail is not JSON
+     * (docs/decisions/0011-one-way-to-listen.md). A DOM event read by named fields is
+     * {@link #addEventListener(String, com.ponysdk.core.ui.basic.event.PEventOptions, Consumer)}.
      *
-     * @param eventName the custom event name (e.g. "count-changed")
-     * @param listener  receives a JsonObject with event detail
+     * @param eventName the custom event's name, {@code count-changed}
+     * @return removes the listener; the last one of a name removed, the terminal stops listening
      */
-    public void onEvent(final String eventName, final Consumer<JsonObject> listener) {
-        if (wcEventListeners == null) wcEventListeners = new ConcurrentHashMap<>();
-        final List<Consumer<JsonObject>> listeners = wcEventListeners.computeIfAbsent(eventName, k -> new ArrayList<>());
+    public HandlerRegistration addEventListener(final String eventName, final Consumer<JsonValue> listener) {
+        Objects.requireNonNull(eventName, "eventName");
+        Objects.requireNonNull(listener, "listener");
+        if (wcEventListeners == null) wcEventListeners = new HashMap<>(4);
+        final List<Consumer<JsonValue>> listeners = wcEventListeners.computeIfAbsent(eventName, k -> new ArrayList<>(1));
         final boolean firstListener = listeners.isEmpty();
         listeners.add(listener);
         if (firstListener && !notCreatedYet()) {
             saveUpdate(writer -> writer.write(ServerToClientModel.WC_LISTEN_EVENT, eventName));
         }
+        return () -> removeCustomEventListener(eventName, listener);
     }
 
-    /**
-     * Removes a specific event listener.
-     */
-    public void removeEventListener(final String eventName, final Consumer<JsonObject> listener) {
+    private void removeCustomEventListener(final String eventName, final Consumer<JsonValue> listener) {
         if (wcEventListeners == null) return;
-        final List<Consumer<JsonObject>> listeners = wcEventListeners.get(eventName);
-        if (listeners != null) {
-            listeners.remove(listener);
-            if (listeners.isEmpty()) {
-                wcEventListeners.remove(eventName);
-                if (!notCreatedYet()) saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
-            }
-        }
-    }
-
-    /**
-     * Removes all listeners for a given event.
-     */
-    public void removeAllEventListeners(final String eventName) {
-        if (wcEventListeners == null) return;
-        if (wcEventListeners.remove(eventName) != null && !notCreatedYet()) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
-        }
+        final List<Consumer<JsonValue>> listeners = wcEventListeners.get(eventName);
+        if (listeners == null || !listeners.remove(listener) || !listeners.isEmpty()) return;
+        wcEventListeners.remove(eventName);
+        if (!notCreatedYet()) saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
     }
 
     // ======== Method call API ========
@@ -641,7 +605,8 @@ public class PWebComponent extends PComplexPanel {
     }
 
     /**
-     * Calls a method on the web component element with JSON-encoded arguments.
+     * Calls a method on the web component element with these arguments: numbers, strings, booleans and null as they
+     * are; a {@link JsonValue} object or array reaches the element parsed (as does a string that is a JSON object or array).
      */
     public void call(final String methodName, final Object... args) {
         saveUpdate(writer -> {
@@ -661,15 +626,11 @@ public class PWebComponent extends PComplexPanel {
     @Override
     public void onClientData(final JsonObject event) {
         if (event.containsKey(WC_EVENT_NAME_KEY)) {
-            final String eventName = event.getString(WC_EVENT_NAME_KEY);
-            if (wcEventListeners != null) {
-                final List<Consumer<JsonObject>> listeners = wcEventListeners.get(eventName);
-                if (listeners != null) {
-                    for (final Consumer<JsonObject> listener : listeners) {
-                        listener.accept(event);
-                    }
-                }
-            }
+            final List<Consumer<JsonValue>> listeners = wcEventListeners != null ? wcEventListeners.get(event.getString(WC_EVENT_NAME_KEY)) : null;
+            if (listeners == null) return;
+            final JsonValue detail = detailOf(event);
+            // Over a copy: a listener may remove itself or another
+            for (final Consumer<JsonValue> listener : List.copyOf(listeners)) listener.accept(detail);
         } else {
             super.onClientData(event);
         }
@@ -685,7 +646,6 @@ public class PWebComponent extends PComplexPanel {
         }
         onHeapValues = null;
         properties = null;
-        wcAttributes = null;
         wcEventListeners = null;
         patchEnabled = null;
         slots = null;

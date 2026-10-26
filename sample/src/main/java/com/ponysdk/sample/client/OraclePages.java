@@ -20,7 +20,6 @@ import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.PAlignment;
 import com.ponysdk.core.model.PUnit;
@@ -79,6 +78,8 @@ import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWebComponent;
+
+import jakarta.json.JsonObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PEventOptions;
@@ -243,10 +244,10 @@ final class OraclePages {
     /** my-counter (script/webcomponents.js): an attribute, a property, its events, and a method called back. */
     private static IsPWidget webComponent() {
         final PWebComponent counter = new PWebComponent("my-counter");
-        counter.attr("label", "Oracle");
+        counter.setAttribute("label", "Oracle");
         counter.property("count").set(5);
-        counter.onEvent("count-changed", event -> {
-            if (event.getString(ClientToServerModel.WC_EVENT_DETAIL.toStringValue(), "").contains("\"count\":7")) counter.call("reset");
+        counter.addEventListener("count-changed", detail -> {
+            if (detail instanceof JsonObject change && change.getInt("count", 0) == 7) counter.call("reset");
         });
         return counter;
     }

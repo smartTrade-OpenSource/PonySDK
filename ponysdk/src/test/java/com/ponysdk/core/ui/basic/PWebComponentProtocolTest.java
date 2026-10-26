@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.PWebComponent.SlotPanel;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -191,22 +192,19 @@ public class PWebComponentProtocolTest extends PSuite {
     @Test
     public void attributesEventsAndMethodsAreWritten() {
         final PWebComponent c = attached("x-misc");
-        c.attr("aria-label", "Chart");
-        c.removeAttr("aria-label");
-        final java.util.function.Consumer<jakarta.json.JsonObject> l1 = e -> {};
-        final java.util.function.Consumer<jakarta.json.JsonObject> l2 = e -> {};
-        c.onEvent("point-click", l1);
-        c.onEvent("point-click", l2); // second listener: no new LISTEN on the wire
-        c.removeEventListener("point-click", l1);
-        c.removeEventListener("point-click", l2); // last one: UNLISTEN
-        c.onEvent("hover", l1);
-        c.removeAllEventListeners("hover");
-        c.removeAllEventListeners("unknown"); // no-op
+        c.setAttribute("aria-label", "Chart");
+        c.removeAttribute("aria-label");
+        final HandlerRegistration first = c.addEventListener("point-click", e -> {});
+        final HandlerRegistration second = c.addEventListener("point-click", e -> {}); // no new LISTEN on the wire
+        first.removeHandler();
+        second.removeHandler(); // last one: UNLISTEN
+        second.removeHandler(); // twice: no-op
+        c.addEventListener("hover", e -> {}).removeHandler();
         c.call("refresh");
         c.call("zoom", 2, "x");
 
-        assertEquals(List.of("Chart"), writer.valuesAfter(ServerToClientModel.WC_SET_ATTRIBUTE, "aria-label"));
-        assertEquals(1, writer.count(ServerToClientModel.WC_REMOVE_ATTRIBUTE));
+        assertEquals(List.of("Chart"), writer.valuesAfter(ServerToClientModel.PUT_ATTRIBUTE_KEY, "aria-label"));
+        assertEquals(1, writer.count(ServerToClientModel.REMOVE_ATTRIBUTE_KEY));
         assertEquals(2, writer.count(ServerToClientModel.WC_LISTEN_EVENT));
         assertEquals(2, writer.count(ServerToClientModel.WC_UNLISTEN_EVENT));
         assertEquals(2, writer.count(ServerToClientModel.WC_CALL_METHOD));
@@ -219,8 +217,8 @@ public class PWebComponentProtocolTest extends PSuite {
     public void stateSetBeforeAttachIsReplayedAtCreation() {
         final PWebComponent c = new PWebComponent("x-early");
         c.property("data").set("{\"a\":1}");
-        c.attr("theme", "dark");
-        c.onEvent("ping", e -> {});
+        c.setAttribute("theme", "dark");
+        c.addEventListener("ping", e -> {});
         c.property("off").offHeap().set("{\"b\":2}");
         writer.clear();
 
@@ -231,7 +229,7 @@ public class PWebComponentProtocolTest extends PSuite {
         assertEquals(List.of("x-early"), writer.valuesOf(ServerToClientModel.WC_TAG_NAME));
         assertTrue(writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "data").contains("{\"a\":1}"));
         assertTrue(writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "off").contains("{\"b\":2}"));
-        assertTrue(writer.valuesAfter(ServerToClientModel.WC_SET_ATTRIBUTE, "theme").contains("dark"));
+        assertTrue(writer.valuesAfter(ServerToClientModel.PUT_ATTRIBUTE_KEY, "theme").contains("dark"));
         assertTrue(writer.count(ServerToClientModel.WC_LISTEN_EVENT) >= 1);
     }
 
@@ -240,8 +238,8 @@ public class PWebComponentProtocolTest extends PSuite {
         final PWebComponent c = new PWebComponent("x-once");
         c.property("data").set("{\"a\":1}");
         c.property("data").set("{\"a\":2}");
-        c.attr("theme", "dark");
-        c.onEvent("ping", e -> {});
+        c.setAttribute("theme", "dark");
+        c.addEventListener("ping", e -> {});
         writer.clear();
 
         PWindow.getMain().add(c);
@@ -249,7 +247,7 @@ public class PWebComponentProtocolTest extends PSuite {
         assertEquals(List.of("{\"a\":2}"), writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "data"),
                 "final value only, sent once");
         assertEquals(0, writer.count(ServerToClientModel.WC_PATCH_PROPERTY));
-        assertEquals(1, writer.valuesAfter(ServerToClientModel.WC_SET_ATTRIBUTE, "theme").size());
+        assertEquals(1, writer.valuesAfter(ServerToClientModel.PUT_ATTRIBUTE_KEY, "theme").size());
         assertEquals(1, writer.count(ServerToClientModel.WC_LISTEN_EVENT));
     }
 
@@ -258,20 +256,16 @@ public class PWebComponentProtocolTest extends PSuite {
         final PWebComponent c = new PWebComponent("x-undone");
         c.property("data").set("{\"a\":1}");
         c.property("data").remove();
-        c.attr("theme", "dark");
-        c.removeAttr("theme");
-        final java.util.function.Consumer<jakarta.json.JsonObject> l = e -> {};
-        c.onEvent("ping", l);
-        c.removeEventListener("ping", l);
-        c.onEvent("pong", l);
-        c.removeAllEventListeners("pong");
+        c.setAttribute("theme", "dark");
+        c.removeAttribute("theme");
+        c.addEventListener("ping", e -> {}).removeHandler();
         writer.clear();
 
         PWindow.getMain().add(c);
 
         for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.WC_SET_PROPERTY,
-                ServerToClientModel.WC_REMOVE_PROPERTY, ServerToClientModel.WC_SET_ATTRIBUTE,
-                ServerToClientModel.WC_REMOVE_ATTRIBUTE, ServerToClientModel.WC_LISTEN_EVENT,
+                ServerToClientModel.WC_REMOVE_PROPERTY, ServerToClientModel.PUT_ATTRIBUTE_KEY,
+                ServerToClientModel.REMOVE_ATTRIBUTE_KEY, ServerToClientModel.WC_LISTEN_EVENT,
                 ServerToClientModel.WC_UNLISTEN_EVENT }) {
             assertEquals(0, writer.count(m), m + " must not be sent");
         }

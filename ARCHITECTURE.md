@@ -1028,7 +1028,7 @@ PonySDK never touches the shadow DOM. It only sets properties/attributes on the 
 │  │   └── PButton         │  │       └── <button>…</button>      │
 │  ├── slot("content")     │  │   └── <div slot="content">        │
 │  │   └── PFlexTable      │  │       └── <table>…</table>        │
-│  └── onEvent("submit")   │  └── dispatchEvent("submit", detail) │
+│  └── addEventListener    │  └── dispatchEvent("submit", detail) │
 │                          │                                      │
 │  Binary protocol ───────▶│  Shadow DOM (managed by WC itself)   │
 │  (properties, slots,     │  ├── <slot name="toolbar">           │
@@ -1042,19 +1042,19 @@ PonySDK never touches the shadow DOM. It only sets properties/attributes on the 
 ```java
 PWebComponent chart = new PWebComponent("my-chart");
 
-// HTML attributes
-chart.attr("aria-label", "Revenue Chart");
-chart.removeAttr("aria-label");
+// HTML attributes, as on any widget
+chart.setAttribute("aria-label", "Revenue Chart");
+chart.removeAttribute("aria-label");
 
-// JS properties (JSON-encoded)
+// JS properties: JSON text, a string in quotes
 chart.property("title").set("\"Revenue Q4\"");
 chart.property("theme").set("\"dark\"");
 
-// Custom events
-chart.onEvent("point-click", event -> {
-    String detail = event.getString("WC_EVENT_DETAIL");
-    log.info("Clicked: {}", detail);
+// Custom events: the listener receives the event's detail, parsed (a JsonValue)
+HandlerRegistration clicks = chart.addEventListener("point-click", detail -> {
+    log.info("Clicked: {}", detail.asJsonObject().getInt("index"));
 });
+clicks.removeHandler(); // when the screen no longer needs it
 
 // Call a JS method on the element
 chart.call("refresh");
@@ -1346,10 +1346,7 @@ dashboard.slot("toolbar").add(filterPanel);
 dashboard.slot("content").add(positionsGrid);
 
 // Events
-dashboard.onEvent("order-submit", event -> {
-    String detail = event.getString("WC_EVENT_DETAIL");
-    orderService.submit(parseOrder(detail));
-});
+dashboard.addEventListener("order-submit", detail -> orderService.submit(parseOrder(detail.asJsonObject())));
 
 flowPanel.add(dashboard);
 ```
@@ -1994,7 +1991,7 @@ The host and the application talk through attributes and events, in both directi
 final PHost host = PHost.get();                                      // null when the application runs as a page
 label.setText(host.getAttribute("instrument"));                      // attributes in, at the handshake
 host.addAttributeListener("instrument", label::setText);             // then each change
-host.addEventListener("reset", detail -> quantity.setText("1000000")); // the host's CustomEvents
+host.addEventListener("reset", detail -> quantity.setText("1000000")); // the host's CustomEvents; each returns its HandlerRegistration
 host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build()); // events out
 ```
 

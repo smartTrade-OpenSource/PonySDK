@@ -49,6 +49,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -149,8 +150,10 @@ public class WebComponentGeneratorTest extends PSuite {
         assertMethod("setCompact", void.class, boolean.class);
         assertThrows(NoSuchMethodException.class, () -> gauge.getDeclaredMethod("setLabelAttribute", String.class),
             "label is the field's attribute");
-        assertMethod("onValueChanged", void.class, Consumer.class);
-        assertMethod("onReady", void.class, Consumer.class);
+        assertMethod("onValueChanged", HandlerRegistration.class, Consumer.class);
+        assertMethod("onReady", HandlerRegistration.class, Consumer.class);
+        assertMethod("configure", void.class, JsonValue.class);
+        assertMethod("setSizeAttribute", void.class, enumType("Size"));
         assertMethod("reset", void.class);
         assertMethod("animateTo", void.class, double.class);
         assertMethod("animateTo", void.class, double.class, enumType("Easing"));
@@ -166,6 +169,7 @@ public class WebComponentGeneratorTest extends PSuite {
         assertTrue(source.contains("A gauge. Its &lt;b&gt;needle&lt;/b&gt; ends the comment *&#47; not."), source);
         assertTrue(source.contains("Its result, of type {@code number}, does not come back."), source);
         assertTrue(source.contains("As JSON text, of type {@code Array&lt;{ from: number; to: number }&gt;}."), source);
+        assertTrue(source.contains("Named {@code setTitleProperty}: {@code setTitle} is PWebComponent's."), source);
     }
 
     // ---- The frames: those of the hand-written calls ----
@@ -186,6 +190,8 @@ public class WebComponentGeneratorTest extends PSuite {
         invoke(generated, "setCompact", true);
         invoke(generated, "setCompact", false);
         invoke(generated, "setCssNeedleColor", "red");
+        invoke(generated, "setSizeAttribute", constantOf("Size", "M"));
+        invoke(generated, "configure", Json.createObjectBuilder().add("speed", 2).build());
         invoke(generated, "reset");
         invoke(generated, "animateTo", 3.0, constantOf("Easing", "EASE_IN"));
         invoke(generated, "slotFooter");
@@ -200,10 +206,12 @@ public class WebComponentGeneratorTest extends PSuite {
         written.property("theme").set("\"dark\"");
         written.property("ranges").set("[{\"from\":0,\"to\":1}]");
         written.property("title").set("\"Gauge\"");
-        written.attr("aria-label", "Value");
-        written.attr("compact", "");
-        written.removeAttr("compact");
+        written.setAttribute("aria-label", "Value");
+        written.setAttribute("compact", "");
+        written.removeAttribute("compact");
         written.setStyleProperty("--needle-color", "red");
+        written.setAttribute("size", "m");
+        written.call("configure", Json.createObjectBuilder().add("speed", 2).build());
         written.call("reset");
         written.call("animateTo", 3.0, "ease-in");
         written.slot("footer");
@@ -240,7 +248,7 @@ public class WebComponentGeneratorTest extends PSuite {
         final PWebComponent generated = attached();
         final List<JsonValue> details = new ArrayList<>();
         final Consumer<JsonValue> listener = details::add;
-        invoke(generated, "onValueChanged", listener);
+        final HandlerRegistration registration = (HandlerRegistration) invoke(generated, "onValueChanged", listener);
         assertEquals(List.of("value-changed"), writer.valuesOf(com.ponysdk.core.model.ServerToClientModel.WC_LISTEN_EVENT));
 
         generated.onClientData(event("value-changed", "{\"value\":7}"));
@@ -249,6 +257,11 @@ public class WebComponentGeneratorTest extends PSuite {
         assertEquals(7, details.get(0).asJsonObject().getInt("value"));
         assertEquals(JsonValue.NULL, details.get(1));
         assertEquals(Json.createValue("not json"), details.get(2));
+
+        registration.removeHandler();
+        generated.onClientData(event("value-changed", "{}"));
+        assertEquals(3, details.size(), "removed by its registration");
+        assertEquals(List.of("value-changed"), writer.valuesOf(com.ponysdk.core.model.ServerToClientModel.WC_UNLISTEN_EVENT));
     }
 
     // ---- Failures ----

@@ -522,12 +522,21 @@ public abstract class PWidget extends PObject implements IsPWidget {
      * Listens to a DOM event of this widget by its name ({@code input}, {@code pointerenter}, {@code wheel}...): the
      * terminal sends the fields the options name, at the rate they set (docs/decisions/0003-protocol-v4-listeners.md).
      * Options given again for a name replace the previous ones, for every listener of the name. The last listener of
-     * a name removed, the terminal stops listening. A terminal below protocol 4 is not told: a warning is logged.
+     * a name removed, the terminal stops listening. A custom event's detail alone: {@code PWebComponent}'s
+     * {@code addEventListener(name, Consumer<JsonValue>)}.
+     *
+     * @throws IllegalStateException when the context speaks a protocol below 4 ({@code maxProtocolVersion}), whose
+     *         terminal cannot listen to events by name
      */
     public HandlerRegistration addEventListener(final String name, final PEventOptions options, final Consumer<PEvent> listener) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(options, "options");
         Objects.requireNonNull(listener, "listener");
+        final int protocol = UIContext.get().getProtocolVersion();
+        if (protocol < ProtocolVersion.LISTENERS) {
+            throw new IllegalStateException(this + ": listening to '" + name + "' needs protocol " + ProtocolVersion.LISTENERS
+                    + ", the context speaks " + protocol + " (ApplicationConfiguration.setMaxProtocolVersion)");
+        }
         final Extras x = wx();
         if (x.eventListening == null) x.eventListening = new HashMap<>(2);
         EventListening listening = x.eventListening.get(name);
@@ -549,11 +558,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     /** Not coalesced: two names in one round each reach the terminal. */
     private void saveListening(final ServerToClientModel model, final String value) {
-        if (UIContext.get().getProtocolVersion() < ProtocolVersion.LISTENERS) {
-            log.warn("{}: the terminal speaks protocol {}, below {}: it is not told to listen to events by name", this,
-                UIContext.get().getProtocolVersion(), ProtocolVersion.LISTENERS);
-            return;
-        }
         saveUpdate(writer -> writer.write(model, value));
     }
 

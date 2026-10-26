@@ -26,6 +26,8 @@ package com.ponysdk.core.ui.basic;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -36,6 +38,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.PWebComponent.PropertyHandle;
 import com.ponysdk.core.ui.basic.PWebComponent.StorageMode;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.test.PSuite;
 
 /**
@@ -117,32 +120,69 @@ public class PWebComponentTest extends PSuite {
         assertNull(tick.get(), "stateless properties are never cached server-side");
     }
 
-    // ---- attributes ----
+    // ---- attributes: PWidget's, one way (docs/decisions/0011-one-way-to-listen.md) ----
 
     @Test
     public void attributeSetGetRemove() {
         final PWebComponent c = new PWebComponent("my-chart");
-        assertNull(c.getAttr("aria-label"));
-        c.attr("aria-label", "Revenue chart");
-        assertEquals("Revenue chart", c.getAttr("aria-label"));
-        c.removeAttr("aria-label");
-        assertNull(c.getAttr("aria-label"));
+        assertNull(c.getAttribute("aria-label"));
+        c.setAttribute("aria-label", "Revenue chart");
+        assertEquals("Revenue chart", c.getAttribute("aria-label"));
+        c.removeAttribute("aria-label");
+        assertNull(c.getAttribute("aria-label"));
     }
 
     // ---- event dispatch ----
 
+    private static JsonObject customEvent(final String name, final String detail) {
+        final var builder = Json.createObjectBuilder().add(ClientToServerModel.WC_EVENT_NAME.toStringValue(), name);
+        if (detail != null) builder.add(ClientToServerModel.WC_EVENT_DETAIL.toStringValue(), detail);
+        return builder.build();
+    }
+
     @Test
-    public void onEventDispatchesClientData() {
+    public void aListenerReceivesTheParsedDetail() {
         final PWebComponent c = new PWebComponent("my-chart");
-        final boolean[] fired = { false };
-        c.onEvent("point-click", ev -> fired[0] = true);
+        final List<JsonValue> details = new ArrayList<>();
+        c.addEventListener("point-click", details::add);
 
-        final JsonObject clientEvent = Json.createObjectBuilder()
-                .add(ClientToServerModel.WC_EVENT_NAME.toStringValue(), "point-click")
-                .build();
-        c.onClientData(clientEvent);
+        c.onClientData(customEvent("point-click", "{\"x\":3}"));
+        c.onClientData(customEvent("point-click", null));
+        c.onClientData(customEvent("point-click", "not json"));
+        c.onClientData(customEvent("other", "{}"));
 
-        assertTrue(fired[0], "registered listener must receive the custom event");
+        assertEquals(3, details.size(), "the other event is not delivered");
+        assertEquals(3, details.get(0).asJsonObject().getInt("x"));
+        assertEquals(JsonValue.NULL, details.get(1));
+        assertEquals(Json.createValue("not json"), details.get(2));
+    }
+
+    @Test
+    public void aListenerMayRemoveItselfWhileCalled() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final List<String> calls = new ArrayList<>();
+        final HandlerRegistration[] once = new HandlerRegistration[1];
+        once[0] = c.addEventListener("point-click", detail -> {
+            calls.add("once");
+            once[0].removeHandler();
+        });
+        c.addEventListener("point-click", detail -> calls.add("always"));
+
+        c.onClientData(customEvent("point-click", null));
+        c.onClientData(customEvent("point-click", null));
+
+        assertEquals(List.of("once", "always", "always"), calls);
+    }
+
+    @Test
+    public void theStorageIsChosenBeforeTheFirstValue() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        c.property("data").set("{\"a\":1}");
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> c.property("data").offHeap());
+        assertEquals("offHeap() on property 'data', which holds a value: choose the storage before the first set", e.getMessage());
+        assertThrows(IllegalStateException.class, () -> c.property("data").stateless());
+        assertEquals("{\"a\":1}", c.property("data").get(), "the value stays where it is");
+        c.property("rows").offHeap().withPatch().set("[]"); // chosen first: fine
     }
 
     // ---- computeJsonPatch (RFC 7396 merge-patch, shallow/top-level) ----

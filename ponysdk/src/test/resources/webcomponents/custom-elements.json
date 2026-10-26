@@ -31,12 +31,14 @@
               { "name": "value", "type": { "text": "number" } },
               { "name": "easing", "type": { "text": "'linear' | 'ease-in'" }, "optional": true } ] },
             { "kind": "method", "name": "default" },
+            { "kind": "method", "name": "configure", "parameters": [ { "name": "options", "type": { "text": "{ speed: number }" } } ] },
             { "kind": "method", "name": "measure", "return": { "type": { "text": "number" } } }
           ],
           "attributes": [
             { "name": "label", "type": { "text": "string" }, "fieldName": "label" },
             { "name": "aria-label", "type": { "text": "string" } },
-            { "name": "compact", "type": { "text": "boolean" } }
+            { "name": "compact", "type": { "text": "boolean" } },
+            { "name": "size", "type": { "text": "'s' | 'm' | 'l'" } }
           ],
           "events": [
             { "name": "value-changed", "type": { "text": "CustomEvent<{ value: number }>" }, "description": "Fired on a change." },
