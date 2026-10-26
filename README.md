@@ -78,6 +78,55 @@ The showcase is a tour of the framework: every widget live with the Java
 behind it, the measured cost of each component (server memory, bytes to create and update it), a live price ticker
 with its encoding pipeline, and the binary protocol streaming typed arrays.
 
+### Your first application
+
+A screen is an `EntryPoint`, run on the server for each browser tab:
+
+```java
+public class HelloWorldEntryPoint implements EntryPoint {
+
+    @Override
+    public void start(final UIContext uiContext) {
+        final PLabel label = Element.newPLabel("Hello PonySDK!");
+        final PTextBox name = Element.newPTextBox();
+        final PButton button = Element.newPButton("Say hello");
+        // Runs on the server: the click comes over the WebSocket, the new text goes back
+        button.addClickHandler(event -> label.setText("Hello, " + (name.getText().isBlank() ? "World" : name.getText()) + "!"));
+
+        final PFlowPanel root = Element.newPFlowPanel();
+        root.add(label);
+        root.add(name);
+        root.add(button);
+        PWindow.getMain().add(root);
+    }
+}
+```
+
+`./gradlew :sample:runQuickStart` runs it with its server (`sample/src/main/java/com/ponysdk/sample/quickstart/`) on
+[http://localhost:8080/hello/](http://localhost:8080/hello/). [ARCHITECTURE.md, Quick Start](ARCHITECTURE.md#2-quick-start-5-minutes)
+gives the dependency and the server code, step by step.
+
+### In another page
+
+A PonySDK application also runs inside a page it does not own, a portal or another web application, as the element
+`<pony-app>`:
+
+```html
+<script type="module" src="https://fx.example.com/app/ponyterminal/terminal.js"></script>
+<pony-app src="https://fx.example.com/app/" view="ticket" instrument="EURUSD">Loading…</pony-app>
+```
+
+The server lists the host pages (`ApplicationConfiguration.setWsAllowedOrigins`); the application reads the element's
+attributes and exchanges events with the page through `PHost`. The showcase's server also serves a gallery of every
+way to integrate on [http://localhost:8082/](http://localhost:8082/).
+[ARCHITECTURE.md, Embedding](ARCHITECTURE.md#117-embedding-in-another-page-pony-app) has the details.
+
+### Web components
+
+`PWebComponent` drives any custom element from Java. From a library's Custom Elements Manifest
+(`custom-elements.json`), `WebComponentGenerator` writes a typed class per element (`counter.setCount(42)`,
+`counter.onCountChanged(…)`): [ARCHITECTURE.md, Web Components](ARCHITECTURE.md#111-web-components-pwebcomponent).
+
 ---
 
 ## Build
@@ -142,7 +191,7 @@ config.setWsDeflateLevel(3);                // zlib level, embedded server (defa
 config.setWsInputBufferSize(1024);          // Jetty buffer per incoming message (default 1 KB; upstream is small JSON)
 config.setUpdateCoalescingEnabled(true);    // send only the last value of a property per transaction (default on)
 config.setStringDictionaryAdmitOnSecondUse(true); // dictionary entry on 2nd use: one-off strings stay inline (default on)
-config.setMaxProtocolVersion(3);            // highest binary protocol used (default: latest); 1 = original format
+config.setMaxProtocolVersion(4);            // highest binary protocol used (default 4, the latest); 1 = original format
 ```
 
 ```java
@@ -196,14 +245,15 @@ Metrics exported:
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `uicontext.active` | Gauge | Live UIContext count |
-| `uicontext.created` | Counter | Total contexts created |
-| `uicontext.destroyed` | Counter | Total contexts destroyed (with reason) |
-| `websocket.bytes.sent` | Counter | Total bytes sent |
-| `websocket.bytes.received` | Counter | Total bytes received |
-| `roundtrip.latency.ms` | Histogram | Server→client→server roundtrip |
-| `execute.duration.ms` | Histogram | UIContext.execute() duration |
-| `lock.wait.ms` | Histogram | UIContext lock contention |
+| `ponysdk.uicontext.active` | Gauge | Live UIContext count |
+| `ponysdk.uicontext.created` | Counter | Total contexts created |
+| `ponysdk.uicontext.destroyed` | Counter | Total contexts destroyed (with reason) |
+| `ponysdk.websocket.bytes.sent` | Counter | Total bytes sent |
+| `ponysdk.websocket.bytes.received` | Counter | Total bytes received |
+| `ponysdk.websocket.messages.in` | Counter | Messages received from clients |
+| `ponysdk.roundtrip.latency.ms` | Histogram | Server→client→server roundtrip |
+| `ponysdk.execute.duration.ms` | Histogram | UIContext.execute() duration |
+| `ponysdk.lock.wait.ms` | Histogram | UIContext lock contention |
 
 ---
 
@@ -223,7 +273,7 @@ wait.until(d -> d.findElement(By.tagName("BUTTON"))).click();
 ### Dependencies
 
 ```gradle
-implementation 'com.ponysdk:ponysdk:3.0.0'
+implementation 'com.ponysdk:ponysdk:3.0.0-SNAPSHOT' // ./gradlew :ponysdk:publishToMavenLocal, then mavenLocal()
 implementation 'org.seleniumhq.selenium:selenium-api:4.x'
 implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
 
@@ -251,4 +301,5 @@ The terminal uses `<dialog>`, the popover API, `ResizeObserver` and ES2022 modul
 - [UPGRADING.md](UPGRADING.md) — from 2.10 to 3.0: platform, removed APIs, the new terminal's DOM, behaviour changes
 - [ARCHITECTURE.md](ARCHITECTURE.md) — deep dive into the protocol, reconnection engine, threading model, OTel metrics, and design patterns
 - [Key concepts](ARCHITECTURE.md#5-key-concepts) — Application, UIContext, PObject, the protocol, EventBus, transactions
+- [Decisions](docs/decisions/README.md) — the architecture decision records, one per structuring change
 - [Wiki](https://github.com/smartTrade-OpenSource/PonySDK/wiki) — FAQ

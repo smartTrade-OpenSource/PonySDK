@@ -25,8 +25,8 @@
 14. [Jetty 12 / Jakarta EE Migration Notes](#14-jetty-12--jakarta-ee-migration-notes)
 15. [Troubleshooting](#15-troubleshooting)
 16. [Trade-offs & Comparisons](#16-trade-offs--comparisons)
-17. [Widget Hierarchy Reference](#widget-hierarchy-reference)
-18. [Architectural Patterns Summary](#architectural-patterns-summary)
+17. [Widget Hierarchy Reference](#17-widget-hierarchy-reference)
+18. [Architectural Patterns Summary](#18-architectural-patterns-summary)
 
 ---
 
@@ -66,12 +66,22 @@ PonySDK is a **Java-only web framework** that lets you build rich web applicatio
 
 ## 2. Quick Start (5 minutes)
 
-### Step 1: Add Dependency
+The code below is `sample/src/main/java/com/ponysdk/sample/quickstart/`, which `QuickStartTest` starts:
+`./gradlew :sample:runQuickStart` runs it from this repository.
+
+### Step 1: Add the dependency
+
+PonySDK 3 is not on Maven Central yet: install it in your local repository from this one
+(`./gradlew :ponysdk:publishToMavenLocal`), then:
 
 **Gradle:**
 ```groovy
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 dependencies {
-    implementation 'com.ponysdk:ponysdk:3.0.+'
+    implementation 'com.ponysdk:ponysdk:3.0.0-SNAPSHOT'
 }
 ```
 
@@ -80,102 +90,88 @@ dependencies {
 <dependency>
     <groupId>com.ponysdk</groupId>
     <artifactId>ponysdk</artifactId>
-    <version>2.8.0</version>
+    <version>3.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
-### Step 2: Create Your EntryPoint
+PonySDK 3 needs Java 25.
+
+### Step 2: Write the screen, an EntryPoint
 
 ```java
-import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class HelloWorldEntryPoint implements EntryPoint {
 
     @Override
-    public void start(UIContext uiContext) {
-        // Create widgets
-        PFlowPanel root = Element.newPFlowPanel();
-        PLabel label = Element.newPLabel("Hello PonySDK!");
-        PTextBox input = Element.newPTextBox();
-        PButton button = Element.newPButton("Say Hello");
-        
-        // Add behavior
-        button.addClickHandler(event -> {
-            String name = input.getText();
-            label.setText("Hello, " + (name.isEmpty() ? "World" : name) + "!");
-        });
-        
-        // Build UI tree
+    public void start(final UIContext uiContext) {
+        final PLabel label = Element.newPLabel("Hello PonySDK!");
+        final PTextBox name = Element.newPTextBox();
+        final PButton button = Element.newPButton("Say hello");
+
+        // Runs on the server: the click comes over the WebSocket, the new text goes back
+        button.addClickHandler(event -> label.setText("Hello, " + (name.getText().isBlank() ? "World" : name.getText()) + "!"));
+
+        final PFlowPanel root = Element.newPFlowPanel();
         root.add(label);
-        root.add(input);
+        root.add(name);
         root.add(button);
-        
-        // Attach to page
-        PRootPanel.get().add(root);
+        PWindow.getMain().add(root);
     }
 }
 ```
 
-### Step 3: Start the Server
+`start` runs once per browser tab, on the server: each tab has its own `UIContext` and its own widgets.
+
+### Step 3: Start the server
 
 ```java
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.impl.java.JavaApplicationManager;
+import com.ponysdk.impl.java.server.JavaApplicationManager;
 import com.ponysdk.impl.main.PonySDKServer;
 
-public class Main {
-    public static void main(String[] args) throws Exception {
-        ApplicationConfiguration config = new ApplicationConfiguration();
-        config.setApplicationName("HelloWorld");
-        config.setEntryPointClass(HelloWorldEntryPoint.class);
+public final class HelloWorldMain {
 
-        JavaApplicationManager appManager = new JavaApplicationManager();
-        appManager.setConfiguration(config);
+    public static void main(final String[] args) throws Exception {
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
+        configuration.setApplicationName("Hello");
+        configuration.setApplicationContextName("hello"); // the application's URL: http://localhost:8080/hello/
+        configuration.setEntryPointClass(HelloWorldEntryPoint.class);
 
-        PonySDKServer server = new PonySDKServer();
-        server.setApplicationManager(appManager);
+        final JavaApplicationManager applicationManager = new JavaApplicationManager();
+        applicationManager.setConfiguration(configuration);
+
+        final PonySDKServer server = new PonySDKServer();
+        server.setApplicationManager(applicationManager);
         server.setPort(8080);
-        server.setHost("0.0.0.0");
+        server.setUseSSL(false); // plain HTTP on this machine; in production, HTTPS with a key store
+        server.setSessionCookieSecure(false); // a Secure cookie is not sent over plain HTTP
         server.start();
-
-        System.out.println("Server running at http://localhost:8080");
     }
 }
 ```
 
-### Step 4: Run and Test
+HTTPS is on by default: without `setUseSSL(false)`, the server needs a key store (`setSslKeyStoreFile`).
 
-```bash
-# Run your Main class, then open browser
-open http://localhost:8080
+### Step 4: Open it
+
+Run `HelloWorldMain`, then open http://localhost:8080/hello/ (the trailing slash matters). Type a name and press
+*Say hello*: the label changes, set by the server.
+
+### What you just built
+
 ```
-
-### Quick Start Summary
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    What You Just Built                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   Main.java                                                     │
-│      │                                                          │
-│      └── PonySDKServer                                          │
-│             │                                                   │
-│             └── HelloWorldEntryPoint.start()                    │
-│                    │                                            │
-│                    ├── PFlowPanel (root container)              │
-│                    │      │                                     │
-│                    │      ├── PLabel ("Hello PonySDK!")         │
-│                    │      ├── PTextBox (user input)             │
-│                    │      └── PButton ("Say Hello")             │
-│                    │             │                              │
-│                    │             └── ClickHandler → updates UI  │
-│                    │                                            │
-│                    └── PRootPanel.get().add(root)               │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+HelloWorldMain ── PonySDKServer ── serves /hello/: the page and terminal.js, the browser side
+                                   └── a WebSocket per tab ── HelloWorldEntryPoint.start(uiContext)
+                                                                ├── PLabel, PTextBox, PButton: Java objects
+                                                                └── a click handler, run on the server
 ```
 
 ### Next Steps
@@ -186,7 +182,9 @@ open http://localhost:8080
 | Learn about performance | [Performance Architecture](#7-performance-architecture) |
 | Add server push | [Threading Model](#10-threading-model) |
 | Integrate Web Components | [Web Components](#111-web-components-pwebcomponent) |
-| Integrate custom JS | [Advanced Features](#11-advanced-features) |
+| Integrate custom JS | [Custom JavaScript (PAddOn)](#112-custom-javascript-paddon) |
+| Show the application in another page | [Embedding in another page](#117-embedding-in-another-page-pony-app) |
+| Configure the server | [Configuration Reference](#13-configuration-reference) |
 
 ---
 
@@ -277,7 +275,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 | **Your App** | Business logic, UI composition | `EntryPoint`, your widgets |
 | **PonySDK** | Widget abstraction, state sync | `PObject`, `UIContext`, `Txn` |
 | **Jetty** | HTTP/WebSocket transport | `WebSocket`, `WebSocketServlet` |
-| **Browser** | Rendering, user input | `Terminal.js`, `UIBuilder` |
+| **Browser** | Rendering, user input | `terminal.js` (TypeScript, `ponysdk/terminal/`) |
 
 ---
 
@@ -369,16 +367,16 @@ Example: Create button "Click me"
 
 ### 6.3 Client → Server Events
 
+Events go up as JSON text. The keys are the short values of `ClientToServerModel` (`"0"` for `OBJECT_ID`); the
+example below writes their names instead, to be read:
+
 ```json
 {
   "APPLICATION_INSTRUCTIONS": [{
     "OBJECT_ID": 42,
-    "DOM_HANDLER_TYPE": "CLICK",
-    "NATIVE_EVENT": {
-      "clientX": 150,
-      "clientY": 200,
-      "button": 0
-    }
+    "DOM_HANDLER_TYPE": 0,
+    "EVENT_INFO": [150, 200, 38, 11, 1, false, false, false, false],
+    "WIDGET_POSITION": [112, 189, 32, 96]
   }]
 }
 ```
@@ -386,8 +384,9 @@ Example: Create button "Click me"
 | Field | Purpose |
 |-------|---------|
 | `OBJECT_ID` | Which widget was interacted with |
-| `DOM_HANDLER_TYPE` | What happened (CLICK, KEY_UP, etc.) |
-| `NATIVE_EVENT` | Raw browser event data |
+| `DOM_HANDLER_TYPE` | What happened: the ordinal of `DomHandlerType` (`CLICK`, `KEY_UP`, …) |
+| `EVENT_INFO` | For a mouse event: the pointer in the page and in the widget, the button, the modifier keys |
+| `WIDGET_POSITION` | The widget's left, top, height and width |
 
 ---
 
@@ -838,8 +837,8 @@ PTextBox input = Element.newPTextBox();
 PElement div = Element.newDiv();
 PElement span = Element.newSpan();
 
-// Custom factory (testing, theming)
-Element.setElementFactory(new MockElementFactory());
+// Custom factory (testing, theming): your implementation of ElementFactory
+Element.setElementFactory(new MyElementFactory());
 ```
 
 ---
@@ -953,7 +952,7 @@ PonySDK is single-threaded per `UIContext` by design — only one thread can upd
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│              Virtual Threads (Java 21, PScheduler)               │
+│              Virtual Threads (Java 25, PScheduler)               │
 │                                                                 │
 │  • PScheduler tasks run on virtual threads                      │
 │  • CommunicationSanityChecker uses virtual threads              │
@@ -1028,7 +1027,7 @@ PonySDK never touches the shadow DOM. It only sets properties/attributes on the 
 │  ├── slot("toolbar")     │  │   └── <div slot="toolbar">        │
 │  │   └── PButton         │  │       └── <button>…</button>      │
 │  ├── slot("content")     │  │   └── <div slot="content">        │
-│  │   └── PDataGrid       │  │       └── <table>…</table>        │
+│  │   └── PFlexTable      │  │       └── <table>…</table>        │
 │  └── onEvent("submit")   │  └── dispatchEvent("submit", detail) │
 │                          │                                      │
 │  Binary protocol ───────▶│  Shadow DOM (managed by WC itself)   │
@@ -1362,24 +1361,39 @@ flowPanel.add(dashboard);
 Integrate custom JS libraries:
 
 ```java
-// Server-side
-public class MyChart extends PAddOn {
-    public MyChart() {
-        super("MyChartAddon");
-    }
-    
-    public void setData(double[] values) {
-        callTerminalMethod("setData", values);
-    }
-}
+```java
+// Server-side: a widget (here a div) whose behaviour is a JavaScript addon
+public class MyChart extends PAddOnComposite<PElement> {
 
-// Client-side (JavaScript)
-function MyChartAddon(id, element, args) {
-    this.setData = function(values) {
-        // D3.js, Chart.js, etc.
-    };
+    public MyChart(final String color) {
+        super(Element.newDiv(), color); // creation arguments: the addon's this.options
+    }
+
+    public void setData(final double... values) {
+        callTerminalMethod("setData", (Object[]) toObjects(values)); // the addon's setData(v1, v2, …)
+    }
+
+    private static Double[] toObjects(final double[] values) {
+        return java.util.Arrays.stream(values).boxed().toArray(Double[]::new);
+    }
 }
 ```
+
+```javascript
+// Client-side, in a script of ApplicationConfiguration.setJavascript: the name is the Java class's
+AbstractAddon.defineAddon("com.example.MyChart", {
+    init: function () {
+        this.color = this.options[0];   // the creation arguments, as an array
+    },
+    setData: function () {
+        var values = Array.prototype.slice.call(arguments);
+        // draw them: D3.js, Chart.js, …
+    }
+});
+```
+
+`sample/src/main/java/com/ponysdk/sample/client/page/addon/BinaryArgsAddOn.java` and `script/sample.js` are a
+working pair.
 
 **Typed arguments travel in pure binary.** `callTerminalMethod(name, args...)` encodes `int`/`long`/`double`/`boolean`/`String`/`JsonValue` as a typed binary array — no JSON serialization on either side. Creation arguments can do the same via the `PAddOn(Object...)` (and `PAddOnComposite(widget, Object...)`) constructor; the terminal factory then receives a JS array instead of a parsed JSON object. Binary arrays carry a **uint31 length**, so they are no longer capped at 255 elements — suitable for large typed payloads. The JSON forms (`PAddOn(JsonObject)`) remain available and unchanged for backward compatibility.
 
@@ -1546,13 +1560,14 @@ config.setMaxRecordingEntries(10_000);   // max buffered protocol entries (defau
 
 If the recording buffer exceeds `maxRecordingEntries` during suspension, the UIContext is destroyed immediately — no reconnection possible. This prevents unbounded memory growth when a high-frequency data feed keeps pushing updates to a disconnected session.
 
-On the client side, set `window.ponyReconnectMode = true` in your bootstrap HTML before PonySDK starts:
+On the client side, the bootstrap page sets `window.ponyReconnectMode = true` itself when `reconnectionTimeoutMs > 0`
+(`BootstrapServlet.addScript`). A page of your own that loads the terminal sets it before the terminal starts:
 
 ```html
 <script>window.ponyReconnectMode = true;</script>
 ```
 
-When both are set, the reconnection flow is:
+The reconnection flow is then:
 
 ```
 Client                          Server
@@ -1996,7 +2011,14 @@ ticket.dispatchEvent(new CustomEvent('reset'));
   transparent reconnection, the legacy layer, its terminal), loads the scripts into the host page once, and puts the
   stylesheets in its shadow root.
 - **Server.** `wsAllowedOrigins` lists the pages allowed to embed the application; `PonySDKServer` answers their CORS
-  requests with credentials (`CrossOriginFilter`).
+  requests with credentials (`CrossOriginFilter`). Nothing else changes on the server:
+
+  ```java
+  configuration.setWsAllowedOrigins(Set.of("https://portal.example.com")); // the host pages' origins
+  ```
+- **Examples.** `./gradlew :sample:runShowcase` serves, besides the showcase, a gallery of every way to integrate on
+  http://localhost:8082/ (alone in a page, a custom page, an iframe, an element of the same site or of another site,
+  several applications on a page, windows and frames, two versions on a page), each with its code.
 - **Another site** ([ADR-0009](docs/decisions/0009-embedding-limits.md)). No session cookie comes from a page of
   another site. The context of an embedded terminal has two keys, sent with `CREATE_CONTEXT`: `K` proves it in the
   `CONTEXT_KEY` header (AJAX, uploads) and, on a reconnection, in the WebSocket subprotocol `ponysdk.key.<K>`; `S`, in
@@ -2081,57 +2103,48 @@ com.ponysdk.core
 
 ### 13.1 ApplicationConfiguration
 
+Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults as in
+`ApplicationConfiguration.java`.
+
 | Property | Description | Default |
 |----------|-------------|---------|
-| `heartbeatPeriod` | Liveness: a client silent for half of it is pinged, for two of it is dropped ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)) (ms) | 5000 |
-| `sessionTimeout` | HTTP session timeout (s) | 900 |
-| `maxInactivity` | Max client inactivity (ms) | 60000 |
-| `enableCompression` | permessage-deflate | true |
+| `applicationContextName` | The path of the application: `http://host:port/<name>/` | `sample` |
+| `entryPointClass` | The `EntryPoint` started for each browser tab | none (required) |
+| `heartBeatPeriod` | Liveness: a client silent for half of it is pinged, for two of it is dropped ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)) (ms) | 5000 |
+| `sessionTimeout` | Stored and readable (`getSessionTimeout`); `PonySDKServer` does not apply it (minutes) | 15 |
 | `debugMode` | Verbose logging | false |
-| `stringDictionaryEnabled` | Enable string interning | true |
-| `stringDictionaryMaxSize` | Max dictionary entries | 65535 |
-| `stringDictionaryMinLength` | Min string length to intern | 4 |
-| `wcSharedSheets` | CSS URLs injected into every WC shadow root via `pony.wc` | null (opt-in) |
-| `metrics` (via `WebSocketServlet.setMetrics()`) | OTel instrumentation bridge | null (opt-in) |
-| `reconnectionTimeoutMs` | Transparent WS reconnection window (ms). 0 = disabled (destroy on close) | 0 |
-| `maxRecordingEntries` | Max buffered protocol entries during suspension. Exceeded → destroy | 10000 |
-| `reconnectionListener` | Server-side hook called on WS disconnect | null |
+| `style`, `javascript` | Stylesheets and scripts of the bootstrap page | none |
+| `stringDictionaryEnabled` | Strings sent once, then by index | true |
+| `stringDictionaryMaxSize` | Max dictionary entries | 4096 |
+| `stringDictionaryMinLength` | Shorter strings are always sent inline | 8 |
+| `updateCoalescingEnabled` | Successive updates of one widget property in a flush sent once | true |
+| `maxProtocolVersion` | Highest binary protocol used; each connection uses min(this, the terminal's). 4 is needed by `PWidget.addEventListener` | 4 (latest) |
+| `wsOriginCheckEnabled` | The WebSocket upgrade checks the `Origin` header | true |
+| `wsAllowedOrigins` | The other origins allowed to connect: the pages that embed the application ([11.7](#117-embedding-in-another-page-pony-app)) | none: same origin only |
+| `wsPermessageDeflateEnabled`, `wsDeflateLevel` | Frame compression and its zlib level | true, 3 |
+| `wsMaxInboundMessageSize` | Largest client message (bytes) | 1 MB |
+| `wsIdleTimeoutMs`, `wsSendTimeoutMs` | WebSocket idle timeout; wait on a slow client before disconnecting (ms) | 1 000 000, 60 000 |
+| `wcSharedSheets` | CSS URLs injected into every web component shadow root via `pony.wc` | none |
+| `legacyClassNames` | Adds the GWT class names the 2.x CSS used ([UPGRADING.md](UPGRADING.md)) | false |
+| `reconnectionTimeoutMs` | Transparent WebSocket reconnection window (ms); 0 = disabled (destroy on close) | 0 |
+| `maxRecordingEntries` | Max buffered protocol entries during a suspension; exceeded, the context is destroyed | 10 000 |
+| `reconnectionListener` | Server-side hook called on WebSocket disconnect | none |
 
-### 13.2 Minimal Setup
+Metrics are set on the servlet, not here: `WebSocketServlet.setMetrics(PonySDKMetrics)`
+([11.4](#114-observability--opentelemetry--dynatrace)).
 
-```java
-public class Main {
-    public static void main(String[] args) throws Exception {
-        ApplicationConfiguration config = new ApplicationConfiguration();
-        config.setApplicationName("MyApp");
-        config.setEntryPointClass(MyEntryPoint.class);
+### 13.2 PonySDKServer
 
-        JavaApplicationManager appManager = new JavaApplicationManager();
-        appManager.setConfiguration(config);
+| Setter | Description | Default |
+|--------|-------------|---------|
+| `setPort`, `setHost` | HTTP port and interface | 80, `0.0.0.0` |
+| `setUseSSL` | Adds an HTTPS connector; needs `setSslKeyStoreFile` (and its passphrase, type) | true |
+| `setSslPort` | HTTPS port | 443 |
+| `setSessionCookieSecure` | The session cookie is `Secure`: a browser does not send it over plain HTTP | true |
+| `setApplicationManager` | The application: a `JavaApplicationManager` holding the configuration | none (required) |
 
-        PonySDKServer server = new PonySDKServer();
-        server.setApplicationManager(appManager);
-        server.setPort(8080);
-        server.setHost("0.0.0.0");
-        server.start();
-    }
-}
-
-public class MyEntryPoint implements EntryPoint {
-    @Override
-    public void start(UIContext uiContext) {
-        PFlowPanel root = Element.newPFlowPanel();
-
-        PLabel label = Element.newPLabel("Hello PonySDK!");
-        PButton button = Element.newPButton("Click me");
-        button.addClickHandler(e -> label.setText("Clicked!"));
-
-        root.add(label);
-        root.add(button);
-        PRootPanel.get().add(root);
-    }
-}
-```
+For plain HTTP on a development machine: `setUseSSL(false)` and `setSessionCookieSecure(false)`, as in the
+[quick start](#2-quick-start-5-minutes).
 
 ---
 
@@ -2213,7 +2226,7 @@ What the server receives from it is checked against traces recorded with the GWT
 
 | Cause | Solution |
 |-------|----------|
-| Wrong port | Verify `config.setPort()` matches URL |
+| Wrong port or path | Verify `server.setPort()` and `applicationContextName`: the URL is `http://host:port/<name>/` |
 | Firewall blocking WS | Allow WebSocket traffic (port 80/443 or custom) |
 | Proxy not configured | Configure proxy for WebSocket upgrade |
 | SSL mismatch | Use `wss://` for HTTPS, `ws://` for HTTP |
@@ -2453,13 +2466,13 @@ public MyView() {
 // 1. Lazy load heavy components
 public void start(UIContext ctx) {
     // Show skeleton immediately
-    PRootPanel.get().add(loadingSpinner);
+    PWindow.getMain().add(loadingSpinner);
     
     // Load heavy stuff async
     scheduler.schedule(() -> {
         ctx.execute(() -> {
             loadingSpinner.removeFromParent();
-            PRootPanel.get().add(createHeavyUI());
+            PWindow.getMain().add(createHeavyUI());
         });
     }, 100, TimeUnit.MILLISECONDS);
 }
@@ -2557,33 +2570,37 @@ System.out.println("Terminal: " + ctx.getTerminalLatency() + "ms");
 
 ## 17. Widget Hierarchy Reference
 
-All widgets extend `PWidget`, which extends `PObject`. Panels are containers that can hold children; focus widgets are interactive elements. `PWebComponent` sits under `PComplexPanel` because it can contain slotted children like any other panel.
+Widgets extend `PWidget`, which extends `PObject`; `PAddOn` and `PHost` are `PObject`s without a widget of their
+own. Panels hold children. `PWebComponent` and `PElement` sit under `PComplexPanel`: they hold children like any
+panel. The main classes, from their `extends`:
 
 ```
 PObject
-└── PWidget
-    ├── PPanel
-    │   ├── PComplexPanel
-    │   │   ├── PFlowPanel
-    │   │   ├── PVerticalPanel
-    │   │   ├── PHorizontalPanel
-    │   │   ├── PAbsolutePanel
-    │   │   └── PWebComponent
-    │   ├── PSimplePanel
-    │   │   ├── PScrollPanel
-    │   │   ├── PFocusPanel
-    │   │   └── PPopupPanel → PDialogBox
-    │   └── PCellPanel
-    │       ├── PDockLayoutPanel
-    │       └── PSplitLayoutPanel
-    ├── PFocusWidget
-    │   ├── PButtonBase → PButton, PPushButton
-    │   ├── PTextBoxBase → PTextBox, PPasswordTextBox, PTextArea
-    │   ├── PListBox
-    │   └── PCheckBox → PRadioButton
-    ├── PLabel → PHTML
-    ├── PImage
-    └── PAddOn
+├── PWidget
+│   ├── PPanel
+│   │   ├── PComplexPanel
+│   │   │   ├── PFlowPanel
+│   │   │   ├── PAbsolutePanel
+│   │   │   ├── PCellPanel → PVerticalPanel, PHorizontalPanel
+│   │   │   ├── PDockLayoutPanel → PSplitLayoutPanel
+│   │   │   ├── PElement (Element.newDiv(), newSpan(), …)
+│   │   │   └── PWebComponent
+│   │   └── PSimplePanel
+│   │       ├── PScrollPanel
+│   │       ├── PFocusPanel
+│   │       └── PPopupPanel → PDecoratedPopupPanel → PDialogBox
+│   ├── PFocusWidget
+│   │   ├── PButtonBase
+│   │   │   ├── PButton → PPushButton
+│   │   │   └── PCheckBox → PRadioButton
+│   │   ├── PValueBoxBase → PTextBoxBase
+│   │   │   ├── PTextBox → PPasswordTextBox
+│   │   │   └── PTextArea
+│   │   └── PListBox
+│   ├── PLabel → PHTML
+│   └── PImage
+├── PAddOn → PAddOnComposite
+└── PHost
 ```
 
 ---
@@ -2608,4 +2625,4 @@ PObject
 
 ---
 
-*Last updated: February 2026*
+*Last updated: October 2026*
