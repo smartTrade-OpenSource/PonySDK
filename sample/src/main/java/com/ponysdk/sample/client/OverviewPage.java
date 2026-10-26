@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.sample.quickstart.LivePrice;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
@@ -86,17 +87,7 @@ final class OverviewPage {
         heroCodeHead.add(el("code-title", "LivePrice.java — the whole application"), el("code-lang", "JAVA"));
         final PElement heroCodeBody = Element.newDiv();
         heroCodeBody.addStyleName("code-body");
-        heroCodeBody.setInnerHTML(
-            ln(kw("public class") + " " + ty("LivePrice") + " " + kw("implements") + " " + ty("EntryPoint") + " {")
-                + ln("  " + kw("public void") + " " + mt("start") + "(" + ty("UIContext") + " ctx) {")
-                + ln("    " + ty("PLabel") + " price = " + ty("Element") + "." + mt("newPLabel") + "(" + st("1.08512") + ");")
-                + ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(price);")
-                + ln("    " + ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(")
-                + ln("        () -> price." + mt("setText") + "(feed." + mt("last") + "()),")
-                + ln("        " + ty("Duration") + "." + mt("ofMillis") + "(50));")
-                + ln("    " + cm("each tick: about 10 bytes on the wire"))
-                + ln("  }")
-                + ln("}"));
+        heroCodeBody.setInnerHTML(Source.code(LivePrice.class, "app")); // sample/.../quickstart/LivePrice.java, as it runs
         heroCode.add(heroCodeHead, heroCodeBody);
         hero.add(heroCode);
         final PFlowPanel chips = Element.newPFlowPanel();

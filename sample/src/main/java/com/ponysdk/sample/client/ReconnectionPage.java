@@ -78,19 +78,17 @@ final class ReconnectionPage {
         frameCard.addStyleName("rc-card");
         frameCard.add(el("rc-card-title", "Client · a second session, in a frame"), frame);
 
-        final ServerView view = new ServerView(SessionAdmin.of(uiContext), client);
+        // region admin
+        final SessionAdmin admin = SessionAdmin.of(uiContext); // checked by the SessionAccessPolicy
+        // endregion
+        final ServerView view = new ServerView(admin, client);
         layout.add(frameCard, view.card);
         p.add(layout);
 
         p.add(sectionTitle("The API behind the buttons"));
-        p.add(codeSnippet("SessionAdmin", "java",
-            ln(ty("SessionAdmin") + " admin = " + ty("SessionAdmin") + "." + mt("of") + "(" + ty("UIContext") + "."
-                + mt("get") + "()); " + cm("checked by the SessionAccessPolicy")) +
-            ln("admin." + mt("holdReconnection") + "(id, " + kw("true") + ");  " + cm("its reconnections are refused")) +
-            ln("admin." + mt("dropConnection") + "(id);  " + cm("closed as a network failure would")) +
-            ln("admin." + mt("session") + "(id).map(" + ty("SessionInfo") + "::" + mt("suspension") + ");  "
-                + cm("what the server holds meanwhile")) +
-            ln("admin." + mt("holdReconnection") + "(id, " + kw("false") + ");  " + cm("back within 2 s, the held instructions replayed"))));
+        p.add(codeSnippet("The buttons: ReconnectionPage.java", "java",
+            Source.code(ReconnectionPage.class, "admin") + Source.code(ReconnectionPage.class, "buttons")));
+        p.add(codeSnippet("The server panel, each second", "java", Source.code(ReconnectionPage.class, "read")));
         p.add(el("ov-note", "By default a caller acts only on the sessions of its own HTTP session: this page reaches its "
             + "frame, never another visitor. ApplicationConfiguration.setSessionAccessPolicy opens more, for an operator "
             + "console. Every action is logged on com.ponysdk.audit.SessionAdmin."));
@@ -146,6 +144,7 @@ final class ReconnectionPage {
             log.addStyleName("rc-log");
             card.add(log);
 
+            // region buttons
             disconnect.addClickHandler(e -> act(id -> {
                 admin.holdReconnection(id, true);
                 admin.dropConnection(id);
@@ -164,6 +163,7 @@ final class ReconnectionPage {
                 admin.destroy(id);
                 event("End session: destroyed, the frame is told and reloads");
             }));
+            // endregion
             render(null);
         }
 
@@ -193,7 +193,9 @@ final class ReconnectionPage {
 
         void refresh() {
             final int id = client.id;
+            // region read: what the server holds for the session, read each second
             final Optional<SessionInfo> now = id < 0 ? Optional.empty() : admin.session(id);
+            // endregion
             if (now.isEmpty()) {
                 if (last != null) {
                     event("Session #" + last.id() + " destroyed: " + endReason() + ". The frame reloads into a new session.");

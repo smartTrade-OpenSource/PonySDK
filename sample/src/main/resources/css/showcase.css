@@ -647,7 +647,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     border-bottom: 1px solid var(--border);
 }
 .ov-hero-code { margin: 0; box-shadow: var(--shadow-lg); }
-.ov-hero-code .code-body { font-size: 12px; padding: 16px 18px; }
+.ov-hero-code .code-body { font-size: 12px; padding: 16px 18px; overflow-x: auto; }
 .ov-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .ov-ctas .pony-Button { padding: 9px 16px; font-size: 14px; }
 .ov-eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; letter-spacing: 0; }
@@ -846,6 +846,24 @@ div.selected-row { background-color: var(--selected-row); }
     color: var(--text-2) !important;
     border-color: var(--border-strong) !important;
     box-shadow: none !important;
+}
+/* Embedded, the demo starts on its light theme: here it takes the showcase's colours, so it follows the system's
+   light or dark theme as the rest of the page (FlexLayout's themes are --fl-* variables) */
+.pony-content .fl-theme-light {
+    --fl-bg: var(--bg-subtle);
+    --fl-panel: var(--surface);
+    --fl-strip: var(--bg-muted);
+    --fl-border: var(--border);
+    --fl-accent: var(--accent);
+    --fl-accent2: var(--accent-strong);
+    --fl-text: var(--text);
+    --fl-text-dim: var(--text-3);
+    --fl-tab-hover: var(--bg-muted);
+    --fl-tab-active-bg: var(--surface);
+    --fl-tab-active-ind: var(--accent);
+    --fl-sp: var(--border);
+    --fl-sp-hover: var(--accent);
+    --fl-drop-border: var(--accent);
 }
 /* the demo's panel texts carry pastel colours made for its dark default theme */
 .pony-content .fl-theme-light .pony-Label[style*="color"] { color: var(--text-2) !important; }
