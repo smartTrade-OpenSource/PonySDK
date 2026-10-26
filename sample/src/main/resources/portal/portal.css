@@ -58,7 +58,11 @@ main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap
 .portal-ticket { margin: 0; }
 .portal-ticket figcaption { margin: 0 0 6px; font-size: 13px; color: #6b7280; }
 
-.portal-blotter, .portal-app {
+.portal-code-parts { display: grid; gap: 16px; }
+.portal-code figure { margin: 0 0 16px; min-width: 0; }
+.portal-code figcaption { margin: 0 0 6px; font-size: 13px; color: #6b7280; }
+.portal-source { max-height: 520px; overflow: auto; }
+.portal-blotter, .portal-app, .portal-code {
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 6px;

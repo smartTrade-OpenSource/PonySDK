@@ -66,12 +66,13 @@ public class UISampleEntryPoint implements EntryPoint {
             OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
             return;
         }
-        // In a <pony-app> element of another page (docs/decisions/0008-embedded-application.md)
+        // region embedded: in a <pony-app> element of another page (docs/decisions/0008-embedded-application.md)
         final PHost host = PHost.get();
         if (host != null && EmbeddedTicket.VIEW.equals(host.getAttribute("view"))) {
             EmbeddedTicket.build(uiContext, host);
             return;
         }
+        // endregion: the portal (portal/portal.html) shows this region
 
         // Styles: css/showcase.css (declared in ShowcaseMain)
         // Favicon: the "P" monogram of the top bar, inline SVG (no extra request); an embedded showcase leaves the

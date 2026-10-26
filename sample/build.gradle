@@ -61,6 +61,14 @@ def webComponents = tasks.register('webComponents', JavaExec) {
 }
 sourceSets.main.java.srcDir(webComponents)
 
+// The portal shows the Java code behind its tickets: the sources themselves, beside its pages
+processResources {
+    from('src/main/java/com/ponysdk/sample/client') {
+        include 'EmbeddedTicket.java', 'UISampleEntryPoint.java'
+        into 'portal/source'
+    }
+}
+
 def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
 
 task runShowcase(type: JavaExec) {

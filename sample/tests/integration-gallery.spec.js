@@ -81,3 +81,15 @@ test('U9, two versions on a page: the page\'s terminal defines the element, the 
   ]);
   expect(errors).toEqual([]);
 });
+
+test('U4, the portal shows the Java code behind a ticket: the entry point\'s region and the ticket\'s source', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto(GALLERY + 'portal.html');
+  const region = page.locator('pre[data-region="embedded"]');
+  await expect(region).toContainText('EmbeddedTicket.build(uiContext, host);');
+  await expect(region).not.toContainText('region');
+  const ticket = page.locator('pre.portal-source');
+  await expect(ticket).toContainText('final class EmbeddedTicket');
+  expect(await ticket.textContent()).toMatch(/^\/\*\*\n \* The ticket another page embeds/);
+  expect(errors).toEqual([]);
+});

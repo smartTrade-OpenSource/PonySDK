@@ -52,6 +52,30 @@
         window.open(event.detail, '_blank', 'noopener');
     });
 
+    // The Java code behind the tickets: the application's sources, copied beside this page by the build. A region
+    // marked "// region <name>" ... "// endregion" shows alone; a file shows from its class's Javadoc, imports left out
+    document.querySelectorAll('pre[data-source]').forEach(function (pre) {
+        fetch(pre.dataset.source).then(function (response) {
+            if (!response.ok) throw new Error(response.status + ' ' + pre.dataset.source);
+            return response.text();
+        }).then(function (text) {
+            var lines = text.split('\n');
+            var region = pre.dataset.region;
+            var start = region
+                ? lines.findIndex(function (line) { return line.trim().indexOf('// region ' + region) === 0; }) + 1
+                : lines.findIndex(function (line) { return line.indexOf('/**') === 0; });
+            var end = region
+                ? lines.findIndex(function (line, i) { return i >= start && line.trim().indexOf('// endregion') === 0; })
+                : lines.length;
+            lines = lines.slice(start, end);
+            var indent = Math.min.apply(null, lines.filter(function (line) { return line.trim(); })
+                .map(function (line) { return line.match(/^ */)[0].length; }));
+            pre.textContent = lines.map(function (line) { return line.slice(indent); }).join('\n').trim();
+        }).catch(function (error) {
+            pre.textContent = 'Not loaded: ' + error.message;
+        });
+    });
+
     // The applications' connection
     var status = document.getElementById('status');
     document.addEventListener('pony-connection-lost', function (event) {

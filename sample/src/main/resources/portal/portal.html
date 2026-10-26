@@ -49,6 +49,35 @@
     </table>
   </section>
 
+  <section class="portal-code" aria-labelledby="code-title">
+    <h2 id="code-title">The code behind a ticket <small>this page's part, then the application's, in Java</small></h2>
+    <div class="portal-code-parts">
+      <figure>
+        <figcaption>This page: the element, and its script (<a href="portal.js">portal.js</a>)</figcaption>
+<pre class="snippet">&lt;script type="module" src="https://fx.example.com/sample/ponyterminal/terminal.js"&gt;&lt;/script&gt;
+
+&lt;pony-app id="ticket-2" src="https://fx.example.com/sample/"
+          view="ticket" instrument="USDJPY" quantity="500000"&gt;Loading the ticket…&lt;/pony-app&gt;
+
+ticket.credential = () =&gt; Promise.resolve(token);              // PHost.getCredential()
+ticket.setAttribute('instrument', 'GBPUSD');                   // addAttributeListener("instrument", …)
+ticket.dispatchEvent(new CustomEvent('reset'));                // addEventListener("reset", …)
+ticket.addEventListener('trade', e =&gt; blotter(e.detail));      // host.dispatchEvent("trade", …)
+ticket.addEventListener('pony-title', e =&gt; caption(e.detail)); // PWindow.getMain().setTitle(…)</pre>
+      </figure>
+      <figure>
+        <figcaption>The application's entry point: an element whose <code>view</code> is <code>ticket</code> gets the
+          ticket (<code>UISampleEntryPoint.java</code>)</figcaption>
+        <pre class="snippet" data-source="source/UISampleEntryPoint.java" data-region="embedded">Loading…</pre>
+      </figure>
+    </div>
+    <figure>
+      <figcaption>The ticket's class (<code>EmbeddedTicket.java</code>): <code>PHost</code> reads the attributes,
+        receives <code>reset</code>, sends <code>trade</code>; the rest is PonySDK as in any page</figcaption>
+      <pre class="snippet portal-source" data-source="source/EmbeddedTicket.java">Loading…</pre>
+    </figure>
+  </section>
+
   <section class="portal-app">
     <h2>An existing application, unchanged: the showcase</h2>
     <pony-app id="showcase" class="portal-showcase">Loading the showcase…</pony-app>
