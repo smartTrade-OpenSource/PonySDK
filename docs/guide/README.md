@@ -12,6 +12,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |
 | [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
+| [FDC3](fdc3.md) | Talking to the other applications of a trader's desktop |
 | [Reconnection](reconnection.md) | Keeping a session through a network cut |
 | [Security](security.md) | What is protected by default, and the settings |
 | [Observability](observability.md) | OpenTelemetry metrics, latency |

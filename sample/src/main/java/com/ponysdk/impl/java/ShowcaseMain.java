@@ -55,7 +55,9 @@ public class ShowcaseMain {
             "script/webcomponents.js",
             "script/sample.js",
             "script/flexlayout.js",
-            "script/flexlayout-addon.js"
+            "script/flexlayout-addon.js",
+            "script/fdc3-agent.js", // the sample's demonstration desktop agent: a real desktop brings its own
+            "script/fdc3-addon.js"
         )));
 
         final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();

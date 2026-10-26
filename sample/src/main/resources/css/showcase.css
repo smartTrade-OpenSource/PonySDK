@@ -949,6 +949,14 @@ div.selected-row { background-color: var(--selected-row); }
 .stream-name { display: block; font-size: 12px; color: var(--text-3); }
 .stream-price { display: block; font: 600 16px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
 
+/* ── FDC3 page: channels, instruments, what came from the others (docs/decisions/0014-fdc3.md) ──────────── */
+.fdc3-agent { display: block; color: var(--text-2); margin: 0 0 8px; }
+.fdc3-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 16px; }
+.fdc3-channels, .fdc3-instruments { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.fdc3-channels .pony-Button.fdc3-channel { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); }
+.fdc3-channels .pony-Button.fdc3-channel-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.fdc3-received, .fdc3-raised { display: block; color: var(--text); font-variant-numeric: tabular-nums; margin: 4px 0; }
+
 /* ── Narrow screens: the sidebar becomes a horizontal strip ─────────────── */
 @media (max-width: 960px) {
     .rc-layout { grid-template-columns: minmax(0, 1fr); }
