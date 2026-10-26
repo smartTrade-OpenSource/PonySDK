@@ -28,14 +28,16 @@ import static com.ponysdk.sample.client.Costs.*;
 
 import java.util.Date;
 import java.util.List;
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PWebComponent;
+import com.ponysdk.sample.client.wc.PMyCard;
+import com.ponysdk.sample.client.wc.PMyCounter;
+import com.ponysdk.sample.client.wc.PMyDashboard;
+import com.ponysdk.sample.client.wc.PMyStats;
 
 /** Web Components: standard custom elements driven from Java. */
 final class WebComponentsPage {
@@ -48,7 +50,8 @@ final class WebComponentsPage {
     static PFlowPanel build(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
         pageTitle(p, "Web Components", "Standard custom elements driven from Java: attributes, properties, events, "
-            + "slots and methods. Object properties travel as JSON merge-patches, only the changed keys.");
+            + "slots and methods, through classes the build generates from their Custom Elements Manifest "
+            + "(custom-elements.json). Object properties travel as JSON merge-patches, only the changed keys.");
         buildWebComponentsInto(p);
         return p;
     }
@@ -59,37 +62,33 @@ final class WebComponentsPage {
         statusLabel.setStyleProperty("font-style", "italic");
 
         // my-counter
-        final PWebComponent counter = new PWebComponent("my-counter");
-        counter.attr("label", "Clicks");
-        counter.property("count").set(0);
-        counter.onEvent("count-changed", event -> {
-            final String detail = event.containsKey(ClientToServerModel.WC_EVENT_DETAIL.toStringValue())
-                ? event.getString(ClientToServerModel.WC_EVENT_DETAIL.toStringValue()) : "{}";
-            statusLabel.setText("count-changed: " + detail);
-        });
+        final PMyCounter counter = new PMyCounter();
+        counter.setLabelAttribute("Clicks");
+        counter.setCount(0);
+        counter.onCountChanged(detail -> statusLabel.setText("count-changed: " + detail));
 
         // my-dashboard
-        final PWebComponent dashboard = new PWebComponent("my-dashboard");
-        dashboard.attr("title", "PonySDK Dashboard");
+        final PMyDashboard dashboard = new PMyDashboard();
+        dashboard.setTitleAttribute("PonySDK Dashboard");
         final PButton refreshBtn = Element.newPButton("Refresh");
         final PButton exportBtn = Element.newPButton("Export");
-        dashboard.slot("toolbar").add(refreshBtn, exportBtn);
+        dashboard.slotToolbar().add(refreshBtn, exportBtn);
         final PFlowPanel contentPanel = Element.newPFlowPanel();
         final PTextBox searchBox = Element.newPTextBox();
         searchBox.setPlaceholder("Search (PTextBox inside WC)...");
         contentPanel.add(Element.newPLabel("PLabel inside 'content' slot"), searchBox);
-        dashboard.slot("content").add(contentPanel);
-        dashboard.slot("footer").add(statusLabel);
-        refreshBtn.addClickHandler(e -> { statusLabel.setText("Refreshed at " + new java.util.Date()); dashboard.attr("theme", "light"); });
-        exportBtn.addClickHandler(e -> { statusLabel.setText("Export triggered!"); dashboard.attr("theme", "dark"); });
+        dashboard.slotContent().add(contentPanel);
+        dashboard.slotFooter().add(statusLabel);
+        refreshBtn.addClickHandler(e -> { statusLabel.setText("Refreshed at " + new java.util.Date()); dashboard.setThemeAttribute("light"); });
+        exportBtn.addClickHandler(e -> { statusLabel.setText("Export triggered!"); dashboard.setThemeAttribute("dark"); });
 
         // my-card
-        final PWebComponent card = new PWebComponent("my-card");
-        card.attr("title", "PonySDK Card");
-        card.property("content").set("\"Card body text set from server via property API.\"");
+        final PMyCard card = new PMyCard();
+        card.setTitleAttribute("PonySDK Card");
+        card.setContent("Card body text set from server via property API.");
         final PButton likeBtn = Element.newPButton("Like");
         final PButton shareBtn = Element.newPButton("Share");
-        card.slot("actions").add(likeBtn, shareBtn);
+        card.slotActions().add(likeBtn, shareBtn);
         likeBtn.addClickHandler(e -> statusLabel.setText("Liked!"));
         shareBtn.addClickHandler(e -> statusLabel.setText("Shared!"));
 
@@ -98,28 +97,28 @@ final class WebComponentsPage {
         counterControls.setStyleProperty("display", "flex");
         counterControls.setStyleProperty("gap", "8px");
         final PButton resetBtn = Element.newPButton("Reset counter");
-        resetBtn.addClickHandler(e -> { counter.call("reset"); statusLabel.setText("reset() called"); });
+        resetBtn.addClickHandler(e -> { counter.reset(); statusLabel.setText("reset() called"); });
         final PButton setCountBtn = Element.newPButton("Set count = 42");
-        setCountBtn.addClickHandler(e -> { counter.property("count").set(42); statusLabel.setText("count set to 42"); });
+        setCountBtn.addClickHandler(e -> { counter.setCount(42); statusLabel.setText("count set to 42"); });
         counterControls.add(resetBtn, setCountBtn);
 
         // my-stats — object property updated through JSON merge-patch (only changed keys travel)
-        final PWebComponent stats = new PWebComponent("my-stats");
+        final PMyStats stats = new PMyStats();
         final int[] trades = { 0 };
         final String statsTemplate = "{\"desk\":\"FX Spot EUR/USD\",\"trader\":\"demo-trader\",\"trades\":%d%s}";
-        stats.property("stats").set(String.format(statsTemplate, 0, ",\"note\":\"initial snapshot\""));
+        stats.setStatsJson(String.format(statsTemplate, 0, ",\"note\":\"initial snapshot\""));
         final PFlowPanel statsControls = Element.newPFlowPanel();
         statsControls.setStyleProperty("display", "flex");
         statsControls.setStyleProperty("gap", "8px");
         final PButton tradeBtn = Element.newPButton("Patch: +1 trade");
         tradeBtn.addClickHandler(e -> {
             trades[0]++;
-            stats.property("stats").set(String.format(statsTemplate, trades[0], ",\"note\":\"initial snapshot\""));
+            stats.setStatsJson(String.format(statsTemplate, trades[0], ",\"note\":\"initial snapshot\""));
             statusLabel.setText("stats patched: trades=" + trades[0]);
         });
         final PButton dropNoteBtn = Element.newPButton("Patch: drop note");
         dropNoteBtn.addClickHandler(e -> {
-            stats.property("stats").set(String.format(statsTemplate, trades[0], ""));
+            stats.setStatsJson(String.format(statsTemplate, trades[0], ""));
             statusLabel.setText("stats patched: note removed");
         });
         statsControls.add(tradeBtn, dropNoteBtn);
@@ -130,34 +129,35 @@ final class WebComponentsPage {
         addToolbarItemBtn.addClickHandler(e -> {
             final PLabel item = Element.newPLabel("Item " + ++toolbarItems[0]);
             item.addStyleName("dyn-toolbar-item");
-            dashboard.slot("toolbar").add(item);
+            dashboard.slotToolbar().add(item);
         });
         counterControls.add(addToolbarItemBtn);
 
         container.add(exampleCard("<my-counter>",
             "An attribute and a property set from Java, a method call, and the element's own event handled on the server.",
             stack(counter, counterControls),
-            ln(ty("PWebComponent") + " counter = " + kw("new") + " " + ty("PWebComponent") + "(" + st("my-counter") + ");")
-                + ln("counter." + mt("attr") + "(" + st("label") + ", " + st("Clicks") + ");")
-                + ln("counter." + mt("property") + "(" + st("count") + ")." + mt("set") + "(0);")
-                + ln("counter." + mt("onEvent") + "(" + st("count-changed") + ", e -> status." + mt("setText") + "(...));")
-                + ln("reset." + mt("addClickHandler") + "(e -> counter." + mt("call") + "(" + st("reset") + "));"),
+            ln(cm("PMyCounter: generated from the manifest, custom-elements.json"))
+                + ln(ty("PMyCounter") + " counter = " + kw("new") + " " + ty("PMyCounter") + "();")
+                + ln("counter." + mt("setLabelAttribute") + "(" + st("Clicks") + ");")
+                + ln("counter." + mt("setCount") + "(0);")
+                + ln("counter." + mt("onCountChanged") + "(detail -> status." + mt("setText") + "(...));")
+                + ln("reset." + mt("addClickHandler") + "(e -> counter." + mt("reset") + "());"),
             costSpec("PWebComponent <my-counter>")));
         container.add(exampleCard("<my-stats>",
             "An object property: each change travels as a JSON merge-patch carrying only the keys that changed.",
             stack(stats, statsControls),
             ln(cm("only \"trades\" travels; a key set to null is removed on the element"))
-                + ln("stats." + mt("property") + "(" + st("stats") + ")." + mt("set") + "(json);")));
+                + ln("stats." + mt("setStatsJson") + "(json);")));
         container.add(exampleCard("<my-dashboard>",
             "Named slots filled with PonySDK widgets - buttons, a text box, a label - and children added while it is live.",
             dashboard,
-            ln("dashboard." + mt("slot") + "(" + st("toolbar") + ")." + mt("add") + "(refresh, export);")
-                + ln("dashboard." + mt("slot") + "(" + st("content") + ")." + mt("add") + "(panel);")
-                + ln("dashboard." + mt("slot") + "(" + st("footer") + ")." + mt("add") + "(status);")));
+            ln("dashboard." + mt("slotToolbar") + "()." + mt("add") + "(refresh, export);")
+                + ln("dashboard." + mt("slotContent") + "()." + mt("add") + "(panel);")
+                + ln("dashboard." + mt("slotFooter") + "()." + mt("add") + "(status);")));
         container.add(exampleCard("<my-card>",
             "A property set from the server and an actions slot whose buttons are handled in Java.",
             card,
-            ln("card." + mt("property") + "(" + st("content") + ")." + mt("set") + "(" + st("Card body text...") + ");")
-                + ln("card." + mt("slot") + "(" + st("actions") + ")." + mt("add") + "(like, share);")));
+            ln("card." + mt("setContent") + "(" + st("Card body text...") + ");")
+                + ln("card." + mt("slotActions") + "()." + mt("add") + "(like, share);")));
     }
 }

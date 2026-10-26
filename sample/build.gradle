@@ -47,6 +47,20 @@ dependencies {
     )
 }
 
+// The classes of the sample's custom elements (script/webcomponents.js), from their manifest (ADR-0010)
+def webComponents = tasks.register('webComponents', JavaExec) {
+    description = 'Generates the Java classes of script/webcomponents.js from its Custom Elements Manifest'
+    classpath = configurations.runtimeClasspath
+    mainClass = 'com.ponysdk.core.tools.WebComponentGenerator'
+    def manifest = file('src/main/resources/script/custom-elements.json')
+    def output = layout.buildDirectory.dir('generated/sources/webcomponents')
+    inputs.file(manifest).withPropertyName('manifest')
+    outputs.dir(output)
+    doFirst { output.get().asFile.deleteDir() } // an element removed from the manifest leaves no class behind
+    argumentProviders.add({ [manifest.path, 'com.ponysdk.sample.client.wc', output.get().asFile.path] } as CommandLineArgumentProvider)
+}
+sourceSets.main.java.srcDir(webComponents)
+
 def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
 
 task runShowcase(type: JavaExec) {
