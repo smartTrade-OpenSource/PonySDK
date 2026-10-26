@@ -80,6 +80,7 @@ export class FileUpload extends Widget {
         // key proves it when the session cookie does not come (ADR-0009)
         const headers: Record<string, string> = session.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: session.contextKey };
         fetch(session.streamUrl(streamRequestId), { method: 'POST', body: data, credentials: 'include', headers })
+            .then(response => response.arrayBuffer()) // read to its end: Chrome reports a body left unread as aborted
             .catch(e => log.error(`${this}: upload failed`, e))
             .finally(() => this.context.guard(() => {
                 const message = about(this.id);

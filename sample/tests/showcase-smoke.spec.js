@@ -61,3 +61,19 @@ test('a tree shows its items only, not its root item', async ({ page }) => {
   expect(Math.abs(widget.x - text.x)).toBeLessThan(1);
   expect(widget.height).toBeLessThan(text.height * 1.5);
 });
+
+// An upload is complete once the server answered: the browser must not report it aborted afterwards
+test('an upload completes: the server reports the file, the browser no failed request', async ({ page }) => {
+  const failed = [];
+  page.on('requestfailed', r => failed.push(`${new URL(r.url()).pathname} ${r.failure()?.errorText}`));
+  await page.goto(BASE_URL);
+  await page.locator('.pony-tab', { hasText: 'Inputs' }).click();
+  const panel = page.locator('.pony-content');
+  await panel.locator('input[type=file]').first().setInputFiles({ name: 'a.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
+  const upload = page.waitForResponse(r => r.url().includes('/sample/stream'));
+  await panel.getByRole('button', { name: 'Submit' }).first().click();
+  expect((await upload).status()).toBe(200);
+  await expect(panel.locator('.pony-ex-echo', { hasText: 'server: received' })).toHaveText('server: received a.txt, 5 bytes');
+  await page.waitForTimeout(300);
+  expect(failed).toEqual([]);
+});

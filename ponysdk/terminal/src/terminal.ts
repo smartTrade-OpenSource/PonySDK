@@ -265,6 +265,7 @@ export class Terminal implements Session, Host {
     cookieRequested(requestId: number): void {
         const headers: Record<string, string> = this.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: this.contextKey };
         fetch(this.streamUrl(requestId), { credentials: 'include', headers })
+            .then(response => response.arrayBuffer()) // read to its end: Chrome reports a body left unread as aborted
             .catch(e => log.error('A cookie of the application could not be set', e));
     }
 
