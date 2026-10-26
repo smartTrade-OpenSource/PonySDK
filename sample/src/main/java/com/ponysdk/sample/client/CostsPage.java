@@ -106,7 +106,9 @@ final class CostsPage {
                 return;
             }
             if (idx >= specs.size()) {
-                status.setText(measured[0] > 0 ? "Done: " + measured[0] + " components measured."
+                status.setText(measured[0] == specs.size() ? "Done: " + specs.size() + " components measured."
+                    : measured[0] > 0 ? "Done: " + measured[0] + " measured now, the other " + (specs.size() - measured[0])
+                        + " earlier on this server. Measure again re-measures all " + specs.size() + "."
                     : "Last measured on this server. Measure again re-measures them in this session.");
                 run.setEnabled(true);
                 return;

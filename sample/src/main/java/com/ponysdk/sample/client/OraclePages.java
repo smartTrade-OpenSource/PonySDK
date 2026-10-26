@@ -255,8 +255,11 @@ final class OraclePages {
     /** A frame running a terminal of its own (the application page), fed by this one. */
     private static IsPWidget frame() {
         final PFrame frame = Element.newPFrame("");
-        frame.setHeight("120px");
+        frame.setHeight("140px");
+        frame.setWidth("100%");
+        frame.setStyleProperty("border", "0");
         final PElement inside = Element.newPElement("button");
+        inside.addStyleName("pony-Button"); // styled as the application's buttons
         inside.setInnerText("Inside");
         inside.addDomHandler((PClickHandler) e -> inside.setInnerText("Clicked"), PClickEvent.TYPE);
         frame.add(inside);

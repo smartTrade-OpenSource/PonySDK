@@ -8,16 +8,35 @@
     --card: #ffffff;
     --line: #e5e0d6;
     --brand: #9d174d;
+    --muted: #6b7280;
+    --buy: #047857;
+    --sell: #b91c1c;
     font: 15px/1.5 Georgia, "Times New Roman", serif;
     color: var(--ink);
     background: var(--paper);
+    color-scheme: light;
+}
+
+/* The portal follows the system's dark theme too */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ink: #e5e7eb;
+        --paper: #14110f;
+        --card: #1f1b18;
+        --line: #3a332c;
+        --brand: #be185d;
+        --muted: #a8a29e;
+        --buy: #34d399;
+        --sell: #f87171;
+        color-scheme: dark;
+    }
 }
 
 * { box-sizing: border-box; }
 body { margin: 0; }
 div { letter-spacing: .01em; }
 h2 { font-size: 18px; margin: 0 0 12px; }
-h2 small { font-size: 13px; font-weight: normal; color: #6b7280; }
+h2 small { font-size: 13px; font-weight: normal; color: var(--muted); }
 
 button {
     background: #db2777;
@@ -46,6 +65,7 @@ select { font: inherit; padding: 4px 8px; margin-left: 8px; }
 .portal-status[data-state="lost"] { background: #f59e0b; color: #1f2937; }
 
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 24px; }
+main > * { min-width: 0; } /* a grid item sizes to its content by default: a long code line would widen the page */
 
 .portal-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
 
@@ -56,11 +76,11 @@ main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap
 }
 
 .portal-ticket { margin: 0; }
-.portal-ticket figcaption { margin: 0 0 6px; font-size: 13px; color: #6b7280; }
+.portal-ticket figcaption { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
 
 .portal-code-parts { display: grid; gap: 16px; }
 .portal-code figure { margin: 0 0 16px; min-width: 0; }
-.portal-code figcaption { margin: 0 0 6px; font-size: 13px; color: #6b7280; }
+.portal-code figcaption { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
 .portal-source { max-height: 520px; overflow: auto; }
 .portal-blotter, .portal-app, .portal-code {
     background: var(--card);
@@ -71,9 +91,9 @@ main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap
 }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-.portal-buy td:nth-child(3) { color: #047857; font-weight: bold; }
-.portal-sell td:nth-child(3) { color: #b91c1c; font-weight: bold; }
-.portal-empty td { color: #6b7280; font-style: italic; }
+.portal-buy td:nth-child(3) { color: var(--buy); font-weight: bold; }
+.portal-sell td:nth-child(3) { color: var(--sell); font-weight: bold; }
+.portal-empty td { color: var(--muted); font-style: italic; }
 
 /* The embedded showcase scrolls in its own box */
 .portal-showcase { height: 640px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
@@ -94,10 +114,11 @@ code { font: 13px ui-monospace, Menlo, Consolas, monospace; background: rgba(157
 .case p { margin: 0; }
 .case-code { align-self: flex-start; font: 600 12px ui-monospace, Menlo, monospace; color: var(--brand);
     border: 1px solid var(--brand); border-radius: 999px; padding: 0 8px; }
-.case-when { color: #6b7280; font-size: 14px; font-style: italic; }
+.case-when { color: var(--muted); font-size: 14px; font-style: italic; }
 .case-open { margin-top: auto; padding-top: 6px; color: var(--brand); font-weight: bold; }
 .case-open + .case-open { margin-top: 0; padding-top: 0; }
-.gallery-frame { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.gallery-frame { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+.gallery-row pony-app#framed { display: block; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
 .gallery-row { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; }
 .gallery-aside { margin: 0; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
 .gallery-aside dt { font-weight: bold; }

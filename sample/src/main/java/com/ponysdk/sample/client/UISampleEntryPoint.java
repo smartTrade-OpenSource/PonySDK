@@ -52,6 +52,8 @@ public class UISampleEntryPoint implements EntryPoint {
 
     /** Opens a page of the showcase (index in the sidebar), from anywhere in the showcase. */
     private java.util.function.IntConsumer navigate = i -> { };
+    /** The pages in sidebar order: a page is built and opened by its name, not its position. */
+    private String[] tabNames;
 
     @Override
     public void start(final UIContext uiContext) {
@@ -155,15 +157,16 @@ public class UISampleEntryPoint implements EntryPoint {
 
         // Sidebar entries, by group: { icon, label }
         final String[][] tabs = {
-            {"◎", "Overview"},
+            {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
-            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"⋯", "Misc"},
+            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
             {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
-            {"⧉", "Embedding"}, {"</>", "Code"},
-            {"▦", "FlexLayout"}
+            {"⧉", "Embedding"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
-        final int[] groupStarts = {0, 1, 7};
+        final int[] groupStarts = {0, 2, 9};
+        tabNames = new String[tabs.length];
+        for (int i = 0; i < tabs.length; i++) tabNames[i] = tabs[i][1];
 
         // Active tab schedulers — cancelled on tab leave, list cleared and refilled on re-entry
         @SuppressWarnings("unchecked")
@@ -250,21 +253,23 @@ public class UISampleEntryPoint implements EntryPoint {
 
     @SuppressWarnings("unchecked")
     private PFlowPanel buildTabWithSchedulers(final int idx, final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
-        return switch (idx) {
-            case 0 -> OverviewPage.build(uiContext, schedulers, i -> navigate.accept(i));
-            case 1 -> InputsPage.build(schedulers);
-            case 2 -> LayoutsPage.build(schedulers);
-            case 3 -> DataPage.build(schedulers);
-            case 4 -> DataGridPage.build(schedulers);
-            case 5 -> WebComponentsPage.build(schedulers);
-            case 6 -> MiscPage.build(schedulers);
-            case 7 -> PerformancePage.build(uiContext, schedulers);
-            case 8 -> CostsPage.build();
-            case 9 -> BinaryProtocolPage.build(schedulers);
-            case 10 -> ReconnectionPage.build(uiContext, schedulers);
-            case 11 -> EmbeddingPage.build(uiContext, schedulers);
-            case 12 -> CodePage.build(schedulers);
-            default -> FlexLayoutPage.build();
+        return switch (tabNames[idx]) {
+            case "Overview" -> OverviewPage.build(uiContext, schedulers,
+                name -> navigate.accept(java.util.Arrays.asList(tabNames).indexOf(name)));
+            case "Code" -> CodePage.build(schedulers);
+            case "Inputs" -> InputsPage.build(schedulers);
+            case "Layouts" -> LayoutsPage.build(schedulers);
+            case "Data" -> DataPage.build(schedulers);
+            case "DataGrid" -> DataGridPage.build(schedulers);
+            case "Web Components" -> WebComponentsPage.build(schedulers);
+            case "FlexLayout" -> FlexLayoutPage.build();
+            case "Misc" -> MiscPage.build(schedulers);
+            case "Performance" -> PerformancePage.build(uiContext, schedulers);
+            case "Component costs" -> CostsPage.build();
+            case "Binary protocol" -> BinaryProtocolPage.build(schedulers);
+            case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);
+            case "Embedding" -> EmbeddingPage.build(uiContext, schedulers);
+            default -> throw new IllegalArgumentException("No page " + tabNames[idx]);
         };
     }
 

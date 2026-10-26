@@ -35,6 +35,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PGrid;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
@@ -58,19 +59,19 @@ final class DataPage {
 
         pageTitle(p, "Data", "Trees and tables whose content is pushed from the server.");
 
-        p.add(sectionTitle("Tree"));
-        p.add(createTree());
+        p.add(exampleCard("PTree", "Items added, inserted and renamed from Java; a widget as an item.", createTree(),
+            Source.code(DataPage.class, "tree")));
 
-        p.add(sectionTitle("RefreshableDataGrid — 50 rows refreshed every 200 ms"));
         final PScrollPanel gridFrame = Element.newPScrollPanel();
         gridFrame.addStyleName("lay-frame");
         gridFrame.addStyleName("data-table");
         gridFrame.setHeight("280px");
         gridFrame.setWidget(createGrid(schedulers));
-        p.add(gridFrame);
+        p.add(exampleCard("RefreshableDataGrid", "50 rows refreshed every 200 ms by a server task: only the changed cells travel.",
+            gridFrame, Source.code(DataPage.class, "refreshablegrid")));
 
-        p.add(sectionTitle("FlexTable"));
-        final com.ponysdk.core.ui.basic.PFlexTable flex = Element.newPFlexTable();
+        // region flextable
+        final PFlexTable flex = Element.newPFlexTable();
         flex.addStyleName("data-table");
         final String[][] fx = { { "Pair", "Bid", "Ask", "Spread" }, { "EUR/USD", "1.0851", "1.0853", "0.2" },
                                 { "GBP/USD", "1.2710", "1.2713", "0.3" }, { "USD/JPY", "149.21", "149.24", "0.3" } };
@@ -81,15 +82,18 @@ final class DataPage {
                 flex.setWidget(row, col, cell);
             }
         }
-        p.add(flex);
+        // endregion
+        p.add(exampleCard("PFlexTable", "A table whose cells are widgets, set by row and column.", flex,
+            Source.code(DataPage.class, "flextable")));
 
-        p.add(sectionTitle("Grid 2×3"));
-        final com.ponysdk.core.ui.basic.PGrid grid2 = Element.newPGrid(2, 3);
-        grid2.addStyleName("data-table");
+        // region grid
+        final PGrid grid = Element.newPGrid(2, 3);
+        grid.addStyleName("data-table");
         for (int row = 0; row < 2; row++) {
-            for (int col = 0; col < 3; col++) grid2.setWidget(row, col, chip("r" + row + " · c" + col));
+            for (int col = 0; col < 3; col++) grid.setWidget(row, col, chip("r" + row + " · c" + col));
         }
-        p.add(grid2);
+        // endregion
+        p.add(exampleCard("PGrid 2×3", "A table of a fixed size.", grid, Source.code(DataPage.class, "grid")));
 
         return p;
     }
@@ -106,6 +110,7 @@ final class DataPage {
     }
 
     static RefreshableDataGrid<Integer, Data> createGrid(final List<PScheduler.UIRunnable> schedulers) {
+        // region refreshablegrid
         final AbstractGridWidget listView = new GridTableWidget();
         listView.setStyleProperty("table-layout", "fixed");
         final RefreshableDataGrid<Integer, Data> grid = new RefreshableDataGrid<>(listView);
@@ -160,11 +165,12 @@ final class DataPage {
                 grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
             }
         }, Duration.ofMillis(500), Duration.ofMillis(200)));
-
+        // endregion
         return grid;
     }
 
     static final PTree createTree() {
+        // region tree
         final PTree tree = Element.newPTree();
 
         tree.addStyleName("data-tree");
@@ -182,7 +188,7 @@ final class DataPage {
         rates.setState(true);
 
         bund.setSelected(true);
-
+        // endregion
         return tree;
     }
 }

@@ -63,7 +63,9 @@ final class Ui {
 
     static String bytes(final double v) {
         if (v < 0) return "n/a";
-        return v < 10 ? String.format(java.util.Locale.ROOT, "%.1f B", v) : String.format(java.util.Locale.ROOT, "%.0f B", v);
+        if (v < 10) return String.format(java.util.Locale.ROOT, "%.1f B", v);
+        if (v < 10 * 1024) return String.format(java.util.Locale.ROOT, "%.0f B", v);
+        return Math.round(v / 1024) + " KB"; // the unit of CostMeter.memory: one table, one unit per size
     }
 
     /** A small labelled box used to fill the layout demos. */
@@ -273,6 +275,36 @@ final class Ui {
     }
 
     static PFlowPanel labeled(final String label, final PWidget widget) {
+        return labeled(label, widget, null);
+    }
+
+    static PFlowPanel labeled(final String label, final IsPWidget widget) {
+        return labeled(label, widget.asWidget(), null);
+    }
+
+    static PFlowPanel labeled(final String label, final IsPWidget widget, final String codeHtml) {
+        return labeled(label, widget.asWidget(), codeHtml);
+    }
+
+    /** A button that shows or hides the code under it: for a page whose example is the whole page. */
+    static PFlowPanel codeToggle(final String what, final String codeHtml) {
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.addStyleName("code-toggle");
+        final PButton show = Element.newPButton("Show the code: " + what);
+        final PElement code = Element.newDiv();
+        code.addStyleName("code-body");
+        code.setInnerHTML(codeHtml);
+        code.setVisible(false);
+        show.addClickHandler(e -> {
+            code.setVisible(!code.isVisible());
+            show.setText((code.isVisible() ? "Hide the code: " : "Show the code: ") + what);
+        });
+        box.add(show, code);
+        return box;
+    }
+
+    /** A row: its label, the live widget, then Code (the region of the page's source that built it) and Cost. */
+    static PFlowPanel labeled(final String label, final PWidget widget, final String codeHtml) {
         final PFlowPanel row = Element.newPFlowPanel();
         row.addStyleName("pony-row");
         final PElement lbl = Element.newDiv();
@@ -281,12 +313,25 @@ final class Ui {
         row.add(lbl);
         row.add(widget);
         final String costName = ROW_COSTS.get(label);
-        if (costName != null) row.add(rowCost(costSpec(costName)));
+        final PFlowPanel actions = costName != null ? rowCost(costSpec(costName)) : Element.newPFlowPanel();
+        actions.addStyleName("row-cost");
+        row.add(actions);
+        if (codeHtml != null) {
+            final PButton show = Element.newPButton("Code");
+            show.addStyleName("row-cost-btn");
+            actions.add(show);
+            final PElement code = Element.newDiv();
+            code.addStyleName("code-body");
+            code.addStyleName("row-code");
+            code.setInnerHTML(codeHtml);
+            code.setVisible(false);
+            row.add(code);
+            show.addClickHandler(e -> {
+                code.setVisible(!code.isVisible());
+                show.setText(code.isVisible() ? "Hide code" : "Code");
+            });
+        }
         return row;
-    }
-
-    static PFlowPanel labeled(final String label, final IsPWidget widget) {
-        return labeled(label, widget.asWidget());
     }
 
     /** Widgets stacked vertically (an example's preview). */

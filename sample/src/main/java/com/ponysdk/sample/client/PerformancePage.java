@@ -49,7 +49,6 @@ final class PerformancePage {
             + "second. The charts are plain PonySDK widgets: 60 bars whose heights are set from Java.");
         final Runtime rt = Runtime.getRuntime();
         final long maxMem = rt.maxMemory();
-        final long startTime = System.currentTimeMillis();
 
         p.add(sectionTitle("Last 60 seconds"));
         final PFlowPanel charts = Element.newPFlowPanel();
@@ -86,7 +85,7 @@ final class PerformancePage {
         final PFlowPanel cpuCard = perfCard(cpuVal, cpuUnit, cpuLbl);
         final PElement uptimeVal = el("perf-value", "0");
         final PElement uptimeUnit = el("perf-unit", "seconds");
-        final PElement uptimeLbl = el("perf-label", "Uptime");
+        final PElement uptimeLbl = el("perf-label", "Server uptime");
         final PFlowPanel uptimeCard = perfCard(uptimeVal, uptimeUnit, uptimeLbl);
 
         heapGrid.add(heapCard, maxCard, committedCard, cpuCard, uptimeCard);
@@ -167,9 +166,11 @@ final class PerformancePage {
             heapTrend.setAttribute("class", used > prevHeap[0] ? "perf-trend perf-down" : used < prevHeap[0] ? "perf-trend perf-up" : "perf-trend");
             prevHeap[0] = used;
 
-            final long upSec = (System.currentTimeMillis() - startTime) / 1000;
-            uptimeVal.setInnerText(upSec < 60 ? String.valueOf(upSec) : (upSec / 60) + "m " + (upSec % 60) + "s");
-            uptimeUnit.setInnerText(upSec < 60 ? "seconds" : "minutes, seconds");
+            // The JVM's, not this page's: how long this server has been up
+            final long upSec = java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
+            uptimeVal.setInnerText(upSec < 60 ? String.valueOf(upSec)
+                : upSec < 3600 ? (upSec / 60) + "m " + (upSec % 60) + "s" : (upSec / 3600) + "h " + (upSec % 3600 / 60) + "m");
+            uptimeUnit.setInnerText(upSec == 1 ? "second" : upSec < 60 ? "seconds" : "");
 
             final double lat = uiContext.getRoundtripLatency();
             latVal.setInnerText(String.format("%.0f", lat));

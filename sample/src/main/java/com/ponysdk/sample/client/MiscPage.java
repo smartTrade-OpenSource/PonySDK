@@ -42,8 +42,10 @@ import org.apache.commons.io.IOUtils;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
@@ -70,15 +72,24 @@ final class MiscPage {
         pageTitle(p, "Misc", "HTML, scripts, frames and cookies, all handled from the server.");
 
         p.add(sectionTitle("HTML / Anchors"));
-        p.add(labeled("HTML", Element.newPHTML("Hello <b>HTML</b>")));
-        p.add(labeled("Anchor", Element.newPAnchor("PonySDK site", "https://github.com/smartTrade-OpenSource/PonySDK")));
+        // region html
+        final PHTML html = Element.newPHTML("Hello <b>HTML</b>");
+        // endregion
+        p.add(labeled("HTML", html, Source.code(MiscPage.class, "html")));
+        // region anchor
+        final PAnchor anchor = Element.newPAnchor("PonySDK site", "https://github.com/smartTrade-OpenSource/PonySDK");
+        // endregion
+        p.add(labeled("Anchor", anchor, Source.code(MiscPage.class, "anchor")));
 
         p.add(sectionTitle("Script"));
+        // region pscript
         final PButton alertBtn = Element.newPButton("Run JS alert");
         alertBtn.addClickHandler(e -> PScript.execute(PWindow.getMain(), "alert('Hello from PScript!')"));
-        p.add(labeled("PScript", alertBtn));
+        // endregion
+        p.add(labeled("PScript", alertBtn, Source.code(MiscPage.class, "pscript")));
 
         p.add(sectionTitle("Toolbar"));
+        // region toolbar
         final PToolbar toolbar = new PToolbar();
         toolbar.addStyleName("misc-toolbar");
         final PLabel toolbarEcho = Element.newPLabel("server: no action yet");
@@ -88,18 +99,21 @@ final class MiscPage {
             b.addClickHandler(e -> toolbarEcho.setText("server: " + action + " clicked"));
             toolbar.add(b);
         }
-        p.add(toolbar);
-        p.add(toolbarEcho);
+        // endregion
+        p.add(labeled("PToolbar", stack(toolbar, toolbarEcho), Source.code(MiscPage.class, "toolbar")));
 
         p.add(sectionTitle("Frame"));
+        // region frame
         final PFrame frame = Element.newPFrame("html/frame-demo.html"); // relative: same origin as the showcase
         frame.setHeight("260px");
         frame.setWidth("min(640px,100%)");
         frame.addStyleName("lay-frame");
-        p.add(frame);
+        // endregion
+        p.add(labeled("PFrame", frame, Source.code(MiscPage.class, "frame")));
 
         p.add(sectionTitle("Cookies"));
-        // The cookies of the application's origin, in its page or in an element of another page (ADR-0009)
+        // region cookies
+        // The cookies of the application's origin, in its page or in an element of another page
         final PCookies cookies = UIContext.get().getCookies();
         final PLabel cookieLabel = Element.newPLabel();
         cookieLabel.addStyleName("misc-cookie");
@@ -113,14 +127,15 @@ final class MiscPage {
             cookies.setCookie(VISITS, String.valueOf(visits));
             cookieLabel.setText("Loaded " + visits + " time(s) in this browser: the cookie " + VISITS + " counts them");
         };
-        if (cookies.isInitialized()) count.run();
-        else cookies.setListener(count::run);
-        p.add(cookieLabel);
+        cookies.setListener(count::run); // at once when the cookies are already known
+        // endregion
+        p.add(labeled("PCookies", cookieLabel, Source.code(MiscPage.class, "cookies")));
 
         return p;
     }
 
     static PFlowPanel createPFileUpload() {
+        // region fileupload
         final PFlowPanel panel = Element.newPFlowPanel();
         final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("file");
@@ -143,6 +158,7 @@ final class MiscPage {
         final PButton button = Element.newPButton("Submit");
         button.addClickHandler(event -> fileUpload.submit());
         panel.add(button);
+        // endregion
         return panel;
     }
 

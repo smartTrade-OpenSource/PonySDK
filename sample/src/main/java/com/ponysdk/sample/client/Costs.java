@@ -267,6 +267,7 @@ final class Costs {
 
     /** A compact DataGrid2 (8 columns, 50 rows) for the cost table. */
     static PWidget smallDataGrid() {
+        // region datagrid
         final DefaultDataGridView<Integer, MyRow> view = new DefaultDataGridView<>();
         final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
         for (char c = 'a'; c <= 'h'; c++) {
@@ -293,8 +294,9 @@ final class Costs {
         view.asWidget().setWidth("900px");
         final DataGridController<Integer, MyRow> controller = view.getController();
         controller.setBound(false);
-        for (int i = 0; i < 50; i++) controller.setData(createMyRow(i));
+        for (int i = 0; i < 50; i++) controller.setData(createMyRow(i)); // the data stays on the server
         controller.setBound(true);
+        // endregion
         return view.asWidget();
     }
 
@@ -337,10 +339,10 @@ final class Costs {
             measure.setEnabled(false);
             spec.measure(cost -> {
                 mem.setInnerText(CostMeter.memory(cost.memory()));
-                create.setInnerText(bytes(cost.createWire()).replace(" B", ""));
-                createUnit.setInnerText("B ON THE WIRE · " + bytes(cost.createProtocol()) + " BEFORE DEFLATE");
-                upd.setInnerText(bytes(cost.updateWire()).replace(" B", ""));
-                updUnit.setInnerText("B ON THE WIRE · " + bytes(cost.updateProtocol()) + " BEFORE DEFLATE");
+                create.setInnerText(bytes(cost.createWire()));
+                createUnit.setInnerText("ON THE WIRE · " + bytes(cost.createProtocol()) + " BEFORE DEFLATE");
+                upd.setInnerText(bytes(cost.updateWire()));
+                updUnit.setInnerText("ON THE WIRE · " + bytes(cost.updateProtocol()) + " BEFORE DEFLATE");
                 measure.setEnabled(true);
             });
         });

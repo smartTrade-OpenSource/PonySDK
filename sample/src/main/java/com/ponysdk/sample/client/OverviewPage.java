@@ -50,9 +50,9 @@ final class OverviewPage {
     /** One measured row of the 2.10 vs 3.0 comparison. */
     record Measure(String metric, String gain, String factor, String before, String after, int afterPct, String hint) {}
 
-    /** @param navigate opens a page of the showcase (its index in the sidebar) */
+    /** @param navigate opens a page of the showcase, by its name in the sidebar */
     static PFlowPanel build(final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers,
-                                      final java.util.function.IntConsumer navigate) {
+                                      final java.util.function.Consumer<String> navigate) {
         final PFlowPanel p = section();
 
         // Hero
@@ -68,11 +68,11 @@ final class OverviewPage {
         ctas.addStyleName("ov-ctas");
         final PButton tryIt = Element.newPButton("Try the widgets");
         tryIt.addStyleName("primary");
-        tryIt.addClickHandler(e -> navigate.accept(1));
+        tryIt.addClickHandler(e -> navigate.accept("Inputs"));
         final PButton protocol = Element.newPButton("See the protocol");
-        protocol.addClickHandler(e -> navigate.accept(9));
+        protocol.addClickHandler(e -> navigate.accept("Binary protocol"));
         final PButton costs = Element.newPButton("What a widget costs");
-        costs.addClickHandler(e -> navigate.accept(8));
+        costs.addClickHandler(e -> navigate.accept("Component costs"));
         ctas.add(tryIt, protocol, costs);
         heroText.add(ctas);
         hero.add(heroText);
@@ -246,7 +246,7 @@ final class OverviewPage {
                 prices[i] = Math.max(0.5, prices[i] + delta);
                 final PLabel c = cells.get(i);
                 final String text = String.format(java.util.Locale.ROOT, "%.5f", prices[i]);
-                final String color = delta >= 0 ? "#047857" : "#b91c1c";
+                final String color = delta >= 0 ? "var(--good)" : "var(--bad)";
                 c.setText(text);
                 c.setStyleProperty("color", color);
                 calls[0] += 2;
@@ -346,7 +346,7 @@ final class OverviewPage {
                 final int pct = base > 0 ? (int) Math.max(1, Math.min(100, Math.round(perSec[k] * 100 / base))) : 0;
                 stageFill[k].setAttribute("style", "width:" + pct + "%");
                 if (k == 1 && perSec[0] > 0) stageGain[k].setInnerText("−" + Math.round(100 - perSec[1] * 100 / perSec[0]) + " %");
-                if (k >= 3 && perSec[2] > 0) stageGain[k].setInnerText("÷" + String.format(java.util.Locale.ROOT, "%.0f", perSec[2] / Math.max(0.001, perSec[k])) + " vs JSON");
+                if (k >= 3 && perSec[2] > 0) stageGain[k].setInnerText(String.format(java.util.Locale.ROOT, "%.0f", perSec[2] / Math.max(0.001, perSec[k])) + "× smaller than JSON");
             }
             if (wire >= 0) {
                 wireVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", dWire / 1024.0 / secs));

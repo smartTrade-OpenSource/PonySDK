@@ -51,27 +51,34 @@ final class CodePage {
         pageTitle(p, "Code", "A PonySDK screen is plain Java on the server: widgets, handlers, pushes and data. Each card "
             + "below runs the code it shows.");
 
+        // region button
         final PButton button = Element.newPButton("Click me");
         final PElement buttonEcho = echoIdle("server: not clicked yet");
         final AtomicInteger clicks = new AtomicInteger();
+        // runs on the server, in a Java lambda: only the new texts travel back
         button.addClickHandler(e -> {
             button.setText("Clicked!");
             echoSet(buttonEcho, "server: handled click #" + clicks.incrementAndGet() + " in a Java lambda");
         });
+        // endregion
         p.add(exampleCard("A button and its handler",
-            "The widget is a Java object on the server; the click handler is a Java lambda. Only the new text travels back.",
-            previewWithEcho(button, buttonEcho), snippet_helloWorld()));
+            "The widget is a Java object on the server; the click handler is a Java lambda. Only the new text travels back. "
+                + "A whole application around it: README.md, Your first application.",
+            previewWithEcho(button, buttonEcho), Source.code(CodePage.class, "button")));
 
+        // region counter
         final PLabel counter = Element.newPLabel("0 updates");
         counter.addStyleName("code-counter");
         final AtomicInteger count = new AtomicInteger();
+        // a server task: about 10 bytes on the wire per update
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
-            if (idle()) return;
+            if (idle()) return; // nobody is looking: no update
             counter.setText(count.incrementAndGet() + " updates");
         }, Duration.ofMillis(100)));
+        // endregion
         p.add(exampleCard("Push from the server",
             "A server task updates the label ten times a second: no polling, no request from the browser, about 10 bytes per update.",
-            counter, snippet_liveCounter()));
+            counter, Source.code(CodePage.class, "counter")));
 
         final PWidget grid = smallDataGrid();
         grid.setWidth("100%");
@@ -79,49 +86,12 @@ final class CodePage {
         p.add(exampleCard("A data grid whose data stays on the server",
             "Columns and rows are defined in Java; the browser only receives the rows it shows. Scroll, sort and resize are "
                 + "handled on the server.",
-            grid, snippet_datagrid()));
+            grid, Source.code(Costs.class, "datagrid")));
 
         p.add(highlightBox("", "What travels on the wire",
-            "One label.setText(...) is 13 bytes on the wire protocol (26 as a JSON message); in a tick of many cells, update "
-                + "runs, the string dictionary and deflate bring it to about 5 bytes per cell. The Binary protocol page shows "
-                + "the bytes of an update, field by field."));
+            "One label.setText(...) is 13 bytes on the wire protocol; in a tick of many cells, update runs, the string "
+                + "dictionary and deflate bring it to about 5 bytes per cell. The Binary protocol page measures the bytes of "
+                + "an update, field by field, and the same update as JSON."));
         return p;
-    }
-
-    static String snippet_helloWorld() {
-        return ln(kw("public class") + " " + ty("MyApp") + " " + kw("implements") + " " + ty("EntryPoint") + " {") +
-            ln("") +
-            ln("  " + kw("@Override")) +
-            ln("  " + kw("public void") + " " + mt("start") + "(" + ty("UIContext") + " ctx) {") +
-            ln("    " + ty("PButton") + " button = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
-            ln("    " + cm("runs on the server, in a Java lambda")) +
-            ln("    button." + mt("addClickHandler") + "(e -> button." + mt("setText") + "(" + st("Clicked!") + "));") +
-            ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(button);") +
-            ln("  }") +
-            ln("}");
-    }
-
-    static String snippet_liveCounter() {
-        return ln(ty("PLabel") + " counter = " + ty("Element") + "." + mt("newPLabel") + "(" + st("0 updates") + ");") +
-            ln(ty("AtomicInteger") + " count = " + kw("new") + " " + ty("AtomicInteger") + "();") +
-            ln("") +
-            ln(cm("a server task: about 10 bytes on the wire per update")) +
-            ln(ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(() ->") +
-            ln("    counter." + mt("setText") + "(count." + mt("incrementAndGet") + "() + " + st(" updates") + "),") +
-            ln("    " + ty("Duration") + "." + mt("ofMillis") + "(" + nu("100") + "));");
-    }
-
-    static String snippet_datagrid() {
-        return ln(ty("List") + "&lt;" + ty("ColumnDefinition") + "&lt;" + ty("Row") + "&gt;&gt; columns = " + kw("new") + " " + ty("ArrayList") + "&lt;&gt;();") +
-            ln(kw("for") + " (" + kw("char") + " c = " + st("a").replace("\"", "'") + "; c &lt;= " + st("h").replace("\"", "'") + "; c++) {") +
-            ln("  " + ty("String") + " key = " + ty("String") + "." + mt("valueOf") + "(c);") +
-            ln("  columns." + mt("add") + "(" + kw("new") + " " + ty("DefaultColumnDefinition") + "&lt;&gt;(key, row -> row." + mt("getValue") + "(key),") +
-            ln("      (row, value) -> row." + mt("putValue") + "(key, value)));") +
-            ln("}") +
-            ln(ty("DefaultDataGridView") + "&lt;" + ty("Integer") + ", " + ty("Row") + "&gt; grid = " + kw("new") + " " + ty("DefaultDataGridView") + "&lt;&gt;();") +
-            ln("grid." + mt("setAdapter") + "(" + kw("new") + " " + ty("RowAdapter") + "(columns)); " + cm("row key, header...")) +
-            ln("") +
-            ln(cm("the data stays on the server; the browser receives the rows it shows")) +
-            ln(kw("for") + " (" + kw("int") + " i = " + nu("0") + "; i &lt; " + nu("50") + "; i++) grid." + mt("getController") + "()." + mt("setData") + "(" + kw("new") + " " + ty("Row") + "(i));");
     }
 }

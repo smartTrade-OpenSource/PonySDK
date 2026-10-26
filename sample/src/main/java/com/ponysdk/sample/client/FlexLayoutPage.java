@@ -40,9 +40,11 @@ final class FlexLayoutPage {
         final PFlowPanel p = Element.newPFlowPanel();
         pageTitle(p, "FlexLayout",
             "Dockable panel layout add-on — drag tabs, split views, collapsible sidebars, themes. "
-                + "Its creation arguments travel over the v3 pure-binary protocol (no JSON).");
+                + "Its creation arguments travel as typed binary values, no JSON. Its Java: "
+                + "sample/src/main/java/com/ponysdk/sample/client/page/addon/FlexLayoutDemoEntryPoint.java.");
         // The FlexLayout panel positions its content absolutely, so it needs a parent with a
         // definite height; the showcase content area scrolls, so we give it a fixed-height box.
+        // region flexlayout
         final PFlowPanel box = Element.newPFlowPanel();
         box.setStyleProperty("height", "78vh");
         box.setStyleProperty("min-height", "480px");
@@ -50,8 +52,10 @@ final class FlexLayoutPage {
         box.setStyleProperty("border", "1px solid var(--border)");
         box.setStyleProperty("border-radius", "10px");
         box.setStyleProperty("overflow", "hidden");
-        box.add(FlexLayoutDemoEntryPoint.buildDemo(false));
+        box.add(FlexLayoutDemoEntryPoint.buildDemo(false)); // the layout, its tabs and its panels
+        // endregion
         p.add(box);
+        p.add(codeToggle("this page", Source.code(FlexLayoutPage.class, "flexlayout")));
         return p;
     }
 }

@@ -6,6 +6,12 @@
     var app = new URLSearchParams(location.search).get('app') || location.protocol + '//' + location.hostname + ':8081/sample/';
     import(app + 'ponyterminal/terminal.js');
 
+    // Opened on another host name than the application's (the gallery's U6): another site, no cookie crosses
+    if (new URL(app).hostname !== location.hostname) {
+        document.querySelector('.portal-note').textContent = 'U6 · Another site: ' + location.host + ' embeds '
+            + new URL(app).host + '. No cookie crosses sites: each element carries its context key and its credential.';
+    }
+
     var tickets = [document.getElementById('ticket-1'), document.getElementById('ticket-2')];
     tickets.forEach(function (ticket) {
         // Who the user is, from the portal's own sign-in (docs/decisions/0009-embedding-limits.md): a property, never
@@ -67,7 +73,7 @@
             var end = region
                 ? lines.findIndex(function (line, i) { return i >= start && line.trim().indexOf('// endregion') === 0; })
                 : lines.length;
-            lines = lines.slice(start, end);
+            lines = lines.slice(start, end).filter(function (line) { return !/^\s*\/\/ (end)?region\b/.test(line); });
             var indent = Math.min.apply(null, lines.filter(function (line) { return line.trim(); })
                 .map(function (line) { return line.match(/^ */)[0].length; }));
             pre.textContent = lines.map(function (line) { return line.slice(indent); }).join('\n').trim();

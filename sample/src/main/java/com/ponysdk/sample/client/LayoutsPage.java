@@ -66,15 +66,22 @@ final class LayoutsPage {
         pageTitle(p, "Layouts", "Containers built and filled from Java. Every box below is a server-side panel.");
 
         p.add(sectionTitle("Panels"));
+        // region flowpanel
         final PFlowPanel flow = Element.newPFlowPanel();
         flow.add(chip("A"), chip("B"), chip("C"));
-        p.add(labeled("FlowPanel", flow));
+        // endregion
+        p.add(labeled("FlowPanel", flow, Source.code(LayoutsPage.class, "flowpanel")));
+        // region horizontalpanel
         final PHorizontalPanel h = Element.newPHorizontalPanel();
         h.add(chip("Left"), chip("Middle"), chip("Right"));
-        p.add(labeled("HorizontalPanel", h));
+        // endregion
+        p.add(labeled("HorizontalPanel", h, Source.code(LayoutsPage.class, "horizontalpanel")));
+        // region verticalpanel
         final PVerticalPanel v = Element.newPVerticalPanel();
         v.add(chip("Top"), chip("Middle"), chip("Bottom"));
-        p.add(labeled("VerticalPanel", v));
+        // endregion
+        p.add(labeled("VerticalPanel", v, Source.code(LayoutsPage.class, "verticalpanel")));
+        // region absolutepanel
         final PAbsolutePanel abs = Element.newPAbsolutePanel();
         abs.setHeight("120px");
         abs.setWidth("min(560px,100%)");
@@ -87,7 +94,9 @@ final class LayoutsPage {
             c.setStyleProperty("top", spot[2]);
             abs.add(c);
         }
-        p.add(labeled("AbsolutePanel", abs));
+        // endregion
+        p.add(labeled("AbsolutePanel", abs, Source.code(LayoutsPage.class, "absolutepanel")));
+        // region scrollpanel
         final PScrollPanel scroll = Element.newPScrollPanel();
         scroll.setHeight("110px");
         scroll.setWidth("320px");
@@ -95,45 +104,61 @@ final class LayoutsPage {
         final PFlowPanel lines = Element.newPFlowPanel();
         for (int i = 1; i <= 20; i++) lines.add(Element.newPLabel("Line " + i + " — scroll me"));
         scroll.setWidget(lines);
-        p.add(labeled("ScrollPanel", scroll));
+        // endregion
+        p.add(labeled("ScrollPanel", scroll, Source.code(LayoutsPage.class, "scrollpanel")));
+        // region simplepanel
         final PSimplePanel simple = Element.newPSimplePanel();
         simple.setWidget(chip("Exactly one child"));
-        p.add(labeled("SimplePanel", simple));
+        // endregion
+        p.add(labeled("SimplePanel", simple, Source.code(LayoutsPage.class, "simplepanel")));
+        // region focuspanel
         final PFocusPanel focus = Element.newPFocusPanel();
         final PLabel focusLbl = Element.newPLabel("Click me: the click is handled in Java");
         focusLbl.addStyleName("lay-chip");
         focus.setWidget(focusLbl);
         final int[] clicks = { 0 };
         focus.addClickHandler(e -> focusLbl.setText("Clicked " + ++clicks[0] + " time" + (clicks[0] > 1 ? "s" : "")));
-        p.add(labeled("FocusPanel", focus));
+        // endregion
+        p.add(labeled("FocusPanel", focus, Source.code(LayoutsPage.class, "focuspanel")));
 
         p.add(sectionTitle("Layout panels"));
+        // region docklayoutpanel
         final PDockLayoutPanel dock = Element.newPDockLayoutPanel(PUnit.PX);
         dock.addNorth(chip("North"), 34);
         dock.addSouth(chip("South"), 34);
         dock.addWest(chip("West"), 90);
         dock.add(chip("Center"));
-        p.add(labeled("DockLayoutPanel", sized(dock)));
+        // endregion
+        p.add(labeled("DockLayoutPanel", sized(dock), Source.code(LayoutsPage.class, "docklayoutpanel")));
+        // region splitlayoutpanel
         final PSplitLayoutPanel split = Element.newPSplitLayoutPanel();
         split.addWest(chip("Drag the splitter →"), 170);
         split.add(chip("Center"));
-        p.add(labeled("SplitLayoutPanel", sized(split)));
+        // endregion
+        p.add(labeled("SplitLayoutPanel", sized(split), Source.code(LayoutsPage.class, "splitlayoutpanel")));
+        // region stacklayoutpanel
         final PStackLayoutPanel stack = Element.newPStackLayoutPanel(PUnit.PX);
         stack.add(chip("Mail section"), "Mail", false, 32);
         stack.add(chip("Contacts section"), "Contacts", false, 32);
         stack.add(chip("Tasks section"), "Tasks", false, 32);
-        p.add(labeled("StackLayoutPanel", sized(stack)));
+        // endregion
+        p.add(labeled("StackLayoutPanel", sized(stack), Source.code(LayoutsPage.class, "stacklayoutpanel")));
+        // region tablayoutpanel
         final PTabLayoutPanel tabs = Element.newPTabLayoutPanel();
         tabs.add(chip("First tab content"), "First");
         tabs.add(chip("Second tab content"), "Second");
         tabs.add(chip("Third tab content"), "Third");
         tabs.selectTab(0);
-        p.add(labeled("TabLayoutPanel", sized(tabs)));
+        // endregion
+        p.add(labeled("TabLayoutPanel", sized(tabs), Source.code(LayoutsPage.class, "tablayoutpanel")));
 
         p.add(sectionTitle("Disclosure / popups"));
+        // region disclosurepanel
         final PDisclosurePanel disclosure = Element.newPDisclosurePanel("Click to expand");
         disclosure.setContent(chip("Hidden content, sent once and toggled client-side"));
-        p.add(labeled("DisclosurePanel", disclosure));
+        // endregion
+        p.add(labeled("DisclosurePanel", disclosure, Source.code(LayoutsPage.class, "disclosurepanel")));
+        // region dialogbox
         final PButton openDialog = Element.newPButton("Open dialog");
         openDialog.addClickHandler(e -> {
             final PDialogBox dialog = Element.newPDialogBox(true);
@@ -149,7 +174,9 @@ final class LayoutsPage {
             PWindow.getMain().add(dialog); // created when attached to its window, then centred
             dialog.center();
         });
-        p.add(labeled("DialogBox", openDialog));
+        // endregion
+        p.add(labeled("DialogBox", openDialog, Source.code(LayoutsPage.class, "dialogbox")));
+        // region decoratedpopuppanel
         final PButton openPopup = Element.newPButton("Show popup");
         openPopup.addClickHandler(e -> {
             final com.ponysdk.core.ui.basic.PDecoratedPopupPanel popup = Element.newPDecoratedPopupPanel(true);
@@ -157,7 +184,8 @@ final class LayoutsPage {
             PWindow.getMain().add(popup);
             popup.center();
         });
-        p.add(labeled("DecoratedPopupPanel", openPopup));
+        // endregion
+        p.add(labeled("DecoratedPopupPanel", openPopup, Source.code(LayoutsPage.class, "decoratedpopuppanel")));
 
         p.add(sectionTitle("Visibility handler"));
         testVisibilityHandler(p, schedulers);

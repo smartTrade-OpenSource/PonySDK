@@ -110,11 +110,13 @@ final class EmbeddedTicket {
         ticket.add(head, prices, amount, last, origin, full, popOut);
         PWindow.getMain().add(ticket);
 
+        // region host: the element's attributes in, then each change; the host's events in
         setInstrument(host.getAttribute("instrument"));
         setQuantity(host.getAttribute("quantity"));
         host.addAttributeListener("instrument", this::setInstrument);
         host.addAttributeListener("quantity", this::setQuantity);
         host.addEventListener("reset", detail -> setQuantity(host.getAttribute("quantity")));
+        // endregion
 
         buy.addClickHandler(event -> trade("BUY", ask));
         sell.addClickHandler(event -> confirmSell());
@@ -224,6 +226,7 @@ final class EmbeddedTicket {
             return;
         }
         final String time = LocalTime.now().format(TIME);
+        // region trade: an event out, to the host page
         host.dispatchEvent("trade", Json.createObjectBuilder()
             .add("instrument", instrument)
             .add("side", side)
@@ -231,6 +234,7 @@ final class EmbeddedTicket {
             .add("price", Double.parseDouble(price(price)))
             .add("time", time)
             .build());
+        // endregion
         last.setText(time + " · " + side + " " + amount + " " + instrument + " at " + price(price));
     }
 }

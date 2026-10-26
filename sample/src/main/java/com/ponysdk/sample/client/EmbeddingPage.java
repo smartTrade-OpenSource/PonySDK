@@ -96,12 +96,9 @@ final class EmbeddingPage {
               ticket.setAttribute('instrument', 'USDJPY');                      // attributes in
               ticket.dispatchEvent(new CustomEvent('reset'));                   // events in
             </script>""")));
-        page.add(codeSnippet("The application", "Java", escape("""
-            final PHost host = PHost.get(); // null when the application runs as a page
-            label.setText(host.getAttribute("instrument"));
-            host.addAttributeListener("instrument", label::setText);
-            host.addEventListener("reset", detail -> quantity.setText("1000000"));
-            host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build());""")));
+        page.add(codeSnippet("The application: EmbeddedTicket.java, the element's attributes and events in", "Java",
+            Source.code(EmbeddedTicket.class, "host")));
+        page.add(codeSnippet("The application: a trade, an event out", "Java", Source.code(EmbeddedTicket.class, "trade")));
         return page;
     }
 

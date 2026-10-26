@@ -50,7 +50,7 @@ class MyCounter extends HTMLElement {
         this.innerHTML =
             '<div style="display:inline-flex;align-items:center;gap:10px;padding:12px 16px;' +
             'border:2px solid var(--accent, #4a90d9);border-radius:8px;background:var(--accent-soft, #f0f6ff);font-family:inherit;">' +
-                '<span style="font-weight:600;color:#555;">' + this._label + ':</span>' +
+                '<span style="font-weight:600;color:var(--text-2, #555);">' + this._label + ':</span>' +
                 '<span style="font-size:28px;font-weight:bold;color:var(--accent, #4a90d9);min-width:50px;text-align:center;">' +
                     this._count + '</span>' +
                 '<button style="padding:6px 14px;border:none;border-radius:4px;background:var(--accent, #4a90d9);' +

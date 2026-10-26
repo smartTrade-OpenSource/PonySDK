@@ -68,6 +68,7 @@ final class DataGridPage {
     }
 
     static void buildDataGridInto(final PFlowPanel container) {
+        // region datagrid
         final DefaultDataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
         simpleGridView.setRefreshOnColumnVisibilityChanged(true);
 
@@ -103,7 +104,7 @@ final class DataGridPage {
             @Override public IsPWidget createLoadingDataWidget() {
                 final PComplexPanel div = Element.newDiv();
                 div.setWidth("100%"); div.setHeight("100%");
-                div.setStyleProperty("background-color", "rgba(255,255,255,.7)");
+                div.setStyleProperty("background-color", "var(--overlay)");
                 return div;
             }
             @Override public void onCreateColumnResizer(final IsPWidget r) {}
@@ -185,6 +186,8 @@ final class DataGridPage {
             }
         });
         container.add(loadMoreButton);
+        // endregion
+        container.add(codeToggle("this grid", Source.code(DataGridPage.class, "datagrid")));
     }
 
     static class MyRow {

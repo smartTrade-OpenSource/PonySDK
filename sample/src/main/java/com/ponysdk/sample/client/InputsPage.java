@@ -66,175 +66,184 @@ final class InputsPage {
     static PFlowPanel build(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
         pageTitle(p, "Inputs",
-            "Each control below is live. Interact with it and watch what the server receives — then flip to Code to see the exact Java behind it. No JavaScript, anywhere.");
+            "Each control below is live. Interact with it and watch what the server receives, then open Code: it shows "
+                + "the lines of this page's source that built it. No JavaScript, anywhere.");
 
-        p.add(sectionTitle("Interactive — try it, then read the code"));
+        p.add(sectionTitle("Interactive: try it, then read the code"));
 
-        // 1) TextBox — the value is read by a server-side handler
-        final PTextBox tb = Element.newPTextBox();
-        final PElement tbEcho = echoIdle("server: waiting for input… (type, then press Enter)");
-        tb.addValueChangeHandler(e -> echoSet(tbEcho, "server received → \"" + e.getData() + "\""));
+        // region textbox
+        final PTextBox box = Element.newPTextBox();
+        final PElement boxEcho = echoIdle("server: waiting for input… (type, then press Enter)");
+        // fires when the value changes: Enter or leaving the field
+        box.addValueChangeHandler(e -> echoSet(boxEcho, "server received → \"" + e.getData() + "\""));
+        // endregion
         p.add(exampleCard("PTextBox",
             "A text field whose value is read by a Java handler the moment it changes (Enter or blur).",
-            previewWithEcho(tb, tbEcho), snippet_exTextBox(), costSpec("PTextBox")));
+            previewWithEcho(box, boxEcho), Source.code(InputsPage.class, "textbox"), costSpec("PTextBox")));
 
-        // 2) Button — every click is a server-side lambda
-        final PButton btn = Element.newPButton("Click me");
+        // region button
+        final PButton button = Element.newPButton("Click me");
         final int[] clicks = { 0 };
-        final PElement btnEcho = echoIdle("server: not clicked yet");
-        btn.addClickHandler(e -> echoSet(btnEcho, "server handled click #" + (++clicks[0]) + " (pure Java lambda)"));
+        final PElement buttonEcho = echoIdle("server: not clicked yet");
+        // every click is a Java lambda, run on the server
+        button.addClickHandler(e -> echoSet(buttonEcho, "server handled click #" + (++clicks[0]) + " (pure Java lambda)"));
+        // endregion
         p.add(exampleCard("PButton",
             "Every click invokes a Java lambda on the JVM. Only a tiny binary delta crosses the wire.",
-            previewWithEcho(btn, btnEcho), snippet_exButton(), costSpec("PButton")));
+            previewWithEcho(button, buttonEcho), Source.code(InputsPage.class, "button"), costSpec("PButton")));
 
-        // 3) CheckBox — state lives on the server
-        final PCheckBox cb = Element.newPCheckBox("Enable feature");
-        final PElement cbEcho = echoIdle("server: checked = false");
-        cb.addValueChangeHandler(e -> echoSet(cbEcho, "server: checked = " + e.getData()));
+        // region checkbox
+        final PCheckBox checkBox = Element.newPCheckBox("Enable feature");
+        final PElement checkEcho = echoIdle("server: checked = false");
+        // the state lives on the server
+        checkBox.addValueChangeHandler(e -> echoSet(checkEcho, "server: checked = " + e.getData()));
+        // endregion
         p.add(exampleCard("PCheckBox",
             "The checked state lives on the server. The handler fires the instant the box toggles.",
-            previewWithEcho(cb, cbEcho), snippet_exCheckBox(), costSpec("PCheckBox")));
+            previewWithEcho(checkBox, checkEcho), Source.code(InputsPage.class, "checkbox"), costSpec("PCheckBox")));
 
-        // 4) RadioButton group — mutually-exclusive selection
+        // region radio
         final PFlowPanel radios = Element.newPFlowPanel();
-        radios.setStyleProperty("display", "flex");
-        radios.setStyleProperty("gap", "16px");
+        radios.addStyleName("pony-inline");
         final PRadioButtonGroup group = Element.newPRadioButtonGroup("size");
-        final PElement rbEcho = echoIdle("server: no selection");
-        for (final String opt : List.of("Small", "Medium", "Large")) {
-            final PRadioButton rb = Element.newPRadioButton(opt);
-            group.addRadioButton(rb);
-            rb.addValueChangeHandler(e -> {
-                if (Boolean.TRUE.equals(e.getData())) echoSet(rbEcho, "server: selected = " + opt);
+        final PElement radioEcho = echoIdle("server: no selection");
+        for (final String option : List.of("Small", "Medium", "Large")) {
+            final PRadioButton radio = Element.newPRadioButton(option);
+            group.addRadioButton(radio); // one selected at a time
+            radio.addValueChangeHandler(e -> {
+                if (Boolean.TRUE.equals(e.getData())) echoSet(radioEcho, "server: selected = " + option);
             });
-            radios.add(rb);
+            radios.add(radio);
         }
+        // endregion
         p.add(exampleCard("PRadioButton (group)",
             "Grouped radios share a name; selecting one clears the others and the server learns the choice.",
-            previewWithEcho(radios, rbEcho), snippet_exRadio(), costSpec("PRadioButton")));
+            previewWithEcho(radios, radioEcho), Source.code(InputsPage.class, "radio"), costSpec("PRadioButton")));
 
-        // ── The long tail, kept compact for completeness ───────────────────────
+        // ── The long tail: each row opens its code ───────────────────────────────
         p.add(sectionTitle("More input widgets"));
-        p.add(labeled("TextArea", Element.newPTextArea()));
-        p.add(labeled("Password", Element.newPPasswordTextBox("Password")));
-        p.add(labeled("RichText editor", buildRichText()));
+        // region textarea
+        final PWidget textArea = Element.newPTextArea();
+        // endregion
+        p.add(labeled("TextArea", textArea, Source.code(InputsPage.class, "textarea")));
+        // region password
+        final PWidget password = Element.newPPasswordTextBox("Password");
+        // endregion
+        p.add(labeled("Password", password, Source.code(InputsPage.class, "password")));
+        p.add(labeled("RichText editor", buildRichText(), Source.code(InputsPage.class, "richtext")));
+        // region pushbutton
         final PPushButton push = Element.newPPushButton(Element.newPImage());
         push.setText("Push me");
-        p.add(labeled("PushButton", push));
+        // endregion
+        p.add(labeled("PushButton", push, Source.code(InputsPage.class, "pushbutton")));
 
         p.add(sectionTitle("Date & Time"));
-        p.add(labeled("DateBox dd/MM/yyyy", Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy"))));
-        p.add(labeled("DateBox with picker", Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd"))));
-        p.add(labeled("DateBox with time", buildDateBoxWithLog()));
-        p.add(labeled("DatePicker", Element.newPDatePicker()));
-        p.add(labeled("DateBox (reset)", createDateBox()));
+        // region datebox
+        final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy"));
+        // endregion
+        p.add(labeled("DateBox dd/MM/yyyy", dateBox, Source.code(InputsPage.class, "datebox")));
+        // region dateboxpicker
+        final PDateBox pickerBox = Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd"));
+        // endregion
+        p.add(labeled("DateBox with picker", pickerBox, Source.code(InputsPage.class, "dateboxpicker")));
+        p.add(labeled("DateBox with time", buildDateBoxWithLog(), Source.code(InputsPage.class, "dateboxtime")));
+        // region datepicker
+        final PDatePicker datePicker = Element.newPDatePicker();
+        // endregion
+        p.add(labeled("DatePicker", datePicker, Source.code(InputsPage.class, "datepicker")));
+        p.add(labeled("DateBox (reset)", createDateBox(), Source.code(InputsPage.class, "dateboxreset")));
 
         p.add(sectionTitle("Selection"));
-        p.add(labeled("ListBox (multi)", createListBox()));
-        p.add(labeled("TwinListBox", new PTwinListBox<>()));
-        p.add(labeled("MenuBar", createMenu()));
+        p.add(labeled("ListBox (multiple)", createListBox(), Source.code(InputsPage.class, "listbox")));
+        p.add(labeled("TwinListBox", createTwinListBox(), Source.code(InputsPage.class, "twinlistbox")));
+        p.add(labeled("MenuBar", createMenu(), Source.code(InputsPage.class, "menubar")));
 
         p.add(sectionTitle("Form fields"));
-        p.add(labeled("String FormField", new StringTextBoxFormField("String")));
-        p.add(labeled("Color FormField", new ColorInputFormField("Color")));
+        // region formfields
+        final StringTextBoxFormField text = new StringTextBoxFormField("String");
+        final ColorInputFormField color = new ColorInputFormField("Color");
+        // endregion
+        p.add(labeled("String FormField", text, Source.code(InputsPage.class, "formfields")));
+        p.add(labeled("Color FormField", color, Source.code(InputsPage.class, "formfields")));
 
         p.add(sectionTitle("File"));
-        p.add(labeled("FileUpload", MiscPage.createPFileUpload()));
+        p.add(labeled("FileUpload", MiscPage.createPFileUpload(), Source.code(MiscPage.class, "fileupload")));
 
         return p;
-    }
-
-    static String snippet_exTextBox() {
-        return ln(ty("PTextBox") + " box = " + ty("Element") + "." + mt("newPTextBox") + "();") +
-            ln(cm("fires when the value changes (Enter / blur)")) +
-            ln("box." + mt("addValueChangeHandler") + "(e ->") +
-            ln("    echo." + mt("setText") + "(" + st("server received → ") + " + e." + mt("getData") + "()));") +
-            ln(ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(box);");
-    }
-
-    static String snippet_exButton() {
-        return ln(ty("PButton") + " btn = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
-            ln(ty("int") + "[] clicks = {" + nu("0") + "};") +
-            ln(cm("every click is a Java lambda — runs on the JVM")) +
-            ln("btn." + mt("addClickHandler") + "(e ->") +
-            ln("    echo." + mt("setText") + "(" + st("handled click #") + " + (++clicks[" + nu("0") + "])));");
-    }
-
-    static String snippet_exCheckBox() {
-        return ln(ty("PCheckBox") + " cb = " + ty("Element") + "." + mt("newPCheckBox") + "(" + st("Enable feature") + ");") +
-            ln(cm("state lives on the server, not in the browser")) +
-            ln("cb." + mt("addValueChangeHandler") + "(e ->") +
-            ln("    echo." + mt("setText") + "(" + st("checked = ") + " + e." + mt("getData") + "()));");
-    }
-
-    static String snippet_exRadio() {
-        return ln(ty("PRadioButtonGroup") + " group = " + ty("Element") + "." + mt("newPRadioButtonGroup") + "(" + st("size") + ");") +
-            ln(kw("for") + " (" + ty("String") + " opt : " + ty("List") + "." + mt("of") + "(" + st("Small") + ", " + st("Medium") + ", " + st("Large") + ")) {") +
-            ln("  " + ty("PRadioButton") + " rb = " + ty("Element") + "." + mt("newPRadioButton") + "(opt);") +
-            ln("  group." + mt("addRadioButton") + "(rb);  " + cm("mutual exclusion")) +
-            ln("  rb." + mt("addValueChangeHandler") + "(e -> {") +
-            ln("    " + kw("if") + " (" + ty("Boolean") + ".TRUE." + mt("equals") + "(e." + mt("getData") + "()))") +
-            ln("      echo." + mt("setText") + "(" + st("selected = ") + " + opt);") +
-            ln("  });") +
-            ln("  row." + mt("add") + "(rb);") +
-            ln("}");
     }
 
     static PWidget buildRichText() {
-        final PFlowPanel p = Element.newPFlowPanel();
-        final PRichTextArea rta = Element.newPRichTextArea();
+        // region richtext
+        final PFlowPanel editor = Element.newPFlowPanel();
+        final PRichTextArea area = Element.newPRichTextArea();
         // the toolbar links to the area: the area is created first, the toolbar is still shown above it
-        p.setStyleProperty("display", "flex");
-        p.setStyleProperty("flex-direction", "column-reverse");
-        p.add(rta);
-        p.add(Element.newPRichTextToolbar(rta));
-        return p;
+        editor.setStyleProperty("display", "flex");
+        editor.setStyleProperty("flex-direction", "column-reverse");
+        editor.add(area);
+        editor.add(Element.newPRichTextToolbar(area));
+        // endregion
+        return editor;
     }
 
     static PDateBox buildDateBoxWithLog() {
-        final PDateBox db = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"), true);
-        db.addValueChangeHandler(e -> log.debug("DateBox value: {}", e.getData()));
-        return db;
+        // region dateboxtime
+        final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"), true);
+        dateBox.addValueChangeHandler(e -> log.debug("DateBox value: {}", e.getData()));
+        // endregion
+        return dateBox;
     }
 
     static final PListBox createListBox() {
-        final PListBox pListBox = Element.newPListBox(true);
-        pListBox.addItem("A");
-        pListBox.addItem("B");
-        pListBox.insertItem("C", 1);
-        pListBox.addItemsInGroup("sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
-        return pListBox;
+        // region listbox
+        final PListBox listBox = Element.newPListBox();
+        listBox.setMultipleSelect(true); // Ctrl or Shift + click selects several
+        listBox.addItem("A");
+        listBox.addItem("B");
+        listBox.insertItem("C", 1); // at index 1: A, C, B
+        listBox.addItemsInGroup("Sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
+        // endregion
+        return listBox;
+    }
+
+    static final PTwinListBox<String> createTwinListBox() {
+        // region twinlistbox
+        final PTwinListBox<String> twin = new PTwinListBox<>("Available", "Selected");
+        for (final String currency : List.of("EUR", "USD", "GBP", "JPY", "CHF")) twin.getLeftListBox().addItem(currency);
+        // endregion
+        return twin;
     }
 
     static final PMenuBar createMenu() {
-        final PMenuBar pMenuBar = Element.newPMenuBar(true);
-        pMenuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
-        pMenuBar.addItem(Element.newPMenuItem("Menu 2", true, Element.newPMenuBar()));
-        pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> log.debug("Menu click")));
-        pMenuBar.addSeparator();
-        return pMenuBar;
+        // region menubar
+        final PMenuBar menuBar = Element.newPMenuBar(true);
+        menuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
+        menuBar.addItem(Element.newPMenuItem("Menu 2", true, Element.newPMenuBar()));
+        menuBar.addItem(Element.newPMenuItem("Menu 3", () -> log.debug("Menu click")));
+        menuBar.addSeparator();
+        // endregion
+        return menuBar;
     }
 
     static final PFlowPanel createDateBox() {
+        // region dateboxreset
         final PFlowPanel flowPanel = Element.newPFlowPanel();
-
         final PDatePicker datePicker = Element.newPDatePicker();
-        final Date a = new Date();
-
-        datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
-        datePicker.addStyleToDates("toto", List.of(new Date()));
-
-        final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
-        //dateBox.setValue(new Date(0));
-        flowPanel.add(dateBox);
+        final Date today = new Date();
+        final List<Date> closed = List.of(today, new Date(today.getYear(), today.getMonth(), 26)); // not selectable
+        datePicker.setTransientEnabledOnDates(false, closed);
+        datePicker.addStyleToDates("pony-date-today", List.of(today));
+        // the picker shows another month: its dates are set again
         datePicker.addShowRangeHandler(e -> {
-            datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
-            datePicker.addStyleToDates("toto", List.of(new Date()));
+            datePicker.setTransientEnabledOnDates(false, closed);
+            datePicker.addStyleToDates("pony-date-today", List.of(today));
         });
 
-        final PButton button = Element.newPButton("reset");
-        button.addClickHandler(event -> dateBox.setValue(null));
-        flowPanel.add(button);
+        final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
+        final PButton reset = Element.newPButton("Reset");
+        reset.addClickHandler(event -> dateBox.setValue(null));
+        flowPanel.add(dateBox);
+        flowPanel.add(reset);
+        // endregion
         return flowPanel;
     }
 }
