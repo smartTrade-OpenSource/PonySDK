@@ -41,6 +41,12 @@ export class Tree extends Widget {
         this.adopt(root);
     }
 
+    /** The server adds the root item to the tree: adopted at its creation, its element never shows. */
+    override add(reader: Reader, child: TerminalObject): void {
+        if (child instanceof TreeItem && child.isRoot) return;
+        super.add(reader, child);
+    }
+
     override remove(reader: Reader, child: TerminalObject): void {
         if (child instanceof Widget && child.parent instanceof TreeItem) child.parent.remove(reader, child);
     }

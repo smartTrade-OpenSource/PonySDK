@@ -47,3 +47,17 @@ test('the bootstrap page at index.html connects', async ({ page }) => {
   await expect(page.locator('.pony-tab').first()).toBeVisible({ timeout: 10000 });
   expect(sockets).toEqual([new URL('ws', BASE_URL).pathname]);
 });
+
+// The tree's invisible root item (PTree's TREE_ROOT) is added to the tree by the server: it must not show
+test('a tree shows its items only, not its root item', async ({ page }) => {
+  await page.goto(BASE_URL + '#data');
+  const tree = page.locator('.data-tree');
+  await expect(tree.getByText('Rates desk')).toBeVisible({ timeout: 10000 });
+  expect(await tree.evaluate(t => [...t.children].map(c => c.tagName))).toEqual(['UL']);
+  // a widget as an item's content sits on the item's row, as a text does
+  const rows = tree.locator('.pony-TreeItem-row');
+  const text = await rows.filter({ hasText: 'Bund 10Y' }).locator('.pony-TreeItem-content').boundingBox();
+  const widget = await rows.filter({ hasText: 'UST 10Y' }).locator('.pony-TreeItem-content').boundingBox();
+  expect(Math.abs(widget.x - text.x)).toBeLessThan(1);
+  expect(widget.height).toBeLessThan(text.height * 1.5);
+});

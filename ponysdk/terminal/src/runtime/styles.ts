@@ -24,7 +24,7 @@ const RULES = `
 :where(.pony-TreeItem-toggle){display:inline-block;width:1em;text-align:center;cursor:pointer}
 :where(.pony-TreeItem-toggle[data-state=closed])::before{content:"▸"}
 :where(.pony-TreeItem-toggle[data-state=open])::before{content:"▾"}
-:where(.pony-TreeItem-content){cursor:default}
+:where(.pony-TreeItem-content){cursor:default;display:inline-block}
 :where(.pony-SuggestPopup [role=option]){cursor:default;white-space:nowrap}
 :where(.pony-LayoutPanel,.pony-SimpleLayoutPanel,.pony-DockLayoutPanel,.pony-SplitLayoutPanel){position:relative;overflow:hidden}
 :where(.pony-RootLayoutPanel){position:absolute;inset:0;overflow:hidden}
