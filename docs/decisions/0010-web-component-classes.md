@@ -101,3 +101,18 @@ properties, descriptions and deprecations. Lit, Shoelace / Web Awesome, FAST, Sp
 - A library upgrade regenerates its classes: a removed property or event fails the application's compilation
   instead of failing in the browser.
 - The jar grows by the generator, one class read only by builds.
+
+## Outcome (2026-10-26)
+
+- `WebComponentGenerator` (`ponysdk/src/main/java/com/ponysdk/core/tools/`): 4 classes, 36.7 KB, 17.4 KB compressed in
+  the jar. `PWebComponent` gains the protected helpers the generated code calls: `jsonOf(String)`, `jsonOf(double)`,
+  `stringOf`, `numberOf`, `booleanOf`, `detailOf`.
+- Details the tables left open: a `readonly` field gives nothing (its getter would only ever return null); getters
+  return the boxed type (`Double getCount()`, `Boolean getAnimated()`), null until set; a parameter of another type is
+  passed as the string given.
+- `WebComponentGeneratorTest`: 14 tests, the generated sources compiled with `-Xlint:all -Werror`; the frames of 15
+  generated calls equal those of the hand-written ones. Each mutation of the Verification section fails 2, 2 and all
+  of them (the fixture's `title` field no longer compiles).
+- The sample: `sample/src/main/resources/script/custom-elements.json`, the task `:sample:webComponents`,
+  `WebComponentsPage` on `PMyCounter`, `PMyStats`, `PMyDashboard`, `PMyCard`; `webcomponents.spec.js` unchanged,
+  12/12 on Chrome, Firefox and WebKit.

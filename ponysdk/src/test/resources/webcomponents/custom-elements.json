@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "2.1.0",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/x-gauge.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "XGauge",
+          "customElement": true,
+          "tagName": "x-gauge",
+          "description": "A gauge. Its <b>needle</b> ends the comment */ not.",
+          "superclass": { "name": "XBase", "module": "src/x-base.js" },
+          "members": [
+            { "kind": "field", "name": "label", "type": { "text": "string" }, "attribute": "label" },
+            { "kind": "field", "name": "value", "type": { "text": "number" }, "description": "The value shown." },
+            { "kind": "field", "name": "max", "type": { "text": "number | undefined" } },
+            { "kind": "field", "name": "animated", "type": { "text": "boolean" } },
+            { "kind": "field", "name": "theme", "type": { "text": "'light' | 'dark' | 'high-contrast'" } },
+            { "kind": "field", "name": "ranges", "type": { "text": "Array<{ from: number; to: number }>" } },
+            { "kind": "field", "name": "title", "type": { "text": "string" } },
+            { "kind": "field", "name": "oldScale", "type": { "text": "number" }, "deprecated": "Use max." },
+            { "kind": "field", "name": "version", "type": { "text": "string" }, "readonly": true },
+            { "kind": "field", "name": "_cache", "privacy": "private" },
+            { "kind": "field", "name": "#secret" },
+            { "kind": "field", "name": "styles", "static": true },
+            { "kind": "field", "name": "locale", "type": { "text": "string" }, "inheritedFrom": { "name": "XBase", "module": "src/x-base.js" } },
+            { "kind": "method", "name": "reset" },
+            { "kind": "method", "name": "animateTo", "parameters": [
+              { "name": "value", "type": { "text": "number" } },
+              { "name": "easing", "type": { "text": "'linear' | 'ease-in'" }, "optional": true } ] },
+            { "kind": "method", "name": "default" },
+            { "kind": "method", "name": "measure", "return": { "type": { "text": "number" } } }
+          ],
+          "attributes": [
+            { "name": "label", "type": { "text": "string" }, "fieldName": "label" },
+            { "name": "aria-label", "type": { "text": "string" } },
+            { "name": "compact", "type": { "text": "boolean" } }
+          ],
+          "events": [
+            { "name": "value-changed", "type": { "text": "CustomEvent<{ value: number }>" }, "description": "Fired on a change." },
+            { "name": "ready" }
+          ],
+          "slots": [
+            { "name": "", "description": "The caption." },
+            { "name": "footer" }
+          ],
+          "cssProperties": [
+            { "name": "--needle-color" }
+          ]
+        },
+        { "kind": "class", "name": "XBase", "description": "Not an element." },
+        { "kind": "function", "name": "helper" }
+      ]
+    }
+  ]
+}

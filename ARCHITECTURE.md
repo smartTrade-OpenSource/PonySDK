@@ -1105,6 +1105,32 @@ String d = dataset.get();   // off-heap → ByteBuffer read → ephemeral String
 String s = stream.get();    // stateless → null (no cache)
 ```
 
+#### Typed classes from a Custom Elements Manifest
+
+A library's `custom-elements.json` describes its elements; `com.ponysdk.core.tools.WebComponentGenerator`, in the
+`ponysdk` jar, writes a `PWebComponent` subclass per element from it (ADR-0010): typed setters for fields, attributes
+and CSS custom properties, a listener per event, the methods, the named slots. Run it from the build:
+
+```groovy
+def webComponents = tasks.register('webComponents', JavaExec) {
+    classpath = configurations.runtimeClasspath
+    mainClass = 'com.ponysdk.core.tools.WebComponentGenerator'
+    args 'node_modules/my-library/custom-elements.json', 'com.example.wc', layout.buildDirectory.dir('generated/wc').get().asFile.path
+    outputs.dir(layout.buildDirectory.dir('generated/wc'))
+}
+sourceSets.main.java.srcDir(webComponents)
+```
+
+```java
+PMyCounter counter = new PMyCounter();
+counter.setCount(42);                                  // "42" on the wire, as property("count").set(42)
+counter.onCountChanged(detail -> label.setText(detail.toString()));
+counter.reset();
+```
+
+The generated class writes the same frames as the untyped calls; `sample/build.gradle` (task `webComponents`) is a
+working setup.
+
 #### 5-level protocol optimization
 
 Every `property("x").set(value)` call goes through up to 5 optimization levels:

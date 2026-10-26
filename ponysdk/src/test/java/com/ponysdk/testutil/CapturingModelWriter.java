@@ -94,6 +94,15 @@ public final class CapturingModelWriter extends ModelWriterForTest {
         return out;
     }
 
+    /** Every write as {@code MODEL=value}, an array value written by its elements. */
+    public List<String> frames() {
+        final List<String> out = new ArrayList<>();
+        for (final Object[] w : writes) {
+            out.add(w[0] + "=" + (w[1] instanceof Object[] array ? java.util.Arrays.deepToString(array) : w[1]));
+        }
+        return out;
+    }
+
     public List<ServerToClientModel> models() {
         final List<ServerToClientModel> out = new ArrayList<>();
         for (final Object[] w : writes) out.add((ServerToClientModel) w[0]);

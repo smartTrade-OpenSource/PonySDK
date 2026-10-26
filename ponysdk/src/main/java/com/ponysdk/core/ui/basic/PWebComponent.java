@@ -79,6 +79,7 @@ public class PWebComponent extends PComplexPanel {
     private static final Logger log = LoggerFactory.getLogger(PWebComponent.class);
 
     private static final String WC_EVENT_NAME_KEY = ClientToServerModel.WC_EVENT_NAME.toStringValue();
+    private static final String WC_EVENT_DETAIL_KEY = ClientToServerModel.WC_EVENT_DETAIL.toStringValue();
 
     // ---- Storage strategy for properties ----
 
@@ -490,6 +491,55 @@ public class PWebComponent extends PComplexPanel {
         try (final JsonReader reader = JSON.createReader(new StringReader(json))) {
             return reader.readObject();
         } catch (final Exception e) {
+            return null;
+        }
+    }
+
+    // ======== JSON values of the classes generated from a Custom Elements Manifest (ADR-0010) ========
+
+    /** A string as JSON text, quoted and escaped. */
+    protected static String jsonOf(final String value) {
+        return JSON.createValue(value).toString();
+    }
+
+    /** A number as JSON text, an integral value without a fraction: {@code 42}, not {@code 42.0}. */
+    protected static String jsonOf(final double value) {
+        return value == Math.rint(value) && Math.abs(value) < 1e15 ? Long.toString((long) value) : Double.toString(value);
+    }
+
+    /** The string a JSON text holds, null when it holds no string. */
+    protected static String stringOf(final String json) {
+        return readJson(json) instanceof JsonString string ? string.getString() : null;
+    }
+
+    /** The number a JSON text holds, null when it holds no number. */
+    protected static Double numberOf(final String json) {
+        return readJson(json) instanceof JsonNumber number ? number.doubleValue() : null;
+    }
+
+    /** The boolean a JSON text holds, null when it holds no boolean. */
+    protected static Boolean booleanOf(final String json) {
+        final JsonValue value = readJson(json);
+        if (value == null) return null;
+        return switch (value.getValueType()) {
+            case TRUE -> Boolean.TRUE;
+            case FALSE -> Boolean.FALSE;
+            default -> null;
+        };
+    }
+
+    /** The detail of a custom event the terminal sent, {@link JsonValue#NULL} when it has none. */
+    protected static JsonValue detailOf(final JsonObject event) {
+        if (!(event.get(WC_EVENT_DETAIL_KEY) instanceof JsonString detail)) return JsonValue.NULL;
+        final JsonValue value = readJson(detail.getString());
+        return value != null ? value : JSON.createValue(detail.getString()); // not JSON: the terminal's String(detail)
+    }
+
+    private static JsonValue readJson(final String json) {
+        if (json == null) return null;
+        try (final JsonReader reader = JSON.createReader(new StringReader(json))) {
+            return reader.readValue();
+        } catch (final JsonException e) {
             return null;
         }
     }
