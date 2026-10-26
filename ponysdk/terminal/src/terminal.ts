@@ -56,6 +56,7 @@ export class Terminal implements Session, Host {
     private readonly mount: Mount;
     private readonly history: History;
     private started = false;
+    private reloading = false;
     private socket: Socket | undefined;
     private reconnection: Reconnection | undefined;
     private parent: ParentTerminal | undefined;
@@ -184,7 +185,10 @@ export class Terminal implements Session, Host {
                 this.loadChunksLater();
             },
             closed: code => {
-                if (code !== 1000) this.reconnection?.socketClosed();
+                // A normal close of the socket that would resume the context: the server could not resume it.
+                // Firefox may report that close alone, without the open and the CREATE_CONTEXT before it
+                if (code === 1000 && this.reconnection?.reconnecting) this.contextLost();
+                else if (code !== 1000) this.reconnection?.socketClosed();
             },
         };
     }
@@ -208,8 +212,7 @@ export class Terminal implements Session, Host {
         if (this.reconnection?.reconnecting) {
             // The server could not resume this context (restarted, or the window is over) and started a new one,
             // whose page follows on this socket: reload, instead of stacking it under the old page
-            this.closeSocket('context lost, reloading');
-            this.destroy();
+            this.contextLost();
             return false;
         }
         this.contextId = id;
@@ -273,6 +276,14 @@ export class Terminal implements Session, Host {
         const url = `${this.hostPageBaseURL}${MappingPath.STREAM}?${C.UI_CONTEXT_ID}=${this.contextId}`
             + `&${C.STREAM_REQUEST_ID}=${requestId}`;
         return this.streamKey === null ? url : `${url}&${C.STREAM_KEY}=${this.streamKey}`;
+    }
+
+    /** The context is gone on the server: the page reloads, once. */
+    private contextLost(): void {
+        if (this.reloading) return;
+        this.reloading = true;
+        this.closeSocket('context lost, reloading');
+        this.destroy();
     }
 
     private destroy(): void {

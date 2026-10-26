@@ -55,6 +55,38 @@ test('a context the server no longer has: the page reloads instead of stacking a
   expect(new URL(page.url()).hash).toBe('#inputs');
 });
 
+/**
+ * Init script: as forgetContextOnReconnect, and the page sees the reconnection's close alone, not its open nor its
+ * message. Firefox does that now and then when the server closes the socket as it opens.
+ */
+function forgetContextOnReconnectCloseOnly() {
+  const Native = window.WebSocket;
+  const Patched = function (url, protocols) {
+    const reconnection = /[?&]Y=\d+/.test(String(url));
+    const socket = new Native(String(url).replace(/([?&]Y=)\d+/, '$1999999999'), protocols);
+    if (reconnection) {
+      for (const handler of ['onopen', 'onmessage']) Object.defineProperty(socket, handler, { set() {}, get() { return null; } });
+    }
+    return socket;
+  };
+  Patched.prototype = Native.prototype;
+  Object.assign(Patched, { CONNECTING: 0, OPEN: 1, CLOSING: 2, CLOSED: 3 });
+  window.WebSocket = Patched;
+}
+
+test('a context the server no longer has, told by the close alone: the page reloads', async ({ page }) => {
+  await page.addInitScript(forgetContextOnReconnectCloseOnly);
+  const sockets = await routeSockets(page);
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  const clickMe = page.getByRole('button', { name: 'Click me' });
+  await expect(clickMe).toBeVisible({ timeout: 10000 });
+
+  const reloaded = page.waitForEvent('load', { timeout: 15000 });
+  await sockets.cut();
+  await reloaded;
+  await expect(clickMe).toHaveCount(1, { timeout: 10000 });
+});
+
 // Read on the server's side, through the Reconnection page's view of its client, not through routeWebSocket: the
 // route replaces the page's socket, so it cannot see what the browser itself sends, and Playwright 1.64 reports no
 // close code on Chromium for a page that navigates away. Chromium and WebKit close with the terminal's 4002, Firefox
