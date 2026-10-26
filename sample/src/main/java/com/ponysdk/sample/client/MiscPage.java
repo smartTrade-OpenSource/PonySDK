@@ -26,19 +26,12 @@ package com.ponysdk.sample.client;
 import static com.ponysdk.sample.client.Ui.*;
 import static com.ponysdk.sample.client.Costs.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
@@ -140,43 +133,27 @@ final class MiscPage {
         final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("file");
         panel.add(fileUpload);
-        fileUpload.addChangeHandler(event -> {
-            final PFileUpload pFileUpload = (PFileUpload) event.getSource();
-            log.debug("File name: {}", pFileUpload.getFileName());
-            log.debug("File size: {} bytes", pFileUpload.getFileSize());
-        });
+        final PLabel received = Element.newPLabel("server: no file yet");
+        received.addStyleName("pony-ex-echo");
+        final String[] result = { "" };
         fileUpload.addStreamHandler((request, response, context) -> {
             try {
-                final List<FileItem> items = new JakartaServletFileUpload(DiskFileItemFactory.builder().get()).parseRequest(request);
-                for (final FileItem item : items) {
-                    if (!item.isFormField()) readFileItem(item);
+                final JakartaServletFileUpload<?, ?> parser = new JakartaServletFileUpload<>(DiskFileItemFactory.builder().get());
+                for (final FileItem<?> item : parser.parseRequest(request)) {
+                    // The name is the browser's: a label, never a path on the server
+                    if (!item.isFormField()) result[0] = FilenameUtils.getName(item.getName()) + ", " + item.getSize() + " bytes";
                 }
-            } catch (final Exception e) {
-                e.printStackTrace();
+            } catch (final IOException e) {
+                log.warn("Upload failed", e);
+                result[0] = "failed";
             }
         });
+        fileUpload.addSubmitCompleteHandler(() -> received.setText("server: received " + result[0]));
         final PButton button = Element.newPButton("Submit");
         button.addClickHandler(event -> fileUpload.submit());
         panel.add(button);
+        panel.add(received);
         // endregion
         return panel;
-    }
-
-    static void readFileItem(final FileItem<?> item) throws IOException, FileNotFoundException {
-        // Store the uploaded file on the server (don't forget to remove)
-        final String fileName = FilenameUtils.getName(item.getName());
-        final InputStream fileContent = item.getInputStream();
-        final File uploadedFile = File.createTempFile(fileName, "fileUpload");
-        IOUtils.copy(fileContent, new FileOutputStream(uploadedFile));
-        uploadedFile.deleteOnExit();
-
-        // Read directly the input stream
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
-        final StringBuilder value = new StringBuilder();
-        final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
-            value.append(buffer, 0, length);
-        }
-        log.debug("File content: {}", value);
     }
 }
