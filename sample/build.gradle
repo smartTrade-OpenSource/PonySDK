@@ -85,6 +85,13 @@ task runShowcase(type: JavaExec) {
     ]
 }
 
+// The quick start of README.md and ARCHITECTURE.md: http://localhost:8080/hello/
+task runQuickStart(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.ponysdk.sample.quickstart.HelloWorldMain'
+    jvmArgs = ['--enable-native-access=ALL-UNNAMED', '-Dlog4j.configurationFile=etc/log4j2.xml']
+}
+
 // FlexLayout demo — activates the 'flexlayout' Spring profile (see etc/server_application.xml).
 // Used by the Playwright E2E suite (sample/tests/flexlayout.spec.js) on http://localhost:8081/sample/.
 task runFlexLayoutDemo(type: JavaExec) {
