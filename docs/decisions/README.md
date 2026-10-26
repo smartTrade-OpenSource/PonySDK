@@ -18,3 +18,4 @@ what was measured once it was built. They are written for the people who change 
 | [0010](0010-web-component-classes.md) | Typed Java classes for web components, generated from their Custom Elements Manifest | Accepted |
 | [0011](0011-one-way-to-listen.md) | One way to listen to a custom event, and the traps of the web component API closed | Accepted |
 | [0012](0012-api-surface.md) | The public API reduced to what an application calls, and PCookies made consistent | Accepted |
+| [0013](0013-conflated-streams.md) | A stream of values bound to a context, the latest value per key at each flush | Accepted |
