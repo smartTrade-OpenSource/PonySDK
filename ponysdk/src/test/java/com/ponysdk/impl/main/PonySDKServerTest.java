@@ -71,6 +71,18 @@ public class PonySDKServerTest {
         ErrorHandler errorHandler() {
             return createErrorHandler();
         }
+
+        void httpsConnector() {
+            createHttpsConnector();
+        }
+    }
+
+    @Test
+    public void httpsWithoutAKeyStoreSaysWhatToSet() {
+        // HTTPS is on by default: a server started without a key store must say how to fix it, not throw an NPE
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> new TestServer().httpsConnector());
+        assertEquals("HTTPS is on (setUseSSL) and no key store is set: call setSslKeyStoreFile, or setUseSSL(false) "
+                + "for plain HTTP", e.getMessage());
     }
 
     private static org.eclipse.jetty.ee11.servlet.ServletContextHandler webApp(final PonySDKServer server) {

@@ -129,6 +129,10 @@ public class PonySDKServer {
 
     protected ServerConnector createHttpsConnector() {
         // HTTPS
+        if (sslKeyStoreFile == null) {
+            throw new IllegalStateException("HTTPS is on (setUseSSL) and no key store is set: call setSslKeyStoreFile, "
+                    + "or setUseSSL(false) for plain HTTP");
+        }
         URL keyStore = getClass().getResource(sslKeyStoreFile);
         if (keyStore == null) keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
 
