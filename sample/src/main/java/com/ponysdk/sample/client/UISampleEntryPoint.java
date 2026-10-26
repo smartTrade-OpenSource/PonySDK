@@ -160,7 +160,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
-            {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -265,6 +265,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "FlexLayout" -> FlexLayoutPage.build();
             case "Misc" -> MiscPage.build(schedulers);
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
+            case "Streams" -> StreamsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
             case "Binary protocol" -> BinaryProtocolPage.build(schedulers);
             case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);

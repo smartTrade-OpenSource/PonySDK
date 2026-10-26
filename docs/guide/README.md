@@ -10,6 +10,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Web components](web-components.md) | Driving custom elements from Java; typed classes from a Custom Elements Manifest |
 | [Custom JavaScript](addons.md) | `PAddOn`: a JavaScript library behind a Java class |
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |
+| [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
 | [Reconnection](reconnection.md) | Keeping a session through a network cut |
 | [Security](security.md) | What is protected by default, and the settings |

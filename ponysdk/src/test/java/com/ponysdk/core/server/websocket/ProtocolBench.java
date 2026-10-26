@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.Conflator;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -251,6 +253,56 @@ public final class ProtocolBench {
                 (double) e.getValue().getData() / ops));
     }
 
+    /**
+     * ADR-0013: quotes of 100 instruments from a feed thread, between two flushes the client takes; per quote. An
+     * {@code execute} per quote, or a {@link Conflator} drained once after them (on this thread, to be measured).
+     */
+    private static void stream(final int protocolVersion, final int quotes, final boolean conflated) {
+        final String name = "stream: " + quotes + " quotes/flush, " + (conflated ? "conflated" : "execute each");
+        if (!name.startsWith(only)) return;
+        final int instruments = 100;
+        final int warmup = 200 * repeat, ops = 300 * repeat;
+        Result result = null;
+        for (final int rounds : new int[] {warmup, ops}) {
+            final Bench b = new Bench(protocolVersion);
+            final List<PLabel> cells = new ArrayList<>(instruments);
+            b.ctx.execute(() -> {
+                for (int c = 0; c < instruments; c++) {
+                    final PLabel l = Element.newPLabel("1.00000");
+                    b.root.add(l);
+                    cells.add(l);
+                }
+            });
+            b.capture.clear();
+            final ArrayDeque<Runnable> drains = new ArrayDeque<>();
+            final Conflator<Integer, String> conflator = Conflator.<Integer, String> builder(b.ctx,
+                (instrument, price) -> cells.get(instrument).setText(price)).executor(drains::add).build();
+            final Random rnd = new Random(11);
+            final String[] prices = new String[4_096];
+            for (int p = 0; p < prices.length; p++) prices[p] = "1." + (10_000 + rnd.nextInt(90_000));
+            final long cpu0 = THREADS.getCurrentThreadCpuTime();
+            final long alloc0 = THREADS.getCurrentThreadAllocatedBytes();
+            for (int op = 0; op < rounds; op++) {
+                for (int q = 0; q < quotes; q++) {
+                    final int instrument = rnd.nextInt(instruments);
+                    final String price = prices[rnd.nextInt(prices.length)];
+                    if (conflated) conflator.offer(instrument, price);
+                    else b.ctx.execute(() -> cells.get(instrument).setText(price));
+                }
+                Runnable drain;
+                while ((drain = drains.poll()) != null) drain.run();
+            }
+            final long cpu = THREADS.getCurrentThreadCpuTime() - cpu0;
+            final long alloc = THREADS.getCurrentThreadAllocatedBytes() - alloc0;
+            final int perQuote = rounds * quotes;
+            result = new Result(name, perQuote, b.capture.size, b.capture.wire(), cpu, alloc);
+            if (rounds == ops) System.out.printf("   frames per quote %.3f, applied %d of %d%n", (double) b.capture.frames / perQuote,
+                conflated ? conflator.getApplied() : perQuote, perQuote);
+            b.ctx.destroy();
+        }
+        result.print();
+    }
+
     /** Retained heap per row of {@link #row}: 5 widgets, 1 handler, styles. */
     private static void heap(final int protocolVersion) {
         final int rows = 5_000;
@@ -412,6 +464,11 @@ public final class ProtocolBench {
                 list.add(row);
             }
         }, 1_000, 2_000);
+
+        for (final int quotes : new int[] {100, 1_000}) {
+            stream(v, quotes, false);
+            stream(v, quotes, true);
+        }
 
         // The pending buffer is pooled per thread: one 3 000-update burst (op 0, warm-up included) leaves it grown
         // for every later small transaction on this thread. Last on purpose, it would skew the scenarios after it.

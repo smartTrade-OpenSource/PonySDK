@@ -159,6 +159,7 @@ The [guides](docs/guide/README.md), one per subject:
 - [Configuration](docs/guide/configuration.md): `ApplicationConfiguration`, `PonySDKServer`, HTTP compression.
 - [Web components](docs/guide/web-components.md), [custom JavaScript](docs/guide/addons.md),
   [EventBus](docs/guide/event-bus.md).
+- [Streams](docs/guide/streams.md): values from a feed thread, the latest per key, without waiting for the browser.
 - [Embedding in another page](docs/guide/embedding.md) with `<pony-app>`.
 - [Transparent reconnection](docs/guide/reconnection.md) (opt-in; not for trading screens whose data must not resume
   silently), [security](docs/guide/security.md), [observability](docs/guide/observability.md) (OpenTelemetry metrics).

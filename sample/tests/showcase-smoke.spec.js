@@ -77,3 +77,18 @@ test('an upload completes: the server reports the file, the browser no failed re
   await page.waitForTimeout(300);
   expect(failed).toEqual([]);
 });
+
+// ADR-0013: a feed faster than the screen, conflated: far fewer values applied than offered, the prices moving
+test('streams: the latest quote per instrument is applied, most quotes replaced before being shown', async ({ page }) => {
+  await page.goto(BASE_URL + '#streams');
+  const values = page.locator('.perf-grid .perf-value');
+  const price = page.locator('.stream-price').first();
+  await expect(values.nth(0)).not.toHaveText('—', { timeout: 10000 });
+  const before = await price.innerText();
+  await expect.poll(async () => {
+    const [offered, applied] = (await values.allInnerTexts()).map(t => Number(t.replace(/,/g, '')));
+    return offered > 5_000 && applied > 0 && applied < offered / 5;
+  }, { timeout: 10000 }).toBe(true);
+  await expect(price).not.toHaveText(before);
+  expect(Number(await values.nth(2).innerText())).toBeGreaterThan(80);
+});
