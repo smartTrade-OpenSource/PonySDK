@@ -141,6 +141,18 @@ public class WebSocketServletHandshakeTest {
     }
 
     /**
+     * A page whose link carries the host's attributes is still a page: only a {@code <pony-app>} element offers
+     * "ponysdk", which a link cannot add. Otherwise the link would make the page's application embedded, with host
+     * attributes of the link's author.
+     */
+    @Test
+    public void testAPageWhoseLinkCarriesHostAttributesIsNotEmbedded() throws Exception {
+        final UIContext uiContext = connect(true, "/?y=%7B%22role%22%3A%22admin%22%7D", "X-Test", "value-1");
+        assertNull(uiContext.getKeys());
+        assertFalse(uiContext.isEmbedded());
+    }
+
+    /**
      * Another site sends no cookie: the reconnection proves its context by key, and the upgrade creates no session,
      * which no context would ever invalidate (ADR-0009).
      */

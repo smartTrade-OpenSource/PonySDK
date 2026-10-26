@@ -65,10 +65,12 @@ public class PHostTest extends PSuite {
         UIContext.get().removeAttribute(PHost.class.getName());
         Mockito.doReturn(Map.of()).when(UIContext.get()).getParameterMap();
         Mockito.doReturn(null).when(UIContext.get()).getHeader(Subprotocols.HEADER);
+        Mockito.doReturn(false).when(UIContext.get()).isEmbedded();
     }
 
     private static void handshake(final String attributesJson) {
         Mockito.doReturn(Map.of(ATTRIBUTES, List.of(attributesJson))).when(UIContext.get()).getParameterMap();
+        Mockito.doReturn(true).when(UIContext.get()).isEmbedded();
     }
 
     private static JsonObject fromTerminal(final PHost host, final JsonObject message) {
@@ -79,6 +81,14 @@ public class PHostTest extends PSuite {
     @Test
     public void aPageHasNoHost() {
         Mockito.doReturn(Map.of()).when(UIContext.get()).getParameterMap();
+        assertNull(PHost.get());
+        assertTrue(writer.isEmpty(), "nothing created");
+    }
+
+    /** The attributes came with the page's link, not from a {@code <pony-app>} element: the page has no host. */
+    @Test
+    public void aPageWhoseLinkCarriesAttributesHasNoHost() {
+        Mockito.doReturn(Map.of(ATTRIBUTES, List.of("{\"role\":\"admin\"}"))).when(UIContext.get()).getParameterMap();
         assertNull(PHost.get());
         assertTrue(writer.isEmpty(), "nothing created");
     }

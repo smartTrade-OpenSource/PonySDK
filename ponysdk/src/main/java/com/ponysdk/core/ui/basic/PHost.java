@@ -96,6 +96,7 @@ public final class PHost extends PObject {
         if (uiContext == null) throw new IllegalStateException("PHost.get() needs a UIContext: call it on the UI thread");
         final PHost existing = uiContext.getAttribute(KEY);
         if (existing != null) return existing;
+        if (!uiContext.isEmbedded()) return null; // a page's link can carry attributes too
         final List<String> handshake = uiContext.getParameterMap().get(ATTRIBUTES_KEY);
         if (handshake == null || handshake.isEmpty()) return null;
         final PHost host = new PHost(parse(handshake.get(0)), Subprotocols.credential(uiContext.getHeader(Subprotocols.HEADER)));

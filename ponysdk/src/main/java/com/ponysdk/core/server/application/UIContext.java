@@ -32,6 +32,7 @@ import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.RecordingEncoder;
+import com.ponysdk.core.server.websocket.Subprotocols;
 import com.ponysdk.core.server.websocket.WebSocket;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -147,7 +148,10 @@ public class UIContext {
     // so parameter map, User-Agent and session are all served from this immutable snapshot.
     private final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData;
 
-    /** The keys of an embedded terminal's context, whose handshake carries the host's attributes; null for a page's. */
+    /**
+     * The keys of an embedded terminal's context, null for a page's. Its handshake carries the host's attributes and
+     * offers "ponysdk": a page's link can carry the attributes, not the subprotocol.
+     */
     private final ContextKeys keys;
 
     private final StringDictionary stringDictionary;
@@ -185,7 +189,7 @@ public class UIContext {
             this.upgradeRequestData = upgradeRequestData;
         }
         this.keys = this.upgradeRequestData.getParameterMap().containsKey(ClientToServerModel.HOST_ATTRIBUTES.toStringValue())
-                ? ContextKeys.create() : null;
+                && Subprotocols.offered(this.upgradeRequestData.getHeader(Subprotocols.HEADER)) ? ContextKeys.create() : null;
 
         // Initialize StringDictionary based on configuration
         if (configuration.isStringDictionaryEnabled()) {
