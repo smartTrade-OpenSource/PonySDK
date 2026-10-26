@@ -1,6 +1,6 @@
 # ADR-0010: Typed Java classes for web components, generated from their Custom Elements Manifest
 
-- Status: Accepted
+- Status: Accepted; amended by [ADR-0011](0011-one-way-to-listen.md) (listeners return their registration, attributes through `setAttribute`)
 - Date: 2026-10-26
 
 ## Context

@@ -16,3 +16,4 @@ what was measured once it was built. They are written for the people who change 
 | [0008](0008-embedded-application.md) | An application embedded in another page, as the element `<pony-app>` | Accepted |
 | [0009](0009-embedding-limits.md) | The limits of an embedded application, lifted | Accepted |
 | [0010](0010-web-component-classes.md) | Typed Java classes for web components, generated from their Custom Elements Manifest | Accepted |
+| [0011](0011-one-way-to-listen.md) | One way to listen to a custom event, and the traps of the web component API closed | Accepted |
