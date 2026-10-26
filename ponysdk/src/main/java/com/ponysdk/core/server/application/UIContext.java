@@ -109,7 +109,8 @@ public class UIContext {
     private final com.ponysdk.core.ui.eventbus.EventBus rootEventBus = new com.ponysdk.core.ui.eventbus.EventBus();
     private final com.ponysdk.core.ui.eventbus2.EventBus newEventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
 
-    private final PCookies cookies = new PCookies();
+    /** Its cookie requests go through this context's private stackCookieRequest: no public door on UIContext. */
+    private final PCookies cookies = new PCookies(this::stackCookieRequest);
 
     private Set<ContextDestroyListener> destroyListeners;
     private final TxnContext context;
@@ -519,7 +520,7 @@ public class UIContext {
      *
      * @param streamListener the stream handler
      */
-    public void stackCookieRequest(final StreamHandler streamListener) {
+    private void stackCookieRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = getWriter();

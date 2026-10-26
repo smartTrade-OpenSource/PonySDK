@@ -25,6 +25,9 @@
 | `PDatePicker.setMonth` | nothing: it did nothing |
 | `BootstrapServlet.addHistoryIFrame` | nothing: history needs no frame |
 | `PObject`'s protected fields `frame` and `saveKey` | `getFrame()` / `setFrame()`; `CompactIntRunnableMap.append` for one-off stacked instructions |
+| `PCookies.setListener(CookiesListener)`, `CookiesListener` (one listener, never called when set late) | `addInitializedListener(Runnable)`: several, called at once when the cookies are known, removed by its `HandlerRegistration` |
+| `PCookies.setCookie(name, value, expires, domain, path, secure, sameSite)` (path and domain in the other order than `setCookie(name, value, expires, path)`) | `setCookie(name, value, CookieOptions.expires(instant).withDomain(domain).withPath(path).secure().sameSite(SameSite.STRICT))` ([ADR-0012](docs/decisions/0012-api-surface.md)) |
+| `new PCookies()` | `UIContext.getCookies()`, which creates it |
 
 The `UIContext` constructors no longer take the upgrade request; `PSuite` builds its context accordingly.
 

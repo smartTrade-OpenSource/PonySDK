@@ -127,7 +127,7 @@ final class MiscPage {
             cookies.setCookie(VISITS, String.valueOf(visits));
             cookieLabel.setText("Loaded " + visits + " time(s) in this browser: the cookie " + VISITS + " counts them");
         };
-        cookies.setListener(count::run); // at once when the cookies are already known
+        cookies.addInitializedListener(count); // at once when the cookies are already known
         // endregion
         p.add(labeled("PCookies", cookieLabel, Source.code(MiscPage.class, "cookies")));
 

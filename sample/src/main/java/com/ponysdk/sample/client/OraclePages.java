@@ -82,7 +82,7 @@ import com.ponysdk.core.ui.basic.PWebComponent;
 import jakarta.json.JsonObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PEventOptions;
+import com.ponysdk.core.ui.basic.PEventOptions;
 import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 

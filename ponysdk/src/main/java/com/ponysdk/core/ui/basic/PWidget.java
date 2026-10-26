@@ -56,8 +56,6 @@ import com.ponysdk.core.ui.basic.event.PDragEndEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
 import com.ponysdk.core.ui.basic.event.PDragOverEvent;
-import com.ponysdk.core.ui.basic.event.PEvent;
-import com.ponysdk.core.ui.basic.event.PEventOptions;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;

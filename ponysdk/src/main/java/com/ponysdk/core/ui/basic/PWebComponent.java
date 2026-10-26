@@ -569,7 +569,7 @@ public class PWebComponent extends PComplexPanel {
      * Listens to a custom event the element dispatches: the listener receives its {@code detail}, parsed;
      * {@link JsonValue#NULL} without one, a JSON string when the detail is not JSON
      * (docs/decisions/0011-one-way-to-listen.md). A DOM event read by named fields is
-     * {@link #addEventListener(String, com.ponysdk.core.ui.basic.event.PEventOptions, Consumer)}.
+     * {@link #addEventListener(String, PEventOptions, Consumer)}.
      *
      * @param eventName the custom event's name, {@code count-changed}
      * @return removes the listener; the last one of a name removed, the terminal stops listening

@@ -7,6 +7,7 @@ package com.ponysdk.core.ui.basic;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.HttpCookie;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -33,12 +34,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class PCookiesEmbeddedTest extends PSuite {
 
     private CapturingModelWriter writer;
+    /** The cookie requests the cookies ask of their UIContext. */
+    private final List<StreamHandler> requests = new ArrayList<>();
 
     @BeforeEach
     public void embedded() {
         writer = CapturingModelWriter.install();
         Mockito.doReturn(true).when(UIContext.get()).isEmbedded();
-        Mockito.doNothing().when(UIContext.get()).stackCookieRequest(Mockito.any());
     }
 
     @AfterEach
@@ -53,7 +55,7 @@ public class PCookiesEmbeddedTest extends PSuite {
     public void theCookiesAreThoseOfTheUpgradeTheSessionCookieAside() {
         Mockito.doReturn(List.of(new HttpCookie("JSESSIONID", "node0x"), new HttpCookie("theme", "dark%20blue"),
             new HttpCookie("a%2Bb", "1+1"))).when(UIContext.get()).getRequestCookies();
-        final PCookies cookies = new PCookies();
+        final PCookies cookies = new PCookies(requests::add);
 
         cookies.onClientData(Json.createObjectBuilder()
             .add(ClientToServerModel.COOKIES.toStringValue(), Json.createArrayBuilder()).build());
@@ -66,8 +68,8 @@ public class PCookiesEmbeddedTest extends PSuite {
 
     @Test
     public void aWriteIsARequestToTheApplicationsOriginAnsweredWithSetCookie() {
-        final PCookies cookies = new PCookies();
-        cookies.setCookie("last quantity", "1 000", null, null, "/sample", true, "Strict");
+        final PCookies cookies = new PCookies(requests::add);
+        cookies.setCookie("last quantity", "1 000", PCookies.CookieOptions.path("/sample").secure().sameSite(PCookies.SameSite.STRICT));
 
         assertEquals("1 000", cookies.getCookie("last quantity"));
         assertTrue(writer.valuesOf(ServerToClientModel.ADD_COOKIE).isEmpty(), "nothing for document.cookie, the host's");
@@ -81,9 +83,9 @@ public class PCookiesEmbeddedTest extends PSuite {
 
     @Test
     public void aRemovalIsACookieThatExpiresAtOnce() {
-        final PCookies cookies = new PCookies();
+        final PCookies cookies = new PCookies(requests::add);
         cookies.setCookie("theme", "dark");
-        Mockito.clearInvocations(UIContext.get());
+        requests.clear();
 
         assertEquals("dark", cookies.removeCookie("theme"));
         assertEquals(0, answered().getMaxAge());
@@ -91,11 +93,10 @@ public class PCookiesEmbeddedTest extends PSuite {
     }
 
     /** The cookie the response to the terminal's request sets. */
-    private static Cookie answered() {
-        final ArgumentCaptor<StreamHandler> handler = ArgumentCaptor.forClass(StreamHandler.class);
-        Mockito.verify(UIContext.get()).stackCookieRequest(handler.capture());
+    private Cookie answered() {
+        assertEquals(1, requests.size(), "one request to the application's origin");
         final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-        handler.getValue().onStream(null, response, UIContext.get());
+        requests.get(0).onStream(null, response, UIContext.get());
         final ArgumentCaptor<Cookie> cookie = ArgumentCaptor.forClass(Cookie.class);
         Mockito.verify(response).addCookie(cookie.capture());
         Mockito.verify(response).setStatus(HttpServletResponse.SC_NO_CONTENT);

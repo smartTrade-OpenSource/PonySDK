@@ -2,7 +2,7 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-package com.ponysdk.core.ui.basic.event;
+package com.ponysdk.core.ui.basic;
 
 import java.time.Duration;
 import java.util.List;
@@ -80,7 +80,7 @@ public final class PEventOptions {
     }
 
     /** The JSON of {@link com.ponysdk.core.model.ServerToClientModel#LISTEN_EVENT}: the name, then what is set. */
-    public String toJson(final String name) {
+    String toJson(final String name) {
         final JsonObjectBuilder json = Json.createObjectBuilder().add("name", name);
         if (!fields.isEmpty()) {
             final JsonArrayBuilder array = Json.createArrayBuilder();

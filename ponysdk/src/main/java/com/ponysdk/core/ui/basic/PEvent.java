@@ -2,14 +2,12 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-package com.ponysdk.core.ui.basic.event;
+package com.ponysdk.core.ui.basic;
 
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
-
-import com.ponysdk.core.ui.basic.PWidget;
 
 /**
  * A DOM event listened to by name ({@link PWidget#addEventListener}): its name and the fields its
@@ -21,7 +19,7 @@ public final class PEvent {
     private final String name;
     private final JsonObject fields;
 
-    public PEvent(final PWidget source, final String name, final JsonObject fields) {
+    PEvent(final PWidget source, final String name, final JsonObject fields) {
         this.source = source;
         this.name = name;
         this.fields = fields;
@@ -47,14 +45,20 @@ public final class PEvent {
         return value instanceof JsonString string ? string.getString() : value.toString();
     }
 
-    /** A number field; NaN when absent or not a number. */
-    public double getNumber(final String field) {
-        return fields.get(field) instanceof JsonNumber number ? number.doubleValue() : Double.NaN;
+    /** A number field; null when absent or not a number. */
+    public Double getNumber(final String field) {
+        return fields.get(field) instanceof JsonNumber number ? number.doubleValue() : null;
     }
 
-    /** A boolean field; false when absent or not a boolean. */
-    public boolean getBoolean(final String field) {
-        return fields.get(field) == JsonValue.TRUE;
+    /** A boolean field; null when absent or not a boolean. */
+    public Boolean getBoolean(final String field) {
+        final JsonValue value = fields.get(field);
+        if (value == null) return null;
+        return switch (value.getValueType()) {
+            case TRUE -> Boolean.TRUE;
+            case FALSE -> Boolean.FALSE;
+            default -> null;
+        };
     }
 
     @Override

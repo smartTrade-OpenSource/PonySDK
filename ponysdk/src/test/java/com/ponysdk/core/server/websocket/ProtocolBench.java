@@ -35,7 +35,7 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.event.PEventOptions;
+import com.ponysdk.core.ui.basic.PEventOptions;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}

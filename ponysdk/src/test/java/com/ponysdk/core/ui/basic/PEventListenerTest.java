@@ -23,8 +23,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.PEvent;
-import com.ponysdk.core.ui.basic.event.PEventOptions;
 import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.test.PSuite;
@@ -105,7 +103,9 @@ public class PEventListenerTest extends PSuite {
         assertEquals("input", events.get(0).getName());
         assertEquals("abc", events.get(0).getString("target.value"));
         assertEquals(null, events.get(0).getString("inputType"));
-        assertTrue(Double.isNaN(events.get(0).getNumber("target.value")));
+        assertEquals(null, events.get(0).getNumber("target.value"), "not a number: absent, as for every type");
+        assertEquals(null, events.get(0).getBoolean("target.value"));
+        assertEquals(null, events.get(0).getBoolean("missing"), "absent is not false");
     }
 
     @Test
