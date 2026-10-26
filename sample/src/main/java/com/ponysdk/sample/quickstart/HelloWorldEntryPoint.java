@@ -32,7 +32,7 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
-/** The quick start's screen (README.md, ARCHITECTURE.md section 2): run by HelloWorldMain. */
+/** The quick start's screen (README.md, docs/guide/quick-start.md): run by HelloWorldMain. */
 public class HelloWorldEntryPoint implements EntryPoint {
 
     @Override

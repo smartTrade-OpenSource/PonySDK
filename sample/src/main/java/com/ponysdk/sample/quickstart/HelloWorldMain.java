@@ -28,7 +28,7 @@ import com.ponysdk.impl.java.server.JavaApplicationManager;
 import com.ponysdk.impl.main.PonySDKServer;
 
 /**
- * The quick start (README.md, ARCHITECTURE.md section 2): {@code ./gradlew :sample:runQuickStart}, then
+ * The quick start (README.md, docs/guide/quick-start.md): {@code ./gradlew :sample:runQuickStart}, then
  * http://localhost:8080/hello/. QuickStartTest starts it.
  */
 public final class HelloWorldMain {

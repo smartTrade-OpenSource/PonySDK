@@ -103,7 +103,7 @@ public class HelloWorldEntryPoint implements EntryPoint {
 ```
 
 `./gradlew :sample:runQuickStart` runs it with its server (`sample/src/main/java/com/ponysdk/sample/quickstart/`) on
-[http://localhost:8080/hello/](http://localhost:8080/hello/). [ARCHITECTURE.md, Quick Start](ARCHITECTURE.md#2-quick-start-5-minutes)
+[http://localhost:8080/hello/](http://localhost:8080/hello/). [The quick start guide](docs/guide/quick-start.md)
 gives the dependency and the server code, step by step.
 
 ### In another page
@@ -119,13 +119,13 @@ A PonySDK application also runs inside a page it does not own, a portal or anoth
 The server lists the host pages (`ApplicationConfiguration.setWsAllowedOrigins`); the application reads the element's
 attributes and exchanges events with the page through `PHost`. The showcase's server also serves a gallery of every
 way to integrate on [http://localhost:8082/](http://localhost:8082/).
-[ARCHITECTURE.md, Embedding](ARCHITECTURE.md#117-embedding-in-another-page-pony-app) has the details.
+[The embedding guide](docs/guide/embedding.md) has the details.
 
 ### Web components
 
 `PWebComponent` drives any custom element from Java. From a library's Custom Elements Manifest
 (`custom-elements.json`), `WebComponentGenerator` writes a typed class per element (`counter.setCount(42)`,
-`counter.onCountChanged(…)`): [ARCHITECTURE.md, Web Components](ARCHITECTURE.md#111-web-components-pwebcomponent).
+`counter.onCountChanged(…)`): [the web components guide](docs/guide/web-components.md).
 
 ---
 
@@ -151,135 +151,19 @@ way to integrate on [http://localhost:8082/](http://localhost:8082/).
 
 ---
 
-## Transparent Reconnection
+## Using PonySDK
 
-Opt-in via `ApplicationConfiguration`:
+The [guides](docs/guide/README.md), one per subject:
 
-```java
-config.setReconnectionTimeoutMs(10_000); // keep UIContext alive for 10s on disconnect
-config.setMaxRecordingEntries(10_000);   // max buffered protocol entries (default 10k ≈ 320KB)
-```
-
-During the reconnection window, all server-side state mutations are buffered by `RecordingEncoder`. On reconnect, the buffer is compacted and replayed on the new WebSocket — the client receives a `RECONNECT_CONTEXT` signal and resumes without a page reload.
-
-**Not recommended for trading applications** where stale market data must never be silently resumed. Use the JS hooks instead:
-
-```javascript
-window.onPonyReconnected = function() {
-    // custom reconnection acknowledgement
-};
-```
-
----
-
-## WebSocket Security & Limits
-
-The WebSocket transport is hardened and tunable via `ApplicationConfiguration`:
-
-```java
-// Cross-Site WebSocket Hijacking (CSWSH) protection — enabled by default.
-// Same-origin is accepted automatically (honouring X-Forwarded-Host behind a proxy);
-// requests without an Origin header (non-browser clients) are allowed.
-config.setWsOriginCheckEnabled(true);                       // default: true
-config.setWsAllowedOrigins(Set.of("https://app.example.com")); // optional extra trusted origins
-
-config.setWsMaxInboundMessageSize(1 << 20); // max client→server text message in bytes (default 1 MB)
-config.setWsIdleTimeoutMs(1_000_000);       // close after this much inactivity (ms)
-config.setWsSendTimeoutMs(60_000);          // disconnect a slow consumer after this (ms)
-config.setWsPermessageDeflateEnabled(true); // frame compression (default on); disable for low-CPU/latency
-config.setWsDeflateLevel(3);                // zlib level, embedded server (default 3: cheaper than Jetty's 6, as compact here)
-config.setWsInputBufferSize(1024);          // Jetty buffer per incoming message (default 1 KB; upstream is small JSON)
-config.setUpdateCoalescingEnabled(true);    // send only the last value of a property per transaction (default on)
-config.setStringDictionaryAdmitOnSecondUse(true); // dictionary entry on 2nd use: one-off strings stay inline (default on)
-config.setMaxProtocolVersion(4);            // highest binary protocol used (default 4, the latest); 1 = original format
-```
-
-```java
-// Embedded server: the session cookie is Secure by default (also right behind a TLS proxy).
-// Plain-http development only: Safari never sends a Secure cookie over http.
-server.setSessionCookieSecure(false);
-```
-
-**CSWSH:** a WebSocket upgrade is *not* subject to the same-origin policy, yet the browser still
-attaches the session cookie. With the Origin check on, cross-origin upgrades are rejected with `403`,
-so a malicious page cannot drive a logged-in user's session.
-
-**Backpressure:** the server keeps a single send in flight per connection; if a slow client does not
-drain within `wsSendTimeoutMs`, the connection is closed — memory stays bounded, no unbounded buffering.
-
----
-
-## HTTP Compression
-
-Static HTTP assets (bootstrap HTML, the terminal's JavaScript bundle, AJAX responses) are compressed by a
-Jetty `CompressionHandler`. **gzip** is always enabled; **Brotli** is enabled automatically when its
-native library is available on the platform — the browser negotiates `br` vs `gzip` via the
-`Accept-Encoding` header. Already-compressed content (images, fonts, archives) is skipped.
-
-Brotli relies on a native library (`brotli4j`). Since JDK 24 ([JEP 472](https://openjdk.org/jeps/472))
-the JVM warns on native access and will eventually block it unless explicitly granted, so run your
-server with:
-
-```sh
-java --enable-native-access=ALL-UNNAMED -jar your-app.jar
-```
-
-If the native library is unavailable (or the flag denied), the server degrades gracefully to gzip
-only — startup is never broken.
-
-> This applies to **HTTP asset delivery** only. The real-time WebSocket protocol uses
-> permessage-deflate, configured separately via `wsPermessageDeflateEnabled`.
-
----
-
-## OpenTelemetry Metrics
-
-```java
-// In your application setup — bring your own OTel SDK
-OpenTelemetry otel = ...; // configure exporter (OTLP, Dynatrace, etc.)
-PonySDKMetrics metrics = new PonySDKMetrics(otel, "my-app");
-webSocketServlet.setMetrics(metrics);
-```
-
-Metrics exported:
-
-| Metric | Type | Description |
-|--------|------|-------------|
-| `ponysdk.uicontext.active` | Gauge | Live UIContext count |
-| `ponysdk.uicontext.created` | Counter | Total contexts created |
-| `ponysdk.uicontext.destroyed` | Counter | Total contexts destroyed (with reason) |
-| `ponysdk.websocket.bytes.sent` | Counter | Total bytes sent |
-| `ponysdk.websocket.bytes.received` | Counter | Total bytes received |
-| `ponysdk.websocket.messages.in` | Counter | Messages received from clients |
-| `ponysdk.roundtrip.latency.ms` | Histogram | Server→client→server roundtrip |
-| `ponysdk.execute.duration.ms` | Histogram | UIContext.execute() duration |
-| `ponysdk.lock.wait.ms` | Histogram | UIContext lock contention |
-
----
-
-## Pony Driver
-
-A Selenium-compatible WebSocket driver for headless testing — no browser required.
-
-```java
-PonySDKWebDriver driver = new PonySDKWebDriver();
-driver.get("ws://localhost:8081/sample/ws");
-
-WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-wait.until(d -> d.findElement(By.cssSelector(".main TEXTBOX.login"))).sendKeys("admin");
-wait.until(d -> d.findElement(By.tagName("BUTTON"))).click();
-```
-
-### Dependencies
-
-```gradle
-implementation 'com.ponysdk:ponysdk:3.0.0-SNAPSHOT' // ./gradlew :ponysdk:publishToMavenLocal, then mavenLocal()
-implementation 'org.seleniumhq.selenium:selenium-api:4.x'
-implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
-
-runtimeOnly 'org.glassfish.tyrus:tyrus-client:2.2.0'
-runtimeOnly 'org.glassfish.tyrus:tyrus-container-grizzly-client:2.2.0'
-```
+- [Quick start](docs/guide/quick-start.md): the dependency, a screen, the server.
+- [Configuration](docs/guide/configuration.md): `ApplicationConfiguration`, `PonySDKServer`, HTTP compression.
+- [Web components](docs/guide/web-components.md), [custom JavaScript](docs/guide/addons.md),
+  [EventBus](docs/guide/event-bus.md).
+- [Embedding in another page](docs/guide/embedding.md) with `<pony-app>`.
+- [Transparent reconnection](docs/guide/reconnection.md) (opt-in; not for trading screens whose data must not resume
+  silently), [security](docs/guide/security.md), [observability](docs/guide/observability.md) (OpenTelemetry metrics).
+- [Testing](docs/guide/testing.md): `PSuite`, the Pony driver.
+- [Troubleshooting](docs/guide/troubleshooting.md).
 
 ---
 
@@ -299,7 +183,8 @@ The terminal uses `<dialog>`, the popover API, `ResizeObserver` and ES2022 modul
 ## Documentation
 
 - [UPGRADING.md](UPGRADING.md) — from 2.10 to 3.0: platform, removed APIs, the new terminal's DOM, behaviour changes
-- [ARCHITECTURE.md](ARCHITECTURE.md) — deep dive into the protocol, reconnection engine, threading model, OTel metrics, and design patterns
-- [Key concepts](ARCHITECTURE.md#5-key-concepts) — Application, UIContext, PObject, the protocol, EventBus, transactions
+- [ARCHITECTURE.md](ARCHITECTURE.md) — how it works inside: the protocol, the reconnection engine, the threading model, the design patterns
+- [Guides](docs/guide/README.md) — how to use each part: configuration, embedding, web components, reconnection, security, testing
+- [Key concepts](ARCHITECTURE.md#4-key-concepts) — Application, UIContext, PObject, the protocol, EventBus, transactions
 - [Decisions](docs/decisions/README.md) — the architecture decision records, one per structuring change
 - [Wiki](https://github.com/smartTrade-OpenSource/PonySDK/wiki) — FAQ

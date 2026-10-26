@@ -2,31 +2,23 @@
 
 ## Table of Contents
 
+How PonySDK works inside. To use it, start with the [guides](docs/guide/README.md).
+
 1. [What is PonySDK?](#1-what-is-ponysdk)
-2. [Quick Start (5 minutes)](#2-quick-start-5-minutes)
-3. [Core Philosophy](#3-core-philosophy)
-4. [High-Level Architecture](#4-high-level-architecture)
-5. [Key Concepts](#5-key-concepts)
-6. [Communication Layer](#6-communication-layer)
-7. [Performance Architecture](#7-performance-architecture)
-8. [Component Deep Dive](#8-component-deep-dive)
-9. [Lifecycle & Flows](#9-lifecycle--flows)
-10. [Threading Model](#10-threading-model)
-11. [Advanced Features](#11-advanced-features)
-    - [11.1 Web Components (PWebComponent)](#111-web-components-pwebcomponent)
-    - [11.2 Custom JavaScript (PAddOn)](#112-custom-javascript-paddon)
-    - [11.3 EventBus Communication](#113-eventbus-communication)
-    - [11.4 Observability — OpenTelemetry & Dynatrace](#114-observability--opentelemetry--dynatrace)
-    - [11.5 Transparent WebSocket Reconnection](#115-transparent-websocket-reconnection-opt-in)
-    - [11.6 Security Model](#116-security-model)
-    - [11.7 Embedding in another page (`<pony-app>`)](#117-embedding-in-another-page-pony-app)
-12. [Package Structure](#12-package-structure)
-13. [Configuration Reference](#13-configuration-reference)
-14. [Jetty 12 / Jakarta EE Migration Notes](#14-jetty-12--jakarta-ee-migration-notes)
-15. [Troubleshooting](#15-troubleshooting)
-16. [Trade-offs & Comparisons](#16-trade-offs--comparisons)
-17. [Widget Hierarchy Reference](#17-widget-hierarchy-reference)
-18. [Architectural Patterns Summary](#18-architectural-patterns-summary)
+2. [Core Philosophy](#2-core-philosophy)
+3. [High-Level Architecture](#3-high-level-architecture)
+4. [Key Concepts](#4-key-concepts)
+5. [Communication Layer](#5-communication-layer)
+6. [Performance Architecture](#6-performance-architecture)
+7. [Component Deep Dive](#7-component-deep-dive)
+8. [Lifecycle & Flows](#8-lifecycle--flows)
+9. [Threading Model](#9-threading-model)
+10. [Transparent reconnection: how it works](#10-transparent-reconnection-how-it-works)
+11. [Package Structure](#11-package-structure)
+12. [Jetty 12 / Jakarta EE Migration Notes](#12-jetty-12--jakarta-ee-migration-notes)
+13. [Trade-offs & Comparisons](#13-trade-offs--comparisons)
+14. [Widget Hierarchy Reference](#14-widget-hierarchy-reference)
+15. [Architectural Patterns Summary](#15-architectural-patterns-summary)
 
 ---
 
@@ -64,131 +56,7 @@ PonySDK is a **Java-only web framework** that lets you build rich web applicatio
 
 ---
 
-## 2. Quick Start (5 minutes)
-
-The code below is `sample/src/main/java/com/ponysdk/sample/quickstart/`, which `QuickStartTest` starts:
-`./gradlew :sample:runQuickStart` runs it from this repository.
-
-### Step 1: Add the dependency
-
-PonySDK 3 is not on Maven Central yet: install it in your local repository from this one
-(`./gradlew :ponysdk:publishToMavenLocal`), then:
-
-**Gradle:**
-```groovy
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-dependencies {
-    implementation 'com.ponysdk:ponysdk:3.0.0-SNAPSHOT'
-}
-```
-
-**Maven:**
-```xml
-<dependency>
-    <groupId>com.ponysdk</groupId>
-    <artifactId>ponysdk</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
-</dependency>
-```
-
-PonySDK 3 needs Java 25.
-
-### Step 2: Write the screen, an EntryPoint
-
-```java
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.main.EntryPoint;
-
-public class HelloWorldEntryPoint implements EntryPoint {
-
-    @Override
-    public void start(final UIContext uiContext) {
-        final PLabel label = Element.newPLabel("Hello PonySDK!");
-        final PTextBox name = Element.newPTextBox();
-        final PButton button = Element.newPButton("Say hello");
-
-        // Runs on the server: the click comes over the WebSocket, the new text goes back
-        button.addClickHandler(event -> label.setText("Hello, " + (name.getText().isBlank() ? "World" : name.getText()) + "!"));
-
-        final PFlowPanel root = Element.newPFlowPanel();
-        root.add(label);
-        root.add(name);
-        root.add(button);
-        PWindow.getMain().add(root);
-    }
-}
-```
-
-`start` runs once per browser tab, on the server: each tab has its own `UIContext` and its own widgets.
-
-### Step 3: Start the server
-
-```java
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.impl.java.server.JavaApplicationManager;
-import com.ponysdk.impl.main.PonySDKServer;
-
-public final class HelloWorldMain {
-
-    public static void main(final String[] args) throws Exception {
-        final ApplicationConfiguration configuration = new ApplicationConfiguration();
-        configuration.setApplicationName("Hello");
-        configuration.setApplicationContextName("hello"); // the application's URL: http://localhost:8080/hello/
-        configuration.setEntryPointClass(HelloWorldEntryPoint.class);
-
-        final JavaApplicationManager applicationManager = new JavaApplicationManager();
-        applicationManager.setConfiguration(configuration);
-
-        final PonySDKServer server = new PonySDKServer();
-        server.setApplicationManager(applicationManager);
-        server.setPort(8080);
-        server.setUseSSL(false); // plain HTTP on this machine; in production, HTTPS with a key store
-        server.setSessionCookieSecure(false); // a Secure cookie is not sent over plain HTTP
-        server.start();
-    }
-}
-```
-
-HTTPS is on by default: without `setUseSSL(false)`, the server needs a key store (`setSslKeyStoreFile`).
-
-### Step 4: Open it
-
-Run `HelloWorldMain`, then open http://localhost:8080/hello/ (the trailing slash matters). Type a name and press
-*Say hello*: the label changes, set by the server.
-
-### What you just built
-
-```
-HelloWorldMain ── PonySDKServer ── serves /hello/: the page and terminal.js, the browser side
-                                   └── a WebSocket per tab ── HelloWorldEntryPoint.start(uiContext)
-                                                                ├── PLabel, PTextBox, PButton: Java objects
-                                                                └── a click handler, run on the server
-```
-
-### Next Steps
-
-| Want to... | See section |
-|------------|-------------|
-| Understand the architecture | [Core Philosophy](#3-core-philosophy) |
-| Learn about performance | [Performance Architecture](#7-performance-architecture) |
-| Add server push | [Threading Model](#10-threading-model) |
-| Integrate Web Components | [Web Components](#111-web-components-pwebcomponent) |
-| Integrate custom JS | [Custom JavaScript (PAddOn)](#112-custom-javascript-paddon) |
-| Show the application in another page | [Embedding in another page](#117-embedding-in-another-page-pony-app) |
-| Configure the server | [Configuration Reference](#13-configuration-reference) |
-
----
-
-## 3. Core Philosophy
+## 2. Core Philosophy
 
 ### The Proxy Pattern at Scale
 
@@ -217,7 +85,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 
 ---
 
-## 4. High-Level Architecture
+## 3. High-Level Architecture
 
 ### High-Level Overview
 
@@ -279,7 +147,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 
 ---
 
-## 5. Key Concepts
+## 4. Key Concepts
 
 ### 5.1 The Three Pillars
 
@@ -324,7 +192,7 @@ Application app;           // 1 Application (shared)
 
 # Part II: How It Works
 
-## 6. Communication Layer
+## 5. Communication Layer
 
 ### 6.1 Protocol Overview
 
@@ -390,7 +258,7 @@ example below writes their names instead, to be read:
 
 ---
 
-## 7. Performance Architecture
+## 6. Performance Architecture
 
 PonySDK is designed for **low-latency, high-throughput** applications like trading platforms. Every architectural decision prioritizes performance.
 
@@ -720,7 +588,7 @@ scheduler.scheduleAtFixedRate(() -> {
 
 ---
 
-## 8. Component Deep Dive
+## 7. Component Deep Dive
 
 This section goes under the hood of the three classes you'll interact with most: `PObject` (the widget base), `UIContext` (the per-tab runtime), and `Txn` (the transaction system). Understanding how they fit together makes the rest of the framework predictable.
 
@@ -843,7 +711,7 @@ Element.setElementFactory(new MyElementFactory());
 
 ---
 
-## 9. Lifecycle & Flows
+## 8. Lifecycle & Flows
 
 This section traces the exact sequence of events from server startup to a user clicking a button. Reading it once gives you a mental model that makes debugging much easier.
 
@@ -936,7 +804,7 @@ Server                    Client
 
 ---
 
-## 10. Threading Model
+## 9. Threading Model
 
 PonySDK is single-threaded per `UIContext` by design — only one thread can update a tab's UI at a time. This eliminates a whole class of concurrency bugs. The rules are simple: background threads must go through `UIContext.execute()`, and you never share `PObject` instances between tabs.
 
@@ -998,677 +866,11 @@ application.pushToClients(notification);
 
 # Part III: Advanced Topics
 
-## 11. Advanced Features
+## 10. Transparent reconnection: how it works
 
-### 11.1 Web Components (PWebComponent)
+How to enable and use it: [docs/guide/reconnection.md](docs/guide/reconnection.md). How it works:
 
-PonySDK integrates native HTML Web Components directly from server-side Java, with the same protocol optimizations as built-in widgets.
-
-#### Philosophy
-
-The separation of concerns is strict:
-
-| Layer | Responsibility |
-|-------|---------------|
-| **Web Component (JS)** | Shadow DOM, rendering, internal structure, slots |
-| **PonySDK (Java)** | Properties, attributes, events, slot insertion, protocol |
-
-PonySDK never touches the shadow DOM. It only sets properties/attributes on the custom element and inserts children into named slots. The web component decides everything about its internal structure.
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  Web Component Integration                      │
-├──────────────────────────┬──────────────────────────────────────┤
-│        SERVER (Java)     │           BROWSER (JS)               │
-│                          │                                      │
-│  PWebComponent           │  <my-dashboard>                      │
-│  ├── property("theme")   │  ├── [theme="dark"]  ← JS property   │
-│  ├── attr("aria-label")  │  ├── aria-label="…"  ← HTML attr     │
-│  ├── slot("toolbar")     │  │   └── <div slot="toolbar">        │
-│  │   └── PButton         │  │       └── <button>…</button>      │
-│  ├── slot("content")     │  │   └── <div slot="content">        │
-│  │   └── PFlexTable      │  │       └── <table>…</table>        │
-│  └── addEventListener    │  └── dispatchEvent("submit", detail) │
-│                          │                                      │
-│  Binary protocol ───────▶│  Shadow DOM (managed by WC itself)   │
-│  (properties, slots,     │  ├── <slot name="toolbar">           │
-│   events, methods)       │  ├── <slot name="content">           │
-│                          │  └── internal styles & structure     │
-└──────────────────────────┴──────────────────────────────────────┘
-```
-
-#### Creating a Web Component
-
-```java
-PWebComponent chart = new PWebComponent("my-chart");
-
-// HTML attributes, as on any widget
-chart.setAttribute("aria-label", "Revenue Chart");
-chart.removeAttribute("aria-label");
-
-// JS properties: JSON text, a string in quotes
-chart.property("title").set("\"Revenue Q4\"");
-chart.property("theme").set("\"dark\"");
-
-// Custom events: the listener receives the event's detail, parsed (a JsonValue)
-HandlerRegistration clicks = chart.addEventListener("point-click", detail -> {
-    log.info("Clicked: {}", detail.asJsonObject().getInt("index"));
-});
-clicks.removeHandler(); // when the screen no longer needs it
-
-// Call a JS method on the element
-chart.call("refresh");
-chart.call("setRange", 0, 100);
-
-// Add to the widget tree like any other widget
-flowPanel.add(chart);
-```
-
-#### Slot API — inserting PonySDK widgets into a Web Component
-
-A Web Component can expose named `<slot>` elements in its shadow DOM. PonySDK's `SlotPanel` lets you insert any PWidget into a named slot from Java:
-
-```java
-PWebComponent dashboard = new PWebComponent("my-dashboard");
-
-// Insert PonySDK widgets into named slots
-dashboard.slot("toolbar").add(refreshButton, exportButton);
-dashboard.slot("content").add(myDataGrid);
-dashboard.slot("footer").add(statusLabel);
-
-flowPanel.add(dashboard);
-```
-
-Under the hood, PonySDK sets `slot="toolbar"` on the child element and appends it to the custom element. The browser handles projection via the native `<slot name="toolbar">` in the shadow DOM. This works regardless of whether the component uses shadow DOM or not.
-
-#### PropertyHandle API — unified storage strategy
-
-`PWebComponent` exposes a `PropertyHandle` API that unifies three storage strategies behind a fluent interface:
-
-```java
-// On-heap (default) — CompactStringMap, delta check + JSON patch
-var title = chart.property("title");
-title.set("\"Revenue Q4\"");
-
-// Off-heap — direct ByteBuffer, FNV-1a hash delta, ideal for large JSON
-var dataset = chart.property("dataset").offHeap().withPatch();
-dataset.set(hugeJson);  // stored off-heap, incremental patch automatic
-
-// Stateless — fire & forget, no cache, no delta, no replay
-var stream = chart.property("stream").stateless();
-stream.set(tempData);   // sent and forgotten
-
-// Uniform read
-String t = title.get();     // on-heap → CompactStringMap
-String d = dataset.get();   // off-heap → ByteBuffer read → ephemeral String
-String s = stream.get();    // stateless → null (no cache)
-```
-
-#### Typed classes from a Custom Elements Manifest
-
-A library's `custom-elements.json` describes its elements; `com.ponysdk.core.tools.WebComponentGenerator`, in the
-`ponysdk` jar, writes a `PWebComponent` subclass per element from it (ADR-0010): typed setters for fields, attributes
-and CSS custom properties, a listener per event, the methods, the named slots. Run it from the build:
-
-```groovy
-def webComponents = tasks.register('webComponents', JavaExec) {
-    classpath = configurations.runtimeClasspath
-    mainClass = 'com.ponysdk.core.tools.WebComponentGenerator'
-    args 'node_modules/my-library/custom-elements.json', 'com.example.wc', layout.buildDirectory.dir('generated/wc').get().asFile.path
-    outputs.dir(layout.buildDirectory.dir('generated/wc'))
-}
-sourceSets.main.java.srcDir(webComponents)
-```
-
-```java
-PMyCounter counter = new PMyCounter();
-counter.setCount(42);                                  // "42" on the wire, as property("count").set(42)
-counter.onCountChanged(detail -> label.setText(detail.toString()));
-counter.reset();
-```
-
-The generated class writes the same frames as the untyped calls; `sample/build.gradle` (task `webComponents`) is a
-working setup.
-
-#### 5-level protocol optimization
-
-Every `property("x").set(value)` call goes through up to 5 optimization levels:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│          5-level protocol optimization                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Level 1 — Equals check (skip if identical)                    │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ On-heap  : Objects.equals(previous, value)              │    │
-│  │ Off-heap : FNV-1a 64-bit hash + byte comparison         │    │
-│  │ → If identical: NOTHING sent. Cost = 0 bytes.           │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                          ↓ (if changed)                         │
-│                                                                 │
-│  Level 2 — String Dictionary (property names)                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ Property names ("dataset", "theme", etc.) are           │    │
-│  │ automatically interned by the PonySDK dictionary.       │    │
-│  │ First time: full name sent + ID assigned                │    │
-│  │ After: only the ID (4 bytes)                            │    │
-│  │ → ~83% reduction on repeated names.                     │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                          ↓                                      │
-│                                                                 │
-│  Level 3 — JSON merge-patch (RFC 7396)                          │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ If value is a JSON object and a previous value exists,  │    │
-│  │ PonySDK computes the diff:                              │    │
-│  │                                                         │    │
-│  │ Old  : {"a":1, "b":2, "c":3}                           │    │
-│  │ New  : {"a":1, "b":5, "d":4}                           │    │
-│  │ Patch: {"b":5, "c":null, "d":4}                        │    │
-│  │                                                         │    │
-│  │ → Only changed fields transit the network.              │    │
-│  │ → null = deletion on client side (RFC 7396).            │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                          ↓                                      │
-│                                                                 │
-│  Level 4 — Compact binary protocol                              │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ The patch (or full value) is sent via PonySDK's         │    │
-│  │ binary WebSocket protocol:                              │    │
-│  │ [WC_PATCH_PROPERTY][ref_id][WC_PROPERTY_VALUE][patch]   │    │
-│  │ → No JSON wrapper, no HTTP overhead.                    │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                          ↓                                      │
-│                                                                 │
-│  Level 5 — WebSocket permessage-deflate                         │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ The WebSocket frame is compressed by Jetty (deflate).   │    │
-│  │ → Additional 70-86% reduction.                          │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-#### Storage mode summary
-
-| Mode | Server storage | Delta check | JSON patch | Reconnect replay | Use case |
-|------|---------------|-------------|------------|------------------|----------|
-| `property("x")` (default) | `CompactStringMap` (on-heap) | `Objects.equals` | yes (default) | yes | Standard properties |
-| `.offHeap()` | `OffHeapJsonStore` (direct ByteBuffer) | FNV-1a 64-bit hash | yes (default) | yes | Large JSON (datasets, configs) |
-| `.stateless()` | None | no | no | no | Streaming, ephemeral data |
-| `.withPatch()` | Per mode | Per mode | yes (forced) | yes | Incremental updates |
-| `.withoutPatch()` | Per mode | Per mode | no (forced) | yes | Always full replacement |
-
-#### Writing a Web Component for PonySDK
-
-Web Components used with PonySDK must follow one critical rule: **never do DOM work in the constructor**. The terminal creates custom elements via `document.createElement()` which invokes the constructor — any DOM access there will crash.
-
-**Rule: constructor = empty. All init goes in `connectedCallback`.**
-
-```javascript
-// Correct pattern
-class MyChart extends HTMLElement {
-    // No constructor needed — or just super() with nothing else
-
-    connectedCallback() {
-        // Safe: element is now in the DOM
-        this.attachShadow({ mode: 'open' });
-        this._render();
-    }
-
-    _render() {
-        this.shadowRoot.innerHTML = `
-            <style>:host { display: block; }</style>
-            <div class="chart-root">
-                <slot name="toolbar"></slot>
-                <slot name="content"></slot>
-            </div>
-        `;
-    }
-}
-customElements.define('my-chart', MyChart);
-```
-
-```javascript
-// Wrong — crashes when the terminal calls document.createElement('my-chart')
-class MyChart extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' }); // CRASH
-        this._render();                       // CRASH
-    }
-}
-```
-
-#### pony.wc — shared stylesheet utilities
-
-`ponysdk.js` exposes `pony.wc` after initialization with two utilities:
-
-**`pony.wc.registerSharedSheet(href)`** — registers a CSS URL to be injected into every shadow root that calls `pony.wc.initShadow()`. Fully opt-in: if never called, nothing is injected.
-
-**`pony.wc.initShadow(element)`** — attaches a shadow root (open mode) and injects all registered shared sheets. Idempotent — safe to call multiple times.
-
-**`pony.wc.PonyElement`** — optional base class that calls `initShadow` + `_render()` automatically in `connectedCallback`. Subclasses must not define a constructor.
-
-```javascript
-// In your app bootstrap (before web components are connected)
-document.onPonyLoaded(function() {
-    pony.wc.registerSharedSheet('/css/design-system.css');
-});
-
-// Web component using PonyElement base class
-document.onPonyLoaded(function() {
-    class MyCard extends pony.wc.PonyElement {
-        // No constructor
-
-        connectedCallback() {
-            super.connectedCallback(); // attaches shadow + injects sheets + calls _render
-        }
-
-        _render() {
-            this.shadowRoot.innerHTML = `
-                <style>:host { display: block; }</style>
-                <div class="card">
-                    <slot></slot>
-                    <slot name="actions"></slot>
-                </div>
-            `;
-        }
-    }
-    customElements.define('my-card', MyCard);
-});
-```
-
-#### Configuring shared sheets from Java
-
-Shared stylesheets can be declared server-side in `ApplicationConfiguration`. PonySDK injects the corresponding `pony.wc.registerSharedSheet()` calls automatically before application scripts load:
-
-```java
-ApplicationConfiguration config = new ApplicationConfiguration();
-config.setWcSharedSheets(Set.of("/css/design-system.css", "/css/tokens.css"));
-```
-
-This generates in the HTML `<head>`:
-```html
-<script>
-document.onPonyLoaded(function() {
-    pony.wc.registerSharedSheet('/css/design-system.css');
-    pony.wc.registerSharedSheet('/css/tokens.css');
-});
-</script>
-```
-
-#### Registering Web Components
-
-Web Components that depend on `pony.wc` must be registered inside `document.onPonyLoaded()` so `pony.wc` is available:
-
-```javascript
-// script/webcomponents.js
-
-// Components that don't need pony.wc can be registered immediately
-class MyCounter extends HTMLElement { ... }
-customElements.define('my-counter', MyCounter);
-
-// Components that extend PonyElement must wait for pony
-document.onPonyLoaded(function() {
-    class MyDashboard extends pony.wc.PonyElement { ... }
-    customElements.define('my-dashboard', MyDashboard);
-});
-```
-
-Add the script in your configuration:
-```java
-config.setJavascript(Set.of("script/webcomponents.js"));
-```
-
-#### Full example: real-time trading dashboard
-
-```java
-PWebComponent dashboard = new PWebComponent("trading-dashboard");
-
-// Static config — on-heap, patch enabled
-var config = dashboard.property("config");
-config.set("{\"theme\":\"dark\",\"locale\":\"fr\",\"refreshRate\":500}");
-
-// Large dataset — off-heap, incremental patch
-var positions = dashboard.property("positions").offHeap().withPatch();
-positions.set(buildPositionsJson());  // 500 KB JSON, stored off-heap
-
-// Incremental update — only changed fields transit the network
-positions.set(buildUpdatedPositionsJson());  // auto patch
-
-// Real-time price tick — stateless, fire & forget
-var tick = dashboard.property("lastTick").stateless();
-tick.set("{\"symbol\":\"AAPL\",\"price\":185.42,\"ts\":1708963200}");
-
-// Slot insertion
-dashboard.slot("toolbar").add(filterPanel);
-dashboard.slot("content").add(positionsGrid);
-
-// Events
-dashboard.addEventListener("order-submit", detail -> orderService.submit(parseOrder(detail.asJsonObject())));
-
-flowPanel.add(dashboard);
-```
-
----
-
-### 11.2 Custom JavaScript (PAddOn)
-
-Integrate custom JS libraries:
-
-```java
-```java
-// Server-side: a widget (here a div) whose behaviour is a JavaScript addon
-public class MyChart extends PAddOnComposite<PElement> {
-
-    public MyChart(final String color) {
-        super(Element.newDiv(), color); // creation arguments: the addon's this.options
-    }
-
-    public void setData(final double... values) {
-        callTerminalMethod("setData", (Object[]) toObjects(values)); // the addon's setData(v1, v2, …)
-    }
-
-    private static Double[] toObjects(final double[] values) {
-        return java.util.Arrays.stream(values).boxed().toArray(Double[]::new);
-    }
-}
-```
-
-```javascript
-// Client-side, in a script of ApplicationConfiguration.setJavascript: the name is the Java class's
-AbstractAddon.defineAddon("com.example.MyChart", {
-    init: function () {
-        this.color = this.options[0];   // the creation arguments, as an array
-    },
-    setData: function () {
-        var values = Array.prototype.slice.call(arguments);
-        // draw them: D3.js, Chart.js, …
-    }
-});
-```
-
-`sample/src/main/java/com/ponysdk/sample/client/page/addon/BinaryArgsAddOn.java` and `script/sample.js` are a
-working pair.
-
-**Typed arguments travel in pure binary.** `callTerminalMethod(name, args...)` encodes `int`/`long`/`double`/`boolean`/`String`/`JsonValue` as a typed binary array — no JSON serialization on either side. Creation arguments can do the same via the `PAddOn(Object...)` (and `PAddOnComposite(widget, Object...)`) constructor; the terminal factory then receives a JS array instead of a parsed JSON object. Binary arrays carry a **uint31 length**, so they are no longer capped at 255 elements — suitable for large typed payloads. The JSON forms (`PAddOn(JsonObject)`) remain available and unchanged for backward compatibility.
-
-### 11.3 EventBus Communication
-
-Decouple components:
-
-```java
-// Define event
-public class PriceUpdateEvent extends BusinessEvent {
-    private final String symbol;
-    private final double price;
-}
-
-// Subscribe
-UIContext.get().getRootEventBus().addHandler(
-    PriceUpdateEvent.TYPE,
-    event -> priceLabel.setText(event.getPrice())
-);
-
-// Publish
-UIContext.get().getRootEventBus().fireEvent(
-    new PriceUpdateEvent("AAPL", 150.25)
-);
-```
-
-### 11.4 Observability — OpenTelemetry & Dynatrace
-
-PonySDK ships a built-in `PonySDKMetrics` class that exports metrics via the OpenTelemetry API. It is vendor-neutral — you bring your own OTel SDK and exporter. Dynatrace ingests natively via OTLP, no proprietary agent required.
-
-#### Metrics exposed
-
-| Metric | Type | Unit | What it tells you |
-|--------|------|------|-------------------|
-| `ponysdk.uicontext.active` | gauge | `{context}` | Open browser tabs right now |
-| `ponysdk.uicontext.created` | counter | `{context}` | Connection rate |
-| `ponysdk.uicontext.destroyed` | counter | `{context}` | Disconnection rate + reason |
-| `ponysdk.websocket.bytes.sent` | counter | `By` | Outbound bandwidth |
-| `ponysdk.websocket.bytes.received` | counter | `By` | Inbound bandwidth |
-| `ponysdk.websocket.messages.in` | counter | `{message}` | Event throughput from clients |
-| `ponysdk.roundtrip.latency.ms` | histogram | `ms` | Full network round-trip (p50/p95/p99) |
-| `ponysdk.execute.duration.ms` | histogram | `ms` | Time spent holding the UIContext lock |
-| `ponysdk.lock.wait.ms` | histogram | `ms` | Time waiting to acquire the lock |
-
-All metrics carry a `ponysdk.app` attribute so you can filter by application name in Dynatrace.
-
-#### Understanding the three latency metrics
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              Latency breakdown in PonySDK                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  User clicks button                                             │
-│       │                                                         │
-│       ▼                                                         │
-│  ┌──────────────┐                                               │
-│  │ lock.wait.ms │  ← Another thread holds the UIContext lock.   │
-│  │              │    High value = thread contention.            │
-│  │              │    Fix: move heavy work outside execute().    │
-│  └──────────────┘                                               │
-│       │  lock acquired                                          │
-│       ▼                                                         │
-│  ┌──────────────────┐                                           │
-│  │ execute.         │  ← Your Java handler runs here +          │
-│  │ duration.ms      │    txn.commit() flushes the WebSocket.    │
-│  │                  │    High value = slow handler or large UI  │
-│  │                  │    update. Fix: batch, cache, paginate.   │
-│  └──────────────────┘                                           │
-│       │  response sent                                          │
-│       ▼                                                         │
-│  ┌──────────────────┐                                           │
-│  │ roundtrip.       │  ← Full server→client→server cycle.       │
-│  │ latency.ms       │    Measured by the server using           │
-│  │                  │    System.nanoTime() ping/pong.           │
-│  │                  │    High value = network or slow client.   │
-│  └──────────────────┘                                           │
-│                                                                 │
-│  Diagnosis guide:                                               │
-│  lock.wait high    → thread contention on this UIContext        │
-│  execute high      → your handler is doing too much work        │
-│  roundtrip high    → network latency or heavy DOM rendering     │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-#### Setup — Dynatrace via OTLP
-
-Add the OTel SDK to your application (not to the `ponysdk` module — it only depends on the API):
-
-```groovy
-// your app's build.gradle
-runtimeOnly(
-    'io.opentelemetry:opentelemetry-sdk:1.44.1',
-    'io.opentelemetry:opentelemetry-exporter-otlp:1.44.1'
-)
-```
-
-Wire it up in your `main()`:
-
-```java
-// 1. Build OTel SDK with OTLP exporter → Dynatrace
-OpenTelemetry otel = OpenTelemetrySdk.builder()
-    .setMeterProvider(SdkMeterProvider.builder()
-        .setResource(Resource.getDefault().merge(
-            Resource.create(Attributes.of(
-                ResourceAttributes.SERVICE_NAME, "ponysdk-trading",
-                ResourceAttributes.SERVICE_VERSION, "3.0.x"
-            ))))
-        .registerMetricReader(PeriodicMetricReader.builder(
-            OtlpGrpcMetricExporter.builder()
-                .setEndpoint("https://<env>.live.dynatrace.com/api/v2/otlp")
-                .addHeader("Authorization", "Api-Token " + System.getenv("DT_API_TOKEN"))
-                .build())
-            .setInterval(Duration.ofSeconds(30))
-            .build())
-        .build())
-    .buildAndRegisterGlobal();
-
-// 2. Create the PonySDK metrics bridge
-PonySDKMetrics metrics = new PonySDKMetrics(otel, "trading");
-
-// 3. Plug into the WebSocket servlet — one line
-webSocketServlet.setMetrics(metrics);
-
-// Optional: also capture incoming message bytes
-webSocketServlet.setWebsocketMonitor(metrics.websocketMonitor());
-```
-
-That's it. `PonySDKMetrics` hooks into `WebSocket.onWebSocketOpen/Close` and `UIContext.execute()` automatically — no further instrumentation needed.
-
-#### Built-in latency API (no OTel required)
-
-If you don't use OTel, the per-tab latency averages are still available directly:
-
-```java
-UIContext ctx = UIContext.get();
-double roundtrip = ctx.getRoundtripLatency();  // rolling avg of last 10 measurements (ms)
-double network   = ctx.getNetworkLatency();    // the roundtrip minus the terminal's part (ms)
-double terminal  = ctx.getTerminalLatency();   // from the arrival of the probe's message to the answer (ms)
-
-if (roundtrip > 200) {
-    log.warn("High latency on UIContext #{}: {}ms", ctx.getID(), roundtrip);
-}
-```
-
-These are rolling averages over the last 10 round-trip measurements: the server sends a probe every 5 s (or every heartbeat period when shorter), so they cover the last 50 s. The terminal answers with the time the probe waited in it, from the arrival of its message (behind the blocks before it, the page's other tasks, a module loading); the rest of the roundtrip is the network's ([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)). An older terminal, or the Pony driver, reports no terminal time: the network latency is then the roundtrip. Useful for in-process alerting without an external metrics system.
-
----
-
-### 11.5 Transparent WebSocket Reconnection (opt-in)
-
-By default, PonySDK destroys the `UIContext` when the WebSocket closes. This is the safe default for trading applications — a disconnected trader must never silently resume stale market data.
-
-For applications where seamless reconnection is acceptable, PonySDK provides an opt-in transparent reconnection mechanism. When enabled, the server keeps the `UIContext` alive for a configurable window after disconnect. If the client reconnects within that window, the existing widget tree and all server-side state are reused — no page reload, no re-initialization.
-
-#### Enabling transparent reconnection
-
-```java
-ApplicationConfiguration config = new ApplicationConfiguration();
-config.setReconnectionTimeoutMs(10_000); // keep UIContext alive for 10s after disconnect
-config.setMaxRecordingEntries(10_000);   // max buffered protocol entries (default, ~320KB)
-```
-
-If the recording buffer exceeds `maxRecordingEntries` during suspension, the UIContext is destroyed immediately — no reconnection possible. This prevents unbounded memory growth when a high-frequency data feed keeps pushing updates to a disconnected session.
-
-On the client side, the bootstrap page sets `window.ponyReconnectMode = true` itself when `reconnectionTimeoutMs > 0`
-(`BootstrapServlet.addScript`). A page of your own that loads the terminal sets it before the terminal starts:
-
-```html
-<script>window.ponyReconnectMode = true;</script>
-```
-
-The reconnection flow is then:
-
-```
-Client                          Server
-  |                               |
-  |--- WebSocket closes --------->|
-  |                               |  UIContext.suspend(10_000ms)
-  |                               |  → swap encoder to RecordingEncoder
-  |                               |  → start timeout virtual thread
-  |                               |
-  |  (external threads keep       |  execute() still runs runnables
-  |   calling execute())          |  → PObjects mutate Java state
-  |                               |  → protocol writes buffered in RecordingEncoder
-  |                               |  → creates, adds, removes, updates all captured
-  |                               |
-  |--- ping GET /app?ping ------->|  (ReconnectionChecker retries)
-  |<-- 200 OK --------------------|
-  |                               |
-  |--- new WS ?Y=<uiContextId> -->|  WebSocket.onWebSocketOpen
-  |                               |  → finds suspended UIContext
-  |                               |  → UIContext.resume(newSocket)
-  |                               |  → compact() merges updates, cancels create+remove
-  |                               |  → replay compacted buffer on real WebSocket
-  |<-- compacted instructions ----|  (structural ops + merged updates)
-  |<-- RECONNECT_CONTEXT ---------|
-  |                               |
-  | window.onPonyReconnected()    |  UIContext alive, state current
-```
-
-A reconnection to a context the server no longer has (restarted, window over, overflow) or that another socket
-resumed gets a `CREATE_CONTEXT` block with no context behind it, then a normal close: the terminal reloads its page,
-and no application starts for a page that is going away.
-
-A page left (closed, reloaded, navigated away, and not kept in the back-forward cache) closes its socket with 4002:
-the server destroys its context at once instead of suspending it, since no reconnection can follow
-([ADR-0005](docs/decisions/0005-page-left-and-terminal-time.md)). A browser may close the socket first, with 1001
-(Firefox when it navigates away, Chrome when it quits): a 1001 with no error before it counts the same; Jetty's own
-1001, on its idle timeout, follows the error it reports ([ADR-0007](docs/decisions/0007-page-left-by-going-away.md)).
-
-#### How state stays consistent during suspension
-
-The key to correctness is the `RecordingEncoder` — a `WebsocketEncoder` implementation that buffers all protocol operations (creates, adds, removes, updates) instead of sending them over the wire.
-
-During suspension:
-
-1. `UIContext.suspend()` swaps the `ModelWriter` encoder to a `RecordingEncoder`
-2. `execute(Runnable)` continues to run normally — PObjects mutate their Java fields, and all protocol writes (`TYPE_CREATE`, `TYPE_ADD`, `TYPE_UPDATE`, `TYPE_REMOVE`, etc.) are captured as `(model, value)` pairs in the recorder's buffer
-3. Structural operations (create, add, remove) are preserved in order — no data loss
-
-On `resume()`, before replaying:
-
-1. `RecordingEncoder.compact()` runs a compaction pass:
-   - Consecutive `TYPE_UPDATE` blocks on the same objectID are merged — last value wins per model key (natural coalescing: 1000 `setText()` → 1 update)
-   - If a widget was both created (`TYPE_CREATE`) and removed (`TYPE_REMOVE` / `TYPE_GC`) during the same suspension window, all blocks for that objectID are eliminated entirely
-   - Structural operations (`TYPE_ADD`, `TYPE_REMOVE`, `TYPE_ADD_HANDLER`) are preserved in order
-2. The compacted buffer is replayed on the real WebSocket encoder in a single transaction
-3. `RECONNECT_CONTEXT` is sent to signal the client
-
-```
-Suspension (8 seconds)              Reconnexion
-                                    
-TYPE_CREATE label#42  → recorded    compact():
-TYPE_ADD label#42     → recorded      → merge updates on same ID
-TYPE_UPDATE label#42  → recorded      → cancel create+remove pairs
-  setText("100")                    
-TYPE_UPDATE label#42  → recorded    replay to real WebSocket:
-  setText("150")                      TYPE_CREATE label#42
-TYPE_UPDATE label#42  → recorded      TYPE_ADD label#42
-  setText("200")                      TYPE_UPDATE label#42 {text="200"}
-                                      RECONNECT_CONTEXT
-(3 updates → 1 after compaction)
-```
-
-#### Server-side hook on disconnect
-
-Regardless of whether transparent reconnection is enabled, you can register a server-side listener to react when a WebSocket is lost:
-
-```java
-config.setReconnectionListener((uiContext) -> {
-    log.warn("Connection lost for user {}", uiContext.getAttribute("userId"));
-    // execute() still works during suspension — safe to push state updates
-});
-```
-
-#### Client-side JS hooks
-
-| Hook | When called | Default behaviour |
-|------|-------------|-------------------|
-| `document.onConnectionLost(cb)` | Immediately on disconnect | — |
-| `window.showReconnectionInformation()` | To show custom reconnecting UI | Built-in banner |
-| `window.onPonyReconnected()` | After successful reconnection | Page reload (if `ponyReconnectMode` is false) |
-
-#### Trading applications — important note
-
-For electronic trading, transparent reconnection should be used with care. A reconnected session resumes the server-side widget state, but market data feeds may have missed updates during the gap. Always notify traders explicitly:
-
-```javascript
-window.onPonyReconnected = function() {
-    showBanner("Reconnected — please verify your positions and prices");
-};
-```
-
-The `ReconnectionListener` on the server side can also trigger risk checks or force a data refresh before the session resumes.
-
-#### RecordingEncoder — architecture deep dive
+### RecordingEncoder — architecture deep dive
 
 The `RecordingEncoder` implements `WebsocketEncoder` and captures every protocol operation as a list of `Entry(ServerToClientModel, Object)` records. It is the core of the reconnection engine — without it, structural operations (create, add, remove) would be lost during suspension.
 
@@ -1736,7 +938,7 @@ TYPE_GC temp#99
 5 blocks → 3 blocks (40% reduction)
 ```
 
-#### Threading model during reconnection
+### Threading model during reconnection
 
 The reconnection engine uses three types of threads:
 
@@ -1780,7 +982,7 @@ The reconnection engine uses three types of threads:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Concurrency guarantees and known race windows
+### Concurrency guarantees and known race windows
 
 | Guarantee | Mechanism |
 |-----------|-----------|
@@ -1799,7 +1001,7 @@ The reconnection engine uses three types of threads:
 | `alive` field not volatile | A thread may see stale `alive=true` after destroy | The `execute()` method re-checks under lock — worst case: one extra lock acquisition |
 | Timeout thread vs resume thread | Both check `suspended` without lock | Only `doDestroy()` and `resume()` set `suspended=false` — `destroy()` has `isAlive()` guard, so the second caller exits |
 
-#### Sequence diagrams
+### Sequence diagrams
 
 **Normal disconnect (reconnection disabled — default):**
 
@@ -1879,7 +1081,7 @@ UIContext            Timeout VT
   │                    │
 ```
 
-#### Client-side reconnection flow
+### Client-side reconnection flow
 
 When `window.ponyReconnectMode = true`, the client-side `ReconnectionChecker` follows this flow:
 
@@ -1908,7 +1110,7 @@ ReconnectionChecker.detectConnectionFailure()
 
 The `Y` parameter (`ClientToServerModel.RECONNECT_UI_CONTEXT_ID`) carries the UIContext ID. On the server, `WebSocketServlet.createWebSocket()` reads it and sets `webSocket.setReconnectContextId(id)`. When `onWebSocketOpen` fires, the WebSocket looks up the suspended UIContext via `Application.getUIContext(id)` and calls `resume()`.
 
-#### Test coverage
+### Test coverage
 
 The reconnection engine is covered by dedicated tests across three test classes:
 
@@ -1920,134 +1122,8 @@ The reconnection engine is covered by dedicated tests across three test classes:
 
 ---
 
-### 11.6 Security Model
 
-PonySDK is **secure by default**: the risky options are off and the protective ones are on, so a stock deployment is safe with no extra configuration. Security spans three layers — the WebSocket transport, request authorization, and static-resource serving.
-
-#### Transport hardening (WebSocket)
-
-A WebSocket upgrade is **not** subject to the browser same-origin policy, yet the browser still attaches the session cookie. Left unchecked, a malicious page could open a WebSocket onto a logged-in user's session (Cross-Site WebSocket Hijacking, CSWSH). The transport is validated and bounded on upgrade:
-
-| Concern | Mechanism | Config (`ApplicationConfiguration`) | Default |
-|---------|-----------|--------------------------------------|---------|
-| **CSWSH** | `Origin` checked on upgrade; cross-origin rejected `403`. Same-origin is auto-accepted (honours `X-Forwarded-Host` behind a proxy); requests with no `Origin` (non-browser clients) are allowed | `wsOriginCheckEnabled`, `wsAllowedOrigins` | check **on** |
-| **Inbound memory** | Max client→server text message size | `wsMaxInboundMessageSize` | 1 MB |
-| **Slow consumer** | One send in flight per connection; a client that doesn't drain within the timeout is disconnected — memory stays bounded, no unbounded buffering | `wsSendTimeoutMs` | 60 s |
-| **Idle connections** | Close after inactivity | `wsIdleTimeoutMs` | 1 000 s |
-| **Frame compression** | permessage-deflate; can be disabled for low-CPU/latency deployments (and for non-browser clients that cannot decode compressed frames) | `wsPermessageDeflateEnabled` | on |
-
-`WebSocketServlet.isOriginAllowed(origin, host, allowedOrigins)` is a pure, unit-tested function, so the matching rules are pinned by tests.
-
-#### Request authorization — UIContext session scoping (IDOR)
-
-`AjaxServlet` and `StreamServiceServlet` address a UIContext by integer ID. A **global** lookup by ID would let any authenticated user act on *another* user's UIContext just by guessing the ID (an Insecure Direct Object Reference). Both servlets resolve the UIContext **scoped to the caller's HTTP session**:
-
-```java
-// Session-scoped: only returns a UIContext that belongs to THIS http session.
-UIContext ctx = SessionManager.get().getUIContext(applicationId, uiContextId);
-```
-
-The legacy global `getUIContext(id)` is deprecated for removal, and cross-session access is denied (regression-tested in `AjaxServletTest` / `StreamServiceServletTest`).
-
-#### Static-resource serving — path traversal
-
-`BootstrapServlet` serves client resources by path. Before loading anything, `isSafeResourcePath(path)` rejects traversal / absolute / backslash paths and returns `404`, so a crafted URL cannot escape the resource root to read arbitrary files.
-
-#### Log-injection hardening
-
-Untrusted client values (the reconnection parameter, malformed inbound frames) are sanitised before being logged, so a client cannot forge log lines by injecting newlines or control characters.
-
-#### Secure-by-default summary
-
-- `Origin` check **on** — cross-origin WebSocket upgrades are rejected.
-- Inbound size **bounded** (1 MB) and slow consumers **disconnected** — one connection cannot exhaust memory.
-- UIContext access **scoped to the HTTP session** — no IDOR.
-- Static resources **path-guarded** — no traversal.
-- Transparent reconnection **off** by default — no silent resume of stale state (important for trading apps, where stale market data must never be replayed unnoticed).
-
-> Each item above is backed by dedicated tests (the Origin matrix, cross-session denial, path-safety, and the configuration defaults), so the secure defaults cannot silently regress.
-
-### 11.7 Embedding in another page (`<pony-app>`)
-
-An application runs inside a page it does not own: a portal, a client's web application, a desktop container
-([ADR-0008](docs/decisions/0008-embedded-application.md)). The host page loads the application's terminal and writes
-the element; each element runs its own terminal on its own context.
-
-```html
-<script type="module" src="https://fx.example.com/app/ponyterminal/terminal.js"></script>
-<pony-app src="https://fx.example.com/app/" view="ticket" instrument="EURUSD">Loading…</pony-app>
-```
-
-| Attribute | Values | Effect |
-|---|---|---|
-| `src` | the application's URL | its query: the application's parameters; its fragment: the first history token |
-| `isolation` | `shadow` (default), `none` | an open shadow root, or the host's document (for addons that search the document) |
-| `history` | `memory` (default), `hash` | the token stays in the element, or the page's fragment is the application's |
-| any other | | the application's, read through `PHost` |
-
-The host and the application talk through attributes and events, in both directions:
-
-```java
-final PHost host = PHost.get();                                      // null when the application runs as a page
-label.setText(host.getAttribute("instrument"));                      // attributes in, at the handshake
-host.addAttributeListener("instrument", label::setText);             // then each change
-host.addEventListener("reset", detail -> quantity.setText("1000000")); // the host's CustomEvents; each returns its HandlerRegistration
-host.dispatchEvent("trade", Json.createObjectBuilder().add("side", "BUY").build()); // events out
-```
-
-```javascript
-ticket.addEventListener('trade', e => blotter.add(e.detail));
-ticket.setAttribute('instrument', 'USDJPY');
-ticket.dispatchEvent(new CustomEvent('reset'));
-```
-
-- **Loading.** `terminal.js` starts a page terminal only in the application's own page (the early socket of the
-  bootstrap page, a child window or frame, or a page under the application's path). Elsewhere it loads
-  `chunks/pony-app.js` (4.9 KB gzip), which defines the element; an application's page loads it with the other modules
-  on demand. The element reads `<application>/ponyapp.json` (stylesheets, scripts, shared web-component sheets,
-  transparent reconnection, the legacy layer, its terminal), loads the scripts into the host page once, and puts the
-  stylesheets in its shadow root.
-- **Server.** `wsAllowedOrigins` lists the pages allowed to embed the application; `PonySDKServer` answers their CORS
-  requests with credentials (`CrossOriginFilter`). Nothing else changes on the server:
-
-  ```java
-  configuration.setWsAllowedOrigins(Set.of("https://portal.example.com")); // the host pages' origins
-  ```
-- **Examples.** `./gradlew :sample:runShowcase` serves, besides the showcase, a gallery of every way to integrate on
-  http://localhost:8082/ (alone in a page, a custom page, an iframe, an element of the same site or of another site,
-  several applications on a page, windows and frames, two versions on a page), each with its code.
-- **Another site** ([ADR-0009](docs/decisions/0009-embedding-limits.md)). No session cookie comes from a page of
-  another site. The context of an embedded terminal has two keys, sent with `CREATE_CONTEXT`: `K` proves it in the
-  `CONTEXT_KEY` header (AJAX, uploads) and, on a reconnection, in the WebSocket subprotocol `ponysdk.key.<K>`; `S`, in
-  a URL, only fetches a pending stream. The host gives the element a credential with its property `credential`, offered
-  as the subprotocol `ponysdk.credential.<base64url>`; the application reads it with `PHost.getCredential()`.
-- **Stylesheets.** Loaded with CORS, the application's stylesheets are adapted once loaded: their `:root`, `html` and
-  `body` selectors name the element (`:host`, the container), and in a shadow root their `@font-face` rules are
-  declared to the document, which Chrome and Firefox require.
-- **What stays the host's.** The page's fragment (unless `history="hash"`), its title and location (the element
-  dispatches `pony-title` and `pony-location`: the host decides). A lost context or `RELOAD` restarts the element
-  instead of reloading the page; the element dispatches `pony-connection-lost` and `pony-reconnected`. `PCookies` holds
-  the cookies of the application's origin: read from the upgrade, written by a request the terminal makes there.
-- **Windows and frames.** A `PWindow` or a `PFrame` of an embedded terminal runs a page of the application, which talks
-  to the element's terminal by `postMessage` only, and accepts as its parent only a page of `wsAllowedOrigins`
-  (the meta `pony-parent-origins` of the bootstrap page).
-- **Versions.** The element defined by one PonySDK version hands an application of another (whose manifest names
-  another terminal) to that terminal's `mountPonyApp(element, src)`; `ponysdk.js` is one per page, the first loaded,
-  and the addon factories are the page's.
-- **Leaving.** An element out of the page at the next task closes its socket with 4002: the server destroys the
-  context (ADR-0005).
-- **Limits.** In a shadow root, addons that search the document find nothing (`isolation="none"`). Each element has
-  its own socket and context (about 80 KB of server heap). The application's scripts run in the host page's global
-  scope.
-
-The showcase's **Embedding** page embeds the ticket in the showcase itself. `ShowcaseMain` serves, on port 8082, another
-origin with a gallery of the ways to integrate PonySDK (`sample/src/main/resources/portal`): alone in its page, a
-custom page, an iframe, an element of the same site or of another site, in the page's document, windows and frames, two
-versions on a page (`sample/tests/embedding.spec.js`, `sample/tests/integration-gallery.spec.js`).
-
----
-
-## 12. Package Structure
+## 11. Package Structure
 
 The codebase is split into three main areas: `server` (runtime, transport, transactions), `ui` (widgets and event system), and the terminal (TypeScript that runs in the browser, under `ponysdk/terminal`). The `util` package contains performance-critical data structures shared by both sides.
 
@@ -2096,56 +1172,7 @@ com.ponysdk.core
 
 ---
 
-## 13. Configuration Reference
-
-### 13.1 ApplicationConfiguration
-
-Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults as in
-`ApplicationConfiguration.java`.
-
-| Property | Description | Default |
-|----------|-------------|---------|
-| `applicationContextName` | The path of the application: `http://host:port/<name>/` | `sample` |
-| `entryPointClass` | The `EntryPoint` started for each browser tab | none (required) |
-| `heartBeatPeriod` | Liveness: a client silent for half of it is pinged, for two of it is dropped ([ADR-0006](docs/decisions/0006-liveness-by-ping.md)) (ms) | 5000 |
-| `sessionTimeout` | Stored and readable (`getSessionTimeout`); `PonySDKServer` does not apply it (minutes) | 15 |
-| `debugMode` | Verbose logging | false |
-| `style`, `javascript` | Stylesheets and scripts of the bootstrap page | none |
-| `stringDictionaryEnabled` | Strings sent once, then by index | true |
-| `stringDictionaryMaxSize` | Max dictionary entries | 4096 |
-| `stringDictionaryMinLength` | Shorter strings are always sent inline | 8 |
-| `updateCoalescingEnabled` | Successive updates of one widget property in a flush sent once | true |
-| `maxProtocolVersion` | Highest binary protocol used; each connection uses min(this, the terminal's). 4 is needed by `PWidget.addEventListener` | 4 (latest) |
-| `wsOriginCheckEnabled` | The WebSocket upgrade checks the `Origin` header | true |
-| `wsAllowedOrigins` | The other origins allowed to connect: the pages that embed the application ([11.7](#117-embedding-in-another-page-pony-app)) | none: same origin only |
-| `wsPermessageDeflateEnabled`, `wsDeflateLevel` | Frame compression and its zlib level | true, 3 |
-| `wsMaxInboundMessageSize` | Largest client message (bytes) | 1 MB |
-| `wsIdleTimeoutMs`, `wsSendTimeoutMs` | WebSocket idle timeout; wait on a slow client before disconnecting (ms) | 1 000 000, 60 000 |
-| `wcSharedSheets` | CSS URLs injected into every web component shadow root via `pony.wc` | none |
-| `legacyClassNames` | Adds the GWT class names the 2.x CSS used ([UPGRADING.md](UPGRADING.md)) | false |
-| `reconnectionTimeoutMs` | Transparent WebSocket reconnection window (ms); 0 = disabled (destroy on close) | 0 |
-| `maxRecordingEntries` | Max buffered protocol entries during a suspension; exceeded, the context is destroyed | 10 000 |
-| `reconnectionListener` | Server-side hook called on WebSocket disconnect | none |
-
-Metrics are set on the servlet, not here: `WebSocketServlet.setMetrics(PonySDKMetrics)`
-([11.4](#114-observability--opentelemetry--dynatrace)).
-
-### 13.2 PonySDKServer
-
-| Setter | Description | Default |
-|--------|-------------|---------|
-| `setPort`, `setHost` | HTTP port and interface | 80, `0.0.0.0` |
-| `setUseSSL` | Adds an HTTPS connector; needs `setSslKeyStoreFile` (and its passphrase, type) | true |
-| `setSslPort` | HTTPS port | 443 |
-| `setSessionCookieSecure` | The session cookie is `Secure`: a browser does not send it over plain HTTP | true |
-| `setApplicationManager` | The application: a `JavaApplicationManager` holding the configuration | none (required) |
-
-For plain HTTP on a development machine: `setUseSSL(false)` and `setSessionCookieSecure(false)`, as in the
-[quick start](#2-quick-start-5-minutes).
-
----
-
-## 14. Jetty 12 / Jakarta EE Migration Notes
+## 12. Jetty 12 / Jakarta EE Migration Notes
 
 ### 14.1 Technology Stack
 
@@ -2211,321 +1238,7 @@ What the server receives from it is checked against traces recorded with the GWT
 
 ---
 
-## 15. Troubleshooting
-
-### 15.1 Connection Issues
-
-#### WebSocket Connection Failed
-
-**Symptom:** Browser shows "WebSocket connection failed" or app doesn't load.
-
-**Causes & Solutions:**
-
-| Cause | Solution |
-|-------|----------|
-| Wrong port or path | Verify `server.setPort()` and `applicationContextName`: the URL is `http://host:port/<name>/` |
-| Firewall blocking WS | Allow WebSocket traffic (port 80/443 or custom) |
-| Proxy not configured | Configure proxy for WebSocket upgrade |
-| SSL mismatch | Use `wss://` for HTTPS, `ws://` for HTTP |
-
-```java
-// Debug: Enable verbose logging
-config.setDebugMode(true);
-
-// Check server is listening
-System.out.println("Server started on port: " + config.getPort());
-```
-
-#### Connection Drops Frequently
-
-**Symptom:** Users get disconnected randomly.
-
-**Solutions:**
-```java
-// Increase heartbeat tolerance
-config.setHeartBeatPeriod(10_000);  // ms: 10 seconds instead of 5
-
-// Check server logs for
-// "Nothing received on UIContext #... not even a pong: the connection is dead" → the client went silent (network issues)
-// "WebSocket lost on UIContext #..." → the connection ended under the server (EOF, reset)
-// "WebSocket Error on UIContext #..." → anything else: check Jetty logs
-```
-
----
-
-### 15.2 UI Not Updating
-
-#### Changes Not Visible in Browser
-
-**Symptom:** You call `label.setText()` but nothing changes.
-
-**Cause 1: Not in UIContext**
-```java
-// WRONG - from background thread without execute()
-new Thread(() -> {
-    label.setText("Updated");  // Silent failure!
-}).start();
-
-// CORRECT - wrap in execute()
-new Thread(() -> {
-    uiContext.execute(() -> {
-        label.setText("Updated");
-    });
-}).start();
-```
-
-**Cause 2: Widget not attached**
-```java
-// WRONG - widget never added to DOM
-PLabel label = Element.newPLabel("Hello");
-label.setText("Updated");  // Queued but never sent
-
-// CORRECT - attach first
-panel.add(label);
-label.setText("Updated");  // Now it works
-```
-
-**Cause 3: Transaction not committed**
-```java
-// WRONG - manual acquire without commit
-uiContext.acquire();
-label.setText("Updated");
-uiContext.release();  // No flush!
-
-// CORRECT - use execute() which auto-commits
-uiContext.execute(() -> {
-    label.setText("Updated");
-});  // Auto-flush here
-```
-
----
-
-### 15.3 Memory Issues
-
-#### OutOfMemoryError on Server
-
-**Symptom:** Server crashes with `java.lang.OutOfMemoryError: Java heap space`
-
-**Diagnosis:**
-```java
-// Add to your code to monitor
-Runtime rt = Runtime.getRuntime();
-long usedMB = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
-System.out.println("Heap used: " + usedMB + " MB");
-```
-
-**Common Causes:**
-
-| Cause | Solution |
-|-------|----------|
-| Widgets not destroyed | Call `removeFromParent()` on unused widgets |
-| Event handlers accumulating | Remove handlers when done |
-| Too many UIContexts | Check for session leaks |
-| Large DataGrids | Use pagination or virtual scrolling |
-
-```java
-//  Properly cleanup widgets
-public void closeDialog() {
-    dialog.removeFromParent();  // Triggers GC on client too
-    dialog = null;              // Allow Java GC
-}
-
-//  Remove handlers when done
-HandlerRegistration reg = button.addClickHandler(e -> {...});
-// Later:
-reg.removeHandler();
-```
-
-#### Memory Leak Detection
-
-```java
-// Monitor UIContext count
-Application app = UIContext.get().getApplication();
-int contextCount = app.getUIContexts().size();
-System.out.println("Active tabs: " + contextCount);
-
-// Monitor widget count (approximate)
-int widgetCount = UIContext.get().getPObjectCache().size();
-System.out.println("Widgets in this tab: " + widgetCount);
-```
-
----
-
-### 15.4 Threading Issues
-
-#### IllegalStateException: No UIContext
-
-**Symptom:** `java.lang.IllegalStateException: No UIContext`
-
-**Cause:** Accessing UI from wrong thread.
-
-```java
-// WRONG - UIContext.get() returns null outside execute()
-new Thread(() -> {
-    UIContext ctx = UIContext.get();  // NULL!
-    ctx.execute(...);  // NPE!
-}).start();
-
-// CORRECT - keep reference before spawning thread
-UIContext ctx = UIContext.get();  // Capture in UI thread
-new Thread(() -> {
-    ctx.execute(() -> {
-        // Safe UI access here
-    });
-}).start();
-```
-
-#### Deadlock
-
-**Symptom:** Application freezes, threads blocked.
-
-**Common Cause:** Nested `execute()` calls or mixing with other locks.
-
-```java
-// WRONG - nested execute() can deadlock
-uiContext.execute(() -> {
-    someService.doSomething();  // If this calls execute() → deadlock!
-});
-
-// CORRECT - execute() is reentrant, but avoid deep nesting
-// Better: do non-UI work outside execute()
-Object result = someService.doSomething();
-uiContext.execute(() -> {
-    label.setText(result.toString());
-});
-```
-
----
-
-### 15.5 Event Handling Issues
-
-#### Click Handler Not Firing
-
-**Symptom:** Button click does nothing.
-
-**Checklist:**
-```java
-// 1. Handler registered?
-button.addClickHandler(e -> {
-    System.out.println("Clicked!");  // Add debug log
-    label.setText("Clicked");
-});
-
-// 2. Widget enabled?
-button.setEnabled(true);  // Disabled widgets don't fire events
-
-// 3. Widget visible?
-button.setVisible(true);  // Hidden widgets don't receive events
-
-// 4. Not covered by another widget?
-// Check z-index and overlapping elements
-```
-
-#### Event Fired Multiple Times
-
-**Symptom:** One click triggers handler 3 times.
-
-**Cause:** Handler registered multiple times.
-
-```java
-// WRONG - called every time view is shown
-public void showView() {
-    button.addClickHandler(e -> doSomething());  // Accumulates!
-}
-
-// CORRECT - register once
-private boolean handlersRegistered = false;
-
-public void showView() {
-    if (!handlersRegistered) {
-        button.addClickHandler(e -> doSomething());
-        handlersRegistered = true;
-    }
-}
-
-//  BETTER - register in constructor
-public MyView() {
-    button.addClickHandler(e -> doSomething());
-}
-```
-
----
-
-### 15.6 Performance Issues
-
-#### Slow Initial Load
-
-**Symptom:** App takes 5+ seconds to show UI.
-
-**Solutions:**
-
-```java
-// 1. Lazy load heavy components
-public void start(UIContext ctx) {
-    // Show skeleton immediately
-    PWindow.getMain().add(loadingSpinner);
-    
-    // Load heavy stuff async
-    scheduler.schedule(() -> {
-        ctx.execute(() -> {
-            loadingSpinner.removeFromParent();
-            PWindow.getMain().add(createHeavyUI());
-        });
-    }, 100, TimeUnit.MILLISECONDS);
-}
-
-// 2. Reduce initial widget count
-// Don't create all tabs upfront - create on demand
-
-// 3. Enable compression
-config.setEnableCompression(true);
-```
-
-#### Laggy UI Updates
-
-**Symptom:** UI feels slow, updates delayed.
-
-**Diagnosis:**
-```java
-// Check latency
-UIContext ctx = UIContext.get();
-System.out.println("Roundtrip: " + ctx.getRoundtripLatency() + "ms");
-System.out.println("Network: " + ctx.getNetworkLatency() + "ms");
-System.out.println("Terminal: " + ctx.getTerminalLatency() + "ms");
-```
-
-| High Value | Likely Cause | Solution |
-|------------|--------------|----------|
-| Network > 100ms | Slow connection | Use CDN, reduce payload |
-| Terminal > 50ms | Heavy DOM updates | Batch updates, simplify UI |
-| Roundtrip spikes | Server overloaded | Profile handlers, add caching |
-
----
-
-### 15.7 Quick Diagnostic Checklist
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Troubleshooting Checklist                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  [ ] Is the server running? (check logs)                          │
-│  [ ] Is WebSocket connected? (browser dev tools → Network → WS)   │
-│  [ ] Is UIContext available? (UIContext.get() != null)            │
-│  [ ] Is widget attached? (added to a parent in DOM)               │
-│  [ ] Is widget enabled/visible?                                   │
-│  [ ] Are you in execute() block for background threads?           │
-│  [ ] Check browser console for JS errors                          │
-│  [ ] Check server logs for exceptions                             │
-│  [ ] Monitor memory usage (heap)                                  │
-│  [ ] Monitor latency (roundtrip/network/terminal)                 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 16. Trade-offs & Comparisons
+## 13. Trade-offs & Comparisons
 
 ### 16.1 Benefits
 
@@ -2565,7 +1278,7 @@ System.out.println("Terminal: " + ctx.getTerminalLatency() + "ms");
 
 ---
 
-## 17. Widget Hierarchy Reference
+## 14. Widget Hierarchy Reference
 
 Widgets extend `PWidget`, which extends `PObject`; `PAddOn` and `PHost` are `PObject`s without a widget of their
 own. Panels hold children. `PWebComponent` and `PElement` sit under `PComplexPanel`: they hold children like any
@@ -2602,7 +1315,7 @@ PObject
 
 ---
 
-## 18. Architectural Patterns Summary
+## 15. Architectural Patterns Summary
 
 | Pattern | Where Used |
 |---------|------------|
