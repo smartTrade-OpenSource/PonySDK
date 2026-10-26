@@ -19,3 +19,4 @@ what was measured once it was built. They are written for the people who change 
 | [0011](0011-one-way-to-listen.md) | One way to listen to a custom event, and the traps of the web component API closed | Accepted |
 | [0012](0012-api-surface.md) | The public API reduced to what an application calls, and PCookies made consistent | Accepted |
 | [0013](0013-conflated-streams.md) | A stream of values bound to a context, the latest value per key at each flush | Accepted |
+| [0014](0014-fdc3.md) | FDC3 from Java, through the desktop agent of the page | Accepted |
