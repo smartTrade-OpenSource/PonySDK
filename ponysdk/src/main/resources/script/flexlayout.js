@@ -344,7 +344,7 @@
         }
         case 'RESIZE_BORDER': {
           const border = this.getBorder(action.side); if (!border) return;
-          border.size = Math.max(50, action.size);
+          border.size = clamp(action.size, border.minSize, border.maxSize);
           break;
         }
         case 'TOGGLE_BORDER': {
@@ -651,12 +651,23 @@
 
     setBorderMinSize(side, min) {
       const border = this.model.getBorder(side);
-      if (border) border.minSize = min;
+      if (!border) return;
+      border.minSize = min;
+      this._reclampBorderSize(border);
     }
 
     setBorderMaxSize(side, max) {
       const border = this.model.getBorder(side);
-      if (border) border.maxSize = max;
+      if (!border) return;
+      border.maxSize = max;
+      this._reclampBorderSize(border);
+    }
+
+    // A border's size always stays within [minSize, maxSize]; the action re-renders when it changes.
+    _reclampBorderSize(border) {
+      if (border.size !== clamp(border.size, border.minSize, border.maxSize)) {
+        this.model.doAction(Actions.resizeBorder(border.side, border.size));
+      }
     }
 
     setMaxChildren(tabsetId, max) {
@@ -1297,7 +1308,8 @@
           try { handle.setPointerCapture(e.pointerId); } catch(err) {}
           this._beginResize(handle, isV);
           const startPos = isV ? e.clientX : e.clientY;
-          const startSize = size;
+          // Start from what is displayed: nothing re-renders after a drag, so the render-time size goes stale.
+          const startSize = isV ? panel.offsetWidth : panel.offsetHeight;
           const rowEl = this.container.querySelector('.fl-row');
           const stripW = this._getStripW();
           const baseSide = side.split('-')[0];
@@ -1347,7 +1359,7 @@
             } else {
               // Normal resize: persist new size
               const allSideBorders = this.model.getBorders().filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
-              allSideBorders.forEach(b => { b.size = Math.max(50, finalSize); });
+              allSideBorders.forEach(b => { b.size = clamp(finalSize, b.minSize, b.maxSize); });
               // The panel and the layout insets were updated inline as the pointer moved, so the
               // rendered state already matches the model: emitting 'change' would only rebuild it.
               if (this.onModelChange) this.onModelChange(this.model);

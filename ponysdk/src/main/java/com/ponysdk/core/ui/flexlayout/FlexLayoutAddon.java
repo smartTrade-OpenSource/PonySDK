@@ -380,6 +380,13 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("setBorderMinSize", side, minSize);
     }
 
+    /**
+     * Resizes a border to the given size in pixels, clamped to its min/max size.
+     */
+    public void setBorderSize(final String side, final int size) {
+        callTerminalMethod("setBorderSize", side, size);
+    }
+
     public void setBorderMaxSize(final String side, final int maxSize) {
         callTerminalMethod("setBorderMaxSize", side, maxSize);
     }

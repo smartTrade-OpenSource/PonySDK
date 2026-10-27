@@ -844,6 +844,11 @@
       this._layout.setBorderMinSize(side, minSize);
     },
 
+    setBorderSize: function (side, size) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'RESIZE_BORDER', side: side, size: size });
+    },
+
     setBorderMaxSize: function (side, maxSize) {
       if (!this._layout) return;
       this._layout.setBorderMaxSize(side, maxSize);

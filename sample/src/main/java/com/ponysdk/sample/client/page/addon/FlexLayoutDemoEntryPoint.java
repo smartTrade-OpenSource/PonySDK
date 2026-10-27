@@ -151,6 +151,11 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         toggleBottom.addClickHandler(e -> flexLayout.getAddon().toggleBorder("bottom"));
         toolbar.add(toggleBottom);
 
+        final PButton rightSize = Element.newPButton("Right 300px");
+        styleSidebarButton(rightSize);
+        rightSize.addClickHandler(e -> flexLayout.getAddon().setBorderSize("right-top", 300));
+        toolbar.add(rightSize);
+
         // Theme selector handler
         themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
         if (!fullViewport) { // embedded in the (light) showcase: start with the light theme
@@ -295,6 +300,8 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         props.setStyleProperty("padding", "12px");
         props.setStyleProperty("color", "#fab387");
         flexLayout.addBorderTab("right-top", "Properties", props);
+        // Larger than the 220px default size: the sidebar must still open at least this wide.
+        flexLayout.getAddon().setBorderMinSize("right-top", 260);
 
         final PLabel outline = Element.newPLabel("Document outline / structure.");
         outline.setStyleProperty("padding", "12px");
