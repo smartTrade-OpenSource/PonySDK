@@ -71,6 +71,10 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 
 ## Behaviour changes
 
+- The session cookie is `Secure` by default: a browser does not send it back over plain HTTP, so a server on plain
+  HTTP calls `setSessionCookieSecure(false)` (Chrome and Firefox accept it on `http://localhost`, Safari does not).
+  HTTPS is on by default as before (`setUseSSL`); without a key store the server now stops at start and says what to
+  set, where it used to stop on a `NullPointerException`.
 - A terminal posts the blocks of its windows and frames to its own origin, no longer to `*`: a window or a frame that
   navigated to another origin receives nothing.
 - The addon factories are a table of the page (`window.ponyAddOnFactories`), shared by the terminals of the page's
