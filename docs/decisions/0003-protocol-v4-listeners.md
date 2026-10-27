@@ -65,7 +65,7 @@ Protocol version 4, `ProtocolVersion.LISTENERS`.
 Key budget. Five keys no V3 server writes and no terminal reads went before V3 is released: `HEARTBEAT` (2.x had
 already removed it, so V3's numbers differed from 2.x's from index 1 on), `DICTIONARY_STRING_ADD`, `WC_SHADOW_MODE`,
 `WC_USE_SHARED_SKIN` and `WC_SET_PROPERTY_TYPED` (never written). `SUGGESTIONS`, written by 2.x only, stays: V3's keys
-now extend the 227 of 2.x at the same numbers. 247 keys are used, 9 left. Once V3 is released no key is renumbered: a
+now extend the 227 of 2.x at the same numbers. 250 keys are used, 6 left. Once V3 is released no key is renumbered: a
 page loaded before a deployment may still read them.
 
 Binary messages from the terminal (`./gradlew :ponysdk:bench -Pbench.args="v4 inbound"`). Per message, on the path
