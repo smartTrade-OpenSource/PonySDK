@@ -31,6 +31,17 @@ The legacy global `getUIContext(id)` is deprecated for removal, and cross-sessio
 
 `BootstrapServlet` serves client resources by path. Before loading anything, `isSafeResourcePath(path)` rejects traversal / absolute / backslash paths and returns `404`, so a crafted URL cannot escape the resource root to read arbitrary files.
 
+From the classpath (the application's jars and PonySDK's), it serves web files only: `html`, `js`, `mjs`, `css`,
+`map`, images and fonts. A class, a `.properties`, `.xml` or `.yml` configuration, a key store (`.jks`, `.p12`) answers
+`404`, as anything not in the list. An application that serves another type from its jars adds it, knowing that every
+file of that type on the classpath becomes downloadable:
+
+```java
+configuration.addServedResourceExtensions("json"); // translations kept in a jar
+```
+
+The files of the servlet context (a web application's directory) are all served: they are public by construction.
+
 ## Log-injection hardening
 
 Untrusted client values (the reconnection parameter, malformed inbound frames) are sanitised before being logged, so a client cannot forge log lines by injecting newlines or control characters.
@@ -40,7 +51,7 @@ Untrusted client values (the reconnection parameter, malformed inbound frames) a
 - `Origin` check **on** — cross-origin WebSocket upgrades are rejected.
 - Inbound size **bounded** (1 MB) and slow consumers **disconnected** — one connection cannot exhaust memory.
 - UIContext access **scoped to the HTTP session** — no IDOR.
-- Static resources **path-guarded** — no traversal.
+- Static resources **path-guarded** — no traversal — and **web files only** from the classpath — no class, configuration or key store.
 - Transparent reconnection **off** by default — no silent resume of stale state (important for trading apps, where stale market data must never be replayed unnoticed).
 
 > Each item above is backed by dedicated tests (the Origin matrix, cross-session denial, path-safety, and the configuration defaults), so the secure defaults cannot silently regress.

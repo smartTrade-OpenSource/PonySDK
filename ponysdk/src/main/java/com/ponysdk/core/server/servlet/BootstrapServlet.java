@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -198,7 +199,10 @@ public class BootstrapServlet extends HttpServlet {
         }
     }
 
-    /** The served file: from the servlet context first, then from the jars. Null when there is none. */
+    /**
+     * The served file: from the servlet context first, then from the jars, of a type the configuration serves (web
+     * files by default: never a class, a configuration or a key store). Null when there is none.
+     */
     protected URL getResourceURL(final String path) {
         try {
             final URL url = getServletContext().getResource(path);
@@ -206,11 +210,25 @@ public class BootstrapServlet extends HttpServlet {
         } catch (final java.net.MalformedURLException e) {
             return null;
         }
+        if (!isServedFromClasspath(path)) return null;
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final String jarPath = path.substring(1);
         final URL url = classLoader.getResource(jarPath);
         return url != null || childClassLoader == null ? url : childClassLoader.getResource(jarPath);
     }
+
+    private boolean isServedFromClasspath(final String path) {
+        final int slash = path.lastIndexOf('/');
+        final int dot = path.lastIndexOf('.');
+        if (dot <= slash) return false;
+        final String extension = path.substring(dot + 1).toLowerCase(Locale.ROOT);
+        final ApplicationConfiguration config = configuration != null ? configuration : DEFAULT_CONFIGURATION;
+        final Set<String> served = config.getServedResourceExtensions();
+        return (served != null ? served : DEFAULT_CONFIGURATION.getServedResourceExtensions()).contains(extension);
+    }
+
+    /** The served types when the servlet has no configuration of its own. */
+    private static final ApplicationConfiguration DEFAULT_CONFIGURATION = new ApplicationConfiguration();
 
     /**
      * Modification time of the requested file, for conditional GETs ({@link HttpServlet#service} answers 304

@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -88,6 +91,13 @@ public class ApplicationConfiguration {
     private boolean wsOriginCheckEnabled = true;
     /** Explicit allow-list of accepted Origins: the pages allowed to embed the application. When empty, only same-origin. */
     private Set<String> wsAllowedOrigins;
+    /**
+     * The file types the application serves from its classpath (its jars and PonySDK's): web files only, so that
+     * neither its classes nor its configuration nor a key store can be downloaded. The servlet context's files are
+     * all served.
+     */
+    private final Set<String> servedResourceExtensions = new HashSet<>(Set.of("html", "htm", "js", "mjs", "css", "map",
+        "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "avif", "woff", "woff2", "ttf", "otf"));
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
     private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
     /**
@@ -393,6 +403,7 @@ public class ApplicationConfiguration {
         public Builder style(final Map<String, String> v)          { config.setStyle(v); return this; }
         public Builder meta(final Set<String> v)                   { config.setMeta(v); return this; }
         public Builder wcSharedSheets(final Set<String> v)         { config.setWcSharedSheets(v); return this; }
+        public Builder servedResourceExtensions(final String... v)  { config.addServedResourceExtensions(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
@@ -601,6 +612,21 @@ public class ApplicationConfiguration {
      */
     public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
         this.wsAllowedOrigins = wsAllowedOrigins;
+    }
+
+    /** The file types served from the classpath, lower case and without their dot. */
+    public Set<String> getServedResourceExtensions() {
+        return Collections.unmodifiableSet(servedResourceExtensions);
+    }
+
+    /**
+     * Serves more file types from the classpath than the web files, e.g. {@code "json"} for translations kept in a jar.
+     * Everything of these types on the classpath becomes downloadable: never the type of a configuration or a key.
+     */
+    public void addServedResourceExtensions(final String... extensions) {
+        for (final String extension : extensions) {
+            servedResourceExtensions.add(extension.toLowerCase(Locale.ROOT).replaceFirst("^\\.", ""));
+        }
     }
 
     public int getMaxProtocolVersion() {

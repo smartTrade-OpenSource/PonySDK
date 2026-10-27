@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -357,4 +358,51 @@ public class BootstrapServletTest {
         assertEquals("{\"styles\":[],\"scripts\":[\"script/ponysdk.js\"],\"sharedSheets\":[],\"reconnection\":false,\"terminal\":\"ponyterminal/terminal.js\",\"mount\":1,\"legacy\":null}",
             body.toString());
     }
+
+    /** A servlet whose servlet context has no file: everything comes from the classpath. */
+    private static TestableBootstrapServlet servletOnTheClasspath(final ApplicationConfiguration config) {
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        final TestableBootstrapServlet servlet = new TestableBootstrapServlet(ctx);
+        servlet.setConfiguration(config);
+        return servlet;
+    }
+
+    private static HttpServletResponse served(final TestableBootstrapServlet servlet, final String path, final ByteArrayOutputStream body)
+            throws IOException {
+        final HttpServletResponse response = response(body);
+        servlet.handleRequest(request("", path), response, path);
+        return response;
+    }
+
+    @Test
+    public void theClasspathServesWebFilesOnly() throws IOException {
+        // Anything on the classpath used to be served: the classes, and an application's configuration
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(new ApplicationConfiguration());
+        for (final String path : List.of("/com/ponysdk/core/server/servlet/BootstrapServlet.class",
+            "/conf/MessagesCore.properties", "/conf/client_application.inc.xml", "/META-INF/mime.types")) {
+            final ByteArrayOutputStream body = new ByteArrayOutputStream();
+            Mockito.verify(served(servlet, path, body)).sendError(HttpServletResponse.SC_NOT_FOUND);
+            assertEquals(0, body.size(), path + " is not served");
+        }
+        final ByteArrayOutputStream script = new ByteArrayOutputStream();
+        served(servlet, "/script/ponysdk.js", script);
+        assertTrue(script.size() > 0, "a script is served");
+    }
+
+    @Test
+    public void anApplicationServesMoreTypesFromTheClasspath() throws IOException {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.addServedResourceExtensions("properties");
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        served(servletOnTheClasspath(config), "/conf/MessagesCore.properties", body);
+        assertTrue(body.size() > 0, "a type the application adds is served");
+    }
+
+    @Test
+    public void getLastModifiedSaysNothingOfAFileThatIsNotServed() {
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(new ApplicationConfiguration());
+        final String path = "/com/ponysdk/core/server/servlet/BootstrapServlet.class";
+        assertEquals(-1, servlet.getLastModified(request("", path)));
+    }
 }
+
