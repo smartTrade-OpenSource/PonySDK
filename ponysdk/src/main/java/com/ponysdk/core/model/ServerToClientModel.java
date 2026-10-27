@@ -217,6 +217,7 @@ public enum ServerToClientModel {
     ROOT_ID(ValueTypeModel.STRING),
     WINDOW_ID(ValueTypeModel.UINT31),
     FRAME_ID(ValueTypeModel.UINT31),
+    /** JavaScript source, written by 2.x servers only (ADR-0015): kept so that the keys keep their numbers. */
     EVAL(ValueTypeModel.STRING),
     VISIBLE_LINES(ValueTypeModel.INTEGER),
     CHARACTER_WIDTH(ValueTypeModel.INTEGER),
@@ -253,6 +254,7 @@ public enum ServerToClientModel {
     PADDON_ARGUMENTS(ValueTypeModel.ARRAY),
     DESTROY(ValueTypeModel.NULL),
 
+    /** JavaScript source, written by 2.x servers only (ADR-0015): kept so that the keys keep their numbers. */
     FUNCTION_CREATION(ValueTypeModel.STRING),
     FUNCTION_ID(ValueTypeModel.UINT31),
     FUNCTION_ARGS(ValueTypeModel.ARRAY),

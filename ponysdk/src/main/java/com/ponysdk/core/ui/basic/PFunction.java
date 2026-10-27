@@ -40,8 +40,7 @@ public class PFunction extends PObject {
     @Override
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
-        if (function.getJsFunctionName() != null) writer.write(ServerToClientModel.FUNCTION_NAME, function.getJsFunctionName());
-        else writer.write(ServerToClientModel.FUNCTION_CREATION, function.getJsFunction());
+        writer.write(ServerToClientModel.FUNCTION_NAME, function.getJsFunctionName());
     }
 
     @Override

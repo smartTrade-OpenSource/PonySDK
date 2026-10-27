@@ -37,8 +37,8 @@ import java.util.Map;
 
 /**
  * Calls a JavaScript function of the terminal's window by name: a function the application's own scripts define
- * ({@link #call(PWindow, String, Object...)}). {@code execute} sends JavaScript source instead, which the browser can
- * only run with {@code 'unsafe-eval'} (ADR-0015).
+ * ({@link #call(PWindow, String, Object...)}). No JavaScript source travels: the page needs no {@code 'unsafe-eval'}
+ * (ADR-0015).
  */
 public class PScript extends PObject {
 
@@ -106,32 +106,7 @@ public class PScript extends PObject {
      */
     public static void call(final PWindow window, final String functionName, final Object[] args, final ExecutionCallback callback,
                             final Duration period) {
-        get(window).send(ServerToClientModel.FUNCTION_NAME, functionName, args, callback, period);
-    }
-
-    /** @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #call(PWindow, String, Object...)} */
-    @Deprecated(since = "3.0")
-    public static void execute(final PWindow window, final String js) {
-        execute(window, js, null, null);
-    }
-
-    /** @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #call(PWindow, String, Object[], ExecutionCallback, Duration)} */
-    @Deprecated(since = "3.0")
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
-        execute(window, js, callback, null);
-    }
-
-    /** @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #call(PWindow, String, Object[], ExecutionCallback, Duration)} */
-    @Deprecated(since = "3.0")
-    public static void execute(final PWindow window, final String js, final Duration period) {
-        execute(window, js, null, period);
-    }
-
-    /** @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #call(PWindow, String, Object[], ExecutionCallback, Duration)} */
-    @Deprecated(since = "3.0")
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
-        requireScriptEval("PScript.execute", "PScript.call");
-        get(window).send(ServerToClientModel.EVAL, js, null, callback, period);
+        get(window).send(functionName, args, callback, period);
     }
 
     @Override
@@ -139,10 +114,9 @@ public class PScript extends PObject {
         return WidgetType.SCRIPT;
     }
 
-    private void send(final ServerToClientModel model, final String script, final Object[] args, final ExecutionCallback callback,
-                      final Duration period) {
+    private void send(final String functionName, final Object[] args, final ExecutionCallback callback, final Duration period) {
         saveUpdate(writer -> {
-            writer.write(model, script);
+            writer.write(ServerToClientModel.FUNCTION_NAME, functionName);
             if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
             if (callback != null) {
                 if (callbacksByID == null) callbacksByID = new HashMap<>(4);

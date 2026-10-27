@@ -102,8 +102,6 @@ public class ApplicationConfiguration {
         "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "avif", "woff", "woff2", "ttf", "otf"));
     /** See {@link #setContentSecurityPolicyEnabled(boolean)}. */
     private boolean contentSecurityPolicyEnabled = true;
-    /** See {@link #setScriptEvalEnabled(boolean)}. */
-    private boolean scriptEvalEnabled = true;
     /** See {@link #addScriptSources(String...)}. */
     private final Set<String> scriptSources = new LinkedHashSet<>();
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
@@ -413,7 +411,6 @@ public class ApplicationConfiguration {
         public Builder wcSharedSheets(final Set<String> v)         { config.setWcSharedSheets(v); return this; }
         public Builder servedResourceExtensions(final String... v)  { config.addServedResourceExtensions(v); return this; }
         public Builder contentSecurityPolicyEnabled(final boolean v) { config.setContentSecurityPolicyEnabled(v); return this; }
-        public Builder scriptEvalEnabled(final boolean v)          { config.setScriptEvalEnabled(v); return this; }
         public Builder scriptSources(final String... v)            { config.addScriptSources(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
@@ -652,20 +649,6 @@ public class ApplicationConfiguration {
      */
     public void setContentSecurityPolicyEnabled(final boolean contentSecurityPolicyEnabled) {
         this.contentSecurityPolicyEnabled = contentSecurityPolicyEnabled;
-    }
-
-    public boolean isScriptEvalEnabled() {
-        return scriptEvalEnabled;
-    }
-
-    /**
-     * Whether JavaScript source may be sent to the terminal, which evaluates it: {@code PScript.execute},
-     * {@code PObject.evalTerminalScript}, a {@code TextFunction} built from source. Off, the policy forbids
-     * {@code 'unsafe-eval'} and these throw {@link IllegalStateException}: functions are called by name
-     * ({@code PScript.call}, {@code callTerminalFunction}, {@code TextFunction.named}). On by default.
-     */
-    public void setScriptEvalEnabled(final boolean scriptEvalEnabled) {
-        this.scriptEvalEnabled = scriptEvalEnabled;
     }
 
     /** The script origins the policy allows besides the application's and those of {@link #getJavascript()}. */

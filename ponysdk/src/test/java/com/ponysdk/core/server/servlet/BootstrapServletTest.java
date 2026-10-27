@@ -462,7 +462,7 @@ public class BootstrapServletTest {
 
         assertTrue(policy.contains(" https://cdn.example "), policy);
         assertTrue(policy.contains(" https://static.example:8443 "), policy);
-        assertTrue(policy.contains(" https://api.example "), policy);
+        assertTrue(policy.contains(" https://api.example;"), policy);
         assertFalse(policy.contains("script/app.js"), "a path of the application is 'self': " + policy);
         assertTrue(policy.endsWith("frame-ancestors 'self' https://portal.example"), policy);
     }
@@ -480,13 +480,11 @@ public class BootstrapServletTest {
         assertTrue(policy.endsWith("frame-ancestors 'self' http://localhost:8082"), policy);
     }
 
+    /** No API sends JavaScript source (ADR-0015): the page never needs eval. */
     @Test
-    public void evalIsAllowedUntilTheApplicationTurnsItOff() throws Exception {
-        final ApplicationConfiguration config = configuration();
-        assertTrue(pageHeaders(config).get("Content-Security-Policy").contains(" 'unsafe-eval';"), "on by default");
-
-        config.setScriptEvalEnabled(false);
-        assertFalse(pageHeaders(config).get("Content-Security-Policy").contains("unsafe-eval"));
+    public void thePolicyNeverAllowsEval() throws Exception {
+        final String policy = pageHeaders(configuration()).get("Content-Security-Policy");
+        assertFalse(policy.contains("unsafe-eval"), policy);
     }
 
     @Test

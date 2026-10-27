@@ -30,11 +30,12 @@
 | `PCookies.setListener(CookiesListener)`, `CookiesListener` (one listener, never called when set late) | `addInitializedListener(Runnable)`: several, called at once when the cookies are known, removed by its `HandlerRegistration` |
 | `PCookies.setCookie(name, value, expires, domain, path, secure, sameSite)` (path and domain in the other order than `setCookie(name, value, expires, path)`) | `setCookie(name, value, CookieOptions.expires(instant).withDomain(domain).withPath(path).secure().sameSite(SameSite.STRICT))` ([ADR-0012](docs/decisions/0012-api-surface.md)) |
 | `new PCookies()` | `UIContext.getCookies()`, which creates it |
+| `PScript.execute(window, js, ...)`: JavaScript source, run with eval | `PScript.call(window, functionName, args...)`, with a callback and a delay as before ([ADR-0015](docs/decisions/0015-content-security-policy.md)) |
+| `PObject.evalTerminalScript(js)` | `callTerminalFunction(functionName, args...)`: the function receives the element, then the args |
+| `new TextFunction(java, js)`, `getJsFunction()` | `TextFunction.named(java, functionName)`: the function receives the args array |
 
-Deprecated, for JavaScript source needs `'unsafe-eval'`: `PScript.execute` → `PScript.call(window, functionName,
-args...)`, `PObject.evalTerminalScript` → `callTerminalFunction(functionName, args...)`, `new TextFunction(java, js)` →
-`TextFunction.named(java, functionName)`. The function is one of `window`, defined by the application's scripts. With
-`setScriptEvalEnabled(false)` the deprecated three throw `IllegalStateException` and the policy forbids eval.
+The functions those three call are functions of `window`, defined by the application's scripts: no JavaScript source
+travels, and the page's policy forbids eval.
 
 The `UIContext` constructors no longer take the upgrade request; `PSuite` builds its context accordingly.
 
@@ -72,6 +73,8 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
   - a site that shows the application in a frame: list its origin in `setWsAllowedOrigins`;
   - HTML sent to the terminal (`PHTML`, `setInnerHTML`, `setAttribute`) with `onclick=` attributes or `javascript:`
     URLs: the policy blocks them; listen with handlers instead;
+  - scripts of the application that use `eval` or `new Function` (a library that compiles templates): the policy
+    blocks them; replace them, or send a policy of your own;
   - an application with its own policy: `setContentSecurityPolicyEnabled(false)`.
 - The reconnection flag and the web components' shared sheets are `<meta>` elements (`pony-reconnection`,
   `pony-wc-shared-sheets`) instead of inline scripts.

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,8 +28,7 @@ import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
 import com.ponysdk.core.ui.formatter.TextFunction;
 
 /**
- * JavaScript called by name instead of sent as source (ADR-0015), and the APIs that send source refused when the
- * application runs without eval.
+ * JavaScript called by name, never sent as source (ADR-0015).
  */
 public class NamedFunctionTest {
 
@@ -47,7 +47,8 @@ public class NamedFunctionTest {
     private UIContext ctx;
     private PFlowPanel root;
 
-    private void start(final boolean scriptEval) {
+    @BeforeEach
+    public void start() {
         wire = new Wire();
         final WebSocket socket = Mockito.mock(WebSocket.class);
         Mockito.when(socket.getUpgradeRequestData()).thenReturn(
@@ -56,7 +57,6 @@ public class NamedFunctionTest {
         txn.getWriter().setEncoder(wire);
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
-        config.setScriptEvalEnabled(scriptEval);
         ctx = new UIContext(socket, txn, config);
         ctx.execute(() -> {
             root = Element.newPFlowPanel();
@@ -85,7 +85,6 @@ public class NamedFunctionTest {
 
     @Test
     public void aScriptCallsAFunctionOfTheWindowWithItsArguments() {
-        start(true);
         run(() -> PScript.call(PWindow.getMain(), "showToast", "saved", 3));
         assertTrue(wire.entries.contains("FUNCTION_NAME=showToast"), wire.entries.toString());
         assertTrue(wire.entries.contains("FUNCTION_ARGS=[saved, 3]"), wire.entries.toString());
@@ -94,7 +93,6 @@ public class NamedFunctionTest {
 
     @Test
     public void aCallWithoutArgumentsSendsNone() {
-        start(true);
         run(() -> PScript.call(PWindow.getMain(), "refresh"));
         assertTrue(wire.entries.contains("FUNCTION_NAME=refresh"));
         assertFalse(wire.entries.stream().anyMatch(e -> e.startsWith("FUNCTION_ARGS")), wire.entries.toString());
@@ -102,7 +100,6 @@ public class NamedFunctionTest {
 
     @Test
     public void aCallWithACallbackAndADelayCarriesBoth() {
-        start(true);
         final ExecutionCallback callback = Mockito.mock(ExecutionCallback.class);
         run(() -> PScript.call(PWindow.getMain(), "measure", new Object[] { "grid" }, callback, Duration.ofMillis(250)));
         final int name = wire.entries.indexOf("FUNCTION_NAME=measure");
@@ -112,7 +109,6 @@ public class NamedFunctionTest {
 
     @Test
     public void aWidgetCallsAFunctionOnItsElement() {
-        start(true);
         final PButton[] button = new PButton[1];
         run(() -> { button[0] = Element.newPButton("ok"); root.add(button[0]); });
         wire.entries.clear();
@@ -123,48 +119,17 @@ public class NamedFunctionTest {
 
     @Test
     public void aFunctionalLabelNamesItsFunction() {
-        start(true);
         run(() -> root.add(Element.newPFunctionalLabel(TextFunction.named(args -> args[0] + " ponies", "ponies"), 3)));
         assertTrue(wire.entries.contains("FUNCTION_NAME=ponies"), wire.entries.toString());
         assertFalse(wire.entries.stream().anyMatch(e -> e.startsWith("FUNCTION_CREATION")), "no source sent");
     }
 
+    /** The 2.x APIs that sent JavaScript source, which the browser ran with eval, are gone. */
     @Test
-    @SuppressWarnings("deprecation")
-    public void theApisThatSendSourceStillWorkWithEval() {
-        start(true);
-        run(() -> PScript.execute(PWindow.getMain(), "a()"));
-        run(() -> root.add(Element.newPFunctionalLabel(new TextFunction(args -> "", "return '';"))));
-        assertTrue(wire.entries.contains("EVAL=a()"));
-        assertTrue(wire.entries.contains("FUNCTION_CREATION=return '';"));
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void withoutEvalTheApisThatSendSourceFailOnTheServer() {
-        start(false);
-        final PButton[] button = new PButton[1];
-        run(() -> { button[0] = Element.newPButton("ok"); root.add(button[0]); });
-        wire.entries.clear();
-
-        final Throwable script = run(() -> PScript.execute(PWindow.getMain(), "a()"));
-        final Throwable widget = run(() -> button[0].evalTerminalScript("a()"));
-        final Throwable label = run(() -> root.add(Element.newPFunctionalLabel(new TextFunction(args -> "", "return '';"))));
-
-        assertInstanceOf(IllegalStateException.class, script);
-        assertTrue(script.getMessage().contains("PScript.call"), script.getMessage());
-        assertInstanceOf(IllegalStateException.class, widget);
-        assertTrue(widget.getMessage().contains("callTerminalFunction"), widget.getMessage());
-        assertInstanceOf(IllegalStateException.class, label);
-        assertTrue(label.getMessage().contains("TextFunction.named"), label.getMessage());
-        assertFalse(wire.entries.stream().anyMatch(e -> e.startsWith("EVAL") || e.startsWith("FUNCTION_CREATION")),
-            wire.entries.toString());
-    }
-
-    @Test
-    public void withoutEvalNamedFunctionsWork() {
-        start(false);
-        assertNull(run(() -> PScript.call(PWindow.getMain(), "refresh")));
-        assertTrue(wire.entries.contains("FUNCTION_NAME=refresh"));
+    public void noApiSendsJavaScriptSource() {
+        assertTrue(Arrays.stream(PScript.class.getMethods()).noneMatch(m -> m.getName().equals("execute")));
+        assertTrue(Arrays.stream(PObject.class.getMethods()).noneMatch(m -> m.getName().equals("evalTerminalScript")));
+        assertEquals(0, TextFunction.class.getConstructors().length, "TextFunction.named only");
+        assertTrue(Arrays.stream(TextFunction.class.getMethods()).noneMatch(m -> m.getName().equals("getJsFunction")));
     }
 }

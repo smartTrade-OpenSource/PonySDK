@@ -366,7 +366,7 @@ public class BootstrapServlet extends HttpServlet {
 
     /**
      * The policy of the page PonySDK builds (ADR-0015): its one inline script by hash, the script origins the
-     * configuration names, eval unless the application turned it off, frames by the pages that embed it. An
+     * configuration names, no eval, frames by the pages that embed it. An
      * application that adds inline scripts to the page overrides this to allow them.
      */
     protected String buildContentSecurityPolicy() {
@@ -379,7 +379,6 @@ public class BootstrapServlet extends HttpServlet {
             if (origin != null) scripts.add(origin);
         });
         scripts.addAll(configuration.getScriptSources());
-        if (configuration.isScriptEvalEnabled()) scripts.add("'unsafe-eval'");
 
         final Set<String> ancestors = new LinkedHashSet<>();
         ancestors.add("'self'");

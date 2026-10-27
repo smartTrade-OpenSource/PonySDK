@@ -69,9 +69,8 @@ ticket.dispatchEvent(new CustomEvent('reset'));
   context (ADR-0005).
 - **Content Security Policy.** The element runs in the host page: the host's policy applies, not the application's
   ([ADR-0015](../decisions/0015-content-security-policy.md)). It allows the application's origin in `script-src` and
-  `connect-src` (its scripts, its socket), and `'unsafe-eval'` unless the application runs with
-  `setScriptEvalEnabled(false)`. The application's own pages (windows, frames) carry its policy, whose
-  `frame-ancestors` lists `wsAllowedOrigins`.
+  `connect-src` (its scripts, its socket); PonySDK needs no `'unsafe-eval'`. The application's own pages (windows,
+  frames) carry its policy, whose `frame-ancestors` lists `wsAllowedOrigins`.
 - **Limits.** In a shadow root, addons that search the document find nothing (`isolation="none"`). Each element has
   its own socket and context (about 80 KB of server heap). The application's scripts run in the host page's global
   scope.

@@ -485,9 +485,6 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
         w.focusTarget.tabIndex = r.int;
     }],
     [K.ENSURE_DEBUG_ID, (w, r) => w.element.setAttribute('pid', r.str ?? '')],
-    [K.EVAL, (w, r) => {
-        new Function('element', `return ${r.str ?? ''}`)(w.element);
-    }],
     [K.FUNCTION_NAME, (w, r) => {
         const name = r.str ?? '';
         let args: unknown[] = [];

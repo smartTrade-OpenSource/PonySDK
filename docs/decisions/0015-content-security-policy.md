@@ -29,7 +29,7 @@ by `'self'`.
    become `<meta>` elements (`pony-reconnection`, `pony-wc-shared-sheets`), read by the terminal and `ponysdk.js`.
 2. The page PonySDK builds is served with
    ```
-   Content-Security-Policy: script-src 'self' 'sha256-…' [script origins] ['unsafe-eval'];
+   Content-Security-Policy: script-src 'self' 'sha256-…' [script origins];
        object-src 'none'; base-uri 'self'; frame-ancestors 'self' [wsAllowedOrigins]
    ```
    - script origins: the origins of the absolute URLs in `setJavascript`, and `addScriptSources(...)`;
@@ -49,13 +49,13 @@ by `'self'`.
 
    One new protocol key, `FUNCTION_NAME`, appended (no number moves); its arguments travel in `FUNCTION_ARGS`.
    The function is looked up when it is called, so a script loaded later still provides it.
-4. `PScript.execute`, `evalTerminalScript` and the `TextFunction` constructor are deprecated, not removed: an
-   application moves call by call. `setScriptEvalEnabled(false)` takes `'unsafe-eval'` out of the policy, and these
-   three throw `IllegalStateException` on the server when called, instead of a violation in the browser's console.
-   Default `true`.
+4. `PScript.execute`, `evalTerminalScript` and the `TextFunction` constructor are removed, and so is the terminal's
+   code that evaluated their source: no JavaScript source travels, the policy never allows `'unsafe-eval'`.
+   `EVAL` and `FUNCTION_CREATION` stay in the protocol, unused, so that no key is renumbered.
+   Rejected: deprecating them behind a switch that kept `'unsafe-eval'` by default (first version of this ADR). 3.0
+   already breaks the API of 2.x; a switch left on by default would leave eval allowed in most applications.
 5. An application embedded with `<pony-app>` runs in the host page: the host's policy applies. The embedding guide
-   says what it must allow: `script-src` the application's origin, and `'unsafe-eval'` unless the application runs
-   with `setScriptEvalEnabled(false)`.
+   says what it must allow: `script-src` and `connect-src` the application's origin.
 
 ## Consequences
 
@@ -65,10 +65,11 @@ by `'self'`.
   lists that site in `setWsAllowedOrigins`. UPGRADING.md says so.
 - HTML sent to the terminal (`PHTML`, `setInnerHTML`, `setAttribute`) cannot carry inline event handlers
   (`onclick=`) or `javascript:` URLs: the policy blocks them, as it should.
-- The showcase runs with `setScriptEvalEnabled(false)`: its browser suites, run under the policy, are the proof
-  that PonySDK needs neither `'unsafe-inline'` nor `'unsafe-eval'`.
-- With `setScriptEvalEnabled(false)` the 2.x-style APIs fail at the first call, in development, with the name of
-  the replacement.
+- The showcase's browser suites, run under the policy, are the proof that PonySDK needs neither `'unsafe-inline'` nor
+  `'unsafe-eval'`.
+- An application moving from 2.x replaces each `execute`, `evalTerminalScript` and `new TextFunction` with a function
+  of its own scripts: the compiler lists them. One whose own scripts need eval (a library that compiles templates)
+  turns the policy off and sends its own.
 - A CSP source expression cannot name an IPv6 address (`http://[::1]:8082`): Chrome rejects it and logs an error on
   every page. Such an origin is left out of the policy with a warning, so a page at an IPv6 address cannot frame the
   application. The browser suites that frame the showcase run on `localhost`, as in CI.

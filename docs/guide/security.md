@@ -49,7 +49,7 @@ injection (a label set with `setInnerHTML` from user data) cannot run script, an
 application in a frame.
 
 ```
-Content-Security-Policy: script-src 'self' 'sha256-…' [script origins] ['unsafe-eval'];
+Content-Security-Policy: script-src 'self' 'sha256-…' [script origins];
     object-src 'none'; base-uri 'self'; frame-ancestors 'self' [wsAllowedOrigins]
 ```
 
@@ -61,19 +61,17 @@ Content-Security-Policy: script-src 'self' 'sha256-…' [script origins] ['unsaf
 - Every response of `BootstrapServlet` carries `X-Content-Type-Options: nosniff`.
 - `style-src`, `connect-src`, `img-src` are not set: the application restricts them if it wants to.
 
-`'unsafe-eval'` is there for the APIs that send JavaScript source: `PScript.execute`, `evalTerminalScript`, a
-`TextFunction` built from source, all deprecated. An application calls the functions of its own scripts by name
-instead, and turns eval off:
+No eval either: no JavaScript source travels to the browser. An application calls the functions of its own scripts by
+name:
 
 ```java
-configuration.setScriptEvalEnabled(false); // no 'unsafe-eval'; the source APIs throw IllegalStateException
-
 PScript.call(PWindow.getMain(), "showToast", "Saved", 3000); // window.showToast("Saved", 3000)
 widget.callTerminalFunction("highlight", "#ff0");            // window.highlight(element, "#ff0")
 TextFunction.named(args -> args[0] + " ponies", "ponies");    // window.ponies(args)
 ```
 
-An application that sends its own policy (a proxy in front) calls `setContentSecurityPolicyEnabled(false)`. One that
+An application that sends its own policy (a proxy in front), or whose scripts need eval, calls
+`setContentSecurityPolicyEnabled(false)`. One that
 adds inline scripts to the page overrides `BootstrapServlet.buildContentSecurityPolicy` to allow them. An `index.html`
 of the application's own files is served as it is, without a policy.
 
@@ -87,7 +85,7 @@ Untrusted client values (the reconnection parameter, malformed inbound frames) a
 - Inbound size **bounded** (1 MB) and slow consumers **disconnected** — one connection cannot exhaust memory.
 - UIContext access **scoped to the HTTP session** — no IDOR.
 - Static resources **path-guarded** — no traversal — and **web files only** from the classpath — no class, configuration or key store.
-- Content Security Policy **on**: no inline script but the hashed one, no frame by another site, `nosniff`.
+- Content Security Policy **on**: no inline script but the hashed one, no eval, no frame by another site, `nosniff`.
 - Transparent reconnection **off** by default — no silent resume of stale state (important for trading apps, where stale market data must never be replayed unnoticed).
 
 > Each item above is backed by dedicated tests (the Origin matrix, cross-session denial, path-safety, and the configuration defaults), so the secure defaults cannot silently regress.

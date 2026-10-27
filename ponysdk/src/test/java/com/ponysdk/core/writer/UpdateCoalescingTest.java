@@ -217,7 +217,6 @@ public class UpdateCoalescingTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void methodCallsAndSideEffectsAreNeverCoalesced() {
         final PButton[] b = new PButton[1];
         ctx.execute(() -> { b[0] = Element.newPButton("ok"); root.add(b[0]); });
@@ -225,11 +224,11 @@ public class UpdateCoalescingTest {
         ctx.execute(() -> {
             b[0].setEnabled(false);
             b[0].setEnabled(true);
-            b[0].evalTerminalScript("a()");
-            b[0].evalTerminalScript("a()");
+            b[0].callTerminalFunction("a");
+            b[0].callTerminalFunction("a");
         });
         assertEquals(2, wire.count("ENABLED="), "boolean toggles are not deferred");
-        assertEquals(2, wire.count("EVAL=a()"));
+        assertEquals(2, wire.count("FUNCTION_NAME=a"));
     }
 
     @Test
