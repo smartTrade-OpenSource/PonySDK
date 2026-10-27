@@ -138,4 +138,37 @@ public class CommunicationSanityCheckerTest {
         checker.stop();
         assertFalse(checker.started.get());
     }
+
+    @Test
+    public void aSuspendedContextIsNotChecked() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final long[] now = { 100_000 };
+        final long[] received = { 100_000 };
+        final CommunicationSanityChecker checker = checker(uiContext, now, received);
+        Mockito.when(uiContext.isSuspended()).thenReturn(true);
+
+        now[0] += 20_000;
+        checker.checkCommunicationState();
+        checker.checkCommunicationState();
+
+        Mockito.verify(uiContext, Mockito.never()).ping();
+        Mockito.verify(uiContext, Mockito.never()).sendRoundTrip();
+        Mockito.verify(uiContext, Mockito.never()).connectionDead();
+    }
+
+    @Test
+    public void aSecondStartKeepsTheRunningChecker() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        Mockito.when(uiContext.getConfiguration()).thenReturn(new ApplicationConfiguration());
+        final CommunicationSanityChecker checker = new CommunicationSanityChecker(uiContext);
+        final int before = CommunicationSanityChecker.sanityCheckerTimer.getQueue().size();
+
+        checker.start();
+        checker.start();
+        assertTrue(checker.started.get());
+        checker.stop();
+
+        assertFalse(checker.started.get());
+        assertEquals(before, CommunicationSanityChecker.sanityCheckerTimer.getQueue().size(), "no second task left behind");
+    }
 }

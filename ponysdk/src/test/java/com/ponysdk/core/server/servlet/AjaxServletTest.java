@@ -24,6 +24,8 @@
 package com.ponysdk.core.server.servlet;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +38,11 @@ import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.UpgradeRequestData;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PObject;
 
 public class AjaxServletTest {
@@ -140,6 +146,121 @@ public class AjaxServletTest {
             ArgumentMatchers.anyString());
 
         SessionManager.get().unregisterApplication(victim);
+    }
+
+    /** A live context of the session "ajax", as a servlet thread finds it: not the current one. */
+    private UIContext liveContext(final Application application) {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
+        config.setStringDictionaryEnabled(false);
+        final WebSocket socket = Mockito.mock(WebSocket.class);
+        Mockito.when(socket.getUpgradeRequestData()).thenReturn(new UpgradeRequestData(Map.of(), "test", Mockito.mock(HttpSession.class)));
+        final TxnContext txnContext = new TxnContext(socket);
+        txnContext.setApplication(application);
+        final UIContext uiContext = new UIContext(socket, txnContext, config);
+        application.registerUIContext(uiContext);
+        return uiContext;
+    }
+
+    private static HttpServletRequest requestOf(final String sessionId, final String contextId, final String objectId) {
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name())).thenReturn(contextId);
+        Mockito.when(request.getHeader(ClientToServerModel.OBJECT_ID.name())).thenReturn(objectId);
+        final HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getId()).thenReturn(sessionId);
+        Mockito.when(request.getSession(false)).thenReturn(session);
+        return request;
+    }
+
+    private interface Exchange {
+
+        void run(UIContext uiContext, HttpServletResponse response) throws Exception;
+    }
+
+    private void withLiveContext(final Exchange exchange) throws Exception {
+        final Application application = new Application("ajax", Mockito.mock(HttpSession.class), new ApplicationConfiguration());
+        SessionManager.get().registerApplication(application);
+        final UIContext uiContext = liveContext(application);
+        try {
+            exchange.run(uiContext, Mockito.mock(HttpServletResponse.class));
+        } finally {
+            uiContext.destroy();
+            SessionManager.get().unregisterApplication(application);
+            UIContext.remove();
+        }
+    }
+
+    private static PObject registeredObject(final UIContext uiContext, final int id) {
+        final PObject pObject = Mockito.mock(PObject.class);
+        Mockito.when(pObject.getID()).thenReturn(id);
+        uiContext.execute(() -> uiContext.registerObject(pObject));
+        return pObject;
+    }
+
+    @Test
+    public void anObjectOfTheContextAnswersItsRequest() throws Exception {
+        withLiveContext((uiContext, response) -> {
+            final PObject pObject = registeredObject(uiContext, 5);
+            final HttpServletRequest request = requestOf("ajax", String.valueOf(uiContext.getID()), "5");
+
+            ajaxServlet.doPost(request, response);
+
+            Mockito.verify(pObject).handleAjaxRequest(request, response);
+            Mockito.verify(response, Mockito.never()).sendError(ArgumentMatchers.anyInt(), ArgumentMatchers.any());
+        });
+    }
+
+    @Test
+    public void anUnknownObjectIsNotFound() throws Exception {
+        withLiveContext((uiContext, response) -> {
+            ajaxServlet.doGet(requestOf("ajax", String.valueOf(uiContext.getID()), "999"), response);
+
+            Mockito.verify(response).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_NOT_FOUND), ArgumentMatchers.anyString());
+        });
+    }
+
+    @Test
+    public void aFailingObjectAnswers500() throws Exception {
+        withLiveContext((uiContext, response) -> {
+            final PObject pObject = registeredObject(uiContext, 6);
+            Mockito.doThrow(new IOException("disk full")).when(pObject).handleAjaxRequest(ArgumentMatchers.any(), ArgumentMatchers.any());
+
+            ajaxServlet.doGet(requestOf("ajax", String.valueOf(uiContext.getID()), "6"), response);
+
+            Mockito.verify(response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "disk full");
+        });
+    }
+
+    @Test
+    public void aFailingErrorAnswerIsOnlyLogged() throws Exception {
+        withLiveContext((uiContext, response) -> {
+            final PObject pObject = registeredObject(uiContext, 7);
+            Mockito.doThrow(new ServletException("bad")).when(pObject).handleAjaxRequest(ArgumentMatchers.any(), ArgumentMatchers.any());
+            Mockito.doThrow(new IOException("reset")).when(response).sendError(ArgumentMatchers.anyInt(), ArgumentMatchers.any());
+
+            ajaxServlet.doGet(requestOf("ajax", String.valueOf(uiContext.getID()), "7"), response);
+
+            Mockito.verify(response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "bad");
+        });
+    }
+
+    @Test
+    public void aMalformedContextIdAnswers500() throws IOException {
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        ajaxServlet.doGet(requestOf("ajax", "not-a-number", "1"), response);
+        Mockito.verify(response).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), ArgumentMatchers.any());
+    }
+
+    @Test
+    public void aFailingErrorResponseIsLogged() throws IOException {
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.doThrow(new IOException("reset")).when(response).sendError(ArgumentMatchers.anyInt(), ArgumentMatchers.any());
+
+        ajaxServlet.doGet(requestOf("ajax", "not-a-number", "1"), response);
+        ajaxServlet.doPost(requestOf("ajax", "not-a-number", "1"), response);
+
+        Mockito.verify(response, Mockito.times(2)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+            ArgumentMatchers.any());
     }
 
 }

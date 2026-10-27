@@ -699,7 +699,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             websocketPusher.encodeInt(model, value);
         } catch (final IOException e) {
             log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.destroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 

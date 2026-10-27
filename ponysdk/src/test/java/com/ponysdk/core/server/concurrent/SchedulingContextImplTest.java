@@ -36,11 +36,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Non-regression tests for {@link SchedulingContextImpl} — the per-context task queue + executor
@@ -181,5 +184,159 @@ public class SchedulingContextImplTest {
 
         // toHandler must cancel a future scheduled onto an already-destroyed context (Dekker guard).
         verify(future).cancel(false);
+    }
+
+    @Test
+    public void testForceExecuteAndWait_runsTaskAsRealtime() throws InterruptedException {
+        doAnswer(inv -> {
+            ctx.run();
+            return null;
+        }).when(scheduler).executeContext(eq(ctx), anyBoolean());
+
+        final AtomicBoolean ran = new AtomicBoolean(false);
+        ctx.forceExecuteAndWait(() -> ran.set(true));
+
+        assertTrue(ran.get());
+        verify(scheduler).executeContext(ctx, true);
+    }
+
+    @Test
+    public void testExecuteAndWait_returnsAtOnceOnADestroyedContext() throws InterruptedException {
+        ctx.destroy();
+        final AtomicBoolean ran = new AtomicBoolean(false);
+
+        ctx.executeAndWait(() -> ran.set(true));
+
+        assertFalse(ran.get());
+        verify(scheduler, never()).executeContext(any(), anyBoolean());
+    }
+
+    @Test
+    public void testExecuteAndWait_returnsWhenTheContextIsDestroyedMeanwhile() throws InterruptedException {
+        doAnswer(inv -> {
+            ctx.destroy();
+            return null;
+        }).when(scheduler).executeContext(eq(ctx), anyBoolean());
+        final AtomicBoolean ran = new AtomicBoolean(false);
+
+        ctx.executeAndWait(() -> ran.set(true));
+
+        assertFalse(ran.get(), "a task of a context destroyed before it ran is dropped, the caller released");
+    }
+
+    @Test
+    public void testRun_aFailingTaskDoesNotStopTheNextOnes() {
+        final List<String> ran = new ArrayList<>();
+        ctx.execute(() -> {
+            throw new IllegalStateException("boom");
+        });
+        ctx.forceExecute(() -> ran.add("realtime"));
+        ctx.execute(() -> ran.add("standard"));
+
+        ctx.run();
+        ctx.run();
+        ctx.run();
+
+        assertEquals(List.of("realtime", "standard"), ran);
+    }
+
+    @Test
+    public void testRun_stealsTheRealtimeTasksOfAnotherContextFirst() {
+        final SchedulingContextImpl other = new SchedulingContextImpl("other", scheduler);
+        final List<String> ran = new ArrayList<>();
+        other.forceExecute(() -> ran.add("other realtime"));
+        ctx.execute(() -> ran.add("own standard"));
+        when(scheduler.pollRealtimeContext()).thenReturn(other, ctx, null);
+
+        ctx.run();
+
+        assertEquals(List.of("other realtime", "own standard"), ran);
+    }
+
+    @Test
+    public void testRun_withOwnRealtimeTaskDoesNotSteal() {
+        ctx.forceExecute(() -> {});
+
+        ctx.run();
+
+        verify(scheduler, never()).pollRealtimeContext();
+    }
+
+    @Test
+    public void testRun_requeuesTheContextWhenOnlyStandardTasksRemain() {
+        final List<String> ran = new ArrayList<>();
+        ctx.execute(() -> ran.add("first"));
+        ctx.execute(() -> ran.add("second"));
+
+        ctx.run();
+
+        assertEquals(List.of("first"), ran, "one standard task per scheduling, for fairness among contexts");
+        verify(scheduler, times(2)).executeContext(ctx, false);
+        ctx.run();
+        assertEquals(List.of("first", "second"), ran);
+    }
+
+    private Runnable schedulePeriodic(final Runnable task, final ScheduledFuture<?> future) {
+        final ArgumentCaptor<Runnable> tick = ArgumentCaptor.forClass(Runnable.class);
+        doReturn(future).when(scheduler).schedulePeriodicTask(anyLong(), eq(ctx), tick.capture());
+        ctx.schedule(10, task);
+        return tick.getValue();
+    }
+
+    @Test
+    public void testSchedule_eachTickRunsThePeriodicTaskOnTheContext() {
+        final List<String> ran = new ArrayList<>();
+        final Runnable tick = schedulePeriodic(() -> ran.add("tick"), mock(ScheduledFuture.class));
+
+        tick.run();
+        verify(scheduler).executeContext(ctx, false);
+        ctx.run();
+        tick.run();
+        ctx.run();
+
+        assertEquals(List.of("tick", "tick"), ran);
+    }
+
+    @Test
+    public void testSchedule_aFailingPeriodicTaskCancelsItsFuture() {
+        final ScheduledFuture<?> future = mock(ScheduledFuture.class);
+        final Runnable tick = schedulePeriodic(() -> {
+            throw new IllegalStateException("boom");
+        }, future);
+
+        tick.run();
+        ctx.run();
+
+        verify(future).cancel(true);
+    }
+
+    @Test
+    public void testSchedule_aTickOfADestroyedContextIsIgnored() {
+        final Runnable tick = schedulePeriodic(() -> {}, mock(ScheduledFuture.class));
+        ctx.destroy();
+
+        tick.run();
+
+        verify(scheduler, never()).executeContext(any(), anyBoolean());
+    }
+
+    @Test
+    public void testSchedule_theOlderPeriodicTaskTakesTheSlotOfANewerOne() {
+        final List<String> ran = new ArrayList<>();
+        final Runnable older = schedulePeriodic(() -> ran.add("older"), mock(ScheduledFuture.class));
+        final Runnable newer = schedulePeriodic(() -> ran.add("newer"), mock(ScheduledFuture.class));
+
+        older.run();
+        ctx.run(); // older gets ticket 1
+        newer.run();
+        ctx.run(); // newer gets ticket 2
+        newer.run(); // newer waits in the slot
+        older.run(); // ticket 1 < 2: older steals the slot
+        ctx.run(); // older gets ticket 3
+        older.run();
+        newer.run(); // ticket 2 < 3: newer steals the slot back
+        ctx.run();
+
+        assertEquals(List.of("older", "newer", "older", "newer"), ran);
     }
 }

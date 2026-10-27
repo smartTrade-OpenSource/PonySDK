@@ -226,4 +226,138 @@ public class WebSocketStatsTest {
         assertTrue(rec(10, 10, 5).compareTo(rec(1, 1, 1)) > 0);
         assertTrue(rec(1, 1, 1).compareTo(rec(10, 10, 5)) < 0);
     }
+
+    @Test
+    public void testEncodeDecodeRoundTrip_ungrouped() throws Exception {
+        final WebSocketStats original = ungrouped();
+        final File file = File.createTempFile("wsstats", ".bin");
+        file.deleteOnExit();
+
+        original.encode(file);
+        final WebSocketStats decoded = WebSocketStats.decode(file);
+
+        assertFalse(decoded.isGrouped());
+        assertEquals(original.getSummaryCount(), decoded.getSummaryCount());
+        assertEquals(Map.of(100, 3, 200, 1), counts(decoded.getStats().get(M_INT)));
+        assertEquals(Map.of("hello", 2), counts(decoded.getStats().get(M_STR)));
+    }
+
+    private static Map<Object, Integer> counts(final Map<Object, ? extends Record> records) {
+        final Map<Object, Integer> counts = new HashMap<>();
+        records.forEach((value, record) -> counts.put(value, record.getCount()));
+        return counts;
+    }
+
+    /** A file with the records of a model this version no longer has: they are skipped, the others kept. */
+    @Test
+    public void testDecode_skipsTheRecordsOfAnUnknownModel() throws Exception {
+        final File file = File.createTempFile("wsstats-old", ".bin");
+        file.deleteOnExit();
+        try (java.io.DataOutputStream out = new java.io.DataOutputStream(new java.io.FileOutputStream(file))) {
+            out.writeBoolean(false);
+            out.writeLong(0L);
+            out.writeLong(60_000L);
+            out.writeInt(2);
+            out.writeUTF("A_REMOVED_MODEL");
+            out.writeInt(1);
+            out.writeByte(5); // an int value
+            out.writeInt(42);
+            out.writeInt(1);
+            out.writeInt(4);
+            out.writeInt(10);
+            out.writeUTF(M_INT.name());
+            out.writeInt(1);
+            out.writeByte(5);
+            out.writeInt(7);
+            out.writeInt(1);
+            out.writeInt(4);
+            out.writeInt(3);
+        }
+
+        final WebSocketStats decoded = WebSocketStats.decode(file);
+
+        assertEquals(Map.of(7, 3), counts(decoded.getStats().get(M_INT)));
+        assertEquals(1, decoded.getStats().size());
+    }
+
+    @Test
+    public void testDecode_unknownValueTypeThrowsDecodeException() throws Exception {
+        final File file = File.createTempFile("wsstats-bad", ".bin");
+        file.deleteOnExit();
+        try (java.io.DataOutputStream out = new java.io.DataOutputStream(new java.io.FileOutputStream(file))) {
+            out.writeBoolean(false);
+            out.writeLong(0L);
+            out.writeLong(0L);
+            out.writeInt(1);
+            out.writeUTF(M_INT.name());
+            out.writeInt(1);
+            out.writeByte(99);
+        }
+
+        final DecodeException e = assertThrows(DecodeException.class, () -> WebSocketStats.decode(file));
+        assertTrue(e.getMessage().contains("99"), e.getMessage());
+    }
+
+    @Test
+    public void testEncode_truncatesStringsTooLongForTheFormat() throws Exception {
+        final Map<Object, Record> records = new HashMap<>();
+        records.put(new Pair<Object, String>("x".repeat(70_000), null), rec(1, 1, 1));
+        records.put(new Pair<Object, String>("\u20ac".repeat(30_000), "euro"), rec(1, 2, 1));
+        final Map<ServerToClientModel, Map<Object, Record>> stats = new EnumMap<>(ServerToClientModel.class);
+        stats.put(M_STR, records);
+        final File file = File.createTempFile("wsstats-long", ".bin");
+        file.deleteOnExit();
+
+        new WebSocketStats(stats, LocalDateTime.now(), LocalDateTime.now(), true).encode(file);
+        final WebSocketStats decoded = WebSocketStats.decode(file);
+
+        final Map<Object, Integer> lengths = new HashMap<>();
+        decoded.getStats().get(M_STR).keySet().forEach(key -> {
+            final Pair<?, ?> pair = (Pair<?, ?>) key;
+            lengths.put(pair.getSecond(), ((String) pair.getFirst()).length());
+        });
+        assertEquals(Map.of("", 65_535, "euro", 21_845), lengths, "cut to what writeUTF accepts, a null group empty");
+    }
+
+    @Test
+    public void testToCsv_groupedAndFiltered() throws Exception {
+        final Map<Object, Record> records = new HashMap<>();
+        records.put(new Pair<Object, String>(1, "alpha"), rec(2, 3, 4));
+        records.put(new Pair<Object, String>("a;b\nc" + "y".repeat(600), "beta"), rec(1, 1, 1));
+        final Map<ServerToClientModel, Map<Object, Record>> stats = new EnumMap<>(ServerToClientModel.class);
+        stats.put(M_INT, records);
+        stats.put(M_STR, Map.of(new Pair<Object, String>("other", "beta"), rec(1, 1, 1)));
+        final File file = File.createTempFile("wsstats", ".csv");
+        file.deleteOnExit();
+
+        new WebSocketStats(stats, LocalDateTime.now(), LocalDateTime.now(), true).toCsv(file, ';',
+            v -> !Integer.valueOf(1).equals(((Pair<?, ?>) v).getFirst()), m -> m == M_INT);
+
+        final List<String> lines = Files.readAllLines(file.toPath());
+        assertTrue(lines.get(0).startsWith("MODEL;VALUE TYPE;GROUP;VALUE;"), lines.get(0));
+        assertEquals(2, lines.size(), "only the kept record: " + lines);
+        final String[] cells = lines.get(1).split(";");
+        assertEquals("beta", cells[2]);
+        assertEquals(512, cells[3].length(), "the value cut, its separators and line breaks blanked");
+        assertTrue(cells[3].startsWith("a b c"));
+    }
+
+    @Test
+    public void testComparisonsSaturateAndToleratesNull() {
+        assertEquals(Integer.MAX_VALUE, new Bandwidth(Long.MAX_VALUE / 2, 0).compareTo(new Bandwidth(0, 0)));
+        assertEquals(Integer.MIN_VALUE, new Bandwidth(0, 0).compareTo(new Bandwidth(Long.MAX_VALUE / 2, 0)));
+        assertTrue(new Bandwidth(1, 0).compareTo(null) > 0);
+        assertEquals(Integer.MAX_VALUE, rec(Integer.MAX_VALUE, Integer.MAX_VALUE, 2).compareTo(rec(0, 0, 0)));
+        assertEquals(Integer.MIN_VALUE, rec(0, 0, 0).compareTo(rec(Integer.MAX_VALUE, Integer.MAX_VALUE, 2)));
+        assertTrue(rec(1, 1, 1).compareTo(null) > 0);
+    }
+
+    @Test
+    public void testTimesAreThoseOfTheRecording() {
+        final LocalDateTime start = LocalDateTime.of(2026, 1, 1, 10, 0);
+        final LocalDateTime end = start.plusMinutes(5);
+        final WebSocketStats ws = new WebSocketStats(new EnumMap<>(ServerToClientModel.class), start, end, false);
+        assertEquals(start, ws.getStartTime());
+        assertEquals(end, ws.getEndTime());
+    }
 }

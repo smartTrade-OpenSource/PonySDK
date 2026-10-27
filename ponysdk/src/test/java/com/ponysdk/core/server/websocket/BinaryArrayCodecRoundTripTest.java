@@ -186,6 +186,93 @@ public class BinaryArrayCodecRoundTripTest {
         }
     }
 
+    /** Every element type and every length form of the array codec, with and without the dictionary. */
+    @Test
+    public void everyArrayElementFormRoundTripsThroughPonyDriver() throws Exception {
+        final String utf8Medium = "é".repeat(200); // 400 bytes: UTF-8 uint16 length
+        final String utf8Long = "é".repeat(40_000); // 80 000 bytes: UTF-8 uint32 length
+        final String asciiMedium = "a".repeat(300); // ASCII uint16 length
+        final String asciiLong = "b".repeat(70_000); // past uint16: sent as UTF-8 uint32
+        final Object[] input = { (byte) 5, (short) 7, (short) 3000, 100, 20_000, 3_000_000, 9L, 300L, 70_000L, 1L << 40,
+            1.5, 0.1, 2.5f, true, false, null, "abc", "été", utf8Medium, utf8Long, asciiMedium, asciiLong,
+            new StringBuilder("other") };
+        final Object[] expected = { 5, 7, 3000, 100, 20_000, 3_000_000, 9, 300, 70_000, 1L << 40, 1.5, 0.1, 2.5, true, false,
+            null, "abc", "été", utf8Medium, utf8Long, asciiMedium, asciiLong, "other" };
+        for (final boolean withDictionary : new boolean[] { false, true }) {
+            final com.ponysdk.core.server.application.StringDictionary dictionary = withDictionary
+                    ? new com.ponysdk.core.server.application.StringDictionary(1_000, 0, 32) : null;
+            final byte[] wire = encode(dictionary, p -> {
+                for (int round = 0; round < 2; round++) {
+                    p.encode(ServerToClientModel.TYPE_UPDATE, 7);
+                    p.encode(ServerToClientModel.PADDON_ARGUMENTS, input);
+                    p.encode(ServerToClientModel.END, null);
+                }
+            });
+
+            final List<List<PonyFrame>> messages = decodeAll(wire);
+            assertEquals(2, messages.size());
+            for (final List<PonyFrame> message : messages) {
+                final Object[] decoded = (Object[]) valueOf(message, ServerToClientModel.PADDON_ARGUMENTS);
+                assertEquals(expected.length, decoded.length);
+                for (int i = 0; i < expected.length; i++) {
+                    final Object e = expected[i];
+                    final Object d = decoded[i];
+                    final String where = "element " + i + " dict=" + withDictionary;
+                    if (e instanceof Long l) assertEquals(l.longValue(), ((Number) d).longValue(), where);
+                    else if (e instanceof Integer n) assertEquals(n.intValue(), ((Number) d).intValue(), where);
+                    else if (e instanceof Double x) assertEquals(x, ((Number) d).doubleValue(), 1e-12, where);
+                    else assertEquals(e, d, where);
+                }
+            }
+        }
+    }
+
+    /** Every length form of a model's string value, inline and through the dictionary. */
+    @Test
+    public void everyStringValueFormRoundTripsThroughPonyDriver() throws Exception {
+        final String[] values = { "ab", "été!", "é".repeat(200), "é".repeat(40_000), "a".repeat(300),
+            "b".repeat(70_000) };
+        for (final boolean withDictionary : new boolean[] { false, true }) {
+            final com.ponysdk.core.server.application.StringDictionary dictionary = withDictionary
+                    ? new com.ponysdk.core.server.application.StringDictionary(1_000, 0, 32) : null;
+            for (final String value : values) {
+                final byte[] wire = encode(dictionary, p -> {
+                    for (int round = 0; round < 2; round++) {
+                        p.encode(ServerToClientModel.TYPE_UPDATE, 7);
+                        p.encode(ServerToClientModel.TEXT, value);
+                        p.encode(ServerToClientModel.END, null);
+                    }
+                });
+                final List<List<PonyFrame>> messages = decodeAll(wire);
+                assertEquals(2, messages.size());
+                for (final List<PonyFrame> message : messages) {
+                    assertEquals(value, valueOf(message, ServerToClientModel.TEXT), value.length() + " chars, dict=" + withDictionary);
+                }
+            }
+        }
+    }
+
+    /** A full dictionary with no eviction budget left sends new strings inline, in values and in arrays. */
+    @Test
+    public void aFullDictionarySendsNewStringsInline() throws Exception {
+        final com.ponysdk.core.server.application.StringDictionary dictionary =
+                new com.ponysdk.core.server.application.StringDictionary(1, 0, 0);
+        final byte[] wire = encode(dictionary, p -> {
+            p.encode(ServerToClientModel.TYPE_UPDATE, 7);
+            p.encode(ServerToClientModel.TEXT, "first value");
+            p.encode(ServerToClientModel.WIDGET_TITLE, "second value");
+            p.encode(ServerToClientModel.PADDON_ARGUMENTS, new Object[] { "third value", "first value" });
+            p.encode(ServerToClientModel.END, null);
+        });
+
+        final List<PonyFrame> message = decodeAll(wire).get(0);
+        assertEquals("first value", valueOf(message, ServerToClientModel.TEXT));
+        assertEquals("second value", valueOf(message, ServerToClientModel.WIDGET_TITLE));
+        final Object[] array = (Object[]) valueOf(message, ServerToClientModel.PADDON_ARGUMENTS);
+        assertEquals("third value", array[0]);
+        assertEquals("first value", array[1], "the one interned string is referenced");
+    }
+
     private static Object valueOf(final List<PonyFrame> message, final ServerToClientModel model) {
         for (final PonyFrame frame : message) if (frame.getModel() == model) return frame.getValue();
         throw new AssertionError(model + " not decoded in " + message);

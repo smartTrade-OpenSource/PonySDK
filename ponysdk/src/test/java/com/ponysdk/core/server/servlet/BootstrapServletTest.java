@@ -509,4 +509,183 @@ public class BootstrapServletTest {
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
         assertTrue(html.contains("content=\"a&quot;>&lt;script>x&lt;/script>.css\""), html);
     }
+
+    // ---- request dispatch and failures ----
+
+    @Test
+    public void theRootAndAnEmptyPathServeTheBootstrapPage() {
+        final TestableBootstrapServlet servlet = servletWith(configuration());
+        for (final String uri : new String[] { "/app", "/app/" }) {
+            final ByteArrayOutputStream body = new ByteArrayOutputStream();
+            final HttpServletResponse response;
+            try {
+                response = response(body);
+            } catch (final IOException e) {
+                throw new AssertionError(e);
+            }
+            servlet.doGet(request("/app", uri), response);
+            assertTrue(body.toString().startsWith("<!doctype html>"), uri + ": " + body);
+        }
+    }
+
+    @Test
+    public void aPostServesTheResourceOfItsPath() throws IOException {
+        final String path = "/script/app.js";
+        final TestableBootstrapServlet servlet = servletServing(path, tempFile("posted"));
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+
+        servlet.doPost(request("", path), response(body));
+
+        assertEquals("posted", body.toString());
+    }
+
+    @Test
+    public void anUnsafePathIsNotFound() throws IOException {
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(new ApplicationConfiguration());
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        final HttpServletResponse response = response(body);
+
+        servlet.doGet(request("", "/script/../conf/x.js"), response);
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(0, body.size());
+    }
+
+    @Test
+    public void aFailureBeforeTheResponseIsCommittedAnswers500() throws IOException {
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        Mockito.when(ctx.getResource(Mockito.anyString())).thenThrow(new IllegalStateException("broken context"));
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+
+        new TestableBootstrapServlet(ctx).doGet(request("", "/script/app.js"), response);
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    public void aFailureAfterTheResponseIsCommittedSendsNothingMore() throws IOException {
+        final String path = "/script/app.js";
+        final TestableBootstrapServlet servlet = servletServing(path, tempFile("content"));
+        for (final Exception failure : new Exception[] { new IOException("browser left"), new IllegalStateException("bug") }) {
+            final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+            Mockito.when(response.isCommitted()).thenReturn(true);
+            Mockito.when(response.getOutputStream()).thenThrow(failure);
+
+            servlet.doGet(request("", path), response);
+
+            Mockito.verify(response, Mockito.never()).sendError(Mockito.anyInt());
+        }
+    }
+
+    @Test
+    public void aFailingErrorResponseIsLogged() throws IOException {
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        Mockito.when(ctx.getResource(Mockito.anyString())).thenThrow(new IllegalStateException("broken context"));
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+        Mockito.doThrow(new IOException("connection reset")).when(response).sendError(Mockito.anyInt());
+        final TestableBootstrapServlet servlet = new TestableBootstrapServlet(ctx);
+
+        assertDoesNotThrow(() -> servlet.doGet(request("", "/script/app.js"), response));
+        assertDoesNotThrow(() -> servlet.doPost(request("", "/script/app.js"), response));
+        Mockito.verify(response, Mockito.times(2)).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    public void aResourceThatCannotBeOpenedIsNotFound() throws IOException {
+        final String path = "/script/gone.js";
+        final File missing = new File(Files.createTempDirectory("pony").toFile(), "gone.js");
+        final TestableBootstrapServlet servlet = servletServing(path, missing);
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+
+        servlet.handleRequest(request("", path), response, path);
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(-1, servlet.getLastModified(request("", path)), "no modification time for a missing file");
+    }
+
+    @Test
+    public void aMalformedResourceUrlIsNotFound() throws IOException {
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        Mockito.when(ctx.getResource(Mockito.anyString())).thenThrow(new java.net.MalformedURLException("bad"));
+        final TestableBootstrapServlet servlet = new TestableBootstrapServlet(ctx);
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+
+        servlet.handleRequest(request("", "/script/ponysdk.js"), response, "/script/ponysdk.js");
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(-1, servlet.getLastModified(request("", "/script/ponysdk.js")));
+    }
+
+    @Test
+    public void aPathWithoutExtensionIsNotServedFromTheClasspath() throws IOException {
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(null);
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+
+        servlet.handleRequest(request("", "/script.d/ponysdk"), response, "/script.d/ponysdk");
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void withoutConfigurationTheClasspathServesTheDefaultTypes() throws IOException {
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        served(servletOnTheClasspath(null), "/script/ponysdk.js", body);
+        assertTrue(body.size() > 0);
+    }
+
+    @Test
+    public void aNullServedTypeSetFallsBackToTheDefaultTypes() throws IOException {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getServedResourceExtensions()).thenReturn(null);
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        served(servletOnTheClasspath(config), "/script/ponysdk.js", body);
+        assertTrue(body.size() > 0);
+    }
+
+    @Test
+    public void theChildClassLoaderServesWhatTheContextClassLoaderLacks() throws IOException {
+        final File dir = Files.createTempDirectory("pony").toFile();
+        final File script = new File(dir, "plugin-only.js");
+        Files.writeString(script.toPath(), "plugin");
+        try (java.net.URLClassLoader child = new java.net.URLClassLoader(new java.net.URL[] { dir.toURI().toURL() }, null)) {
+            final ServletContext ctx = Mockito.mock(ServletContext.class);
+            final BootstrapServlet servlet = new BootstrapServlet(child) {
+
+                @Override
+                public ServletContext getServletContext() {
+                    return ctx;
+                }
+            };
+            final ByteArrayOutputStream body = new ByteArrayOutputStream();
+
+            servlet.handleRequest(request("", "/plugin-only.js"), response(body), "/plugin-only.js");
+
+            assertEquals("plugin", body.toString());
+        } finally {
+            script.delete();
+            dir.delete();
+        }
+    }
+
+    @Test
+    public void aMalformedScriptUrlIsLeftOutOfThePolicy() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        config.setJavascript(Set.of("http://exa mple/x.js", "//cdn.example/y.js"));
+
+        final String policy = pageHeaders(config).get("Content-Security-Policy");
+
+        assertFalse(policy.contains("exa mple"), policy);
+        assertTrue(policy.contains(" cdn.example"), "a scheme-relative URL keeps its host: " + policy);
+    }
+
+    @Test
+    public void theManifestNamesTheLegacyLayerWhenAskedFor() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.isLegacyClassNames()).thenReturn(true);
+
+        final jakarta.json.JsonObject manifest = jakarta.json.Json.createReader(
+            new java.io.StringReader(servletWith(config).buildManifest(request("", "/ponyapp.json")))).readObject();
+
+        assertEquals("ponyterminal/legacy.js", manifest.getString("legacy"));
+    }
 }

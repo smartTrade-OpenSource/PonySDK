@@ -24,12 +24,17 @@
 package com.ponysdk.core.server.concurrent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -92,5 +97,101 @@ public class PSchedulerTest {
         task.cancel();
 
         assertEquals(before, timerQueueSize());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        UIContext.remove();
+    }
+
+    private static void await(final BooleanSupplier condition) throws InterruptedException {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (!condition.getAsBoolean()) {
+            assertTrue(System.nanoTime() < deadline, "not reached in 5 s");
+            Thread.sleep(5);
+        }
+    }
+
+    private static UIContext runningContext() {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        Mockito.when(context.execute(Mockito.any())).thenAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return true;
+        });
+        return context;
+    }
+
+    @Test
+    public void theCurrentContextRunsTheRepeatedTasksUntilCancelled() throws Exception {
+        final CountDownLatch fixedRate = new CountDownLatch(2);
+        final CountDownLatch delayedRate = new CountDownLatch(2);
+        final CountDownLatch fixedDelay = new CountDownLatch(2);
+        final UIContext context = runningContext();
+        UIContext.setCurrent(context);
+        final int before = timerQueueSize();
+
+        final UIRunnable rate = PScheduler.scheduleAtFixedRate(fixedRate::countDown, Duration.ofMillis(1));
+        final UIRunnable delayed = PScheduler.scheduleAtFixedRate(delayedRate::countDown, Duration.ZERO, Duration.ofMillis(1));
+        final UIRunnable delay = PScheduler.scheduleWithFixedDelay(context, fixedDelay::countDown, Duration.ZERO,
+            Duration.ofMillis(1));
+
+        assertTrue(fixedRate.await(5, TimeUnit.SECONDS));
+        assertTrue(delayedRate.await(5, TimeUnit.SECONDS));
+        assertTrue(fixedDelay.await(5, TimeUnit.SECONDS));
+        assertEquals(context, rate.getUIContext());
+        rate.cancel();
+        delayed.cancel();
+        delay.cancel();
+        assertEquals(before, timerQueueSize());
+    }
+
+    @Test
+    public void aRepeatedTaskThatThrowsIsCancelled() throws Exception {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        final CountDownLatch ran = new CountDownLatch(1);
+        Mockito.when(context.execute(Mockito.any())).thenAnswer(invocation -> {
+            ran.countDown();
+            throw new IllegalStateException("boom");
+        });
+        final int before = timerQueueSize();
+
+        PScheduler.scheduleAtFixedRate(context, () -> {}, Duration.ofMillis(1));
+        assertTrue(ran.await(5, TimeUnit.SECONDS));
+
+        await(() -> {
+            try {
+                return timerQueueSize() == before;
+            } catch (final ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
+        });
+        Mockito.verify(context, Mockito.times(1)).execute(Mockito.any());
+    }
+
+    @Test
+    public void aRepeatedTaskOfADeadContextStopsAtItsFirstRun() throws Exception {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(false);
+        final CountDownLatch ran = new CountDownLatch(1);
+        Mockito.when(context.execute(Mockito.any())).thenAnswer(invocation -> {
+            ran.countDown();
+            return false;
+        });
+        final int before = timerQueueSize();
+
+        PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
+        assertTrue(ran.await(5, TimeUnit.SECONDS));
+
+        await(() -> {
+            try {
+                return timerQueueSize() == before;
+            } catch (final ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
+        });
+        Mockito.verify(context, Mockito.times(1)).execute(Mockito.any());
+        Mockito.verify(context, Mockito.never()).addContextDestroyListener(Mockito.any());
     }
 }

@@ -202,6 +202,8 @@ public class WebSocketStats {
                         final Pair<Object, String> pair = (Pair<Object, String>) value;
                         encodeValue(outputStream, pair.getFirst());
                         writeUTF(outputStream, pair.getSecond());
+                    } else {
+                        encodeValue(outputStream, value);
                     }
                     final Record record = recordEntry.getValue();
                     outputStream.writeInt(record.getMetaBytes());
@@ -280,7 +282,9 @@ public class WebSocketStats {
                     log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
                 }
                 final int nbRecords = inputStream.readInt();
-                final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
+                // The records of an unknown model are read past, not kept: an EnumMap has no null key
+                final Map<Object, Record> records = model != null ? stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords))
+                        : new HashMap<>();
                 for (int j = 0; j < nbRecords; j++) {
                     Object value = decodeValue(inputStream);
                     if (grouped) {

@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -257,5 +258,73 @@ public class ConflatorTest {
             feed.submit(1); // a cancelled subscription is removed by the publisher's next item
             await(() -> feed.getNumberOfSubscribers() == 0);
         }
+    }
+
+    @Test
+    public void aFailedPublisherClosesIt() {
+        final Conflator<String, Integer> quotes = manual();
+        quotes.subscriber(String::valueOf).onError(new IllegalStateException("feed lost"));
+        assertTrue(quotes.isClosed());
+    }
+
+    @Test
+    public void subscribingAClosedConflatorCancelsTheSubscription() {
+        final Conflator<String, Integer> quotes = manual();
+        quotes.close();
+        final Flow.Subscription subscription = Mockito.mock(Flow.Subscription.class);
+
+        quotes.subscriber(String::valueOf).onSubscribe(subscription);
+
+        Mockito.verify(subscription).cancel();
+        Mockito.verify(subscription, Mockito.never()).request(Mockito.anyLong());
+    }
+
+    @Test
+    public void closeTwiceIsHarmless() {
+        final Conflator<String, Integer> quotes = manual();
+        quotes.close();
+        quotes.close();
+        assertTrue(quotes.isClosed());
+    }
+
+    @Test
+    public void builtOnTheContextsThreadItIsClosedByTheDestroy() {
+        UIContext.setCurrent(context);
+        final Conflator<String, Integer> quotes = manual();
+        UIContext.remove();
+
+        context.destroy();
+
+        assertTrue(quotes.isClosed());
+    }
+
+    @Test
+    public void builtForADeadContextItIsClosedAtOnce() {
+        context.destroy();
+        assertTrue(manual().isClosed());
+    }
+
+    @Test
+    public void aContextDeadAfterADrainClosesIt() {
+        final UIContext dying = Mockito.spy(context);
+        final Conflator<String, Integer> quotes = Conflator.<String, Integer> builder(dying, this::record).executor(manual).build();
+        quotes.offer("EURUSD", 1);
+        Mockito.doReturn(false).when(dying).isAlive();
+
+        drains.poll().run();
+
+        assertTrue(quotes.isClosed());
+        assertFalse(quotes.offer("EURUSD", 2));
+    }
+
+    @Test
+    public void aNegativeIntervalIsRefused() {
+        final Conflator.Builder<String, Integer> builder = Conflator.builder(context, this::record);
+        assertThrows(IllegalArgumentException.class, () -> builder.minInterval(Duration.ofMillis(-1)));
+    }
+
+    @Test
+    public void itNamesItsContext() {
+        assertEquals("Conflator of UIContext #" + context.getID(), manual().toString());
     }
 }

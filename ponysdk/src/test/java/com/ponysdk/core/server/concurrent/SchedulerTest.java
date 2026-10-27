@@ -233,6 +233,64 @@ public class SchedulerTest {
     }
 
     @Test
+    public void testShutdownDestroysTheContextsStillQueued() throws InterruptedException {
+        final Scheduler single = new Scheduler(1);
+        final CountDownLatch started = new CountDownLatch(1);
+        single.createContext("busy").execute(() -> {
+            started.countDown();
+            try {
+                new CountDownLatch(1).await();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        assertTrue(started.await(TIMEOUT_S, SECONDS));
+        final SchedulingContextImpl queued = (SchedulingContextImpl) single.createContext("queued");
+        queued.execute(() -> {});
+        final SchedulingContextImpl idle = (SchedulingContextImpl) single.createContext("idle");
+
+        single.shutdown();
+
+        assertFalse(queued.isAlive(), "a context dropped from the executor queue must be destroyed");
+        assertTrue(idle.isAlive(), "a context with nothing queued is left to its owner");
+        assertTrue(single.awaitTermination(TIMEOUT_S * 1000));
+    }
+
+    @Test
+    public void testContextsQueuedBehindABusyOneRunInTheirOrder() throws InterruptedException {
+        final Scheduler single = new Scheduler(1);
+        try {
+            final CountDownLatch started = new CountDownLatch(1);
+            final CountDownLatch release = new CountDownLatch(1);
+            single.createContext("busy").execute(() -> {
+                started.countDown();
+                try {
+                    release.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+            assertTrue(started.await(TIMEOUT_S, SECONDS));
+            final List<String> order = Collections.synchronizedList(new ArrayList<>());
+            final CountDownLatch done = new CountDownLatch(5);
+            for (final String name : List.of("a", "b", "c", "d", "e")) {
+                single.createContext(name).execute(() -> {
+                    order.add(name);
+                    done.countDown();
+                });
+            }
+
+            release.countDown();
+
+            assertTrue(done.await(TIMEOUT_S, SECONDS));
+            assertEquals(List.of("a", "b", "c", "d", "e"), order);
+        } finally {
+            single.shutdown();
+            assertTrue(single.awaitTermination(TIMEOUT_S * 1000));
+        }
+    }
+
+    @Test
     public void testForceExecuteLaterRunsAfterDelay() throws InterruptedException {
         final SchedulingContext ctx = scheduler.createContext("ctx");
         final CountDownLatch latch = new CountDownLatch(1);

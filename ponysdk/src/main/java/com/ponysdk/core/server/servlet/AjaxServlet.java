@@ -68,7 +68,8 @@ public class AjaxServlet extends HttpServlet {
                 uiContext.execute(() -> {
                     try {
                         final PObject pObject = uiContext.getObject(objectID);
-                        pObject.handleAjaxRequest(req, resp);
+                        if (pObject != null) pObject.handleAjaxRequest(req, resp);
+                        else resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Object #" + objectID + " not found");
                     } catch (ServletException | IOException e) {
                         log.error("Cannot stream request", e);
                         try {

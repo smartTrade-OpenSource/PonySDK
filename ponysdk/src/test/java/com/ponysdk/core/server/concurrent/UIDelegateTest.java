@@ -73,4 +73,25 @@ public class UIDelegateTest {
         verify(uiContext).execute(any(Runnable.class));
         assertNull(received.get(), "consumer must only run through UIContext.execute, never directly");
     }
+
+    @Test
+    public void testAccept_withoutExplicitContextDispatchesToTheCurrentOne() {
+        final UIContext uiContext = mock(UIContext.class);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return true;
+        }).when(uiContext).execute(any(Runnable.class));
+        final AtomicReference<String> received = new AtomicReference<>();
+        UIContext.setCurrent(uiContext);
+        final UIDelegate<String> delegate;
+        try {
+            delegate = new UIDelegate<>(received::set);
+        } finally {
+            UIContext.remove();
+        }
+
+        delegate.accept("payload");
+
+        assertEquals("payload", received.get(), "the context current at construction receives the callback");
+    }
 }

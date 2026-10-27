@@ -318,4 +318,8 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		return scheduler;
 	}
 
+	boolean isAlive() {
+		return alive;
+	}
+
 }

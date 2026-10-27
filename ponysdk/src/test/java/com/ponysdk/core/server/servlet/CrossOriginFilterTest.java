@@ -88,4 +88,30 @@ public class CrossOriginFilterTest {
         verify(response, never()).setHeader(anyString(), anyString());
         verify(chain).doFilter(request, response);
     }
+
+    @Test
+    public void aPreflightWithoutHeadersAllowsNone() throws Exception {
+        final HttpServletRequest request = request("OPTIONS", HOST);
+        when(request.getHeader("Access-Control-Request-Method")).thenReturn("POST");
+        filter.doFilter(request, response, chain);
+        verify(response, never()).setHeader(org.mockito.ArgumentMatchers.eq("Access-Control-Allow-Headers"), anyString());
+        verify(response).setStatus(HttpServletResponse.SC_NO_CONTENT);
+        verifyNoInteractions(chain);
+    }
+
+    @Test
+    public void anOptionsRequestThatIsNoPreflightGoesThrough() throws Exception {
+        final HttpServletRequest request = request("OPTIONS", HOST);
+        filter.doFilter(request, response, chain);
+        verify(response, never()).setStatus(org.mockito.ArgumentMatchers.anyInt());
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    public void noAllowedOriginsLetsEveryRequestThroughWithoutCors() throws Exception {
+        final HttpServletRequest request = request("GET", HOST);
+        new CrossOriginFilter(() -> null).doFilter(request, response, chain);
+        verify(response, never()).setHeader(anyString(), anyString());
+        verify(chain).doFilter(request, response);
+    }
 }

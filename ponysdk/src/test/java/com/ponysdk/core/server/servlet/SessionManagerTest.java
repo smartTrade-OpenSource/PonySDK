@@ -113,6 +113,29 @@ public class SessionManagerTest {
     }
 
     @Test
+    public void testAListenerOfTheOneArgumentDestroyIsNotifiedToo() {
+        final List<Application> destroyed = new ArrayList<>();
+        manager.addApplicationListener(new ApplicationListener() {
+
+            @Override
+            public void onApplicationCreated(final Application application) {
+                // not observed here
+            }
+
+            @Override
+            public void onApplicationDestroyed(final Application application) {
+                destroyed.add(application);
+            }
+        });
+        final Application application = register("app-" + UUID.randomUUID());
+
+        manager.unregisterApplication(application);
+        registered.remove(application);
+
+        assertTrue(destroyed.contains(application));
+    }
+
+    @Test
     public void testGetUIContextScoped_returnsContextOfMatchingApplication() {
         final String id = "app-" + UUID.randomUUID();
         final Application application = register(id);

@@ -154,4 +154,56 @@ public class ApplicationTest {
         assertEquals(StatusCode.NO_CODE, application.getLastCloseStatusCode());
     }
 
+    private Application registeredWithInvalidSession(final String id) {
+        final HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.doThrow(new IllegalStateException("already invalidated")).when(session).invalidate();
+        final Application registered = new Application(id, session, Mockito.mock(ApplicationConfiguration.class));
+        com.ponysdk.core.server.servlet.SessionManager.get().registerApplication(registered);
+        return registered;
+    }
+
+    private static UIContext context(final int id) {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        Mockito.when(uiContext.getID()).thenReturn(id);
+        return uiContext;
+    }
+
+    @Test
+    public void testTheLastContextLeavingAnInvalidatedSessionStillUnregisters() {
+        final Application registered = registeredWithInvalidSession("invalidated-" + System.nanoTime());
+        registered.registerUIContext(context(1));
+
+        registered.deregisterUIContext(1);
+
+        assertNull(com.ponysdk.core.server.servlet.SessionManager.get().getApplication(registered.getId()));
+    }
+
+    @Test
+    public void testDestroyGoesOnPastAFailingContextAndAnInvalidatedSession() {
+        final Application registered = registeredWithInvalidSession("destroyed-" + System.nanoTime());
+        final UIContext failing = context(1);
+        Mockito.doThrow(new IllegalStateException("broken")).when(failing).destroyFromApplication();
+        final UIContext other = context(2);
+        registered.registerUIContext(failing);
+        registered.registerUIContext(other);
+
+        registered.destroy();
+
+        Mockito.verify(other).destroyFromApplication();
+        assertTrue(registered.getUIContexts().isEmpty());
+        assertNull(com.ponysdk.core.server.servlet.SessionManager.get().getApplication(registered.getId()));
+    }
+
+    @Test
+    public void testPushToClientsGoesOnPastAFailingContext() {
+        final UIContext failing = context(1);
+        Mockito.when(failing.pushToClient((Object) "news")).thenThrow(new IllegalStateException("broken"));
+        final UIContext other = context(2);
+        application.registerUIContext(failing);
+        application.registerUIContext(other);
+
+        application.pushToClients("news");
+
+        Mockito.verify(other).pushToClient((Object) "news");
+    }
 }

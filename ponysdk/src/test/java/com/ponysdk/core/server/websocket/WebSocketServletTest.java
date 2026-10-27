@@ -223,4 +223,90 @@ public class WebSocketServletTest {
         config.setMaxProtocolVersion(1);
         assertEquals(1, WebSocketServlet.negotiateProtocolVersion("2", config), "server kill switch");
     }
+
+    @Test
+    public void anUnreadableUpgradeRequestStillOpensWithAnEmptySnapshot() {
+        final Fixture f = new Fixture();
+        final RuntimeException recycled = new IllegalStateException("request recycled");
+        when(f.request.getParameterMap()).thenThrow(recycled);
+        when(f.request.getHeaders()).thenThrow(recycled);
+        when(f.request.getCookies()).thenThrow(recycled);
+        when(f.request.getHost()).thenThrow(recycled);
+        when(f.request.isSecure()).thenThrow(recycled);
+        when(f.request.getRemoteSocketAddress()).thenThrow(recycled);
+        when(f.request.getHeader("User-Agent")).thenThrow(recycled);
+
+        final WebSocket ws = f.servlet.createWebsocket(f.request, f.response);
+
+        final UpgradeRequestData data = ws.getUpgradeRequestData();
+        assertTrue(data.getParameterMap().isEmpty());
+        assertTrue(data.getHeaders().isEmpty());
+        assertTrue(data.getCookies().isEmpty());
+        assertNull(data.getHost());
+        assertFalse(data.isSecure());
+        assertNull(data.getRemoteSocketAddress());
+        assertNull(data.getUserAgent());
+        assertNull(data.getSession());
+    }
+
+    @Test
+    public void theOriginIsCheckedAgainstTheFirstForwardedHost() {
+        final Fixture f = new Fixture();
+        when(f.config.isWsOriginCheckEnabled()).thenReturn(true);
+        when(f.request.getHeader("Origin")).thenReturn("https://front.example.com");
+        when(f.request.getHeader("Host")).thenReturn("inner:8080");
+        when(f.request.getHeader("X-Forwarded-Host")).thenReturn("front.example.com, proxy.internal");
+
+        assertNotNull(f.servlet.createWebsocket(f.request, f.response));
+        verify(f.response, never()).setStatusCode(anyInt());
+
+        final Fixture g = new Fixture();
+        when(g.config.isWsOriginCheckEnabled()).thenReturn(true);
+        when(g.request.getHeader("Origin")).thenReturn("https://front.example.com");
+        when(g.request.getHeader("Host")).thenReturn("front.example.com");
+        when(g.request.getHeader("X-Forwarded-Host")).thenReturn("");
+
+        assertNotNull(g.servlet.createWebsocket(g.request, g.response), "an empty forwarded host falls back to Host");
+    }
+
+    @Test
+    public void anEmbeddedTerminalGetsThePonysdkSubprotocol() {
+        final Fixture f = new Fixture();
+        when(f.request.getHeader(Subprotocols.HEADER)).thenReturn("other, " + Subprotocols.PONYSDK);
+
+        assertNotNull(f.servlet.createWebsocket(f.request, f.response));
+
+        verify(f.response).setAcceptedSubProtocol(Subprotocols.PONYSDK);
+    }
+
+    @Test
+    public void withoutConfigurationTheServletUsesItsOwnIdleTimeout() {
+        final ApplicationManager appManager = mock(ApplicationManager.class);
+        final WebSocketServlet servlet = new WebSocketServlet(appManager);
+        servlet.setMaxIdleTime(7_000);
+        final JettyWebSocketServletFactory factory = mock(JettyWebSocketServletFactory.class);
+
+        servlet.configure(factory);
+
+        verify(factory).setIdleTimeout(Duration.ofMillis(7_000));
+        verify(factory, never()).setMaxTextMessageSize(anyInt());
+        verify(factory, never()).setInputBufferSize(anyInt());
+    }
+
+    @Test
+    public void aSessionGetsOneApplicationAndNoSessionIsRefused() {
+        final Fixture f = new Fixture();
+        final com.ponysdk.core.server.stm.TxnContext first = new com.ponysdk.core.server.stm.TxnContext(mock(WebSocket.class));
+        final com.ponysdk.core.server.stm.TxnContext second = new com.ponysdk.core.server.stm.TxnContext(mock(WebSocket.class));
+        try {
+            f.servlet.configureWithSession(f.httpSession, first);
+            f.servlet.configureWithSession(f.httpSession, second);
+
+            assertNotNull(first.getApplication());
+            assertSame(first.getApplication(), second.getApplication(), "the tabs of a session share its application");
+            assertThrows(IllegalStateException.class, () -> f.servlet.configureWithSession(null, first));
+        } finally {
+            SessionManager.get().unregisterApplication(first.getApplication());
+        }
+    }
 }

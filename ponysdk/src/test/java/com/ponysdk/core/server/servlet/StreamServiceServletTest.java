@@ -148,4 +148,18 @@ public class StreamServiceServletTest {
         SessionManager.get().unregisterApplication(victim);
     }
 
+    @Test
+    public void testAFailingErrorResponseIsLogged() throws IOException {
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue())).thenReturn("not-a-number");
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.doThrow(new IOException("reset")).when(response).sendError(ArgumentMatchers.anyInt(), ArgumentMatchers.any());
+
+        streamServiceServlet.doGet(request, response);
+        streamServiceServlet.doPost(request, response);
+
+        Mockito.verify(response, Mockito.times(2)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+            ArgumentMatchers.any());
+    }
+
 }
