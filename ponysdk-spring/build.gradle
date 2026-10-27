@@ -2,12 +2,6 @@ plugins {
     id 'jacoco'
 }
 
-ext {
-    springVersion = '7.0.10'
-    slf4jVersion = '2.0.20'
-    jakartaServletVersion = '6.1.0'
-}
-
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
 group = 'com.ponysdk'
 version = '3.0.0' + versionSuffix
@@ -34,10 +28,10 @@ publishing {
 
 dependencies {
     implementation project(':ponysdk')
-    implementation 'org.springframework:spring-core:' + springVersion
-    implementation 'org.springframework:spring-web:' + springVersion
-    implementation 'org.springframework:spring-beans:' + springVersion
-    implementation 'org.springframework:spring-context:' + springVersion
+    implementation libs.spring.core
+    implementation libs.spring.web
+    implementation libs.spring.beans
+    implementation libs.spring.context
 }
 
 java {

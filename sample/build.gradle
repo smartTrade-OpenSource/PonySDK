@@ -1,49 +1,35 @@
-ext {
-    java2htmlVersion = '5.0'
-    commonsBeanutilsVersion = '1.11.0'
-    commonsIoVersion = '2.22.0'
-    commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
-    jettyVersion = '12.1.14'
-    springVersion = '7.0.10'
-    jakartaServletVersion = '6.1.0'
-    jakartaJsonVersion = '2.1.3'
-    parssonVersion = '1.1.9'
-    slf4jVersion = '2.0.20'
-    log4jVersion = '2.26.1'
-}
-
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.3'
-    testRuntimeOnly 'org.eclipse.parsson:parsson:' + parssonVersion // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly libs.junit.platform.launcher
+    testRuntimeOnly libs.parsson // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
 
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
-            'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,
-            'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
-            'org.slf4j:slf4j-api:' + slf4jVersion,
-            'de.java2html:java2html:' + java2htmlVersion,
-            'org.eclipse.jetty.websocket:jetty-websocket-jetty-client:' + jettyVersion,
-            'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
-            'commons-io:commons-io:' + commonsIoVersion,
-            'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileupload2Version,
-            'com.google.code.gson:gson:2.15.0'
+            libs.jakarta.json.api,
+            libs.jakarta.servlet.api,
+            libs.slf4j.api,
+            libs.java2html,
+            libs.jetty.websocket.jetty.client,
+            libs.commons.beanutils,
+            libs.commons.io,
+            libs.commons.fileupload2.jakarta.servlet6,
+            libs.gson
     )
 
     // Spring kept for the runFlexLayoutDemo task (FlexLayout E2E suite) — uses ponysdk-spring module
     implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
-            'org.eclipse.parsson:parsson:' + parssonVersion,
-            'de.java2html:java2html:' + java2htmlVersion,
-            'org.springframework:spring-context:' + springVersion,
-            'org.springframework:spring-aop:' + springVersion,
-            'org.springframework:spring-expression:' + springVersion,
-            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-slf4j2-impl:' + log4jVersion,
+            libs.parsson,
+            libs.java2html,
+            libs.spring.context,
+            libs.spring.aop,
+            libs.spring.expression,
+            libs.slf4j.jcl.over.slf4j,
+            libs.slf4j.jul.to.slf4j,
+            libs.log4j.api,
+            libs.log4j.core,
+            libs.log4j.slf4j2.impl
     )
 }
 
