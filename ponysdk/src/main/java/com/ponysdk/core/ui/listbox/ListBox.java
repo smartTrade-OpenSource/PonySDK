@@ -403,11 +403,14 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
-        if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
+        if (!configuration.isMultiSelectionEnabled()) {
+            setSelected(selectedData);
+            return;
+        }
         final Collection<ListBoxItem<D>> selectedItems = getSelectedItems();
         for (final ListBoxItem<D> item : this.items) {
             if (item.getData() != null && item.getData().equals(selectedData)) {
-                selectedItems.add(item);
+                if (!selectedItems.contains(item)) selectedItems.add(item);
                 break;
             }
         }
@@ -487,7 +490,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 log.debug("Cannot select index {} ", index, e);
             }
         } else {
-            final List<ListBoxItem<D>> data = dataProvider.getData(index, 0, null);
+            final List<ListBoxItem<D>> data = dataProvider.getData(index, 1, null);
             if (data != null && !data.isEmpty()) {
                 if (configuration.isMultiSelectionEnabled()) {
                     setMultiSelected(List.of(data.get(0).data));
