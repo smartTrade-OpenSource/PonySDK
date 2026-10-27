@@ -457,7 +457,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
             } catch (final Exception e) {
                 log.error("Problem occured while updating the view for result {}, row nb {}", result.getFirst(), rows.size(), e);
-                showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+                showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(e));
             } finally {
                 from = Integer.MAX_VALUE;
                 to = 0;
@@ -1485,6 +1485,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setState(final State state) {
             if (columnView.state == state) return;
 
+            // show and hide work on the unpinned table: unpin before hiding, pin after showing
+            if (!state.isPinned() && columnView.state.isPinned()) unpin(columnView);
+
             if (state.isShown() && !columnView.state.isShown()) {
                 show(columnView);
             } else if (!state.isShown() && columnView.state.isShown()) {
@@ -1492,11 +1495,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 clearSort();
             }
 
-            if (state.isPinned() && !columnView.state.isPinned()) {
-                pin(columnView);
-            } else if (!state.isPinned() && columnView.state.isPinned()) {
-                unpin(columnView);
-            }
+            if (state.isPinned() && !columnView.state.isPinned()) pin(columnView);
 
             columnView.state = state;
             columnView.notifyStateChangedListeners();

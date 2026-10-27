@@ -245,6 +245,26 @@ public class PWidgetTest extends PSuite {
         assertEquals("", label.getStyleName());
         assertEquals(0, label.getStyleNames().count());
         assertEquals(List.of("main", ""), writer.valuesOf(ServerToClientModel.STYLE_NAME));
+
+        label.setStyleName("");
+        assertEquals(2, writer.count(ServerToClientModel.STYLE_NAME), "already no style name");
+    }
+
+    @Test
+    public void setStyleNameAgainDropsTheNamesAddedSince() {
+        final PLabel label = attachedLabel();
+        label.setStyleName("main");
+        label.addStyleName("extra");
+        writer.clear();
+        label.setStyleName("main");
+        assertEquals(List.of("main"), writer.valuesOf(ServerToClientModel.STYLE_NAME));
+        assertEquals(Set.of("main"), label.getStyleNames().collect(Collectors.toSet()));
+
+        label.setStyleName("");
+        label.addStyleName("extra");
+        label.setStyleName("");
+        assertEquals(0, label.getStyleNames().count());
+        assertEquals(List.of("main", "", ""), writer.valuesOf(ServerToClientModel.STYLE_NAME));
     }
 
     @Test

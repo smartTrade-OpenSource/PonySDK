@@ -72,6 +72,7 @@ public class InputFormFieldTest extends PSuite {
         assertEquals("true", field.asWidget().getAttribute("dirty"));
 
         assertTrue(field.removeValueChangeHandler(handler));
+        assertFalse(field.removeValueChangeHandler(handler));
         type(field, "");
         assertEquals(1, values.size());
         // Blur validates as well

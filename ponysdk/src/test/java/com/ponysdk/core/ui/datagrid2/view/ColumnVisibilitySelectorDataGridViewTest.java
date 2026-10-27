@@ -183,6 +183,19 @@ public class ColumnVisibilitySelectorDataGridViewTest extends PSuite {
         Assertions.assertTrue(checkBox(1).isEnabled());
     }
 
+    @Test
+    public void cancelUnchecksAColumnCheckedSinceLastApply() {
+        DomEvents.booleanValueChange(checkBox(1), false);
+        PEmulator.click(applyButton());
+        DomEvents.booleanValueChange(checkBox(1), true);
+
+        PEmulator.click(layout().getWidget(2));
+
+        Assertions.assertFalse(checkBox(1).getValue());
+        PEmulator.click(applyButton());
+        Assertions.assertEquals(State.UNPINNED_HIDDEN, stateOf("name"));
+    }
+
     private State stateOf(final String columnId) {
         for (final DataGridConfig.ColumnConfig<String> config : view.getConfig().getColumnConfigs()) {
             if (config.getColumnId().equals(columnId)) return config.getState();

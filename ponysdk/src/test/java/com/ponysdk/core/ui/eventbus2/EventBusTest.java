@@ -103,4 +103,15 @@ public class EventBusTest {
         assertEquals(List.of("direct"), manualReceived);
         assertFalse(bus.unsubscribe(new EventBus.EventHandler<>(Long.class)));
     }
+
+    @Test
+    public void testFreshBusAndReplacedInitialValue() {
+        final EventBus bus = new EventBus();
+        assertFalse(bus.unsubscribe(new EventBus.EventHandler<>(String.class)));
+        bus.setInitialValueByType(String.class, () -> "first");
+        bus.setInitialValueByType(String.class, () -> "second");
+        final List<String> received = new ArrayList<>();
+        bus.subscribe(String.class, received::add);
+        assertEquals(List.of("second"), received);
+    }
 }

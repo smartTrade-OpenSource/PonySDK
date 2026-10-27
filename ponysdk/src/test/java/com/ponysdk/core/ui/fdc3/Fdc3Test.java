@@ -216,4 +216,99 @@ public class Fdc3Test extends PSuite {
         assertEquals(Fdc3.State.UNAVAILABLE, fdc3.getState());
         assertNull(fdc3.getInfo());
     }
+
+    @Test
+    public void joiningAndLeavingAChannelCallTheAgent() {
+        final Fdc3 fdc3 = Fdc3.get();
+        fdc3.joinUserChannel("fdc3.channel.2");
+        fdc3.leaveCurrentChannel();
+        assertThrows(NullPointerException.class, () -> fdc3.joinUserChannel(null));
+        assertEquals(List.of("joinUserChannel[fdc3.channel.2]", "leaveCurrentChannel"), calls());
+    }
+
+    @Test
+    public void removedStateAndChannelListenersAreNotCalled() {
+        final Fdc3 fdc3 = Fdc3.get();
+        final List<Fdc3.State> states = new ArrayList<>();
+        final List<String> channels = new ArrayList<>();
+        fdc3.addStateListener(states::add).removeHandler();
+        fdc3.addChannelListener(channels::add).removeHandler();
+        fromAgent(fdc3, Json.createObjectBuilder().add("state", "unavailable").build());
+        fromAgent(fdc3, Json.createObjectBuilder().add("channel", "fdc3.channel.1").build());
+        assertEquals(List.of(Fdc3.State.WAITING), states);
+        assertEquals(List.of(), channels);
+        assertEquals("fdc3.channel.1", fdc3.getCurrentChannel());
+    }
+
+    @Test
+    public void aContextListenerRemovedTwiceIsRemovedOnce() {
+        final Fdc3 fdc3 = Fdc3.get();
+        final List<String> received = new ArrayList<>();
+        final HandlerRegistration first = fdc3.addContextListener("fdc3.instrument", c -> received.add("first"));
+        final HandlerRegistration second = fdc3.addContextListener("fdc3.instrument", c -> received.add("second"));
+        first.removeHandler();
+        first.removeHandler();
+        fromAgent(fdc3, Json.createObjectBuilder().add("listener", "fdc3.instrument").add("context", Fdc3.instrument("A", null)).build());
+        assertEquals(List.of("second"), received);
+
+        second.removeHandler();
+        second.removeHandler();
+        assertEquals(List.of("listenContext[fdc3.instrument]", "unlistenContext[fdc3.instrument]"), calls());
+
+        // a context of a type nobody listens to is dropped
+        fromAgent(fdc3, Json.createObjectBuilder().add("listener", "fdc3.instrument").add("context", Fdc3.instrument("B", null)).build());
+        assertEquals(List.of("second"), received);
+    }
+
+    @Test
+    public void aRaisedIntentWithoutCallbackIgnoresItsAnswer() {
+        final Fdc3 fdc3 = Fdc3.get();
+        fdc3.raiseIntent("ViewChart", Fdc3.instrument("A", null));
+        fromAgent(fdc3, Json.createObjectBuilder().add("raised", 1).add("app", "chart").build());
+        assertEquals(List.of("raiseIntent[1, ViewChart, {\"type\":\"fdc3.instrument\",\"id\":{\"ticker\":\"A\"}}]"), calls());
+        assertThrows(NullPointerException.class, () -> fdc3.raiseIntent(null, Fdc3.instrument("A", null)));
+    }
+
+    @Test
+    public void anIntentHandlerReturningJavaNullAnswersNull() {
+        final Fdc3 fdc3 = Fdc3.get();
+        fdc3.addIntentListener("ViewChart", c -> null);
+        writer.clear();
+        fromAgent(fdc3, Json.createObjectBuilder().add("intent", "ViewChart").add("request", 4).add("context", Fdc3.instrument("A", null)).build());
+        assertEquals(List.of("intentResult[4, null]"), calls());
+    }
+
+    @Test
+    public void otherMessagesGoToTheTerminalHandler() {
+        final Fdc3 fdc3 = Fdc3.get();
+        final List<JsonObject> events = new ArrayList<>();
+        fdc3.setTerminalHandler(e -> events.add(e.getData()));
+        final JsonObject other = Json.createObjectBuilder().add("other", 1).build();
+        fromAgent(fdc3, other);
+        fdc3.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_CHANGE.toStringValue(), "x").build());
+        assertEquals(List.of(other), events);
+    }
+
+    @Test
+    public void aDestroyedAgentIgnoresItsMessages() {
+        final Fdc3 fdc3 = Fdc3.get();
+        fdc3.onDestroy();
+        fromAgent(fdc3, Json.createObjectBuilder().add("state", "unavailable").build());
+        assertEquals(Fdc3.State.WAITING, fdc3.getState());
+    }
+
+    @Test
+    public void getOutsideTheUIThreadFails() throws InterruptedException {
+        final Throwable[] thrown = new Throwable[1];
+        final Thread thread = new Thread(() -> {
+            try {
+                Fdc3.get();
+            } catch (final Throwable t) {
+                thrown[0] = t;
+            }
+        });
+        thread.start();
+        thread.join();
+        assertInstanceOf(IllegalStateException.class, thrown[0]);
+    }
 }

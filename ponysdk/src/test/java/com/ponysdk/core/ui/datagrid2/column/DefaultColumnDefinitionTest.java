@@ -164,4 +164,48 @@ public class DefaultColumnDefinitionTest extends PSuite {
 
         Assertions.assertEquals("price", ((PLabel) column.getHeader().getWidget(0)).getText());
     }
+
+    @Test
+    public void clickOnNameAfterDescendingSortSortsAscending() {
+        column.setController(controller);
+        column.onSort(false);
+        PEmulator.click(column.getHeader().getWidget(0));
+        Mockito.verify(controller).sort(true);
+    }
+
+    @Test
+    public void pinnedByDefaultColumnOffersUnpin() {
+        final DefaultColumnDefinition<Integer> pinned = new DefaultColumnDefinition<>("p", v -> v, null) {
+
+            @Override
+            public State getDefaultState() {
+                return State.PINNED_SHOWN;
+            }
+        };
+        Assertions.assertEquals("Unpin", ((PLabel) pinned.getHeader().getWidget(1)).getText());
+    }
+
+    @Test
+    public void lockedColumnHasNoPinNorHideAction() {
+        final DefaultColumnDefinition<Integer> locked = new DefaultColumnDefinition<>("l", v -> v, null) {
+
+            @Override
+            public boolean isPinnable() {
+                return false;
+            }
+
+            @Override
+            public boolean isVisibilitySwitchable() {
+                return false;
+            }
+        };
+        locked.setController(controller);
+        final PLabel pin = (PLabel) locked.getHeader().getWidget(1);
+        final PLabel hide = (PLabel) locked.getHeader().getWidget(2);
+        Assertions.assertNull(pin.getText());
+        Assertions.assertNull(hide.getText());
+        PEmulator.click(pin);
+        PEmulator.click(hide);
+        Mockito.verifyNoInteractions(controller);
+    }
 }

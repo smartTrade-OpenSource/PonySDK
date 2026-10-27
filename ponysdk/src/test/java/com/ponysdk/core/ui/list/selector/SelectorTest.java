@@ -115,6 +115,18 @@ public class SelectorTest extends PSuite {
     }
 
     @Test
+    public void testUnselectWithinAPage() {
+        final RecordingSelectorView view = new RecordingSelectorView();
+        final Selector<String> selector = new Selector<>(view, 3);
+        selector.setFullSize(10);
+        selector.onSelect();
+        selector.onSelect();
+        selector.onUnselect();
+        assertEquals(SelectionMode.PARTIAL, selector.getSelectionMode());
+        assertEquals(1, view.lastSelected);
+    }
+
+    @Test
     public void testFullWhenEverythingIsSelected() {
         final RecordingSelectorView view = new RecordingSelectorView();
         final Selector<String> selector = new Selector<>(view);
@@ -222,6 +234,8 @@ public class SelectorTest extends PSuite {
         view.update(SelectionMode.FULL, 10, 10, 20);
         assertEquals(1, view.getWidgetCount());
 
+        view.update(SelectionMode.PARTIAL, 3, 10, 20);
+        assertFalse(view.isVisible());
         view.update(SelectionMode.PARTIAL, 3, 10, 20);
         assertFalse(view.isVisible());
         view.update(SelectionMode.PAGE, 3, 10, 20);

@@ -126,16 +126,16 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     public void removeRow(final int row) {
-        if (row >= rows.size()) return; // a row past the last widget is not known here: nothing shifts (unchanged behaviour)
         getRowFormatter().removeRowStyle(row);
 
-        final PWidget[] cells = rows.get(row);
+        // A row past the last widget is the terminal's only (inserted, or emptied): its removal is sent all the same
+        final PWidget[] cells = row < rows.size() ? rows.get(row) : null;
         if (cells != null) {
             for (final PWidget widget : cells) {
                 if (widget != null) remove(widget, false);
             }
         }
-        if (row < rows.size()) {
+        if (row < rows.size()) { // the last row is trimmed with its last widget
             rows.remove(row);
             shiftRows(row, -1);
             trimTrailingEmptyRows();

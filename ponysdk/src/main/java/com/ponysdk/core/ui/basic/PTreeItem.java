@@ -170,8 +170,9 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean remove(final PTreeItem item) {
+        if (children == null || !children.remove(item)) return false;
         item.saveRemove(item.getID(), ID);
-        return children.remove(item);
+        return true;
     }
 
     public PTreeItem get(final int index) {

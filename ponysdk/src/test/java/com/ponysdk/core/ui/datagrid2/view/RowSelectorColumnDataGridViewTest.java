@@ -213,6 +213,32 @@ public class RowSelectorColumnDataGridViewTest extends PSuite {
         Assertions.assertEquals(List.of("a"), view.getLiveSelectedData().getData());
     }
 
+    @Test
+    public void gridWithoutHeaderHasNoHeaderCheckBox() throws Exception {
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
+        source.setFilterController(new FilterController<>());
+        base = new DefaultDataGridView<>(source);
+        view = new RowSelectorColumnDataGridView<>(base);
+        view.setAdapter(new RecordingAdapter(List.of(new DefaultColumnDefinition<>("name", v -> v, (v, s) -> {
+        })), false));
+
+        drawAfter(() -> view.getController().setData(List.of("a", "b")));
+
+        Assertions.assertNull(selector().getHeader());
+        Assertions.assertFalse(rowCheckBox(0).getValue());
+        drawAfter(() -> view.getController().select("a"));
+        Assertions.assertEquals(1, view.getLiveSelectedDataCount());
+    }
+
+    @Test
+    public void setConfigWithoutColumnsKeepsSelectorColumnFirst() throws Exception {
+        newView(false);
+
+        view.setConfig(new DataGridConfigBuilder<String>().build());
+
+        Assertions.assertEquals(List.of(COLUMN_ID, "name"), columnIds(view.getConfig()));
+    }
+
     private ColumnDefinition<String> selector() {
         return view.getAdapter().getColumnDefinitions().get(0);
     }

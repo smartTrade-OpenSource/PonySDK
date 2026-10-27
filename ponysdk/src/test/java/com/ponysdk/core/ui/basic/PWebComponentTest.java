@@ -232,6 +232,8 @@ public class PWebComponentTest extends PSuite {
         assertNull(PWebComponent.computeJsonPatch("   ", "{\"a\":1}"));
         assertNull(PWebComponent.computeJsonPatch("{ broken", "{\"a\":1}"));
         assertNull(PWebComponent.computeJsonPatch(null, "{\"a\":1}"));
+        assertNull(PWebComponent.computeJsonPatch("{\"a\":1}", "{ broken"));
+        assertEquals("{\"a\":2}", PWebComponent.computeJsonPatch(" \t\r\n{\"a\":1}", "\n{\"a\":2}"));
     }
 
     // ---- Typed setters, removal, slots, JSON helpers ----

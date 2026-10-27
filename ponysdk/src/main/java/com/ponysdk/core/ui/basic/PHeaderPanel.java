@@ -59,7 +59,9 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setContentWidget(final PWidget child) {
+        if (child == content) return;
         child.removeFromParent();
+        if (content != null) remove(content);
         adopt(child);
         content = child;
         if (isInitialized()) child.attach(window, getFrame());
@@ -71,7 +73,9 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setFooterWidget(final PWidget child) {
+        if (child == footer) return;
         child.removeFromParent();
+        if (footer != null) remove(footer);
         adopt(child);
         footer = child;
         if (isInitialized()) child.attach(window, getFrame());
@@ -83,7 +87,9 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setHeaderWidget(final PWidget child) {
+        if (child == header) return;
         child.removeFromParent();
+        if (header != null) remove(header);
         adopt(child);
         header = child;
         if (isInitialized()) child.attach(window, getFrame());
@@ -138,6 +144,7 @@ public class PHeaderPanel extends PPanel {
 
     @Override
     public String dumpDOM() {
-        return "<div pid=\"" + ID + "\">" + header.dumpDOM() + content.dumpDOM() + footer.dumpDOM() + "</div>";
+        return "<div pid=\"" + ID + "\">" + (header != null ? header.dumpDOM() : "") + (content != null ? content.dumpDOM() : "")
+                + (footer != null ? footer.dumpDOM() : "") + "</div>";
     }
 }

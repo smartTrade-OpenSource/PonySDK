@@ -420,4 +420,57 @@ public class PWindowTest extends PSuite {
         assertNull(PWindowManager.getWindow(w1.getID()));
     }
 
+
+    @Test
+    public void testSeveralHandlersAndRemovalWithoutRegistration() {
+        final PWindow window = Element.newPWindow(null, null);
+        final POpenHandler open = e -> {
+        };
+        final PCloseHandler close = e -> {
+        };
+        assertFalse(window.removeOpenHandler(open));
+        assertFalse(window.removeCloseHandler(close));
+        window.removeVisibilityHandler(e -> {
+        });
+
+        final AtomicInteger opened = new AtomicInteger();
+        final AtomicInteger closed = new AtomicInteger();
+        window.addOpenHandler(e -> opened.incrementAndGet());
+        window.addOpenHandler(e -> opened.incrementAndGet());
+        window.addOpenHandler(open);
+        window.addCloseHandler(e -> closed.incrementAndGet());
+        window.addCloseHandler(e -> closed.incrementAndGet());
+        window.addCloseHandler(close);
+        assertTrue(window.removeOpenHandler(open));
+        assertFalse(window.removeOpenHandler(open));
+        assertTrue(window.removeCloseHandler(close));
+
+        final List<Boolean> visibility = new ArrayList<>();
+        window.addVisibilityHandler(e -> visibility.add(e.getData()));
+        window.addVisibilityHandler(e -> visibility.add(e.getData()));
+
+        window.open();
+        window.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue(), false).build());
+        window.close();
+        assertEquals(2, opened.get());
+        assertEquals(2, closed.get());
+        assertEquals(List.of(false, false), visibility);
+    }
+
+    @Test
+    public void testInitAndDestroyAreIdempotent() {
+        final PWindow window = Element.newPWindow(PWindow.getMain(), "w", null);
+        window.open();
+        writer.clear();
+        window.init();
+        assertTrue(writer.isEmpty());
+
+        final AtomicInteger destroyed = new AtomicInteger();
+        window.addDestroyListener(o -> destroyed.incrementAndGet());
+        window.onDestroy();
+        window.onDestroy();
+        assertFalse(window.isOpened());
+        assertFalse(PWindow.getMain().getSubWindows().contains(window));
+        assertTrue(window.getSubWindows().isEmpty());
+    }
 }

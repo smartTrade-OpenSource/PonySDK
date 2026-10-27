@@ -37,6 +37,7 @@ import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.CapturingColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.RecordingAdapter;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.test.PSuite;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -228,6 +229,23 @@ public class ColumnFilterFooterDataGridViewTest extends PSuite {
 
         Assertions.assertThrows(IllegalStateException.class, () -> noAdapter.encodeConfigCustomValue(CONFIG_KEY, Map.of()));
         Assertions.assertThrows(IllegalStateException.class, () -> noAdapter.decodeConfigCustomValue(CONFIG_KEY, ""));
+    }
+
+    @Test
+    public void hidingColumnWithoutFilterKeepsData() {
+        final ColumnDefinition<String> name = view.getAdapter().getColumnDefinitions().get(0);
+
+        name.getController().setState(State.UNPINNED_HIDDEN);
+
+        Assertions.assertEquals("", footer().getText());
+        Assertions.assertEquals(List.of("apple", "banana", "cherry"), view.getFilteredData().getData());
+    }
+
+    @Test
+    public void adapterCannotBeSetTwice() {
+        final DataGridAdapter<String, String> adapter = view.getAdapter();
+        Assertions.assertThrows(IllegalStateException.class, () -> view.setAdapter(adapter));
+        Assertions.assertSame(adapter, view.getAdapter());
     }
 
     /** Types in the "name" footer, then waits for the draw that enables the footer again. */

@@ -90,7 +90,7 @@ public class PCookiesTest extends PSuite {
         });
         initialize(cookies, "visits", "3");
         final int[] calls = { 0 };
-        cookies.addInitializedListener(() -> calls[0]++);
+        cookies.addInitializedListener(() -> calls[0]++).removeHandler(); // nothing left to remove
         assertEquals(1, calls[0], "the cookies are known: no later call would come");
     }
 

@@ -35,9 +35,7 @@ public abstract class AbstractScene implements Scene {
 
         if (firstStart) {
             try {
-                if (widget == null) {
-                    widget = buildGUI();
-                }
+                asWidget();
                 if (!widget.isInitialized()) {
                     widget.addInitializeListener(this::onInit);
                 } else {
@@ -111,19 +109,19 @@ public abstract class AbstractScene implements Scene {
     }
 
     private void fireStarting() {
-        listeners.forEach(l -> l.starting(this));
+        if (listeners != null) listeners.forEach(l -> l.starting(this));
     }
 
     private void fireStarted() {
-        listeners.forEach(l -> l.started(this));
+        if (listeners != null) listeners.forEach(l -> l.started(this));
     }
 
     private void fireStopping() {
-        listeners.forEach(l -> l.stopping(this));
+        if (listeners != null) listeners.forEach(l -> l.stopping(this));
     }
 
     private void fireStopped() {
-        listeners.forEach(l -> l.stopped(this));
+        if (listeners != null) listeners.forEach(l -> l.stopped(this));
     }
 
     @Override

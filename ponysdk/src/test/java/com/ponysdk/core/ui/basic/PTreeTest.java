@@ -246,4 +246,22 @@ public class PTreeTest extends PSuite {
         tree.add("a");
         assertEquals("<div><div item=\"null\"><div item=\"a\"></div></div></div>", tree.dumpDOM());
     }
+
+    @Test
+    public void severalSelectionHandlersAndRemovalWithoutAny() {
+        final PTree tree = Element.newPTree();
+        tree.removeSelectionHandler(e -> {
+        });
+        final List<String> calls = new ArrayList<>();
+        final PSelectionHandler<PTreeItem> removed = e -> calls.add("removed");
+        tree.addSelectionHandler(e -> calls.add("a"));
+        tree.addSelectionHandler(removed);
+        tree.addSelectionHandler(e -> calls.add("b"));
+        tree.removeSelectionHandler(removed);
+        final PTreeItem item = tree.add("x");
+        PWindow.getMain().add(tree);
+        tree.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_SELECTION.toStringValue(), item.getID()).build());
+        assertEquals(List.of("a", "b"), calls);
+        tree.removeFromParent();
+    }
 }

@@ -227,4 +227,100 @@ public class PHostTest extends PSuite {
             Json.createObjectBuilder().add("instrument", "GBPUSD")).build());
         assertEquals(List.of("USDJPY"), seen);
     }
+
+    @Test
+    public void getOutsideAContextFails() {
+        final UIContext context = UIContext.get();
+        UIContext.setCurrent(null);
+        try {
+            assertThrows(IllegalStateException.class, PHost::get);
+        } finally {
+            UIContext.setCurrent(context);
+        }
+    }
+
+    @Test
+    public void anEmbeddedContextWithoutHandshakeAttributesHasNoHost() {
+        Mockito.doReturn(true).when(UIContext.get()).isEmbedded();
+        Mockito.doReturn(Map.of()).when(UIContext.get()).getParameterMap();
+        assertNull(PHost.get());
+        Mockito.doReturn(Map.of(ATTRIBUTES, List.of())).when(UIContext.get()).getParameterMap();
+        assertNull(PHost.get());
+        assertTrue(writer.isEmpty(), "nothing created");
+    }
+
+    @Test
+    public void handshakeAttributesThatAreNotStringsAreIgnored() {
+        handshake("{\"instrument\":\"EURUSD\",\"depth\":5,\"live\":true}");
+        assertEquals(Map.of("instrument", "EURUSD"), PHost.get().getAttributes());
+    }
+
+    @Test
+    public void attributeListenersOfSeveralNamesAreRemovedOneByOne() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        final List<String> seen = new ArrayList<>();
+        final HandlerRegistration a1 = host.addAttributeListener("a", v -> seen.add("a1:" + v));
+        final HandlerRegistration a2 = host.addAttributeListener("a", v -> seen.add("a2:" + v));
+        final HandlerRegistration b = host.addAttributeListener("b", v -> seen.add("b:" + v));
+
+        a1.removeHandler();
+        a1.removeHandler(); // already removed: no effect
+        fromTerminal(host, Json.createObjectBuilder().add(ATTRIBUTES, Json.createObjectBuilder().add("a", "1").add("c", "3")).build());
+        assertEquals(List.of("a2:1"), seen);
+
+        a2.removeHandler();
+        a2.removeHandler(); // the name has no listener left
+        b.removeHandler();
+        fromTerminal(host, Json.createObjectBuilder().add(ATTRIBUTES, Json.createObjectBuilder().add("a", "2").add("b", "2")).build());
+        assertEquals(List.of("a2:1"), seen);
+        assertEquals("2", host.getAttribute("b"));
+    }
+
+    @Test
+    public void anAttributeChangeWithoutAnyListenerIsKept() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        fromTerminal(host, Json.createObjectBuilder().add(ATTRIBUTES, Json.createObjectBuilder().add("a", "1")).build());
+        assertEquals("1", host.getAttribute("a"));
+    }
+
+    @Test
+    public void anEventWithoutAnyListenerIsDropped() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        writer.clear();
+        fromTerminal(host, Json.createObjectBuilder().add(ClientToServerModel.WC_EVENT_NAME.toStringValue(), "refresh").build());
+        assertTrue(writer.isEmpty());
+    }
+
+    @Test
+    public void removingAnEventListenerTwiceUnlistensOnce() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        final HandlerRegistration registration = host.addEventListener("refresh", v -> {
+        });
+        writer.clear();
+        registration.removeHandler();
+        registration.removeHandler();
+        host.addEventListener("other", v -> {
+        });
+        final HandlerRegistration kept = host.addEventListener("other", v -> {
+        });
+        kept.removeHandler();
+        kept.removeHandler();
+        assertEquals(List.of("refresh"), writer.valuesOf(ServerToClientModel.WC_UNLISTEN_EVENT));
+    }
+
+    @Test
+    public void aDestroyedHostIgnoresTheTerminal() {
+        handshake("{\"a\":\"1\"}");
+        final PHost host = PHost.get();
+        final List<String> seen = new ArrayList<>();
+        host.addAttributeListener("a", seen::add);
+        host.onDestroy();
+        host.onClientData(Json.createObjectBuilder().add(ATTRIBUTES, Json.createObjectBuilder().add("a", "2")).build());
+        assertEquals("1", host.getAttribute("a"));
+        assertTrue(seen.isEmpty());
+    }
 }

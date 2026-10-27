@@ -207,6 +207,43 @@ public class PListBoxTest extends PSuite {
     }
 
     @Test
+    public void testRemoveSelectedItemOfDropDownSelectsFirstItem() {
+        // A single-select drop-down always shows an option: the browser selects the first one left
+        final PListBox listBox = attachedListBox();
+        listBox.addItem("a");
+        listBox.addItem("b");
+        listBox.addItem("c");
+        listBox.setSelectedIndex(1);
+
+        writer.clear();
+        listBox.removeItem(1);
+        assertEquals(0, listBox.getSelectedIndex());
+        assertEquals("a", listBox.getSelectedItem());
+        assertEquals(0, writer.count(ServerToClientModel.SELECTED));
+
+        listBox.removeItem("a");
+        assertEquals(0, listBox.getSelectedIndex());
+        assertEquals("c", listBox.getSelectedItem());
+
+        listBox.removeValue("c");
+        assertEquals(-1, listBox.getSelectedIndex());
+        assertNull(listBox.getSelectedItem());
+    }
+
+    @Test
+    public void testRemoveSelectedItemOfSingleSelectListSelectsNothing() {
+        // Shown as a list (more than one visible row), the browser leaves nothing selected
+        final PListBox listBox = attachedListBox();
+        listBox.setVisibleItemCount(3);
+        listBox.addItem("a");
+        listBox.addItem("b");
+        listBox.setSelectedIndex(1);
+        listBox.removeItem(1);
+        assertEquals(-1, listBox.getSelectedIndex());
+        assertNull(listBox.getSelectedItem());
+    }
+
+    @Test
     public void testRemoveItemByLabel() {
         final PListBox listBox = attachedListBox();
         listBox.addItem("a");

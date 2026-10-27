@@ -150,6 +150,52 @@ public class PHeaderPanelTest extends PSuite {
     }
 
     @Test
+    public void testDumpDOMWithMissingParts() {
+        final PHeaderPanel panel = Element.newPHeaderPanel();
+        assertEquals("<div pid=\"" + panel.getID() + "\"></div>", panel.dumpDOM());
+
+        final PLabel content = Element.newPLabel("c");
+        panel.setContentWidget(content);
+        assertEquals("<div pid=\"" + panel.getID() + "\">" + content.dumpDOM() + "</div>", panel.dumpDOM());
+    }
+
+    @Test
+    public void testSetReplacesPreviousWidget() {
+        final PHeaderPanel panel = Element.newPHeaderPanel();
+        final PLabel header1 = Element.newPLabel("h1");
+        final PLabel content1 = Element.newPLabel("c1");
+        final PLabel footer1 = Element.newPLabel("f1");
+        panel.setHeaderWidget(header1);
+        panel.setContentWidget(content1);
+        panel.setFooterWidget(footer1);
+        PWindow.getMain().add(panel);
+
+        writer.clear();
+        final PLabel header2 = Element.newPLabel("h2");
+        final PLabel content2 = Element.newPLabel("c2");
+        final PLabel footer2 = Element.newPLabel("f2");
+        panel.setHeaderWidget(header2);
+        panel.setContentWidget(content2);
+        panel.setFooterWidget(footer2);
+
+        assertNull(header1.getParent());
+        assertNull(content1.getParent());
+        assertNull(footer1.getParent());
+        assertEquals(List.of(header1.getID(), content1.getID(), footer1.getID()), writer.valuesOf(ServerToClientModel.TYPE_REMOVE));
+        final List<PWidget> children = new ArrayList<>();
+        panel.forEach(children::add);
+        assertEquals(List.of(header2, content2, footer2), children);
+
+        // setting the same widget again is a no-op
+        writer.clear();
+        panel.setHeaderWidget(header2);
+        panel.setContentWidget(content2);
+        panel.setFooterWidget(footer2);
+        assertTrue(writer.isEmpty());
+        assertSame(panel, header2.getParent());
+    }
+
+    @Test
     public void testResize() {
         final PHeaderPanel panel = Element.newPHeaderPanel();
         PWindow.getMain().add(panel);

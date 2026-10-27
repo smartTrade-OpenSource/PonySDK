@@ -229,10 +229,35 @@ public class PTreeItemTest extends PSuite {
 
     @Test
     public void testDumpDOM() {
-        // a leaf item cannot be dumped (see PTreeTest#testDumpDOMWithLeaf), so dump an empty but non null list
         final PTreeItem lone = Element.newPTreeItem("x");
         final PTreeItem tmp = lone.add("y");
         lone.remove(tmp);
         assertEquals("<div item=\"x\"></div>", lone.dumpDOM());
+    }
+
+    @Test
+    public void testRemoveFromLeafReturnsFalse() {
+        final PTree tree = Element.newPTree();
+        final PTreeItem leaf = tree.add("leaf");
+        final PTreeItem other = tree.add("other");
+        PWindow.getMain().add(tree);
+
+        writer.clear();
+        assertFalse(leaf.remove(other));
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE));
+    }
+
+    @Test
+    public void testRemoveNonChildReturnsFalse() {
+        final PTree tree = Element.newPTree();
+        final PTreeItem parent = tree.add("parent");
+        parent.add("child");
+        final PTreeItem other = tree.add("other");
+        PWindow.getMain().add(tree);
+
+        writer.clear();
+        assertFalse(parent.remove(other));
+        assertEquals(1, parent.size());
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE));
     }
 }

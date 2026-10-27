@@ -206,6 +206,19 @@ public class EventBusTest extends PSuite {
     }
 
     @Test
+    public void testOnlyAFailingBroadcastHandlerIsReported() {
+        final EventBus eventBus = new EventBus();
+        final TestBroadcastHandler survivor = new TestBroadcastHandler();
+        eventBus.addHandler(event -> {
+            throw new UnsupportedOperationException("broadcast");
+        });
+        eventBus.addHandler(survivor);
+        final UmbrellaException exception = assertThrows(UmbrellaException.class, () -> eventBus.fireEvent(new ClickTestEvent(null)));
+        assertTrue(survivor.invoked);
+        assertEquals("Exception caught: broadcast", exception.getMessage());
+    }
+
+    @Test
     public void testUmbrellaExceptionMessage() {
         final UmbrellaException single = new UmbrellaException(List.of(new RuntimeException("only")));
         assertEquals("Exception caught: only", single.getMessage());

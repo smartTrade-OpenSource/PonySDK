@@ -137,9 +137,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                     }
                 } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
                     close();
-                    if (!isOpen()) {
-                        focus();
-                    }
+                    focus();
                 } else {
                     onContainerKeyDown(e.getKeyCode());
                 }
@@ -472,7 +470,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void setContainerVisible(final boolean visible) {
-        if (!isEnabled()) return;
+        if (visible && !isEnabled()) return;
         if (visible && !isOpen()) {
             widget.addStyleName(STYLE_CONTAINER_OPENED);
             container.addStyleName(STYLE_CONTAINER_WIDGET_OPENED);

@@ -66,4 +66,31 @@ public class CompactEventSourceTest {
         assertSame(ab.join(), pool.emptyImmutableSet().getAdd("a").getAdd("b").join());
         assertEquals("", pool.emptyImmutableSet().join());
     }
+
+    @Test
+    public void nullTypeOrHandlerIsRejected() {
+        final CompactEventSource s = new CompactEventSource();
+        assertThrows(NullPointerException.class, () -> s.addHandler(null, new EventHandler() {}));
+        assertThrows(NullPointerException.class, () -> s.addHandler(A, null));
+        assertFalse(s.removeHandler(A, new EventHandler() {}));
+        assertTrue(s.getEventHandlers(A).isEmpty());
+    }
+
+    @Test
+    public void oneHandlerUnderTwoTypesIsTwoRegistrations() {
+        final CompactEventSource s = new CompactEventSource();
+        final EventHandler h = new EventHandler() {};
+        final EventHandler other = new EventHandler() {};
+        s.addHandler(A, h);
+        s.addHandler(B, h);
+        assertEquals(List.of(h), List.copyOf(s.getEventHandlers(B)));
+        // same type, other handler: not removed
+        assertFalse(s.removeHandler(B, other));
+        assertTrue(s.removeHandler(B, h));
+        assertEquals(List.of(h), List.copyOf(s.getEventHandlers(A)));
+        assertTrue(s.getEventHandlers(B).isEmpty());
+        assertTrue(s.removeHandler(A, h));
+        // emptied after use
+        assertTrue(s.getEventHandlers(A).isEmpty());
+    }
 }

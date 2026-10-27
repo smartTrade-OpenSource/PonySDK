@@ -271,6 +271,11 @@ public class PWebComponent extends PComplexPanel {
 
     private void setOffHeap(final String name, final String value, final boolean patchEnabled) {
         if (offHeapValues == null) offHeapValues = new OffHeapJsonStore();
+        if (value == null) {
+            // The store holds no null: the value is dropped and, as on-heap, a full null is sent if one was held
+            if (offHeapValues.remove(name) && !notCreatedYet()) sendFull(name, null);
+            return;
+        }
 
         if (offHeapValues.hasSameValue(name, value)) return;
         if (notCreatedYet()) {
@@ -283,7 +288,7 @@ public class PWebComponent extends PComplexPanel {
 
         offHeapValues.put(name, value);
 
-        if (patchEnabled && previous != null && value != null) {
+        if (patchEnabled && previous != null) {
             sendPatchOrFull(name, value, previous);
         } else {
             sendFull(name, value);

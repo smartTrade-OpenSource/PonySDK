@@ -50,18 +50,21 @@ public class DataConverterTest {
         assertEquals(4L, longConverter.to("4"));
         assertNull(longConverter.from(null));
         assertNull(longConverter.to(""));
+        assertNull(longConverter.to(null));
 
         final DoubleConverter doubleConverter = new DoubleConverter();
         assertEquals("1.5", doubleConverter.from(1.5));
         assertEquals(1.5, doubleConverter.to("1.5"));
         assertNull(doubleConverter.from(null));
         assertNull(doubleConverter.to(null));
+        assertNull(doubleConverter.to(""));
 
         final FloatConverter floatConverter = new FloatConverter();
         assertEquals("2.5", floatConverter.from(2.5f));
         assertEquals(2.5f, floatConverter.to("2.5"));
         assertNull(floatConverter.from(null));
         assertNull(floatConverter.to(""));
+        assertNull(floatConverter.to(null));
     }
 
     @Test

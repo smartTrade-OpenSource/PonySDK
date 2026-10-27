@@ -334,4 +334,91 @@ public class PWebComponentProtocolTest extends PSuite {
         assertEquals(0, c.getOffHeapBytes());
         assertTrue(c.toString().contains("x-destroy"));
     }
+
+    @Test
+    public void offHeapSetNullSendsFullNullLikeOnHeap() {
+        final PWebComponent c = attached("x-offnull");
+        final PWebComponent.PropertyHandle h = c.property("rows").offHeap();
+        h.set((String) null);
+        assertTrue(writer.isEmpty(), "nothing held: nothing to clear");
+        h.set("{\"a\":1}");
+        writer.clear();
+        h.set((String) null);
+        assertEquals(1, writer.count(ServerToClientModel.WC_SET_PROPERTY));
+        assertNull(writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "rows").get(0));
+        assertNull(h.get());
+
+        final PWebComponent early = new PWebComponent("x-offnull-early");
+        early.property("rows").offHeap().set("{\"a\":1}");
+        early.property("rows").set((String) null);
+        writer.clear();
+        PWindow.getMain().add(early);
+        assertEquals(0, writer.count(ServerToClientModel.WC_SET_PROPERTY), "an empty store replays nothing");
+    }
+
+    @Test
+    public void offHeapWithoutPatchSendsFullValues() {
+        final PWebComponent c = attached("x-offfull");
+        final PWebComponent.PropertyHandle h = c.property("rows").offHeap().withoutPatch();
+        assertFalse(h.isPatchEnabled());
+        h.set("{\"a\":1,\"b\":2}");
+        h.set("{\"a\":1,\"b\":3}");
+        assertEquals(List.of("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":3}"), writer.valuesAfter(ServerToClientModel.WC_SET_PROPERTY, "rows"));
+        assertEquals(0, writer.count(ServerToClientModel.WC_PATCH_PROPERTY));
+    }
+
+    @Test
+    public void patchFlagsAndStorageOfSeveralProperties() {
+        final PWebComponent c = attached("x-flags");
+        assertFalse(c.property("a").withoutPatch().isPatchEnabled(), "nothing enabled yet");
+        assertTrue(c.property("b").withPatch().isPatchEnabled());
+        assertTrue(c.property("c").withPatch().isPatchEnabled());
+        assertFalse(c.property("b").withoutPatch().isPatchEnabled());
+
+        assertNull(c.property("on").get(), "on-heap, no store yet");
+        assertNull(c.property("off").offHeap().get(), "off-heap, no store yet");
+        c.property("off").remove();
+        c.property("on").set("1");
+        c.property("off").set("2");
+        // other properties hold values: the storage of a new one can still be chosen
+        assertEquals(PWebComponent.StorageMode.STATELESS, c.property("s").stateless().getMode());
+        assertEquals(PWebComponent.StorageMode.OFF_HEAP, c.property("o2").offHeap().getMode());
+        c.property("o2").remove();
+        c.property("s").remove();
+        assertEquals(0, writer.count(ServerToClientModel.WC_REMOVE_PROPERTY));
+    }
+
+    @Test
+    public void slotPanelRefusesAChildOfAnotherWindowAndAttachesOnce() {
+        final PWebComponent c = attached("x-slot-window");
+        final SlotPanel slot = c.slot("s");
+        final PWindow other = Element.newPWindow(null, null);
+        other.open();
+        final PLabel foreign = Element.newPLabel("f");
+        other.add(foreign);
+        assertThrows(IllegalAccessError.class, () -> slot.add(foreign));
+
+        final PLabel a = Element.newPLabel("a");
+        final PLabel b = Element.newPLabel("b");
+        PWindow.getMain().add(b);
+        slot.add(a);
+        slot.add(b);
+        assertEquals(2, slot.getWidgetCount());
+        assertSame(slot, b.getParent());
+        assertFalse(slot.attach(PWindow.getMain(), null), "already attached");
+    }
+
+    @Test
+    public void anEventWithoutListenersIsDropped() {
+        final PWebComponent c = attached("x-noevent");
+        c.onClientData(jakarta.json.Json.createObjectBuilder()
+            .add(com.ponysdk.core.model.ClientToServerModel.WC_EVENT_NAME.toStringValue(), "ping").build());
+        final HandlerRegistration r = c.addEventListener("ping", e -> {});
+        c.addEventListener("pong", e -> {});
+        r.removeHandler();
+        r.removeHandler();
+        assertEquals(List.of("ping"), writer.valuesOf(ServerToClientModel.WC_UNLISTEN_EVENT));
+        c.onDestroy();
+        assertEquals(0, c.getOffHeapBytes());
+    }
 }

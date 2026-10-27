@@ -85,6 +85,7 @@ public class RichWidgetsTest extends PSuite {
         assertEquals(3, file.getLevel());
         assertFalse(home.hasPrevious());
         assertSame(home, folder.getPrevious());
+        assertTrue(folder.hasPrevious());
         assertSame(file, folder.getNext());
         assertTrue(folder.hasNext());
         assertFalse(file.hasNext());
@@ -366,9 +367,10 @@ public class RichWidgetsTest extends PSuite {
         left.addItem("c", 3);
         left.setSelectedIndex(0, true);
         left.setSelectedIndex(2, true);
+        twin.getRightListBox().addItem("y", 25);
         PEmulator.click(twin.getWidget(1, 1));
         assertEquals(List.of("b"), items(left));
-        assertEquals(List.of("a", "c"), items(twin.getRightListBox()));
+        assertEquals(List.of("y", "a", "c"), items(twin.getRightListBox()));
     }
 
     private static List<String> items(final PListBox listBox) {

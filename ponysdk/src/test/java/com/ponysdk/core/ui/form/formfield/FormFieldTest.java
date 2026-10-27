@@ -45,6 +45,7 @@ import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.IdentityConverter;
 import com.ponysdk.core.ui.form.validator.IntegerFieldValidator;
@@ -349,5 +350,102 @@ public class FormFieldTest extends PSuite {
         container.setEnabled(false);
         assertFalse(inner.getWidget().isEnabled());
         container.setDataProvider(IdentityConverter.STRING);
+    }
+
+    @Test
+    public void testFieldWithoutWidgetShowsNoError() {
+        final AbstractFormField<String, PTextBox> field = new AbstractFormField<>() {
+
+            private String value;
+
+            @Override
+            protected String getStringValue() {
+                return value;
+            }
+
+            @Override
+            protected void reset0() {
+                value = null;
+            }
+
+            @Override
+            public String getValue() {
+                return value;
+            }
+
+            @Override
+            public void setValue(final String value) {
+                this.value = value;
+                fireValueChange(value);
+            }
+        };
+        assertNull(field.getWidget());
+        // no handler yet: firing is a no-op
+        field.setValue("a");
+        field.setValidator(new NotEmptyFieldValidator("empty"));
+        field.setValue("");
+        final RecordingListener first = new RecordingListener();
+        final RecordingListener second = new RecordingListener();
+        field.addFormFieldListener(first);
+        field.addFormFieldListener(second);
+        assertFalse(field.isValid().isValid());
+        field.reset();
+        assertEquals(1, first.validations.size());
+        assertEquals(1, second.resets);
+        assertNull(field.getValue());
+    }
+
+    @Test
+    public void testRemoveUnknownValueChangeHandler() {
+        final StringTextBoxFormField field = new StringTextBoxFormField();
+        field.addValueChangeHandler(event -> {});
+        assertFalse(field.removeValueChangeHandler(event -> {}));
+        assertEquals(1, field.getValueChangeHandlers().size());
+    }
+
+    @Test
+    public void testEmptyStringFieldsHaveNoValue() {
+        final StringTextBoxFormField text = new StringTextBoxFormField();
+        assertNull(text.getValue());
+        typeText(text.getWidget(), "");
+        assertNull(text.getValue());
+
+        final StringPasswordTextBoxFormField password = new StringPasswordTextBoxFormField();
+        password.setValue("");
+        assertNull(password.getValue());
+        password.setValue(null);
+        assertNull(password.getValue());
+        text.setValue(null);
+        assertNull(text.getValue());
+    }
+
+    @Test
+    public void testListBoxListensToTheWidgetOnce() {
+        final ListBoxFormField<String> field = new ListBoxFormField<>(true);
+        field.getWidget().addItem("x");
+        final List<String> first = new ArrayList<>();
+        final List<String> second = new ArrayList<>();
+        field.addValueChangeHandler(event -> first.add(event.getData()));
+        field.addValueChangeHandler(event -> second.add(event.getData()));
+        field.getWidget().onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_CHANGE.toStringValue(), "0").build());
+        assertEquals(List.of("x"), first);
+        assertEquals(List.of("x"), second);
+    }
+
+    @Test
+    public void testDateBoxWithConverter() {
+        final PDateBox dateBox = Element.newPDateBox();
+        final DateBoxFormField field = new DateBoxFormField(dateBox, new com.ponysdk.core.ui.form.dataconverter.DateConverter());
+        assertSame(dateBox, field.getWidget());
+        assertFalse(field.isDirty());
+        assertTrue(field.getValueChangeHandlers().isEmpty());
+    }
+
+    @Test
+    public void testDestroyWithoutDirtyModeKeepsTheHandlers() {
+        final StringTextBoxFormField plainField = new StringTextBoxFormField();
+        plainField.addValueChangeHandler(event -> {});
+        plainField.asWidget().onDestroy();
+        assertEquals(1, plainField.getValueChangeHandlers().size());
     }
 }

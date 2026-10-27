@@ -950,6 +950,304 @@ public class DefaultDataGridViewTest extends PSuite {
         Assertions.assertFalse(((PComplexPanel) g.unpinnedRow(5).getWidget(0)).hasAttribute(DefaultDataGridView.EXTENDED_ATTRIBUTE));
     }
 
+    @Test
+    public void destroyingWithoutPollingNorAdapterIsSafe() {
+        final Grid g = new Grid(true);
+        g.grid.asWidget().onDestroy();
+        Assertions.assertTrue(g.recorder.methods.contains("destroy"));
+
+        final DefaultDataGridView<String, String> noAdapter = new DefaultDataGridView<>();
+        noAdapter.asWidget().onDestroy();
+        Assertions.assertNull(noAdapter.asWidget().getWindow());
+    }
+
+    @Test
+    public void columnVisibilityEventWithoutChangeDoesNotRedraw() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        final List<Integer> draws = new ArrayList<>();
+        g.grid.addDrawListener(draws::add);
+
+        g.terminal(Json.createObjectBuilder().add("col", Json.createArrayBuilder().add(0).add(1))
+            .add("cv", Json.createArrayBuilder().add(true).add(true)));
+        Assertions.assertTrue(draws.isEmpty());
+
+        g.terminal(Json.createObjectBuilder().add("col", Json.createArrayBuilder().add(0).add(1))
+            .add("cv", Json.createArrayBuilder().add(false).add(false)));
+        Assertions.assertEquals(1, draws.size());
+        Assertions.assertTrue(((PComplexPanel) g.unpinnedRow(0).getWidget(1)).hasAttribute(DefaultDataGridView.PENDING_ATTRIBUTE));
+    }
+
+    @Test
+    public void updateRowsWithAnEmptyIntervalOnlyNotifies() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        final List<Integer> draws = new ArrayList<>();
+        g.grid.addDrawListener(draws::add);
+
+        g.grid.onUpdateRows(5, 2);
+        g.grid.onUpdateRows(0, 1000);
+
+        Assertions.assertEquals(List.of(30, 30), draws);
+        Assertions.assertEquals(List.of("a"), g.texts(0));
+    }
+
+    @Test
+    public void sourceFailureWithoutHandlerShowsEmptyMessage() throws Exception {
+        final DefaultCacheDataSource<String, String> failing = new DefaultCacheDataSource<>() {
+
+            @Override
+            public com.ponysdk.core.ui.datagrid2.data.LiveDataView<String> getRows(final int from, final int size) {
+                throw new IllegalStateException("boom");
+            }
+        };
+        failing.setFilterController(new FilterController<>());
+        final Grid g = new Grid(true, failing);
+
+        g.grid.getController().setData("a");
+
+        Assertions.assertTrue(waitUntil(() -> g.errorDiv().isVisible() && g.errorDiv().getWidgetCount() == 1));
+        Assertions.assertEquals("", ((PElement) g.errorDiv().getWidget(0)).getInnerText());
+    }
+
+    @Test
+    public void renderingFailureIsGivenToTheExceptionHandler() throws Exception {
+        final Grid g = new Grid(true);
+        final IllegalStateException failure = new IllegalStateException("bad row");
+        final List<Throwable> handled = new ArrayList<>();
+        g.grid.setExceptionHandler(t -> {
+            handled.add(t);
+            return "failed: " + t.getMessage();
+        });
+        g.grid.addRowAction("throwing", new AttributeRowAction("a") {
+
+            @Override
+            public boolean testRow(final String v, final int index) {
+                throw failure;
+            }
+        });
+
+        g.grid.getController().setData("a");
+
+        Assertions.assertTrue(waitUntil(() -> g.errorDiv().isVisible() && g.errorDiv().getWidgetCount() == 1));
+        Assertions.assertEquals("failed: bad row", ((PElement) g.errorDiv().getWidget(0)).getInnerText());
+        Assertions.assertEquals(List.of(failure), handled);
+    }
+
+    @Test
+    public void renderingFailureWithoutHandlerShowsEmptyMessage() throws Exception {
+        final Grid g = new Grid(true);
+        g.grid.addRowAction("throwing", new AttributeRowAction("a") {
+
+            @Override
+            public boolean testRow(final String v, final int index) {
+                throw new IllegalStateException("bad row");
+            }
+        });
+
+        g.grid.getController().setData("a");
+
+        Assertions.assertTrue(waitUntil(() -> g.errorDiv().isVisible() && g.errorDiv().getWidgetCount() == 1));
+        Assertions.assertEquals("", ((PElement) g.errorDiv().getWidget(0)).getInnerText());
+    }
+
+    @Test
+    public void hiddenByDefaultColumnIsNotDisplayed() {
+        final DefaultColumnDefinition<String> hidden = new DefaultColumnDefinition<>("hidden", v -> v, null) {
+
+            @Override
+            public State getDefaultState() {
+                return State.UNPINNED_HIDDEN;
+            }
+        };
+        final Grid g = new Grid(true, hidden);
+
+        Assertions.assertEquals(2, g.unpinnedHeader().getWidgetCount());
+        Assertions.assertEquals(2, g.unpinnedRow(0).getWidgetCount());
+        Assertions.assertEquals(List.of("name:UNPINNED_SHOWN", "len:UNPINNED_SHOWN", "hidden:UNPINNED_HIDDEN"),
+            columnStates(g.grid.getConfig()));
+    }
+
+    @Test
+    public void setConfigAppliesTheFirstConfigOfAColumn() {
+        final Grid g = new Grid(true);
+
+        g.grid.setConfig(new DataGridConfigBuilder<String>()
+            .addColumnConfig(new ColumnConfig<>("len", State.PINNED_SHOWN, 100))
+            .addColumnConfig(new ColumnConfig<>("len", State.UNPINNED_HIDDEN, 100))
+            .build());
+
+        Assertions.assertEquals(1, g.pinnedHeader().getWidgetCount());
+        Assertions.assertEquals(List.of("len:PINNED_SHOWN", "name:UNPINNED_SHOWN"), columnStates(g.grid.getConfig()));
+    }
+
+    @Test
+    public void refreshOnColumnVisibilitySetBeforeAdapterIsSentWithTheAddon() {
+        final RecordingWriter recorder = new RecordingWriter();
+        Mockito.doReturn(recorder).when(UIContext.get()).getWriter();
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
+        source.setFilterController(new FilterController<>());
+        final DefaultDataGridView<String, String> grid = new DefaultDataGridView<>(source);
+
+        grid.setRefreshOnColumnVisibilityChanged(false);
+        Assertions.assertTrue(recorder.methods.isEmpty());
+
+        grid.setAdapter(new TestAdapter(List.of(new CapturingColumnDefinition())));
+        PWindow.getMain().add(grid.asWidget());
+        Assertions.assertEquals(1, recorder.count("listenOnColumnVisibility"));
+    }
+
+    @Test
+    public void nonSelectableRowsIgnoreClicksAndSelection() throws Exception {
+        final CapturingColumnDefinition col = new CapturingColumnDefinition();
+        final DefaultDataGridView<String, String> v = newView(col, "b");
+        setDataOn(v, col, "a", "b");
+        final PComplexPanel unpinnedBody = (PComplexPanel) ((PComplexPanel) ((PComplexPanel) ((PComplexPanel) v.asWidget())
+            .getWidget(1)).getWidget(0)).getWidget(1);
+
+        DomEvents.click(unpinnedBody.getWidget(1), false);
+        assertNotSelectedOn(v, "b");
+
+        getCellControllerFrom(col, 1).selectRow();
+        assertNotSelectedOn(v, "b");
+        getCellControllerFrom(col, 1).unselectRow();
+        assertNotSelectedOn(v, "b");
+    }
+
+    @Test
+    public void shiftClickWithoutAnchorIsNoOp() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a", "b", "c")));
+
+        DomEvents.click(g.unpinnedRow(1), true);
+        Assertions.assertEquals(0, g.grid.getLiveSelectedDataCount());
+
+        // the anchor row becomes empty: a range from it is a no-op
+        DomEvents.click(g.unpinnedRow(2), false);
+        g.grid.getController().unselect("c");
+        g.drawAfter(() -> g.grid.getController().removeData("c"));
+        DomEvents.click(g.unpinnedRow(0), true);
+        Assertions.assertEquals(0, g.grid.getLiveSelectedDataCount());
+    }
+
+    @Test
+    public void extendedModeWithoutExtendedCellKeepsThePrimaryCell() throws Exception {
+        setData("a");
+        final ExtendedCellController<String> controller = (ExtendedCellController<String>) getCellController(0);
+
+        ((PrimaryCellController<String>) getCellController(0)).setExtendedMode();
+        getCellController(0).selectRow();
+        assertSelected("a");
+        controller.setPrimaryMode();
+        assertSelected("a");
+    }
+
+    @Test
+    public void extendedCellFollowsSelectionAndColumnVisibility() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final Grid g = new Grid(true, col);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        col.controllers.get(0).setExtendedMode();
+        final PComplexPanel cell = (PComplexPanel) g.unpinnedRow(0).getWidget(0);
+        Assertions.assertEquals(3, cell.getWidgetCount());
+        final PWidget extended = cell.getWidget(2);
+
+        col.controllers.get(0).selectRow();
+        Assertions.assertTrue(g.grid.getController().isSelected("a"));
+        col.controllers.get(0).unselectRow();
+        Assertions.assertFalse(g.grid.getController().isSelected("a"));
+
+        g.terminal(Json.createObjectBuilder().add("col", Json.createArrayBuilder().add(0)).add("cv", Json.createArrayBuilder().add(false)));
+        Assertions.assertFalse(extended.isVisible());
+        Assertions.assertFalse(cell.hasAttribute(DefaultDataGridView.EXTENDED_ATTRIBUTE));
+
+        g.terminal(Json.createObjectBuilder().add("col", Json.createArrayBuilder().add(0)).add("cv", Json.createArrayBuilder().add(true)));
+        Assertions.assertTrue(extended.isVisible());
+        Assertions.assertTrue(cell.hasAttribute(DefaultDataGridView.EXTENDED_ATTRIBUTE));
+    }
+
+    @Test
+    public void hidingAPinnedColumnUnpinsAndHidesIt() {
+        final Grid g = new Grid(true);
+        g.name.getController().setState(State.PINNED_SHOWN);
+
+        g.name.getController().setState(State.UNPINNED_HIDDEN);
+
+        Assertions.assertEquals(0, g.pinnedHeader().getWidgetCount());
+        Assertions.assertEquals(0, g.pinnedRow(0).getWidgetCount());
+        Assertions.assertEquals(1, g.unpinnedHeader().getWidgetCount());
+        Assertions.assertEquals(1, g.unpinnedRow(0).getWidgetCount());
+        Assertions.assertEquals(List.of("len:UNPINNED_SHOWN", "name:UNPINNED_HIDDEN"), columnStates(g.grid.getConfig()));
+
+        g.name.getController().setState(State.PINNED_SHOWN);
+        Assertions.assertEquals(1, g.pinnedHeader().getWidgetCount());
+        Assertions.assertEquals(1, g.pinnedRow(0).getWidgetCount());
+        Assertions.assertEquals(1, g.unpinnedHeader().getWidgetCount());
+    }
+
+    @Test
+    public void unknownTerminalDataIsIgnored() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        final int calls = g.recorder.methods.size();
+
+        g.terminal(Json.createObjectBuilder().add("unknown", 1));
+
+        Assertions.assertEquals(calls, g.recorder.methods.size());
+        Assertions.assertEquals(List.of("a"), g.texts(0));
+    }
+
+    @Test
+    public void nonSelectableRowIgnoresClick() throws Exception {
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>() {
+
+            @Override
+            public boolean isSelectable(final String key) {
+                return !"b".equals(key);
+            }
+        };
+        source.setFilterController(new FilterController<>());
+        final Grid g = new Grid(true, source);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a", "b")));
+
+        DomEvents.click(g.unpinnedRow(1), false);
+        Assertions.assertFalse(g.grid.getController().isSelected("b"));
+        DomEvents.click(g.unpinnedRow(0), false);
+        Assertions.assertTrue(g.grid.getController().isSelected("a"));
+    }
+
+    @Test
+    public void unselectingAnEmptyRowIsNoOp() throws Exception {
+        setData("a");
+        getCellController(0).selectRow();
+
+        getCellController(4).unselectRow();
+
+        assertSelected("a");
+    }
+
+    @Test
+    public void extendedModeTransitionsAreIdempotent() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final Grid g = new Grid(true, col);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        final PComplexPanel cell = (PComplexPanel) g.unpinnedRow(0).getWidget(0);
+        final ExtendedCellController<String> controller = (ExtendedCellController<String>) col.controllers.get(0);
+
+        controller.setPrimaryMode();
+        Assertions.assertEquals(2, cell.getWidgetCount());
+
+        col.controllers.get(0).setExtendedMode();
+        final PWidget extended = cell.getWidget(2);
+        col.controllers.get(0).setExtendedMode();
+        Assertions.assertEquals(3, cell.getWidgetCount());
+        Assertions.assertSame(extended, cell.getWidget(2));
+
+        controller.setPrimaryMode();
+        Assertions.assertEquals(2, cell.getWidgetCount());
+        Assertions.assertFalse(cell.hasAttribute(DefaultDataGridView.EXTENDED_ATTRIBUTE));
+    }
+
     private static List<String> columnStates(final DataGridConfig<String> config) {
         final List<String> states = new ArrayList<>();
         config.getColumnConfigs().forEach(c -> states.add(c.getColumnId() + ":" + c.getState()));
@@ -999,7 +1297,7 @@ public class DefaultDataGridViewTest extends PSuite {
     }
 
     /** Sets an attribute on the rows of one value, removes it from the others. */
-    private static final class AttributeRowAction implements RowAction<String> {
+    private static class AttributeRowAction implements RowAction<String> {
 
         private final String value;
 

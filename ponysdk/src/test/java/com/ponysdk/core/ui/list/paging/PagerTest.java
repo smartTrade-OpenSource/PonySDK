@@ -107,6 +107,14 @@ public class PagerTest extends PSuite {
     }
 
     @Test
+    public void testWindowWiderThanThePageCount() {
+        final DefaultPagerView view = new DefaultPagerView();
+        final Pager<String> pager = new Pager<>(view, 10, 5);
+        pager.process(20);
+        assertEquals(List.of("<<", "<", "1", "2", ">", ">>"), anchorTexts(view));
+    }
+
+    @Test
     public void testNavigationNotifiesListeners() {
         final DefaultPagerView view = new DefaultPagerView();
         final Pager<String> pager = new Pager<>(view, 10, 5);

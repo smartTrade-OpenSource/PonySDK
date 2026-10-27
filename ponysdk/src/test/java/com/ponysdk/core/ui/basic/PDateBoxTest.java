@@ -237,4 +237,31 @@ public class PDateBoxTest extends PSuite {
         dateBox.fireEvent(new PDoubleClickEvent(dateBox));
         assertEquals(5, events.size());
     }
+
+    @Test
+    public void testTabindexOnlyOnFormFieldsMakesTheBoxFocusable() {
+        org.mockito.Mockito.when(com.ponysdk.core.server.application.UIContext.get().getConfiguration().isTabindexOnlyFormField())
+            .thenReturn(true);
+        try {
+            assertEquals(PWidget.TabindexMode.FOCUSABLE.getTabIndex(), Element.newPDateBox().getTabindex());
+        } finally {
+            org.mockito.Mockito.when(com.ponysdk.core.server.application.UIContext.get().getConfiguration().isTabindexOnlyFormField())
+                .thenReturn(false);
+        }
+    }
+
+    @Test
+    public void testSeveralHandlersAndTheRemovalOfAnUnknownOne() {
+        final PDateBox dateBox = Element.newPDateBox(utcFormat("yyyy-MM-dd"));
+        PWindow.getMain().add(dateBox);
+        final List<String> calls = new ArrayList<>();
+        dateBox.addValueChangeHandler(e -> calls.add("a"));
+        dateBox.addValueChangeHandler(e -> calls.add("b"));
+        assertFalse(dateBox.removeValueChangeHandler(e -> {
+        }));
+        dateBox.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue(), "2020-03-15").build());
+        assertEquals(List.of("a", "b"), calls);
+        assertFalse(Element.newPDateBox().removeValueChangeHandler(e -> {
+        }));
+    }
 }

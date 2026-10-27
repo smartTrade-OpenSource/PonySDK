@@ -83,17 +83,17 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             if (rowIndex == previousIndex) {
                 rows.set(previousIndex, data);
                 keyByIndex.set(previousIndex, key);
+            } else if (rowIndex < rows.size()) {
+                // The key moves: the row it leaves takes what the target row showed, so no row is lost
+                final D displaced = rows.set(rowIndex, data);
+                keyByIndex.set(previousIndex, keyByIndex.set(rowIndex, key));
+                rows.set(previousIndex, displaced);
+                redraw(previousIndex, displaced);
             } else {
                 rows.remove(previousIndex);
                 keyByIndex.remove(previousIndex);
-
-                if (rowIndex < rows.size()) {
-                    rows.set(rowIndex, data);
-                    keyByIndex.set(rowIndex, key);
-                } else {
-                    rows.add(rowIndex, data);
-                    keyByIndex.add(rowIndex, key);
-                }
+                rows.add(rowIndex, data);
+                keyByIndex.add(rowIndex, key);
             }
         } else {
             if (rowIndex < rows.size()) {
@@ -105,6 +105,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             }
         }
 
+        redraw(rowIndex, data);
+    }
+
+    private void redraw(final int rowIndex, final D data) {
         final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = cells.get(rowIndex);
         for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
             final Cell<D, ? extends IsPWidget> current = map.get(descriptor);

@@ -235,4 +235,21 @@ public class PDatePickerTest extends PSuite {
         picker.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue(), true).build());
         assertTrue(picker.isShown());
     }
+
+    @Test
+    public void severalHandlersAndTheRemovalOfAnUnknownOne() {
+        final PDatePicker picker = attachedPicker();
+        final List<String> calls = new ArrayList<>();
+        picker.addValueChangeHandler(e -> calls.add("v1"));
+        picker.addValueChangeHandler(e -> calls.add("v2"));
+        picker.addShowRangeHandler(e -> calls.add("r1"));
+        picker.addShowRangeHandler(e -> calls.add("r2"));
+        assertFalse(picker.removeValueChangeHandler(e -> {
+        }));
+        assertFalse(picker.removeShowRangeHandler(e -> {
+        }));
+        picker.onClientData(Json.createObjectBuilder().add(DATE_KEY, "2020-03-15").build());
+        picker.onClientData(showRange("2020-01-01", "2020-01-31"));
+        assertEquals(List.of("v1", "v2", "r1", "r2"), calls);
+    }
 }

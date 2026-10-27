@@ -313,4 +313,34 @@ public class PRadioButtonSelectionTest extends PSuite {
         
         assertEquals(0, handlerFiredCount.get());
     }
+
+    private static void click(final PRadioButton radio, final boolean checked) {
+        radio.onClientData(jakarta.json.Json.createObjectBuilder()
+            .add(com.ponysdk.core.model.ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue(), checked).build());
+    }
+
+    @Test
+    public void testAClickSelectsTheRadioAndNotifiesTheHandlers() {
+        PRadioButton radio1 = Element.newPRadioButton("Option 1");
+        PRadioButton radio2 = Element.newPRadioButton("Option 2");
+        PWindow.getMain().add(radio1);
+        PWindow.getMain().add(radio2);
+        PRadioButtonSelection selection = Element.newPRadioButtonSelection(Arrays.asList(radio1, radio2));
+
+        click(radio2, true); // no handler yet
+        assertEquals(radio2, selection.getValue());
+
+        AtomicReference<PRadioButton> notified = new AtomicReference<>();
+        selection.addValueChangeHandler(event -> notified.set(event.getData()));
+        click(radio2, false); // the radio left: the one clicked notifies
+        assertNull(notified.get());
+        assertEquals(radio2, selection.getValue());
+
+        click(radio1, true);
+        assertEquals(radio1, notified.get());
+        assertEquals(radio1, selection.getValue());
+        assertEquals(PCheckBoxState.UNCHECKED, radio2.getState());
+        radio1.removeFromParent();
+        radio2.removeFromParent();
+    }
 }

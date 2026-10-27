@@ -221,6 +221,80 @@ public class MultiLevelDropDownRendererTest extends PSuite {
         assertFalse(root.isOpen());
     }
 
+    @Test
+    public void refreshReusesTheLabelAndTheNestedListBox() {
+        root.open();
+        final PWidget leafLabel = ((PSimplePanel) renderers.get(0).asWidget()).getWidget();
+        final ListBox<MultiLevelDropDownNode<String>> nested = renderers.get(1).nestedListBox;
+
+        root.refresh();
+
+        assertSame(leafLabel, ((PSimplePanel) renderers.get(0).asWidget()).getWidget());
+        assertSame(nested, renderers.get(1).nestedListBox);
+        assertSame(nested.asWidget(), ((PSimplePanel) renderers.get(1).asWidget()).getWidget());
+    }
+
+    @Test
+    public void nodeRenderedAsLeafDoesNotOpenItsNestedLevel() {
+        root.open();
+        final ListBox<MultiLevelDropDownNode<String>> nested = renderers.get(1).nestedListBox;
+
+        root.replaceItems(List.of(leaf("first"), leaf("second")));
+        renderers.get(1).openNested();
+
+        assertFalse(nested.isOpen());
+        assertEquals("second", ((PLabel) ((PSimplePanel) renderers.get(1).asWidget()).getWidget()).getText());
+    }
+
+    @Test
+    public void destroyingARendererDestroysTheHiddenWidget() {
+        root.open();
+        final ListBox<MultiLevelDropDownNode<String>> nested = renderers.get(1).nestedListBox;
+        final PWidget hiddenLabel = ((PSimplePanel) renderers.get(0).asWidget()).getWidget();
+        // renderer 0 goes from a label to a nested list box, renderer 1 from a nested list box to a label
+        root.replaceItems(List.of(node("other", leaf("x")), leaf("last")));
+
+        renderers.get(0).asWidget().onDestroy();
+        renderers.get(1).asWidget().onDestroy();
+
+        assertFalse(hiddenLabel.isUpdatable());
+        assertFalse(nested.asWidget().isUpdatable());
+    }
+
+    @Test
+    public void destroyingALeafRendererWithoutNestedLevel() {
+        root.open();
+        final PWidget label = ((PSimplePanel) renderers.get(0).asWidget()).getWidget();
+
+        renderers.get(0).asWidget().onDestroy();
+
+        assertNull(renderers.get(0).nestedListBox);
+        assertFalse(label.isUpdatable());
+    }
+
+    @Test
+    public void destroyingANodeRendererThatNeverShowedALabel() {
+        root.open();
+
+        renderers.get(1).asWidget().onDestroy();
+
+        assertFalse(renderers.get(1).asWidget().isUpdatable());
+    }
+
+    @Test
+    public void groupHeaderOfANestedLevelIsALabel() {
+        final GroupListBoxItem<MultiLevelDropDownNode<String>> group = GroupListBoxItem.of("G", List.of(leaf("grouped")));
+        root.replaceItems(List.of(node("withGroup", group)));
+        root.open();
+
+        renderers.get(0).nestedListBox.open();
+
+        final ListBox<MultiLevelDropDownNode<String>> nested = renderers.get(0).nestedListBox;
+        final PComplexPanel nestedRows = (PComplexPanel) ((PComplexPanel) nested.getItemContainer().asWidget()).getWidget(0);
+        final PSimplePanel groupPanel = (PSimplePanel) ((PComplexPanel) nestedRows.getWidget(0)).getWidget(0);
+        assertEquals("G", ((PLabel) groupPanel.getWidget()).getText());
+    }
+
     private static ListBoxItem<MultiLevelDropDownNode<String>> leaf(final String label) {
         return ListBoxItem.of(label, new MultiLevelDropDownNode<String>(label + "-value"));
     }

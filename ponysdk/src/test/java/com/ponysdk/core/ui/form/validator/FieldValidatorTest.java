@@ -82,6 +82,7 @@ public class FieldValidatorTest extends PSuite {
         assertValid(unchecked, "true");
         assertInvalid(unchecked, "false", "Unchecked field");
         assertInvalid(unchecked, null, "Unchecked field");
+        assertInvalid(unchecked, "", "Unchecked field");
     }
 
     @Test

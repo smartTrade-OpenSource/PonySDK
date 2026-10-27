@@ -985,6 +985,398 @@ public class ListBoxTest extends PSuite {
         assertTrue(renderedLabels(box).isEmpty());
     }
 
+    @Test
+    public void shouldAllowSelection_WhenMultiSelectionDisabledAndSelectedItemsNull() throws Exception {
+        ReflectionTestUtil.setField(configuration, "multiSelectionEnabled", false);
+        configuration.setSelectionLimit(0);
+        setConfigurationInListBox(listBox, FIELD_CONFIGURATION, configuration);
+
+        assertTrue(invokeIsSelectionAllowed(null));
+    }
+
+    @Test
+    public void allSelectedItemsAreSortedFirst() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().enableMultiSelection(), items("d", "c", "b", "a")));
+        box.setMultiSelected(List.of("b", "d"));
+
+        box.open();
+
+        assertEquals(List.of("b", "d", "a", "c"), renderedLabels(box));
+        assertTrue(row(box, "d").hasStyleName("dd-listbox-item-last-selected"));
+        assertFalse(row(box, "b").hasStyleName("dd-listbox-item-last-selected"));
+    }
+
+    @Test
+    public void plainItemAddedInGroupModeIsAppended() {
+        final ListBox<String> box = groupListBox();
+
+        box.addItem(ListBoxItem.of("loose"));
+
+        assertEquals(List.of("Fruits", "pear", "apple", "Vegetables", "leek", "loose"), labels(box.getItems()));
+        assertNull(item(box, "loose").getGroupName());
+    }
+
+    @Test
+    public void groupChangesWhileOpenAreRendered() {
+        final ListBox<String> box = attach(groupListBox());
+        box.setSelected("leek");
+        box.open();
+
+        box.addItemInGroup("Vegetables", ListBoxItem.of("carrot"));
+        assertEquals(List.of("Fruits", "apple", "pear", "Vegetables", "leek", "carrot"), renderedLabels(box));
+
+        box.renameItemInGroup("Vegetables", "leek", "Leek");
+        assertEquals(List.of("Fruits", "apple", "pear", "Vegetables", "Leek", "carrot"), renderedLabels(box));
+        assertEquals("Leek", mainButton(box).getText());
+    }
+
+    @Test
+    public void addItemsWhileOpenAreRenderedSorted() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration(), items("b", "c")));
+        box.open();
+
+        box.addItems(List.of(ListBoxItem.of("a")));
+
+        assertEquals(List.of("a", "b", "c"), renderedLabels(box));
+    }
+
+    @Test
+    public void removingUnselectedGroupItemsKeepsTheSelection() {
+        final ListBox<String> box = groupListBox();
+        box.setSelected("leek");
+
+        box.removeItemFromGroup("Fruits", "apple");
+        assertEquals("leek", box.getSelectedData());
+
+        box.removeGroup("Fruits");
+        assertEquals("leek", box.getSelectedData());
+        assertEquals(List.of("Vegetables", "leek"), labels(box.getItems()));
+    }
+
+    @Test
+    public void renameItemBeforeAttach() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration(), items("a"));
+
+        box.renameItem("a", "alpha");
+
+        assertEquals(List.of("alpha"), labels(box.getItems()));
+    }
+
+    @Test
+    public void selectedItemWithoutDataIsSkippedBySelectedData() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().enableMultiSelection(),
+            List.of(ListBoxItem.of("none", null, true), ListBoxItem.of("a", "a", true)));
+
+        assertEquals("a", box.getSelectedData());
+        assertEquals("none", box.getSelectedItem().getLabel());
+    }
+
+    @Test
+    public void unknownDataSelectsNothing() {
+        final ListBox<String> single = new ListBox<>(new ListBoxConfiguration(),
+            List.of(ListBoxItem.of("none", null), ListBoxItem.of("a", "a")));
+        single.setSelected("zz");
+        assertNull(single.getSelectedItem());
+
+        final ListBox<String> multi = new ListBox<>(new ListBoxConfiguration().enableMultiSelection(),
+            List.of(ListBoxItem.of("none", null), ListBoxItem.of("a", "a")));
+        multi.setMultiSelected(List.of("zz"));
+        assertTrue(multi.getSelectedItems().isEmpty());
+
+        multi.addToSelection("a");
+        multi.addToSelection("a");
+        multi.addToSelection("zz");
+        assertEquals(List.of("a"), multi.getSelectedDataList());
+    }
+
+    @Test
+    public void removeFromSelectionOfUnknownDataKeepsTheSelection() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().enableMultiSelection(),
+            List.of(ListBoxItem.of("none", null, true), ListBoxItem.of("a", "a", true)));
+
+        box.removeFromSelection("zz");
+
+        assertEquals(List.of("none", "a"), labels(box.getSelectedItems()));
+    }
+
+    @Test
+    public void eventOnlyRejectsMultiSelectionChanges() {
+        final ListBoxConfiguration multi = new ListBoxConfiguration().enableMultiSelection();
+        final ListBox<String> box = new ListBox<>(multi, items("a"));
+        multi.enabledEventOnly();
+
+        assertThrows(UnsupportedOperationException.class, () -> box.setMultiSelected(List.of("a")));
+        assertThrows(UnsupportedOperationException.class, () -> box.removeFromSelection("a"));
+    }
+
+    @Test
+    public void dataProviderEventOnlyRejectsSelectionById() {
+        final ListBoxConfiguration single = new ListBoxConfiguration();
+        final ListBox<String> singleBox = new ListBox<>(single, new ListDataProvider("a"));
+        single.enabledEventOnly();
+        assertThrows(UnsupportedOperationException.class, () -> singleBox.setSelectedId("a"));
+
+        final ListBoxConfiguration multi = new ListBoxConfiguration().enableMultiSelection();
+        final ListBox<String> multiBox = new ListBox<>(multi, new ListDataProvider("a"));
+        multi.enabledEventOnly();
+        assertThrows(UnsupportedOperationException.class, () -> multiBox.setSelectedIds(List.of("a")));
+    }
+
+    @Test
+    public void dataProviderEmptySelectionClearsIt() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().enableMultiSelection(), new ListDataProvider("a", "b"));
+        box.setSelectedIds(List.of("a"));
+
+        box.setSelectedIds(List.of());
+        assertTrue(box.getSelectedDataList().isEmpty());
+
+        box.setMultiSelected(List.of("b"));
+        box.setMultiSelected(List.of());
+        assertTrue(box.getSelectedDataList().isEmpty());
+    }
+
+    @Test
+    public void dataProviderSetSelectedIndex_MultiSelectionAndOutOfRange() {
+        final ListBox<String> multi = new ListBox<>(new ListBoxConfiguration().enableMultiSelection(), new ListDataProvider("a", "b"));
+        multi.setSelectedIndex(1);
+        assertEquals(List.of("b"), multi.getSelectedDataList());
+
+        multi.setSelectedIndex(5);
+        assertTrue(multi.getSelectedDataList().isEmpty());
+    }
+
+    @Test
+    public void navigationKeysInFilterDoNotFilter() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration(), items("pear", "apple", "fig"));
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        box.open();
+        filter.setFilter("p");
+
+        for (final PKeyCodes key : List.of(PKeyCodes.CTRL, PKeyCodes.ALT, PKeyCodes.PAGE_UP, PKeyCodes.PAGE_DOWN, PKeyCodes.END,
+            PKeyCodes.ENTER, PKeyCodes.HOME, PKeyCodes.LEFT, PKeyCodes.UP, PKeyCodes.RIGHT, PKeyCodes.DOWN)) {
+            DropDownTestEvents.keyUp(filter.asWidget(), key.getCode());
+            assertEquals(List.of("apple", "fig", "pear"), renderedLabels(box), key.name());
+        }
+
+        DropDownTestEvents.keyUp(filter.asWidget(), 80);
+        assertEquals(List.of("apple", "pear"), renderedLabels(box));
+    }
+
+    @Test
+    public void filterInGroupModeShowsEachGroupHeaderOnce() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBox<String> box = groupListBox();
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        box.open();
+
+        filter.setFilter("p");
+        DropDownTestEvents.keyUp(filter.asWidget(), 80);
+
+        assertEquals(List.of("Fruits", "apple", "pear"), renderedLabels(box));
+    }
+
+    @Test
+    public void titleNotDisplayedShowsOnlyTheSelection() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().setTitle("T").setTitleDisplayed(false), items("a")));
+        assertEquals("", mainButton(box).getText());
+
+        box.setSelected("a");
+
+        assertEquals("a", mainButton(box).getText());
+    }
+
+    @Test
+    public void allLabelWithoutTitle() {
+        final ListBox<String> box = attach(
+            new ListBox<>(new ListBoxConfiguration().enableMultiSelection().disableTitlePlaceHolder().setAllLabel("All"), items("a")));
+
+        assertEquals("All", mainButton(box).getText());
+    }
+
+    @Test
+    public void clearMultiButtonFollowsTheSelection() {
+        final ListBoxConfiguration multi = new ListBoxConfiguration().enableMultiSelection().enableMultiSelectionClear("Clear");
+        final ListBox<String> box = attach(new ListBox<>(multi, items("a", "b")));
+        box.setMultiSelected(List.of("a"));
+
+        box.open();
+        final PButton clear = clearMultiButton(box);
+        assertTrue(clear.isEnabled());
+
+        clickItem(box, "a");
+        assertTrue(box.getSelectedItems().isEmpty());
+        assertFalse(clear.isEnabled());
+        assertFalse(clearButton(box).isVisible());
+    }
+
+    @Test
+    public void closeOnClickFalseInMultiSelectionKeepsItOpen() {
+        final ListBox<String> box = attach(new ListBox<>(
+            new ListBoxConfiguration().enableMultiSelection().setCloseOnClickMode(DropDownCloseOnClickMode.FALSE), items("a", "b")));
+        box.open();
+
+        clickItem(box, "a");
+
+        assertTrue(box.isOpen());
+        assertEquals(List.of("a"), box.getSelectedDataList());
+    }
+
+    @Test
+    public void enterInMultiSelectionKeepsItOpenWithoutFocus() {
+        final ListBox<String> box = attach(
+            new ListBox<>(new ListBoxConfiguration().enableMultiSelection().disableSearch(), items("a", "b")));
+        box.open();
+        writer.clear();
+
+        DropDownTestEvents.keyDown(box.getContainer().asWidget(), PKeyCodes.ENTER);
+
+        assertEquals(List.of("a"), box.getSelectedDataList());
+        assertTrue(box.isOpen());
+        assertFalse(writer.values(box.asWidget(), ServerToClientModel.FOCUS).contains(Boolean.TRUE));
+    }
+
+    @Test
+    public void keysOnEmptyListDoNothing() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().disableSearch()));
+        box.open();
+        final PWidget keys = box.getContainer().asWidget();
+
+        box.showIndex(ListBoxItem.of("unknown"));
+        DropDownTestEvents.keyDown(keys, PKeyCodes.DOWN);
+        DropDownTestEvents.keyDown(keys, PKeyCodes.ENTER);
+
+        assertTrue(box.isOpen());
+        assertNull(box.getItemContainer().getCurrentItemIndex());
+        assertNull(box.getSelectedItem());
+    }
+
+    @Test
+    public void keysFromAnUnknownIndexRestartFromTheFirstEnabledItem() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().disableSearch(), items("a", "b", "c")));
+        box.setDataEnabled("a", false);
+        box.open();
+        final PWidget keys = box.getContainer().asWidget();
+
+        box.showIndex(ListBoxItem.of("unknown"));
+        DropDownTestEvents.keyDown(keys, PKeyCodes.DOWN);
+        assertEquals("b", currentLabel(box));
+
+        box.setDataEnabled("a", true);
+        box.showIndex(ListBoxItem.of("unknown"));
+        DropDownTestEvents.keyDown(keys, PKeyCodes.DOWN);
+        assertEquals("a", currentLabel(box));
+
+        box.showIndex(ListBoxItem.of("unknown"));
+        DropDownTestEvents.keyDown(keys, PKeyCodes.UP);
+        assertEquals("a", currentLabel(box));
+    }
+
+    @Test
+    public void keysFromAnIndexPastTheEndMoveFromTheLastItem() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().disableSearch(), items("a", "b", "c")));
+        box.open();
+        final PWidget keys = box.getContainer().asWidget();
+
+        ReflectionTestUtil.setField(box, "index", 10);
+        DropDownTestEvents.keyDown(keys, PKeyCodes.UP);
+        assertEquals("b", currentLabel(box));
+
+        ReflectionTestUtil.setField(box, "index", 10);
+        DropDownTestEvents.keyDown(keys, PKeyCodes.DOWN);
+        assertEquals("c", currentLabel(box));
+    }
+
+    @Test
+    public void rightKeyInMultilevelModeWithoutNestedRenderer() {
+        final ListBoxConfiguration multilevel = new ListBoxConfiguration().disableSearch();
+        multilevel.enableMultilevel();
+        final ListBox<String> box = attach(new ListBox<>(multilevel, items("a")));
+        box.open();
+
+        DropDownTestEvents.keyDown(box.getContainer().asWidget(), PKeyCodes.RIGHT);
+        assertTrue(box.isOpen());
+
+        final ListBox<String> empty = attach(new ListBox<>(multilevel));
+        empty.open();
+        DropDownTestEvents.keyDown(empty.getContainer().asWidget(), PKeyCodes.RIGHT);
+        assertTrue(empty.isOpen());
+    }
+
+    @Test
+    public void blurOfOpenMultilevelListBoxFocusesTheFilter() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBoxConfiguration multilevel = new ListBoxConfiguration();
+        multilevel.enableMultilevel();
+        final ListBox<String> box = new ListBox<>(multilevel, items("a"));
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        DropDownTestEvents.focus(box.asWidget());
+        box.open();
+        writer.clear();
+
+        DropDownTestEvents.blur(box.asWidget());
+
+        assertTrue(box.isOpen());
+        assertEquals(List.of(Boolean.TRUE), writer.values(filter.asWidget(), ServerToClientModel.FOCUS));
+
+        // Without a filter there is nothing to focus: the multilevel list box stays open
+        final ListBoxConfiguration noSearch = new ListBoxConfiguration().disableSearch();
+        noSearch.enableMultilevel();
+        final ListBox<String> other = attach(new ListBox<>(noSearch, items("a")));
+        DropDownTestEvents.focus(other.asWidget());
+        other.open();
+        DropDownTestEvents.blur(other.asWidget());
+        assertTrue(other.isOpen());
+    }
+
+    @Test
+    public void nonCharacterKeyOnClosedListBoxDoesNotOpenIt() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration(), items("a")));
+
+        DropDownTestEvents.keyDown(box.asWidget(), PKeyCodes.DOWN);
+
+        assertFalse(box.isOpen());
+    }
+
+    @Test
+    public void removeUpDownKeyHandlerBeforeOpening() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().disableSearch(), items("a")));
+
+        box.removeUpDownKeyHandler();
+
+        assertEquals(TabindexMode.FOCUSABLE.getTabIndex(), box.getContainer().asWidget().getTabindex());
+    }
+
+    @Test
+    public void isValueEmpty() {
+        assertTrue(listBox.isValueEmpty(List.of()));
+        assertFalse(listBox.isValueEmpty(List.of(ListBoxItem.of("a"))));
+    }
+
+    @Test
+    public void hashCodeWithNullLabelAndGroup() {
+        assertEquals(ListBoxItem.of(null, 1).hashCode(), ListBoxItem.of(null, 2).hashCode());
+        final ListBoxItem<Integer> first = ListBoxItem.of("a", 1);
+        first.setGroupName("g");
+        final ListBoxItem<Integer> second = ListBoxItem.of("a", 2);
+        second.setGroupName("g");
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    public void scrollOnAnEmptyListKeepsNoCurrentItem() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration(), items()));
+        box.open();
+
+        scroll(box);
+
+        assertNull(box.getItemContainer().getCurrentItemIndex());
+    }
+
     // Helpers
 
     private static List<ListBoxItem<String>> items(final String... labels) {

@@ -242,6 +242,15 @@ public class FlexLayoutPanelTest extends PSuite {
     }
 
     @Test
+    public void nullComponentFactoryIgnoresExternalDrops() {
+        panel.setWidgetFactory((java.util.function.Function<String, PWidget>) null);
+        recorder.clear();
+        fire(addon, Json.createObjectBuilder().add("type", "externalDrop").add("tabId", "x1").add("component", "chart"));
+        assertTrue(recorder.calls(addon).isEmpty());
+        assertFalse(addon.getTabWidgets().containsKey("x1"));
+    }
+
+    @Test
     public void instanceFactoryReceivesConfigOrTabIdAsInstanceKey() {
         final List<String> requested = new ArrayList<>();
         panel.setWidgetFactory((String component, String key) -> {

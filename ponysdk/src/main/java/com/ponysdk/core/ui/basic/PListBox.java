@@ -202,14 +202,16 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private void sendRemoveItemInstruction(final int index) {
         saveUpdate(writer -> writer.write(ServerToClientModel.ITEM_REMOVED, index));
-        // The terminal removes the option and its selection: the selection follows the items, nothing else gets selected
+        // The terminal removes the option and its selection: the selection follows the items
         final Set<Integer> after = selectedIndexes.tailSet(index, false);
         if (!after.isEmpty()) {
             final List<Integer> shifted = new ArrayList<>(after);
             after.clear();
             shifted.forEach(i -> selectedIndexes.add(i - 1));
         }
-        if (selectedIndex == index) selectedIndex = selectedIndexes.isEmpty() ? -1 : selectedIndexes.first();
+        // A single-select drop-down always shows an option: the browser then selects the first one left
+        if (selectedIndex == index) selectedIndex = !selectedIndexes.isEmpty() ? selectedIndexes.first()
+                : !isMultipleSelect && visibleItemCount <= 1 && !items.isEmpty() ? 0 : -1;
         else if (selectedIndex > index) selectedIndex--;
     }
 

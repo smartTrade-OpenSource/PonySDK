@@ -224,8 +224,55 @@ public class PHTMLTableTest extends PSuite {
         table.getRowFormatter().addStyleName(1, "third");
         assertEquals(0, writer.count(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME));
 
+        // The terminal has rows without widget (inserted, or emptied): their removal is sent too
+        writer.clear();
         table.removeRow(9);
-        assertEquals(0, writer.count(ServerToClientModel.CLEAR_ROW));
+        assertEquals(List.of(9), writer.valuesOf(ServerToClientModel.CLEAR_ROW));
+    }
+
+    @Test
+    public void removingARowWithoutWidgetShiftsTheRowStylesBelow() {
+        final PLabel a = put(0, 0);
+        table.insertRow(1);
+        table.insertRow(2);
+        table.getRowFormatter().addStyleName(0, "first");
+        table.getRowFormatter().addStyleName(2, "third");
+        writer.clear();
+
+        table.removeRow(1);
+        assertEquals(List.of(1), writer.valuesOf(ServerToClientModel.CLEAR_ROW));
+        writer.clear();
+        table.getRowFormatter().addStyleName(0, "first");
+        table.getRowFormatter().addStyleName(1, "third");
+        assertEquals(0, writer.count(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME), "styles moved up with their rows");
+        assertSame(a, table.getWidget(0, 0));
+        assertEquals(1, table.getRowCount());
+    }
+
+    @Test
+    public void cellLookupOutsideTheTableAndWiderRows() {
+        final PLabel a = put(0, 0);
+        assertNull(table.getWidget(-1, 0));
+        assertNull(table.getWidget(0, -1));
+        assertNull(table.getWidget(0, 5));
+        final PLabel far = put(0, 5);
+        assertSame(far, table.getWidget(0, 5));
+        assertSame(a, table.getWidget(0, 0));
+        assertEquals(6, table.getCellCount(0));
+        table.setWidget(0, 1, (IsPWidget) null);
+        assertNull(table.getWidget(0, 1));
+        assertEquals(0, table.getCellCount(9));
+    }
+
+    @Test
+    public void insertingARowAboveAnEmptyRowShiftsTheWidgetsBelowIt() {
+        final PLabel a = put(0, 0);
+        final PLabel c = put(2, 0);
+        table.insertRow(0);
+        assertSame(a, table.getWidget(1, 0));
+        assertSame(c, table.getWidget(3, 0));
+        assertTrue(table.remove(c));
+        assertEquals(2, table.getRowCount());
     }
 
     @Test

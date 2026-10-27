@@ -172,6 +172,58 @@ public class DropDownContainerTest extends PSuite {
     }
 
     @Test
+    public void disabledOpenDropDownCanStillBeClosed() {
+        final TestDropDown dropDown = attach(new TestDropDown(new DefaultDropDownContainerConfiguration()));
+        final List<String> events = new ArrayList<>();
+        dropDown.addCloseHandler(e -> events.add("close"));
+        dropDown.open();
+        dropDown.setEnabled(false);
+
+        DropDownTestEvents.keyDown(dropDown.asWidget(), PKeyCodes.ESCAPE);
+
+        assertFalse(dropDown.isOpen());
+        assertEquals(List.of("close"), events);
+        dropDown.open();
+        assertFalse(dropDown.isOpen());
+    }
+
+    @Test
+    public void closingAClosedDropDownDoesNothing() {
+        final TestDropDown dropDown = attach(new TestDropDown(new DefaultDropDownContainerConfiguration()));
+        final List<String> events = new ArrayList<>();
+        dropDown.addCloseHandler(e -> events.add("close"));
+
+        dropDown.close();
+
+        assertTrue(events.isEmpty());
+        assertTrue(dropDown.hooks.isEmpty());
+    }
+
+    @Test
+    public void hiddenTitleHasNoPlaceholderStyle() {
+        final DefaultDropDownContainerConfiguration configuration = titled();
+        configuration.setTitleDisplayed(false);
+        final TestDropDown dropDown = attach(new TestDropDown(configuration));
+
+        assertFalse(dropDown.mainButton.hasStyleName(DropDownContainer.STYLE_CONTAINER_BUTTON_PLACEHOLDER));
+        assertEquals("", dropDown.mainButton.getText());
+    }
+
+    @Test
+    public void emptyValueWithoutSelectionDisplayedShowsTitleOnly() {
+        final DefaultDropDownContainerConfiguration configuration = new DefaultDropDownContainerConfiguration();
+        configuration.setTitle(TITLE).setAllLabel("All").setTitleSeparator("-").disableTitlePlaceHolder();
+        configuration.setSelectionDisplayed(false);
+        final TestDropDown dropDown = attach(new TestDropDown(configuration));
+
+        dropDown.setValue("");
+        dropDown.forceUpdateTitle();
+
+        assertEquals("Title - ", dropDown.mainButton.getText());
+        assertFalse(dropDown.asWidget().hasStyleName(DropDownContainer.STYLE_CONTAINER_SELECTED));
+    }
+
+    @Test
     public void clickOnButtonsTogglesContainer() {
         final TestDropDown dropDown = attach(new TestDropDown(new DefaultDropDownContainerConfiguration()));
 
@@ -522,6 +574,19 @@ public class DropDownContainerTest extends PSuite {
         dropDown.open();
         dropDown.onBlur();
         assertFalse(dropDown.isOpen());
+    }
+
+    @Test
+    public void defaultFocusContainerWritesNothing() {
+        final BareDropDown dropDown = attach(new BareDropDown(new DefaultDropDownContainerConfiguration()));
+        dropDown.open();
+        writer.clear();
+
+        dropDown.focusContainer();
+
+        assertFalse(dropDown.isContainerFocusable());
+        assertTrue(writer.values(dropDown.getContainer().asWidget(), ServerToClientModel.FOCUS).isEmpty());
+        assertTrue(writer.values(dropDown.asWidget(), ServerToClientModel.FOCUS).isEmpty());
     }
 
     private static DefaultDropDownContainerConfiguration titled() {

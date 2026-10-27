@@ -170,6 +170,30 @@ public class DataGridTest extends PSuite {
     }
 
     @Test
+    public void testUpdatedSortValueMovesTheRowUp() {
+        final DefaultView view = new DefaultView();
+        final DataGrid<Item> grid = new DataGrid<>(view, Item::key, BY_RANK);
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Label", Item::label));
+        grid.addData(new Item("k1", 1, "one"));
+        grid.addData(new Item("k2", 2, "two"));
+        grid.addData(new Item("k3", 3, "three"));
+        grid.addData(new Item("k3", 0, "zero"));
+        assertEquals(List.of("zero", "one", "two"), column(view, 0));
+    }
+
+    @Test
+    public void testRemoveUnknownDataKeepsRows() {
+        final DefaultView view = new DefaultView();
+        final DataGrid<String> grid = new DataGrid<>(view, Function.identity());
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Value", s -> s));
+        grid.addData(List.of("a", "c"));
+        grid.removeData("b");
+        assertEquals(List.of("a", "c"), column(view, 0));
+        grid.removeData("c");
+        assertEquals(List.of("a", ""), column(view, 0));
+    }
+
+    @Test
     public void testChainedTransforms() {
         final ColumnDescriptor<Item> twoSteps = ColumnDescriptor.newDefault("Label length", Item::label, l -> l.length() + "");
         final ColumnDescriptor<Item> threeSteps = ColumnDescriptor.newDefault("Twice", Item::label, String::length,

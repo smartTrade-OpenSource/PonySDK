@@ -92,6 +92,54 @@ public class PCookiesEmbeddedTest extends PSuite {
         assertTrue(writer.valuesOf(ServerToClientModel.REMOVE_COOKIE).isEmpty());
     }
 
+    @Test
+    public void aWriteCarriesItsExpiryAndDomain() {
+        final PCookies cookies = new PCookies(requests::add);
+        cookies.setCookie("theme", "dark", PCookies.CookieOptions.expires(java.time.Instant.now().plusSeconds(3600)).withDomain("example.com"));
+        final Cookie cookie = answered();
+        assertEquals("example.com", cookie.getDomain());
+        assertTrue(cookie.getMaxAge() > 3500 && cookie.getMaxAge() <= 3600, "seconds left: " + cookie.getMaxAge());
+        assertFalse(cookie.getSecure());
+        assertNull(cookie.getAttribute("SameSite"));
+    }
+
+    @Test
+    public void aRemovalWithADomainRemovesTheCookieOfThatDomain() {
+        final PCookies cookies = new PCookies(requests::add);
+        assertNull(cookies.removeCookie("theme", PCookies.CookieOptions.path("/").withDomain("example.com")));
+        final Cookie cookie = answered();
+        assertEquals("example.com", cookie.getDomain());
+        assertEquals("/", cookie.getPath());
+        assertEquals(0, cookie.getMaxAge());
+    }
+
+    @Test
+    public void theSessionCookieIsTheOneTheServletContextNames() {
+        final jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
+        final jakarta.servlet.ServletContext servletContext = Mockito.mock(jakarta.servlet.ServletContext.class);
+        final jakarta.servlet.SessionCookieConfig config = Mockito.mock(jakarta.servlet.SessionCookieConfig.class);
+        Mockito.doReturn(servletContext).when(session).getServletContext();
+        Mockito.doReturn(config).when(servletContext).getSessionCookieConfig();
+        Mockito.doReturn("SID").when(config).getName();
+        Mockito.doReturn(session).when(UIContext.get()).getSession();
+        try {
+            Mockito.doReturn(List.of(new HttpCookie("SID", "s"), new HttpCookie("JSESSIONID", "j"), new HttpCookie("bad", "%zz")))
+                .when(UIContext.get()).getRequestCookies();
+            final PCookies cookies = new PCookies(requests::add);
+            cookies.onClientData(Json.createObjectBuilder().add(ClientToServerModel.COOKIES.toStringValue(), Json.createArrayBuilder()).build());
+            assertNull(cookies.getCookie("SID"));
+            assertEquals("j", cookies.getCookie("JSESSIONID"), "not the session cookie of this application");
+            assertEquals("%zz", cookies.getCookie("bad"), "not URI-encoded: kept as it is");
+
+            Mockito.doReturn(null).when(config).getName();
+            final PCookies defaults = new PCookies(requests::add);
+            defaults.onClientData(Json.createObjectBuilder().add(ClientToServerModel.COOKIES.toStringValue(), Json.createArrayBuilder()).build());
+            assertNull(defaults.getCookie("JSESSIONID"));
+        } finally {
+            Mockito.doCallRealMethod().when(UIContext.get()).getSession();
+        }
+    }
+
     /** The cookie the response to the terminal's request sets. */
     private Cookie answered() {
         assertEquals(1, requests.size(), "one request to the application's origin");

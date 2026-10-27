@@ -85,6 +85,23 @@ public class RefreshableDataGridTest extends PSuite {
     }
 
     @Test
+    public void movingAKeyToAnotherRowSwapsTheTwoRows() {
+        grid.setData(0, "k1", "a");
+        grid.setData(1, "k2", "b");
+        grid.setData(2, "k3", "c");
+
+        grid.setData(1, "k1", "a2");
+
+        assertEquals(3, grid.getRowCount());
+        assertEquals(List.of("b", "a2", "c"), List.of(grid.getRow(0), grid.getRow(1), grid.getRow(2)));
+        assertEquals(List.of("b", "a2", "c"), List.of(grid.getViewData(0), grid.getViewData(1), grid.getViewData(2)));
+        assertEquals("b", textAt(1, 0));
+        assertEquals("a2", textAt(2, 0));
+        assertEquals(0, grid.removeByKey("k2"));
+        assertEquals(1, grid.removeByKey("k3"));
+    }
+
+    @Test
     public void testUpdateWithMovedOrNewKey() {
         grid.setData(0, "k1", "a");
         grid.setData(1, "k2", "b");

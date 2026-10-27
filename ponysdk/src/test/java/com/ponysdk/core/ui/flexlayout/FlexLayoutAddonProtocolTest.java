@@ -722,6 +722,60 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         assertFalse(wrapper.hasStyleName("t-a"));
     }
 
+    @Test
+    public void removeTabOfAFloatPopOut() {
+        addon.addTab("t1", "T", Element.newPLabel());
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1"));
+        assertTrue(addon.isPopOut("t1"));
+        addon.removeTab("t1");
+        assertFalse(addon.isPopOut("t1"));
+        recorder.assertLast(addon, "removeTab", "t1");
+    }
+
+    @Test
+    public void popInOfAFloatPopOutGoesThroughTheTerminal() {
+        addon.addTab("t1", "T", Element.newPLabel());
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1"));
+        addon.popIn("t1");
+        recorder.assertLast(addon, "popIn", "t1");
+    }
+
+    @Test
+    public void emptyThenNullThemeOnAWindowPopOut() {
+        final List<PWidget> widgets = new ArrayList<>();
+        addon.setWidgetFactory((component, tabId) -> {
+            final PLabel label = Element.newPLabel();
+            widgets.add(label);
+            return label;
+        });
+        addon.setTheme("");
+        addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+        final PWidget wrapper = (PWidget) widgets.get(0).getParent();
+        assertEquals(0, wrapper.getStyleNames().count());
+
+        addon.setTheme("t-a");
+        assertTrue(wrapper.hasStyleName("t-a"));
+        addon.setTheme(null);
+        assertFalse(wrapper.hasStyleName("t-a"));
+        addon.setTheme("t-b");
+        assertTrue(wrapper.hasStyleName("t-b"));
+    }
+
+    @Test
+    public void windowPopInWithoutFactoryLeavesTheTabEmpty() {
+        addon.setWidgetFactory((component, tabId) -> Element.newPLabel());
+        addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+        assertTrue(addon.isPopOut("t1"));
+
+        addon.setWidgetFactory(null);
+        addon.popIn("t1");
+        assertFalse(addon.isPopOut("t1"));
+        recorder.assertLast(addon, "restorePopOut", "t1", null);
+        assertFalse(addon.getTabWidgets().containsKey("t1"));
+    }
+
     // ─── Drag sources and feature toggles ────────────────────────
 
     @Test

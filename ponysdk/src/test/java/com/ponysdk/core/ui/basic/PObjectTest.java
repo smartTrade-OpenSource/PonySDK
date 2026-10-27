@@ -48,6 +48,7 @@ import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
@@ -413,5 +414,88 @@ public class PObjectTest extends PSuite {
         label.setAjaxHandler(null);
         label.handleAjaxRequest(request, response);
         assertEquals(1, calls.get());
+    }
+
+    @Test
+    public void coalescedUpdatesAreWrittenOnceAtTheDrain() {
+        final PLabel label = attachedLabel();
+        final WebsocketEncoder encoder = Mockito.mock(WebsocketEncoder.class);
+        writer.setEncoder(encoder);
+        writer.clear();
+        writer.setCoalescing(true);
+        label.setText("a");
+        label.setText("b");
+        label.addStyleName("s");
+        label.setStyleProperty("color", "red");
+        assertTrue(writer.isEmpty());
+        assertEquals(3, writer.pendingUpdateCount());
+
+        writer.setCoalescing(false);
+        assertEquals(0, writer.pendingUpdateCount());
+        Mockito.verify(encoder).encode(ServerToClientModel.TEXT, "b");
+        Mockito.verify(encoder, Mockito.never()).encode(ServerToClientModel.TEXT, "a");
+        Mockito.verify(encoder).encode(ServerToClientModel.ADD_STYLE_NAME, "s");
+        Mockito.verify(encoder).encode(ServerToClientModel.STYLE_VALUE, "red");
+    }
+
+    @Test
+    public void notCoalescibleUpdatesAreWrittenRightAway() {
+        final PLabel label = attachedLabel();
+        writer.clear();
+        writer.setCoalescing(true);
+        // without a string key, the two-field update cannot be coalesced: written at once
+        label.saveUpdate(ServerToClientModel.PUT_STYLE_KEY, null, ServerToClientModel.STYLE_VALUE, "v");
+        assertEquals(List.of("v"), writer.valuesOf(ServerToClientModel.STYLE_VALUE));
+        assertEquals(0, writer.pendingUpdateCount());
+        writer.setCoalescing(false);
+    }
+
+    @Test
+    public void keyedAndTwoFieldUpdatesBeforeInitAreReplayed() {
+        final PLabel label = Element.newPLabel();
+        label.saveKeyedUpdate(ServerToClientModel.ADD_STYLE_NAME, "k");
+        label.saveUpdate(ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red");
+        assertTrue(writer.isEmpty());
+        PWindow.getMain().add(label);
+        assertEquals(List.of("k"), writer.valuesOf(ServerToClientModel.ADD_STYLE_NAME));
+        assertEquals(List.of("red"), writer.valuesAfter(ServerToClientModel.PUT_STYLE_KEY, "color"));
+    }
+
+    @Test
+    public void bindingWithOtherExtrasAndCallWithoutArgs() {
+        final PLabel label = attachedLabel();
+        label.setTerminalHandler(e -> {
+        });
+        label.removeDestroyListener(o -> {
+        });
+        writer.clear();
+        label.bindTerminalFunction("fn");
+        assertEquals(List.of("fn"), writer.valuesOf(ServerToClientModel.BIND));
+        label.callTerminalFunction("f", (Object[]) null);
+        assertEquals(List.of("f"), writer.valuesOf(ServerToClientModel.FUNCTION_NAME));
+        assertEquals(0, writer.count(ServerToClientModel.FUNCTION_ARGS));
+    }
+
+    @Test
+    public void attributeLinkedToValue() {
+        final PLabel label = Element.newPLabel();
+        label.setAttributeLinkedToValue0(null);
+        assertNull(label.getAttributeLinkedToValue0());
+        label.setAttributeLinkedToValue0("a");
+        assertEquals("a", label.getAttributeLinkedToValue0());
+        label.setAttributeLinkedToValue0(null);
+        assertNull(label.getAttributeLinkedToValue0());
+    }
+
+    @Test
+    public void objectOfAClosedWindowInAnInitializedFrameWaitsForTheWindow() {
+        final PFrame frame = Element.newPFrame("url");
+        PWindow.getMain().add(frame);
+        final PWindow window = Element.newPWindow(null, null);
+        final PLabel label = Element.newPLabel();
+        label.attach(window, frame);
+        assertFalse(label.isInitialized());
+        window.open();
+        assertTrue(label.isInitialized());
     }
 }

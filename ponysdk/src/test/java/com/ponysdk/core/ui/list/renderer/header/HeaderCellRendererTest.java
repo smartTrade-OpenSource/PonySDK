@@ -75,6 +75,7 @@ public class HeaderCellRendererTest extends PSuite {
         assertEquals("ascending", HeaderSortingHelper.getAssociatedStyleName(SortingType.ASCENDING));
         assertEquals("descending", HeaderSortingHelper.getAssociatedStyleName(SortingType.DESCENDING));
         assertEquals("none", HeaderSortingHelper.getAssociatedStyleName(SortingType.NONE));
+        assertEquals(SortingType.NONE, HeaderSortingHelper.getNextSortingType(null));
     }
 
     @Test
@@ -171,6 +172,25 @@ public class HeaderCellRendererTest extends PSuite {
     }
 
     @Test
+    public void testComplexHeaderWithoutValueHolderFiltersOnSortOnly() {
+        final StringTextBoxFormField formField = new StringTextBoxFormField() {
+
+            @Override
+            public com.ponysdk.core.ui.basic.HasPValue<String> asHasPValue() {
+                return null;
+            }
+        };
+        formField.setValue("ignored");
+        final ComplexHeaderCellRenderer renderer = new ComplexHeaderCellRenderer("Name", formField, "name");
+        assertTrue(renderer.getCriteria().isEmpty());
+        renderer.sort(SortingType.DESCENDING);
+        final List<Criterion> criteria = renderer.getCriteria();
+        assertEquals(1, criteria.size());
+        assertNull(criteria.get(0).getValue());
+        assertEquals(SortingType.DESCENDING, criteria.get(0).getSortingType());
+    }
+
+    @Test
     public void testComplexHeaderValidationStyle() {
         final StringTextBoxFormField formField = new StringTextBoxFormField();
         formField.setValidator(new NotEmptyFieldValidator());
@@ -184,6 +204,9 @@ public class HeaderCellRendererTest extends PSuite {
         assertTrue(formField.asWidget().hasStyleName("validation-error"));
 
         formField.setValue("value");
+        assertTrue(renderer.isValid().isValid());
+        assertFalse(formField.asWidget().hasStyleName("validation-error"));
+        // Still valid: nothing to remove
         assertTrue(renderer.isValid().isValid());
         assertFalse(formField.asWidget().hasStyleName("validation-error"));
 

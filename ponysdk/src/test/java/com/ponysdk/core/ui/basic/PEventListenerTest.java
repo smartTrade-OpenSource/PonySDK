@@ -5,6 +5,7 @@
 package com.ponysdk.core.ui.basic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -136,5 +138,38 @@ public class PEventListenerTest extends PSuite {
         panel.removeScrollHandler(handler);
         assertEquals(0, writer.count(ServerToClientModel.WIDGET_ID), "the old block below 4");
         assertEquals(1, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+    }
+
+    private static JsonObject event(final PWidget widget, final String name) {
+        return Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), widget.getID())
+            .add(ClientToServerModel.EVENT.toStringValue(), name).build();
+    }
+
+    @Test
+    public void anEventWithoutListenerOrFieldsIsHandled() {
+        final PTextBox box = attachedBox();
+        box.onClientData(event(box, "input")); // nothing registered at all
+
+        final List<PEvent> events = new ArrayList<>();
+        box.addEventListener("input", PEventOptions.NONE, events::add);
+        box.onClientData(event(box, "keydown")); // another name
+        assertTrue(events.isEmpty());
+        box.onClientData(event(box, "input"));
+        assertEquals(1, events.size());
+        assertNull(events.get(0).getString("target.value"), "no fields");
+    }
+
+    @Test
+    public void removingAListenerTwiceOrOfAnotherNameUnlistensOnce() {
+        final PTextBox box = attachedBox();
+        final HandlerRegistration input = box.addEventListener("input", PEventOptions.NONE, e -> {
+        });
+        final HandlerRegistration other = box.addEventListener("keydown", PEventOptions.NONE, e -> {
+        });
+        input.removeHandler();
+        input.removeHandler();
+        assertEquals(List.of("input"), writer.valuesOf(ServerToClientModel.UNLISTEN_EVENT));
+        other.removeHandler();
+        assertEquals(List.of("input", "keydown"), writer.valuesOf(ServerToClientModel.UNLISTEN_EVENT));
     }
 }
