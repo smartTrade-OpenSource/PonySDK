@@ -39,15 +39,7 @@ public final class FlexTabset {
             .add("weight", weight);
         if (maxChildren > 0) b.add("maxChildren", maxChildren);
         final JsonArrayBuilder arr = Json.createArrayBuilder();
-        for (final FlexTab t : tabs) {
-            final JsonObjectBuilder tb = Json.createObjectBuilder()
-                .add("type", "tab")
-                .add("name", t.getName());
-            if (t.getComponent() != null) tb.add("component", t.getComponent());
-            tb.add("enableClose", t.isEnableClose());
-            tb.add("enableDrag", t.isEnableDrag());
-            arr.add(tb);
-        }
+        for (final FlexTab t : tabs) arr.add(Json.createObjectBuilder().add("type", "tab").addAll(t.toJsonBuilder()));
         b.add("children", arr);
         return b.build().toString();
     }

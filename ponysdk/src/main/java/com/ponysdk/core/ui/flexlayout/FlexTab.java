@@ -52,12 +52,16 @@ public final class FlexTab {
 
     /** Serializes this tab to a JSON string for the FlexLayout model. */
     String toJson() {
+        return toJsonBuilder().build().toString();
+    }
+
+    JsonObjectBuilder toJsonBuilder() {
         final JsonObjectBuilder b = Json.createObjectBuilder().add("name", name);
         if (component != null) b.add("component", component);
         if (icon != null) b.add("icon", icon);
         b.add("enableClose", enableClose);
         b.add("enableDrag", enableDrag);
         if (config != null) b.add("config", Json.createReader(new java.io.StringReader(config)).readObject());
-        return b.build().toString();
+        return b;
     }
 }
