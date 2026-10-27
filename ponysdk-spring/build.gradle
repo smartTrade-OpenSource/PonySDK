@@ -29,7 +29,6 @@ publishing {
 dependencies {
     implementation project(':ponysdk')
     implementation libs.spring.core
-    implementation libs.spring.web
     implementation libs.spring.beans
     implementation libs.spring.context
 }

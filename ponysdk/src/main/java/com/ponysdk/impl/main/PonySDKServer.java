@@ -28,7 +28,6 @@ import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.EnumSet;
-import java.util.List;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -43,9 +42,6 @@ import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletConta
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
-import org.eclipse.jetty.compression.brotli.BrotliCompression;
-import org.eclipse.jetty.compression.brotli.BrotliEncoderConfig;
-import com.aayushatharva.brotli4j.Brotli4jLoader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import jakarta.servlet.DispatcherType;
 import org.slf4j.Logger;
@@ -175,46 +171,16 @@ public class PonySDKServer {
     protected Handler createMainHandler() {
         final CompressionHandler compression = new CompressionHandler();
         compression.putCompression(new GzipCompression());
-        addBrotliIfAvailable(compression);
         // Compress text assets (HTML, the terminal's JavaScript, JSON) but skip already-compressed
         // content (images, fonts, archives) — restores the sensible GzipHandler defaults
         // instead of wasting CPU re-compressing incompressible payloads.
-        // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty would always
-        // pick gzip. Brotli is preferred when registered (about 20 % smaller on the terminal JS), gzip otherwise.
         // Request bodies are never decompressed: no PonySDK client sends one compressed, and decoding them hands
-        // any client the decoders (CVE-2026-111497 in Brotli's) and a decompression bomb.
+        // any client a decompression bomb.
         compression.putConfiguration("/", CompressionConfig.builder().defaults()
-            .compressPreferredEncodings(List.of("br", "gzip"))
-            .decompressExcludeEncoding("br")
             .decompressExcludeEncoding("gzip")
             .build());
         compression.setHandler(addHandlers());
         return compression;
-    }
-
-    /**
-     * Registers Brotli HTTP compression, but only when its native library can be loaded on the
-     * current platform. Brotli compresses text assets (notably the terminal's JavaScript bundle served on
-     * first load) noticeably better than gzip; the browser negotiates {@code br} vs {@code gzip}
-     * via {@code Accept-Encoding}. When the native is unavailable the server degrades gracefully to
-     * gzip only — startup is never broken by a missing native.
-     */
-    static final int BROTLI_LEVEL = 5;
-
-    protected void addBrotliIfAvailable(final CompressionHandler compression) {
-        try {
-            Brotli4jLoader.ensureAvailability();
-            final BrotliCompression brotli = new BrotliCompression();
-            // Compressed per response: level 11 (the default) took 344 ms on the 382 KB terminal for 98 KB,
-            // level 5 takes 5 ms for 111 KB - smaller and faster than gzip (8 ms, 122 KB).
-            final BrotliEncoderConfig level = new BrotliEncoderConfig();
-            level.setCompressionLevel(BROTLI_LEVEL);
-            brotli.setDefaultEncoderConfig(level);
-            compression.putCompression(brotli);
-            log.info("Brotli HTTP compression enabled");
-        } catch (final Throwable t) {
-            log.info("Brotli native library unavailable; using gzip only ({})", t.toString());
-        }
     }
 
     protected Handler addHandlers() {

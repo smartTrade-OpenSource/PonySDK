@@ -203,7 +203,6 @@ dependencies {
             // OpenTelemetry API — metrics + trace (no SDK, user brings their own)
             libs.opentelemetry.api,
             libs.bundles.jetty.server,
-            libs.brotli4j,
             libs.slf4j.api,
             libs.jakarta.servlet.api,
             libs.jakarta.json.api,
@@ -221,11 +220,6 @@ dependencies {
             libs.jakarta.websocket.client.api,
             libs.jsoup
     )
-
-    // Brotli native libraries (brotli4j) for the common server + dev platforms.
-    // Optional at runtime: PonySDKServer registers Brotli only when the native is loadable
-    // (Brotli4jLoader.isAvailable()), otherwise it degrades gracefully to gzip.
-    runtimeOnly libs.bundles.brotli4j.natives
 
     testRuntimeOnly(
             libs.junit.platform.launcher,
@@ -303,9 +297,6 @@ tasks.register('bench', JavaExec) {
 test {
     useJUnitPlatform()
     classpath = files(resourcesCoreTest) + classpath
-    // Brotli compression tests load a native lib (brotli4j); JDK 24+ (JEP 472) warns on native access
-    // now and will block it later unless explicitly granted.
-    jvmArgs '--enable-native-access=ALL-UNNAMED'
     // Forward opt-in browser-test properties to the forked test JVM (see driver/BinaryAddonBrowserIT)
     ['ponysdk.browserTest', 'ponysdk.browserUrl', 'ponysdk.chromeBinary', 'webdriver.chrome.driver'].each { k ->
         if (System.getProperty(k) != null) systemProperty k, System.getProperty(k)

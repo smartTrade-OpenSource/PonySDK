@@ -31,10 +31,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import org.eclipse.jetty.compression.brotli.BrotliCompression;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
 import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.server.CompressionHandler;
@@ -47,19 +45,16 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.Callback;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.aayushatharva.brotli4j.Brotli4jLoader;
-import com.aayushatharva.brotli4j.encoder.Encoder;
 
 /**
  * Non-regression tests for the Jakarta EE11 / Jetty 12.1 migration of {@link PonySDKServer}.
  *
  * <ul>
  * <li>the main handler must be a Jetty 12.1 {@link CompressionHandler} (the EE10 {@code GzipHandler}
- * is deprecated for removal); it registers gzip (and Brotli when its native lib is available),
+ * is deprecated for removal); it registers gzip,
  * wraps the application handler, and applies a default {@link CompressionConfig} that compresses
  * text but skips already-compressed content;</li>
  * <li>the error handler must keep hiding stack traces and the message-in-title
@@ -178,22 +173,6 @@ public class PonySDKServerTest {
         // CompressionHandler keys by the HTTP content-coding token (getEncodingName()).
         assertNotNull(compression.removeCompression(new GzipCompression().getEncodingName()),
                 "gzip compression must be registered on the handler");
-        // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty picks gzip
-        assertEquals(List.of("br", "gzip"), config.getCompressPreferredEncodings(),
-                "Brotli preferred when the browser accepts both");
-    }
-
-    @Test
-    public void testCreateMainHandler_registersBrotliWhenNativeAvailable() {
-        // Brotli is a progressive enhancement gated on the native lib: only assert it where loadable.
-        Assumptions.assumeTrue(Brotli4jLoader.isAvailable(), "Brotli native library not available on this platform");
-
-        final CompressionHandler compression = (CompressionHandler) new TestServer().mainHandler();
-
-        final BrotliCompression brotli = (BrotliCompression) compression.removeCompression(new BrotliCompression().getEncodingName());
-        assertNotNull(brotli, "Brotli must be registered when its native library is available");
-        assertEquals(PonySDKServer.BROTLI_LEVEL,
-                brotli.getDefaultEncoderConfig().getCompressionLevel(), "a level that compresses each response in milliseconds, not hundreds");
     }
 
     @Test
@@ -243,15 +222,6 @@ public class PonySDKServerTest {
     }
 
     private static final byte[] PLAIN = "a request body ".repeat(100).getBytes(StandardCharsets.US_ASCII);
-
-    @Test
-    public void aBrotliRequestBodyIsNotDecodedByTheServer() throws Exception {
-        // CVE-2026-111497: the native Brotli decoder writes out of bounds on a crafted stream. PonySDK only
-        // compresses responses; a request body must never reach the decoder.
-        Assumptions.assumeTrue(Brotli4jLoader.isAvailable(), "Brotli native library not available on this platform");
-        final byte[] compressed = Encoder.compress(PLAIN);
-        assertEquals(compressed.length, receivedSize("br", compressed), "the body reaches the application as it was sent");
-    }
 
     @Test
     public void aGzipRequestBodyIsNotDecodedByTheServer() throws Exception {

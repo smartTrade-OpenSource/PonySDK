@@ -8,12 +8,9 @@ dependencies {
             libs.jakarta.json.api,
             libs.jakarta.servlet.api,
             libs.slf4j.api,
-            libs.java2html,
             libs.jetty.websocket.jetty.client,
-            libs.commons.beanutils,
             libs.commons.io,
-            libs.commons.fileupload2.jakarta.servlet6,
-            libs.gson
+            libs.commons.fileupload2.jakarta.servlet6
     )
 
     // Spring kept for the runFlexLayoutDemo task (FlexLayout E2E suite) — uses ponysdk-spring module
@@ -21,10 +18,7 @@ dependencies {
 
     runtimeOnly(
             libs.parsson,
-            libs.java2html,
             libs.spring.context,
-            libs.spring.aop,
-            libs.spring.expression,
             libs.slf4j.jcl.over.slf4j,
             libs.slf4j.jul.to.slf4j,
             libs.log4j.api,
@@ -72,9 +66,6 @@ task runShowcase(type: JavaExec) {
     jvmArgs = [
         '-Xmx1g',
         '-XX:+UseZGC',
-        // Brotli HTTP compression loads a native lib (brotli4j); JDK 24+ (JEP 472) warns on native
-        // access now and will block it later unless explicitly granted.
-        '--enable-native-access=ALL-UNNAMED',
         '-Dlog4j.configurationFile=etc/log4j2.xml'
     ]
 }
@@ -83,7 +74,7 @@ task runShowcase(type: JavaExec) {
 task runQuickStart(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.ponysdk.sample.quickstart.HelloWorldMain'
-    jvmArgs = ['--enable-native-access=ALL-UNNAMED', '-Dlog4j.configurationFile=etc/log4j2.xml']
+    jvmArgs = ['-Dlog4j.configurationFile=etc/log4j2.xml']
 }
 
 // FlexLayout demo — activates the 'flexlayout' Spring profile (see etc/server_application.xml).
@@ -95,7 +86,6 @@ task runFlexLayoutDemo(type: JavaExec) {
     mainClass = 'com.ponysdk.impl.spring.MainSpring'
     jvmArgs = [
         '-Xmx2g',
-        '--enable-native-access=ALL-UNNAMED',
         '-Dlog4j.configurationFile=etc/log4j2.xml',
         '-Dspring.profiles.active=flexlayout'
     ]
