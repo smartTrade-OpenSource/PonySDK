@@ -18,8 +18,8 @@ ext {
     parssonVersion = '1.1.9'
     jakartaValidationVersion = '3.1.1'
     otelVersion = '1.67.0'
-    // brotli4j native version brought transitively by jetty-compression-brotli (keep in sync)
-    brotli4jVersion = '1.23.0'
+    // brotli4j, above the version jetty-compression-brotli brings: 1.24.0 bundles Brotli 1.2.1 (CVE-2026-111497)
+    brotli4jVersion = '1.24.0'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
@@ -210,6 +210,7 @@ dependencies {
             'org.eclipse.jetty.compression:jetty-compression-server:' + jettyVersion,
             'org.eclipse.jetty.compression:jetty-compression-gzip:' + jettyVersion,
             'org.eclipse.jetty.compression:jetty-compression-brotli:' + jettyVersion,
+            'com.aayushatharva.brotli4j:brotli4j:' + brotli4jVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,

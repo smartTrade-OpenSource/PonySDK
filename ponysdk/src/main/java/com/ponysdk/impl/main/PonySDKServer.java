@@ -181,8 +181,13 @@ public class PonySDKServer {
         // instead of wasting CPU re-compressing incompressible payloads.
         // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty would always
         // pick gzip. Brotli is preferred when registered (about 20 % smaller on the terminal JS), gzip otherwise.
+        // Request bodies are never decompressed: no PonySDK client sends one compressed, and decoding them hands
+        // any client the decoders (CVE-2026-111497 in Brotli's) and a decompression bomb.
         compression.putConfiguration("/", CompressionConfig.builder().defaults()
-            .compressPreferredEncodings(List.of("br", "gzip")).build());
+            .compressPreferredEncodings(List.of("br", "gzip"))
+            .decompressExcludeEncoding("br")
+            .decompressExcludeEncoding("gzip")
+            .build());
         compression.setHandler(addHandlers());
         return compression;
     }

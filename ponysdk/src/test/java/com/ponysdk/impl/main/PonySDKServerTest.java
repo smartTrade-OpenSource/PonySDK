@@ -25,20 +25,34 @@ package com.ponysdk.impl.main;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.jetty.compression.brotli.BrotliCompression;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
 import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee11.servlet.ErrorHandler;
+import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.Callback;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.aayushatharva.brotli4j.Brotli4jLoader;
+import com.aayushatharva.brotli4j.encoder.Encoder;
 
 /**
  * Non-regression tests for the Jakarta EE11 / Jetty 12.1 migration of {@link PonySDKServer}.
@@ -189,5 +203,63 @@ public class PonySDKServerTest {
         assertNotNull(errorHandler);
         assertFalse(errorHandler.isShowStacks(), "error handler must not show stack traces");
         assertFalse(errorHandler.isShowMessageInTitle(), "error handler must not show the message in the title");
+    }
+
+    /** Answers the number of bytes of the request body the application receives. */
+    private static final class BodySizeServer extends PonySDKServer {
+
+        @Override
+        protected Handler addHandlers() {
+            return new Handler.Abstract() {
+
+                @Override
+                public boolean handle(final Request request, final Response response, final Callback callback) throws Exception {
+                    final int size = Content.Source.asByteBuffer(request).remaining();
+                    Content.Sink.write(response, true, String.valueOf(size), callback);
+                    return true;
+                }
+            };
+        }
+    }
+
+    /** The size of a compressed body as the application receives it, through the server's main handler. */
+    private static int receivedSize(final String encoding, final byte[] body) throws Exception {
+        final Server jetty = new Server();
+        final ServerConnector connector = new ServerConnector(jetty);
+        connector.setHost("127.0.0.1");
+        jetty.addConnector(connector);
+        jetty.setHandler(new BodySizeServer().createMainHandler());
+        jetty.start();
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            final HttpRequest request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + connector.getLocalPort() + "/"))
+                .header("Content-Encoding", encoding)
+                .header("Content-Type", "text/plain")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
+                .build();
+            return Integer.parseInt(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
+        } finally {
+            jetty.stop();
+        }
+    }
+
+    private static final byte[] PLAIN = "a request body ".repeat(100).getBytes(StandardCharsets.US_ASCII);
+
+    @Test
+    public void aBrotliRequestBodyIsNotDecodedByTheServer() throws Exception {
+        // CVE-2026-111497: the native Brotli decoder writes out of bounds on a crafted stream. PonySDK only
+        // compresses responses; a request body must never reach the decoder.
+        Assumptions.assumeTrue(Brotli4jLoader.isAvailable(), "Brotli native library not available on this platform");
+        final byte[] compressed = Encoder.compress(PLAIN);
+        assertEquals(compressed.length, receivedSize("br", compressed), "the body reaches the application as it was sent");
+    }
+
+    @Test
+    public void aGzipRequestBodyIsNotDecodedByTheServer() throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzip = new GZIPOutputStream(out)) {
+            gzip.write(PLAIN);
+        }
+        final byte[] compressed = out.toByteArray();
+        assertEquals(compressed.length, receivedSize("gzip", compressed), "the body reaches the application as it was sent");
     }
 }
