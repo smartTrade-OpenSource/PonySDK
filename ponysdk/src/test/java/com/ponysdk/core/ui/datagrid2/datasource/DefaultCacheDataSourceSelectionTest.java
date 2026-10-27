@@ -149,13 +149,13 @@ public class DefaultCacheDataSourceSelectionTest {
 
     @Test
     public void testSelectKeysIntervalCoversAllAffectedRows() {
-        // Selecting "a" and "e" inserts them into liveSelectedData at positions 0 and 1
+        // "a" and "e" are the rows at positions 0 and 4 of the live data
         final Interval interval = dataSource.selectKeys(List.of("a", "e"));
 
         Assertions.assertNotNull(interval);
-        // Interval covers position 0 (first insertion) to position 1 (second insertion) in liveSelectedData
+        // Interval covers the rows to redraw, from row 0 to row 4 inclusive
         Assertions.assertEquals(0, interval.from);
-        Assertions.assertEquals(1, interval.to);
+        Assertions.assertEquals(5, interval.to);
     }
 
     @Test

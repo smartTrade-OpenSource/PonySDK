@@ -247,7 +247,8 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         public void onStateChanged(final State state) {
             this.state = state;
             if (!state.isShown()) {
-                footer.setText(filter = "");
+                footer.setText("");
+                if (!filter.isEmpty()) filter("");
             }
             super.onStateChanged(state);
         }

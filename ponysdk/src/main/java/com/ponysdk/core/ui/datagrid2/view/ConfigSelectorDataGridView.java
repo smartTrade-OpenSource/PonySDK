@@ -161,10 +161,15 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         for (final ColumnConfig<V> columnConfig : columnConfigs) {
             buffer = encodeColumnConfig(buffer, columnConfig);
         }
-        final Map<String, Object> customValues = config.getReadOnlyCustomValues();
+        final Map<String, String> customValues = new LinkedHashMap<>();
+        for (final Map.Entry<String, Object> entry : config.getReadOnlyCustomValues().entrySet()) {
+            final String value = encodeConfigCustomValue(entry.getKey(), entry.getValue());
+            if (value != null) customValues.put(entry.getKey(), value);
+        }
         buffer = encodeInt(buffer, customValues.size());
-        for (final Map.Entry<String, Object> entry : customValues.entrySet()) {
-            buffer = encodeCustomValue(buffer, entry.getKey(), entry.getValue());
+        for (final Map.Entry<String, String> entry : customValues.entrySet()) {
+            buffer = encodeString(buffer, entry.getKey());
+            buffer = encodeString(buffer, entry.getValue());
         }
         return buffer;
     }
@@ -174,12 +179,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         final Object value = decodeConfigCustomValue(key, decodeString(buffer));
         if (value == null) return;
         builder.addCustomValue(key, value);
-    }
-
-    private ByteBuffer encodeCustomValue(ByteBuffer buffer, final String key, final Object value) {
-        buffer = encodeString(buffer, key);
-        buffer = encodeString(buffer, encodeConfigCustomValue(key, value));
-        return buffer;
     }
 
     private static <V> ColumnConfig<V> decodeColumnConfig(final ByteBuffer buffer) {
@@ -367,8 +366,8 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
 
         public void onRemove() {
-            layout.remove(widget.asWidget());
             if (current == null || key.equals(defaultKey)) return;
+            layout.remove(widget.asWidget());
             if (this == current) {
                 handlers.get(defaultKey).onSelect();
             }

@@ -108,7 +108,7 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
 		return rowIndex;
 	}
 
-	private int findRowIndex(final List<DefaultRow<V>> rows, final DefaultRow<V> row) {
+	protected int findRowIndex(final List<DefaultRow<V>> rows, final DefaultRow<V> row) {
 		int left = 0;
 		int right = rows.size() - 1;
 		while (left <= right) {

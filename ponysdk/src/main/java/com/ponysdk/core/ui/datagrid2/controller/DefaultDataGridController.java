@@ -228,6 +228,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         int to = 0;
         for (final Map.Entry<K, Consumer<V>> entry : updaters.entrySet()) {
             final DefaultRow<V> row = dataSource.getRow(entry.getKey());
+            if (row == null) continue;
             clearRenderingHelpers(row);
             final Interval interval = dataSource.updateData(entry.getKey(), entry.getValue());
             if (interval == null) continue;
@@ -240,6 +241,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void updateData(final K k, final Consumer<V> updater) {
         final DefaultRow<V> row = dataSource.getRow(k);
+        if (row == null) return;
         clearRenderingHelpers(row);
         final Interval interval = dataSource.updateData(k, updater);
         if (interval != null) refreshRows(interval.from, interval.to);

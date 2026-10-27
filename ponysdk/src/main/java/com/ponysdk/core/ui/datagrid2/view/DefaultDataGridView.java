@@ -918,6 +918,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private void setColumnConfig(final ColumnDefinition<V> column, State state, final int width) {
         if (state == null) state = column.getDefaultState();
         final ColumnView columnView = getColumnView(column);
+        final boolean resized = columnView.width != width;
         columnView.width = width;
         if (state.isShown()) {
             final Table table = state.isPinned() ? pinnedTable : unpinnedTable;
@@ -927,10 +928,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             columnView.state = state;
             columnView.notifyStateChangedListeners();
         }
-        if (columnView.width != width) {
-            columnView.width = width;
-            columnView.notifyResizedListeners();
-        }
+        if (resized) columnView.notifyResizedListeners();
 
     }
 

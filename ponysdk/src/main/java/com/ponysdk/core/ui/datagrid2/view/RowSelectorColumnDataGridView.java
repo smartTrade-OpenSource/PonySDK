@@ -118,7 +118,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         }
 
         private void addColumnActionListeners() {
-            for (final ColumnDefinition<V> column : getColumnDefinitions()) {
+            for (final ColumnDefinition<V> column : RowSelectorColumnDataGridView.this.getAdapter().getColumnDefinitions()) {
                 addColumnActionListener(column, rowSelectorColumn);
             }
         }
