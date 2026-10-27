@@ -24,6 +24,7 @@
 package com.ponysdk.core.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +47,31 @@ public class DomHandlerConverterTest {
     public void testConvertHandlerModel() {
         final HandlerModel type = DomHandlerConverter.convert(DomHandlerType.MOUSE_WHELL);
         assertEquals(HandlerModel.HANDLER_DOM_MOUSE_WHELL, type);
+    }
+
+    @Test
+    public void everyDomHandlerModelRoundTrips() {
+        int mapped = 0;
+        for (final HandlerModel model : HandlerModel.values()) {
+            if (!model.name().startsWith("HANDLER_DOM_")) {
+                assertThrows(IllegalArgumentException.class, () -> DomHandlerConverter.convert(model), model.name());
+                continue;
+            }
+            final DomHandlerType type = DomHandlerConverter.convert(model);
+            assertEquals(model, DomHandlerConverter.convert(type), model.name());
+            assertEquals(model.name(), "HANDLER_DOM_" + type.name());
+            mapped++;
+        }
+        assertEquals(20, mapped);
+    }
+
+    @Test
+    public void aDomHandlerTypeWithoutModelIsRejected() {
+        for (final DomHandlerType type : DomHandlerType.values()) {
+            final boolean hasModel = java.util.Arrays.stream(HandlerModel.values()).anyMatch(m -> m.name().equals("HANDLER_DOM_" + type.name()));
+            if (hasModel) assertEquals(type, DomHandlerConverter.convert(DomHandlerConverter.convert(type)));
+            else assertThrows(IllegalArgumentException.class, () -> DomHandlerConverter.convert(type), type.name());
+        }
     }
 
 }

@@ -121,7 +121,8 @@ public class PonySDKWebDriver implements WebDriver {
             if ((boolean) frame.getValue()) {
                 final String typeHistory = (String) findValueForModel(message, ServerToClientModel.TYPE_HISTORY);
                 if (typeHistory == null) return;
-                if (handleImplicitCommunication) sendTypeHistory(this.typeHistory = typeHistory);
+                this.typeHistory = typeHistory;
+                if (handleImplicitCommunication) sendTypeHistory(typeHistory);
             }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_ADD, (message, frame) -> {

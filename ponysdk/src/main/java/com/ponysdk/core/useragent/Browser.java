@@ -81,7 +81,7 @@ public enum Browser {
     IE5(Manufacturer.MICROSOFT, Browser.IE, 50, "Internet Explorer 5", new String[] { "MSIE 5" }, BrowserType.WEB_BROWSER,
             RenderingEngine.TRIDENT, null), // before MSIE
 
-    EDGE(Manufacturer.MICROSOFT, null, 1, "Edge", new String[] { "Edge" }, BrowserType.WEB_BROWSER, RenderingEngine.EDGE_HTML, null),
+    EDGE(Manufacturer.MICROSOFT, null, 2, "Edge", new String[] { "Edge" }, BrowserType.WEB_BROWSER, RenderingEngine.EDGE_HTML, null),
 
     /**
      * Google Chrome browser
@@ -240,7 +240,8 @@ public enum Browser {
                 final String fullVersionString = matcher.group(1);
                 final String majorVersion = matcher.group(2);
                 String minorVersion = "0";
-                if (matcher.groupCount() > 2) minorVersion = matcher.group(3); // usually but not always there is a minor version
+                // usually but not always there is a minor version
+                if (matcher.groupCount() > 2 && matcher.group(3) != null) minorVersion = matcher.group(3);
                 return new Version(fullVersionString, majorVersion, minorVersion);
             }
         }

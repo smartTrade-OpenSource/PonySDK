@@ -34,7 +34,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelWriterTest extends PSuite {
 
@@ -92,6 +95,58 @@ public class ModelWriterTest extends PSuite {
     public void testEndObject() {
         modelWriter.endObject();
         Mockito.verify(websocketEncoder).endObject();
+    }
+
+    private static UpdateTarget target(final int id) {
+        final UpdateTarget target = Mockito.mock(UpdateTarget.class);
+        Mockito.when(target.getID()).thenReturn(id);
+        Mockito.when(target.isUpdatable()).thenReturn(true);
+        Mockito.when(target.beginCoalescedUpdate(ArgumentMatchers.any())).thenReturn(true);
+        return target;
+    }
+
+    @Test
+    public void onlyCoalescibleKeyedUpdatesAreDeferred() {
+        final UpdateTarget target = target(5);
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.TEXT, "off"), "coalescing is off");
+
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.isCoalescing());
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.TYPE_UPDATE, 5), "not a property");
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.PUT_STYLE_KEY, null, ServerToClientModel.STYLE_VALUE, "red"));
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.ADD_STYLE_NAME, null));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.TEXT, "a"));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red"));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.ADD_STYLE_NAME, "k"));
+        assertEquals(3, modelWriter.pendingUpdateCount());
+
+        modelWriter.setCoalescing(false); // drains
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.TEXT, "a");
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.ADD_STYLE_NAME, "k");
+    }
+
+    @Test
+    public void updatesDrainedOutsideTheContextAreDropped() throws Exception {
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.deferUpdate(target(5), ServerToClientModel.TEXT, "a"));
+
+        final Thread thread = Thread.ofVirtual().start(modelWriter::drainPendingUpdates);
+        thread.join();
+
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        Mockito.verify(websocketEncoder, Mockito.never()).encode(ServerToClientModel.TEXT, "a");
+    }
+
+    @Test
+    public void aValueOfTheWrongTypeIsNamed() {
+        assertTrue(ModelWriter.accepts(ServerToClientModel.TEXT, "a"));
+        assertTrue(ModelWriter.accepts(null, 1));
+        assertEquals("TEXT takes STRING, given Integer 5",
+            assertThrows(AssertionError.class, () -> ModelWriter.accepts(ServerToClientModel.TEXT, 5)).getMessage());
+        assertEquals("TYPE_UPDATE takes UINT31, given null",
+            assertThrows(AssertionError.class, () -> ModelWriter.accepts(ServerToClientModel.TYPE_UPDATE, null)).getMessage());
     }
 
 }

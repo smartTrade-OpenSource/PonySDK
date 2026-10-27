@@ -298,6 +298,16 @@ public class WebComponentGeneratorTest extends PSuite {
     }
 
     @Test
+    public void anEscapedQuoteInALiteralIsUnescaped() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"mode","type":{"text":"'it\\\\'s' | 'b'"}}]}]}]}""";
+        final String source = String.join("\n", sources(manifest).values());
+        assertTrue(source.contains("IT_S(\"it's\")"), source);
+    }
+
+    @Test
     public void namesAndConstants() {
         assertEquals("countChanged", WebComponentGenerator.camel("count-changed"));
         assertEquals("needleColor", WebComponentGenerator.camel("--needle-color"));
@@ -307,6 +317,83 @@ public class WebComponentGeneratorTest extends PSuite {
         assertEquals("TOP_START", WebComponentGenerator.constant("topStart"));
         assertEquals("_2X", WebComponentGenerator.constant("2x"));
         assertEquals("EMPTY", WebComponentGenerator.constant(""));
+    }
+
+    @Test
+    public void moreNamesAndConstants() {
+        assertEquals("_", WebComponentGenerator.camel("--"));
+        assertEquals("A", WebComponentGenerator.constant("--a--"));
+        assertEquals("ABC", WebComponentGenerator.constant("ABC"));
+        assertEquals("A_B", WebComponentGenerator.constant("aB"));
+    }
+
+    @Test
+    public void typesOfTheManifest() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"Plain"},
+              {"kind":"class","name":"NoTag","customElement":true},
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a","deprecated":"use x-b",
+               "members":[
+                 {"kind":"field","name":"nothing","type":{"text":"null | undefined"}},
+                 {"kind":"field","name":"untyped"},
+                 {"kind":"field","name":"flag","type":{"text":"boolean | undefined"},"deprecated":true},
+                 {"kind":"field","name":"ratio","type":{"text":"number | null"}},
+                 {"kind":"field","name":"mode","type":{"text":"| 'a' | \\"b|c\\" | null"}},
+                 {"kind":"field","name":"items","type":{"text":"Array<'x' | 'y'> | {k: (1 | 2)[]}"}},
+                 {"kind":"field","name":"quoted","type":{"text":"'it\\\\'s' | 'q'"}},
+                 {"kind":"method","name":"compute","return":{"type":{"text":"number"}},
+                  "parameters":[{"name":"values","rest":true}]},
+                 {"kind":"method","name":"reset","return":{"type":{"text":"Promise<void>"}}},
+                 {"kind":"method","name":"clear","return":{"type":{"text":"void"}}},
+                 {"kind":"method","name":"pick","parameters":[{"name":"mode","type":{"text":"'a' | \\"b|c\\""}}]}
+               ],
+               "attributes":[{"name":"mode","type":{"text":"'a' | \\"b|c\\""}}],
+               "events":[{"description":"no name"}]}]}]}""";
+
+        final String source = WebComponentGenerator.sources(Json.createReader(new StringReader(manifest)).readObject(), "", "test")
+            .get("PA");
+
+        assertFalse(source.contains("package "), "the default package");
+        assertFalse(source.contains("Consumer"), "no named event");
+        assertTrue(source.contains("@Deprecated\npublic class PA"), source);
+        assertTrue(source.contains("public void setNothingJson(final String value)"), source);
+        assertTrue(source.contains("As JSON text, of type {@code null | undefined}."), source);
+        assertTrue(source.contains("public void setUntypedJson(final String value)"), source);
+        assertTrue(source.contains("@Deprecated\n    public void setFlag(final Boolean value)"), source);
+        assertTrue(source.contains("property(\"flag\").set(value.booleanValue());"), source);
+        assertTrue(source.contains("property(\"ratio\").set(jsonOf(value.doubleValue()));"), source);
+        assertTrue(source.contains("public void setMode(final Mode value)"), source);
+        assertTrue(source.contains("B_C(\"b|c\")"), source);
+        assertTrue(source.contains("public void setItemsJson(final String value)"), source);
+        assertTrue(source.contains("public void setQuoted(final Quoted value)"), source);
+        assertTrue(source.contains("public void compute(final JsonValue values)"), source);
+        assertTrue(source.contains("public void compute()"), "the rest parameter can be left out");
+        assertTrue(source.contains("Its result, of type {@code number}, does not come back."), source);
+        assertFalse(source.contains("Promise"), "a promise of nothing returns nothing");
+        assertTrue(source.contains("public void setModeAttribute(final Mode value)"), "the enum is shared");
+        assertTrue(source.contains("call(\"pick\", mode == null ? null : mode.literal);"), source);
+        assertEquals(1, source.split("public enum Mode ").length - 1);
+    }
+
+    @Test
+    public void oneEnumNameForTwoTypesFails() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"mode","type":{"text":"'a' | 'b'"}}],
+               "attributes":[{"name":"mode","type":{"text":"'a' | 'c'"}}]}]}]}""";
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> sources(manifest));
+        assertEquals("<x-a>: two types named Mode: [a, b], [a, c]", e.getMessage());
+    }
+
+    @Test
+    public void oneClassNameForTwoTagsFails() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[{"kind":"class","name":"A","customElement":true,"tagName":"x-a"}]},
+                        {"path":"b.js","declarations":[{"kind":"class","name":"A","customElement":true,"tagName":"x-b"}]}]}""";
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> sources(manifest));
+        assertEquals("Class A is declared twice: A in a.js, A in b.js", e.getMessage());
     }
 
     // ---- Helpers ----

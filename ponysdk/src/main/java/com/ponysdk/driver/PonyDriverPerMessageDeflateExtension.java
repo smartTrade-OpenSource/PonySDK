@@ -59,7 +59,8 @@ public class PonyDriverPerMessageDeflateExtension extends PerMessageDeflateExten
         // we have a 7 bit length
         else length += 1;
 
-        if (frame.isMask()) length++;
+        // the masking key is 4 bytes
+        if (frame.isMask()) length += 4;
 
         return length;
     }

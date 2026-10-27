@@ -58,6 +58,19 @@ public class DateConverterTest {
         assertNull(DateConverter.encode(List.of()));
     }
 
+    @Test
+    public void aMultipleOfTheArraySizeFillsEveryArray() {
+        final List<Date> dates = new ArrayList<>();
+        for (int i = 0; i < 510; i++) {
+            dates.add(new Date(i));
+        }
+        final Long[][] encoded = DateConverter.encode(dates);
+        assertEquals(2, encoded.length);
+        assertEquals(255, encoded[0].length);
+        assertEquals(255, encoded[1].length);
+        assertEquals(509L, encoded[1][254]);
+    }
+
     /**
      * Test method for {@link com.ponysdk.core.model.DateConverter#encode(java.util.Date)}.
      */

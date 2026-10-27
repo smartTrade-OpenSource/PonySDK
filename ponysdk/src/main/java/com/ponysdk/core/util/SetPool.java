@@ -661,7 +661,7 @@ public class SetPool<E> {
         @Override
         protected boolean containsAll(final ImmutableSet originalSet, final Set<? extends E> delta, final Collection<?> c) {
             for (final Object o : c) {
-                if (!delta.contains(o) || !originalSet.contains(o)) {
+                if (!delta.contains(o) && !originalSet.contains(o)) {
                     return false;
                 }
             }
@@ -696,7 +696,7 @@ public class SetPool<E> {
         @Override
         protected boolean containsAll(final ImmutableSet originalSet, final Set<?> delta, final Collection<?> c) {
             for (final Object o : c) {
-                if (!delta.contains(o) && !originalSet.contains(o)) {
+                if (!delta.contains(o) || !originalSet.contains(o)) {
                     return false;
                 }
             }

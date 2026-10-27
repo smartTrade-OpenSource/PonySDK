@@ -24,6 +24,8 @@
 package com.ponysdk.impl.java.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +65,23 @@ public class JavaApplicationManagerTest extends PSuite {
         applicationManager.startApplication(UIContext.get());
 
         assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass());
+    }
+
+    public static final class NoDefaultConstructorEntryPoint implements EntryPoint {
+
+        public NoDefaultConstructorEntryPoint(final String unused) {
+        }
+
+        @Override
+        public void start(final UIContext uiContext) {
+        }
+    }
+
+    @Test
+    public void anEntryPointThatCannotBeInstantiatedIsReported() {
+        configuration.setEntryPointClass(NoDefaultConstructorEntryPoint.class);
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, applicationManager::initializeEntryPoint);
+        assertInstanceOf(NoSuchMethodException.class, e.getCause());
     }
 
     /**

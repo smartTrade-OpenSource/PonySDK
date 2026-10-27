@@ -149,6 +149,12 @@ class PonySearchContext implements SearchContext {
         final List<PonyWebElement> elements = consumer.list;
         consumer.list = null;
         elements.sort(elementsComparator);
+        // A descendant selector reaches an element once per matching ancestor: keep it once
+        int size = 0;
+        for (final PonyWebElement e : elements) {
+            if (size == 0 || elements.get(size - 1) != e) elements.set(size++, e);
+        }
+        elements.subList(size, elements.size()).clear();
         return elements;
     }
 
@@ -255,12 +261,20 @@ class PonySearchContext implements SearchContext {
     }
 
     private boolean findElementByCssSelector(final String using, final int usingIndex, final Predicate<PonyWebElement> consumer) {
-        return switch (using.charAt(usingIndex)) {
-            case ' ' -> findElementsByCssSelector(using, usingIndex + 1, true, consumer);
-            case '>' -> findElementsByCssSelector(using, usingIndex + 1, false, consumer);
-            default -> throw new IllegalArgumentException(
-                    "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
-        };
+        // A combinator: ' ' (descendant) or '>' (child), the latter possibly surrounded by spaces
+        int i = skipSpaces(using, usingIndex);
+        final boolean child = i < using.length() && using.charAt(i) == '>';
+        if (child) i = skipSpaces(using, i + 1);
+        if (!child && i == usingIndex) throw new IllegalArgumentException(
+                "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
+        if (i == using.length()) throw new IllegalArgumentException(
+                "Invalid css selector '" + using + "' at " + i + ", a widget type or class name is expected");
+        return findElementsByCssSelector(using, i, !child, consumer);
+    }
+
+    private static int skipSpaces(final String str, int index) {
+        while (index < str.length() && str.charAt(index) == ' ') index++;
+        return index;
     }
 
     private static int wordEnd(final String str, final int wordStart) {

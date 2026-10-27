@@ -175,6 +175,36 @@ public class OffHeapJsonStoreTest {
     }
 
     @Test
+    public void reclaimsOverwrittenBytesInPlaceBeforeGrowing() {
+        final OffHeapJsonStore store = new OffHeapJsonStore(256);
+        store.put("k", "a".repeat(100));
+        store.put("k", "b".repeat(100));
+        store.put("other", "o");
+        store.put("k", "c".repeat(100)); // 201 + 100 > 256, 100 wasted bytes > 256 / 4: compacted, not grown
+
+        assertEquals(256, store.offHeapBytes());
+        assertEquals("c".repeat(100), store.readValue("k"));
+        assertEquals("o", store.readValue("other"));
+    }
+
+    @Test
+    public void refusesToGrowBeyondTheCap() {
+        final OffHeapJsonStore store = new OffHeapJsonStore(64);
+        final String tooLarge = "x".repeat((16 << 20) + 1);
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> store.put("k", tooLarge));
+        assertTrue(e.getMessage().contains("cannot grow beyond"), e.getMessage());
+        assertFalse(store.containsKey("k"));
+    }
+
+    @Test
+    public void valuesOfAnotherLengthAreNeverTheSame() {
+        final OffHeapJsonStore store = new OffHeapJsonStore();
+        store.put("k", "abc");
+        assertFalse(store.hasSameValue("k", "abcd"));
+        assertTrue(store.hasSameValue("k", "abc"));
+    }
+
+    @Test
     public void overwritingLargeValueDuringGrowDoesNotOverflow() {
         // Regression: overwriting a large value (larger than the grow cushion) with one big enough
         // to force a grow used to under-allocate the new buffer. The stale entry was still copied by

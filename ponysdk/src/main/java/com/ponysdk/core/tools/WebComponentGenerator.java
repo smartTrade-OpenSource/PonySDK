@@ -388,7 +388,7 @@ public final class WebComponentGenerator {
             for (final String part : parts) {
                 if (part.length() >= 2 && (part.charAt(0) == '\'' || part.charAt(0) == '"')
                         && part.charAt(part.length() - 1) == part.charAt(0)) {
-                    literals.add(part.substring(1, part.length() - 1));
+                    literals.add(part.substring(1, part.length() - 1).replaceAll("\\\\(.)", "$1"));
                 }
             }
             if (literals.size() == parts.size()) return new Type(Kind.ENUM, nullable, literals, text);
