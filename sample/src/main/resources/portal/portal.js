@@ -2,8 +2,9 @@
 // talks to the embedded applications through attributes and events (docs/decisions/0008-embedded-application.md).
 (function () {
     'use strict';
-    // The showcase, on the same host as this page: same site, so the session cookie goes with each request
-    var app = new URLSearchParams(location.search).get('app') || location.protocol + '//' + location.hostname + ':8081/sample/';
+    // The showcase, on the same host as this page by default (app-url.js): same site, so the session cookie goes with
+    // each request
+    var app = window.portalApp;
     import(app + 'ponyterminal/terminal.js');
 
     // Opened on another host name than the application's (the gallery's U6): another site, no cookie crosses

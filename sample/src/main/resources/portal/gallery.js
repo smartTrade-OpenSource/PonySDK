@@ -1,9 +1,8 @@
 // The gallery's links (index.html and the pages of each way to integrate PonySDK): no PonySDK in it. The application
-// is the showcase, on port 8081 of this host, or the query's app; another site is this host's other name.
+// is window.portalApp (app-url.js); another site is this host's other name.
 (function () {
     'use strict';
-    var query = new URLSearchParams(location.search);
-    var app = query.get('app') || location.protocol + '//' + location.hostname + ':8081/sample/';
+    var app = window.portalApp;
     // 127.0.0.1 and localhost, or [::1], are different sites: the session cookie does not go from one to the other
     var otherHost = location.hostname === '127.0.0.1' ? 'localhost' : '127.0.0.1';
     var otherSite = location.protocol + '//' + otherHost + ':' + location.port + '/portal.html?app=' + encodeURIComponent(app);

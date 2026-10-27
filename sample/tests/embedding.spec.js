@@ -449,3 +449,24 @@ test('the Embedding page: an application embeds another and drives it from Java'
   await expect(page.locator('.pony-embedding-trade').first()).toContainText('USDJPY');
   expect(errors).toEqual([]);
 });
+
+test("the portal's pages load an application from this machine only, whatever the query says", async ({ page }) => {
+  const elsewhere = [];
+  await page.route('**/*', route => {
+    const host = new URL(route.request().url()).hostname;
+    if (host === 'attacker.example') {
+      elsewhere.push(route.request().url());
+      return route.abort();
+    }
+    return route.continue();
+  });
+  const query = '?app=' + encodeURIComponent('https://attacker.example/');
+  const index = new URL(PORTAL_URL);
+  for (const path of ['portal.html', 'index.html']) {
+    index.pathname = '/' + path;
+    await page.goto(index.href + query);
+    await page.waitForLoadState('load');
+  }
+  await page.waitForTimeout(500);
+  expect(elsewhere).toEqual([]);
+});
