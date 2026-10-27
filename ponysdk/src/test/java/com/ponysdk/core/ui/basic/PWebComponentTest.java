@@ -227,6 +227,84 @@ public class PWebComponentTest extends PSuite {
         assertEquals(1, patch.getJsonObject("a").getInt("x"));
     }
 
+    @Test
+    public void malformedObjectsProduceNoPatch() {
+        assertNull(PWebComponent.computeJsonPatch("   ", "{\"a\":1}"));
+        assertNull(PWebComponent.computeJsonPatch("{ broken", "{\"a\":1}"));
+        assertNull(PWebComponent.computeJsonPatch(null, "{\"a\":1}"));
+    }
+
+    // ---- Typed setters, removal, slots, JSON helpers ----
+
+    @Test
+    public void typedSettersStoreTheTextValue() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final PropertyHandle h = c.property("v");
+        assertEquals("v", h.getName());
+        h.set(1.5);
+        assertEquals("1.5", h.get());
+        h.set(true);
+        assertEquals("true", h.get());
+    }
+
+    @Test
+    public void removingAStatelessPropertyHoldsNothing() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final PropertyHandle h = c.property("tick").stateless();
+        h.set("1");
+        h.remove();
+        assertNull(h.get());
+    }
+
+    @Test
+    public void slotRejectsAWidgetOfAnotherWindow() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final PWebComponent.SlotPanel slot = c.slot("content");
+        assertEquals("content", slot.getSlotName());
+        final PLabel other = Element.newPLabel();
+        final PWindow window = Element.newPWindow(null, null);
+        other.attach(window, null);
+        assertThrows(IllegalAccessError.class, () -> slot.add(other));
+    }
+
+    @Test
+    public void slotAttachIsDoneOnce() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final PWebComponent.SlotPanel slot = c.slot("content");
+        final PLabel child = Element.newPLabel();
+        slot.add(child);
+        PWindow.getMain().add(c);
+        assertSame(PWindow.getMain(), child.getWindow());
+        assertFalse(slot.attach(PWindow.getMain(), null));
+    }
+
+    @Test
+    public void jsonHelpersOfGeneratedClasses() {
+        assertEquals("\"a\\\"b\"", PWebComponent.jsonOf("a\"b"));
+        assertEquals("42", PWebComponent.jsonOf(42.0));
+        assertEquals("1.5", PWebComponent.jsonOf(1.5));
+        assertEquals("1.0E16", PWebComponent.jsonOf(1e16));
+        assertEquals("x", PWebComponent.stringOf("\"x\""));
+        assertNull(PWebComponent.stringOf("1"));
+        assertNull(PWebComponent.stringOf("not json"));
+        assertEquals(2.5, PWebComponent.numberOf("2.5"));
+        assertNull(PWebComponent.numberOf("\"x\""));
+        assertEquals(Boolean.TRUE, PWebComponent.booleanOf("true"));
+        assertEquals(Boolean.FALSE, PWebComponent.booleanOf("false"));
+        assertNull(PWebComponent.booleanOf("1"));
+        assertNull(PWebComponent.booleanOf(null));
+    }
+
+    @Test
+    public void nonCustomEventDataReachesTheTerminalHandler() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final List<JsonObject> received = new ArrayList<>();
+        c.setTerminalHandler(e -> received.add(e.getData()));
+        final JsonObject data = Json.createObjectBuilder().add("k", 1).build();
+        c.onClientData(Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), data).build());
+        assertEquals(List.of(data), received);
+    }
+
     private static JsonObject patch(final String oldJson, final String newJson) {
         final String result = PWebComponent.computeJsonPatch(oldJson, newJson);
         try (final var reader = Json.createReader(new StringReader(result))) {

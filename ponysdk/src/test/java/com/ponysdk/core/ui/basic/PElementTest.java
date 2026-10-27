@@ -23,8 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PSuite;
+import com.ponysdk.testutil.CapturingModelWriter;
+
+import java.util.List;
 
 import org.jsoup.Jsoup;
 
@@ -80,6 +84,42 @@ public class PElementTest extends PSuite {
         PWindow.getMain().add(w);
         Document document = Jsoup.parse(w.dumpDOM());
         assertEquals("test", document.getElementsByClass("t").get(0).text());
+    }
+
+    @Test
+    public void tagTravelsInTheCreateAndContentChangesAreSentOnce() {
+        final CapturingModelWriter writer = CapturingModelWriter.install();
+        try {
+            final PElement w = Element.newPElement("section");
+            w.setInnerText("before");
+            PWindow.getMain().add(w);
+            assertEquals(List.of("section"), writer.valuesOf(ServerToClientModel.TAG));
+            assertEquals(List.of("before"), writer.valuesOf(ServerToClientModel.TEXT));
+
+            writer.clear();
+            w.setInnerText("before");
+            w.setInnerHTML("<b>x</b>");
+            w.setInnerHTML("<b>x</b>");
+            w.setInnerText("after");
+            assertEquals(List.of("<b>x</b>"), writer.valuesOf(ServerToClientModel.HTML));
+            assertEquals(List.of("after"), writer.valuesOf(ServerToClientModel.TEXT));
+            w.removeFromParent();
+        } finally {
+            writer.uninstall();
+        }
+    }
+
+    @Test
+    public void dumpDomRendersChildrenHtmlAndVisibility() {
+        final PElement parent = Element.newDiv();
+        parent.addStyleName("p");
+        final PElement child = Element.newSpan();
+        child.setInnerHTML("<i>c</i>");
+        assertEquals("<span pid=\"" + child.getID() + "\" class=\"\"><i>c</i></span>", child.dumpDOM());
+
+        parent.add(child);
+        parent.setVisible(false);
+        assertEquals("<div pid=\"" + parent.getID() + "\" hidden class=\"p\">" + child.dumpDOM() + "</div>", parent.dumpDOM());
     }
 
 }

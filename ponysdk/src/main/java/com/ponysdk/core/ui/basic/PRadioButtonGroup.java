@@ -66,9 +66,9 @@ public class PRadioButtonGroup {
         if (this.buttons == null) this.buttons = new ArrayList<>();
         radioButton.setName(name);
         radioButton.addValueChangeHandler(event -> {
-            for (final PRadioButton button : buttons) {
-                if (button != radioButton) {
-                    button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED, false);
+            if (event.getData()) {
+                for (final PRadioButton button : buttons) {
+                    if (button != radioButton) button.setState(PCheckBoxState.UNCHECKED, false);
                 }
             }
             if (handlers != null) {
@@ -87,6 +87,7 @@ public class PRadioButtonGroup {
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
+        if (buttons == null) return;
         for (final PRadioButton button : buttons) {
             button.setName(name);
         }

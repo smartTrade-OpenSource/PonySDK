@@ -61,4 +61,22 @@ public class PHistoryTest extends PSuite {
         assertEquals("token3", UIContext.get().getHistory().getToken());
     }
 
+    @Test
+    public void aRemovedHandlerIsNoLongerCalledAndFiringWithoutHandlersOnlyStoresTheToken() {
+        final PHistory history = new PHistory();
+        history.removeValueChangeHandler(e -> {
+        });
+        history.fireHistoryChanged("alone");
+        assertEquals("alone", history.getToken());
+
+        final AtomicInteger calls = new AtomicInteger();
+        final PValueChangeHandler<String> handler = e -> calls.incrementAndGet();
+        history.addValueChangeHandler(handler);
+        history.fireHistoryChanged("t1");
+        history.removeValueChangeHandler(handler);
+        history.fireHistoryChanged("t2");
+        assertEquals(1, calls.get());
+        assertEquals("t2", history.getToken());
+    }
+
 }

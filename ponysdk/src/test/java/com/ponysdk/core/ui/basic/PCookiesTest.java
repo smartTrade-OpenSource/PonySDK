@@ -24,10 +24,15 @@
 package com.ponysdk.core.ui.basic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,5 +127,83 @@ public class PCookiesTest extends PSuite {
         initialize(cookies, "visits", "3");
         assertEquals(List.of("visits"), List.copyOf(cookies.getNames()));
         assertThrows(UnsupportedOperationException.class, () -> cookies.getNames().clear());
+    }
+
+    @Test
+    public void theShortOverloadsWriteOnlyTheGivenAttributes() {
+        final PCookies cookies = new PCookies(request -> {
+        });
+        cookies.setCookie("a", "1");
+        assertEquals(List.of("a"), writer.valuesOf(ServerToClientModel.ADD_COOKIE));
+        assertEquals(List.of("1"), writer.valuesOf(ServerToClientModel.VALUE));
+        assertEquals(List.of(0), writer.valuesOf(ServerToClientModel.TYPE_UPDATE), "cookies use the reserved object 0");
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_PATH));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_EXPIRE));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_DOMAIN));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_SECURE));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_SAMESITE));
+
+        writer.clear();
+        cookies.setCookie("b", "2", "/b");
+        assertEquals(List.of("/b"), writer.valuesOf(ServerToClientModel.COOKIE_PATH));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_DOMAIN));
+
+        writer.clear();
+        cookies.setCookie("c", "3", new Date(42L));
+        assertEquals(List.of(42L), writer.valuesOf(ServerToClientModel.COOKIE_EXPIRE));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_PATH));
+
+        writer.clear();
+        cookies.setCookie("d", "4", new Date(43L), "/d");
+        assertEquals(List.of(43L), writer.valuesOf(ServerToClientModel.COOKIE_EXPIRE));
+        assertEquals(List.of("/d"), writer.valuesOf(ServerToClientModel.COOKIE_PATH));
+
+        writer.clear();
+        cookies.setCookie("e", "5", (Date) null);
+        cookies.setCookie("f", "6", PCookies.CookieOptions.domain("example.com"));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_EXPIRE));
+        assertEquals(List.of("example.com"), writer.valuesOf(ServerToClientModel.COOKIE_DOMAIN));
+
+        assertEquals("4", cookies.getCookie("d"));
+        assertEquals(Set.of("a", "b", "c", "d", "e", "f"), Set.copyOf(cookies.getNames()));
+    }
+
+    @Test
+    public void removeWritesThePathOnlyWhenGiven() {
+        final PCookies cookies = new PCookies(request -> {
+        });
+        cookies.setCookie("a", "1");
+        cookies.setCookie("b", "2");
+        writer.clear();
+
+        assertEquals("1", cookies.removeCookie("a"));
+        assertEquals(List.of("a"), writer.valuesOf(ServerToClientModel.REMOVE_COOKIE));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_PATH));
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_DOMAIN));
+        assertNull(cookies.getCookie("a"));
+
+        assertEquals("2", cookies.removeCookie("b", "/p"));
+        assertEquals(List.of("/p"), writer.valuesOf(ServerToClientModel.COOKIE_PATH));
+        assertNull(cookies.removeCookie("unknown"));
+    }
+
+    @Test
+    public void theClientCookiesInitializeOnceAndUpdateTheCache() {
+        final PCookies cookies = new PCookies(request -> {
+        });
+        assertFalse(cookies.isInitialized());
+        initialize(cookies, "k", "v1");
+        assertTrue(cookies.isInitialized());
+        assertEquals("v1", cookies.getCookie("k"));
+        initialize(cookies, "k", "v2");
+        assertEquals("v2", cookies.getCookie("k"));
+    }
+
+    @Test
+    public void aCookiesObjectNeedsItsRequestSink() {
+        assertThrows(NullPointerException.class, () -> new PCookies(null));
+        final PCookies cookies = new PCookies(request -> {
+        });
+        assertThrows(NullPointerException.class, () -> cookies.addInitializedListener(null));
     }
 }

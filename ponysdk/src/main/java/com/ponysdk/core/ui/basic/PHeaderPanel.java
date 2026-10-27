@@ -62,6 +62,7 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         content = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
     }
 
@@ -73,6 +74,7 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         footer = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
@@ -84,6 +86,7 @@ public class PHeaderPanel extends PPanel {
         child.removeFromParent();
         adopt(child);
         header = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
     }
 

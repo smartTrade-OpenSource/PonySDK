@@ -54,7 +54,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private final List<ListItem> items = new ArrayList<>();
 
-    private final Set<Integer> selectedIndexes = new TreeSet<>();
+    private final TreeSet<Integer> selectedIndexes = new TreeSet<>();
     private final boolean containsEmptyItem;
     protected int selectedIndex = -1;
     private boolean isMultipleSelect;
@@ -202,7 +202,15 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private void sendRemoveItemInstruction(final int index) {
         saveUpdate(writer -> writer.write(ServerToClientModel.ITEM_REMOVED, index));
-        if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
+        // The terminal removes the option and its selection: the selection follows the items, nothing else gets selected
+        final Set<Integer> after = selectedIndexes.tailSet(index, false);
+        if (!after.isEmpty()) {
+            final List<Integer> shifted = new ArrayList<>(after);
+            after.clear();
+            shifted.forEach(i -> selectedIndexes.add(i - 1));
+        }
+        if (selectedIndex == index) selectedIndex = selectedIndexes.isEmpty() ? -1 : selectedIndexes.first();
+        else if (selectedIndex > index) selectedIndex--;
     }
 
     public Object getValue(final int index) {
@@ -384,7 +392,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         String DOM = "<select pid=\"" + ID + "\">";
 
         for (int i = 0; i < items.size(); i++) {
-            ListItem item = items.get(0);
+            ListItem item = items.get(i);
             DOM += "<option value=\"" + i + "\" " + (selectedIndex == i ? "selected" : "") + ">" + item.label + "</option>";
         }
 

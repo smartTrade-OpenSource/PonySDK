@@ -260,7 +260,7 @@ public enum ServerToClientModel {
     FUNCTION_ARGS(ValueTypeModel.ARRAY),
 
     // Old, useless or not used
-    POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
+    POPUP_GLASS_STYLE_NAME(ValueTypeModel.STRING),
     DISCLOSURE_PANEL_OPEN_IMG(ValueTypeModel.INTEGER),
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
     /** Written by 2.x servers only: kept so that the 227 keys of 2.x keep their numbers, which V3's extend. */

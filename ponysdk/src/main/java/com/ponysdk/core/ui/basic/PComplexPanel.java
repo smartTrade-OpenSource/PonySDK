@@ -170,8 +170,10 @@ public abstract class PComplexPanel extends PPanel {
 
         DOM += ">";
 
-        for (PWidget child : children) {
-            DOM += child.dumpDOM();
+        if (children != null) {
+            for (PWidget child : children) {
+                DOM += child.dumpDOM();
+            }
         }
         DOM += "</div>";
         return DOM;

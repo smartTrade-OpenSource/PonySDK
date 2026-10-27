@@ -139,7 +139,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
         @Override
         public PWidget next() {
-            if (index >= size) {
+            if (index >= size - 1) {
                 throw new NoSuchElementException();
             }
             return array[++index];

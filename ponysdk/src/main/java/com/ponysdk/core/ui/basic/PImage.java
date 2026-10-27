@@ -34,11 +34,10 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -149,13 +148,7 @@ public class PImage extends PWidget {
             String imageToBase64 = null;
 
             try (InputStream in = url.openStream()) {
-                final byte[] buffer = new byte[1024];
-                try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    while (in.read(buffer) != -1) {
-                        out.write(buffer);
-                    }
-                    imageToBase64 = new String(out.toByteArray(), StandardCharsets.UTF_8);
-                }
+                imageToBase64 = Base64.getEncoder().encodeToString(in.readAllBytes());
             } catch (final IOException e) {
                 log.error("Cannot load resource from " + this, e);
             }

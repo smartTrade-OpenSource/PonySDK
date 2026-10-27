@@ -126,12 +126,14 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     public void removeRow(final int row) {
-        final PWidget[] cells = row < rows.size() ? rows.get(row) : null;
-        if (cells == null) return; // a row without widget is not known here: nothing shifts (unchanged behaviour)
+        if (row >= rows.size()) return; // a row past the last widget is not known here: nothing shifts (unchanged behaviour)
         getRowFormatter().removeRowStyle(row);
 
-        for (final PWidget widget : cells) {
-            if (widget != null) remove(widget, false);
+        final PWidget[] cells = rows.get(row);
+        if (cells != null) {
+            for (final PWidget widget : cells) {
+                if (widget != null) remove(widget, false);
+            }
         }
         if (row < rows.size()) {
             rows.remove(row);

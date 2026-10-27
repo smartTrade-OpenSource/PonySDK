@@ -180,6 +180,40 @@ public class PHostTest extends PSuite {
     }
 
     @Test
+    public void aMalformedHandshakeGivesAHostWithoutAttributes() {
+        handshake("[\"not an object\"]");
+        final PHost host = PHost.get();
+        assertNotNull(host);
+        assertTrue(host.getAttributes().isEmpty());
+        assertEquals("PHost #" + host.getID() + " {}", host.toString());
+    }
+
+    @Test
+    public void aDetailThatIsNotJsonIsGivenAsAString() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        final List<JsonValue> seen = new ArrayList<>();
+        host.addEventListener("refresh", seen::add);
+        fromTerminal(host, Json.createObjectBuilder()
+            .add(ClientToServerModel.WC_EVENT_NAME.toStringValue(), "refresh")
+            .add(ClientToServerModel.WC_EVENT_DETAIL.toStringValue(), "[object Object").build());
+        fromTerminal(host, Json.createObjectBuilder()
+            .add(ClientToServerModel.WC_EVENT_NAME.toStringValue(), "unknown").build());
+        assertEquals(List.of(Json.createValue("[object Object")), seen);
+    }
+
+    @Test
+    public void otherDataReachesTheTerminalHandler() {
+        handshake("{}");
+        final PHost host = PHost.get();
+        final List<JsonObject> seen = new ArrayList<>();
+        host.setTerminalHandler(e -> seen.add(e.getData()));
+        final JsonObject data = Json.createObjectBuilder().add("k", 1).build();
+        fromTerminal(host, Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), data).build());
+        assertEquals(List.of(data), seen);
+    }
+
+    @Test
     public void anAttributeListenerGivenAsAMethodReferenceIsRemovedByItsRegistration() {
         // label::setText is a new object at each evaluation: removal by identity removed nothing
         handshake("{\"instrument\":\"EURUSD\"}");

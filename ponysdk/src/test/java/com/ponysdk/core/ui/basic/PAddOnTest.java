@@ -63,6 +63,10 @@ public class PAddOnTest extends PSuite {
         LabelAddOn(final PLabel label, final JsonObject args) { super(label, args); }
     }
 
+    private static final class PlainLabelAddOn extends PAddOnComposite<PLabel> {
+        PlainLabelAddOn(final PLabel label) { super(label); }
+    }
+
     private CapturingModelWriter writer;
 
     @BeforeEach
@@ -203,5 +207,22 @@ public class PAddOnTest extends PSuite {
         assertEquals(1, writer.count(ServerToClientModel.FACTORY));
         assertEquals(List.of(args.toString()), writer.valuesOf(ServerToClientModel.PADDON_CREATION));
         assertEquals(List.of(label.getID()), writer.valuesOf(ServerToClientModel.WIDGET_ID));
+    }
+    @Test
+    public void compositeWithoutArgsSendsNoCreationArgsAndAttachesOnce() {
+        final PLabel label = Element.newPLabel("plain");
+        PWindow.getMain().add(label);
+        writer.clear();
+
+        final PlainLabelAddOn addOn = new PlainLabelAddOn(label);
+
+        assertEquals(1, writer.count(ServerToClientModel.FACTORY));
+        assertEquals(0, writer.count(ServerToClientModel.PADDON_CREATION));
+        assertEquals(0, writer.count(ServerToClientModel.PADDON_CREATION_ARGS));
+        assertTrue(label.getAddons().contains(addOn));
+        assertFalse(addOn.attach(PWindow.getMain(), null), "already attached to this window");
+
+        final PWindow other = Element.newPWindow("other", null);
+        assertThrows(IllegalAccessError.class, () -> addOn.attach(other, null));
     }
 }

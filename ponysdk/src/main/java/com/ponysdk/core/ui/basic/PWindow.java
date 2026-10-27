@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -299,6 +298,7 @@ public class PWindow extends PObject {
             }
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
+            PWindowManager.unregisterWindow(this);
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
             shown = event.getBoolean(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue());
@@ -442,6 +442,7 @@ public class PWindow extends PObject {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
      */
     public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        // Nothing to register with the terminal: its root panel always sends HANDLER_DOCUMENT_VISIBILITY
         if (visibilityHandlers == null) visibilityHandlers = new ArrayList<>();
         visibilityHandlers.add(visibilityHandler);
     }
@@ -452,10 +453,7 @@ public class PWindow extends PObject {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
      */
     public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
-        if (visibilityHandlers != null) {
-            visibilityHandlers.remove(visibilityHandler);
-            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
-        }
+        if (visibilityHandlers != null) visibilityHandlers.remove(visibilityHandler);
     }
 
     /**

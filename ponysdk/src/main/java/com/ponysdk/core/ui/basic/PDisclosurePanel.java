@@ -146,8 +146,11 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
 
     @Override
     public boolean remove(final PWidget w) {
-        if (w == content) {
-            content.removeFromParent();
+        if (w != null && w == content) {
+            // Logical detach.
+            content.setParent(null);
+            // Physical detach.
+            content.saveRemove(content.getID(), ID);
             content = null;
             return true;
         } else {

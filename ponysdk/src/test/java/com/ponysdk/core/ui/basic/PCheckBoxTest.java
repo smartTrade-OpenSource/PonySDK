@@ -23,18 +23,41 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
+import com.ponysdk.testutil.CapturingModelWriter;
 
+import jakarta.json.Json;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PCheckBoxTest extends PSuite {
+
+    private CapturingModelWriter writer;
+
+    @BeforeEach
+    public void capture() {
+        writer = CapturingModelWriter.install();
+    }
+
+    @AfterEach
+    public void restore() {
+        writer.uninstall();
+        // testAttach counts the widgets of the root panel
+        PWindow.getMain().getPRootPanel().clear();
+    }
 
     @Test
     public void testInit() {
@@ -120,5 +143,90 @@ public class PCheckBoxTest extends PSuite {
 
         checkBox.setState(PCheckBoxState.CHECKED);
         assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" checked class=\"style\">text</input>", checkBox.dumpDOM());
+    }
+    @Test
+    public void stateIsStackedBeforeAttachAndSentOnceAfter() {
+        final PCheckBox checkBox = Element.newPCheckBox("label");
+        checkBox.setState(PCheckBoxState.INDETERMINATE);
+        assertTrue(writer.isEmpty());
+        PWindow.getMain().add(checkBox);
+        assertEquals(List.of(PCheckBoxState.INDETERMINATE.getValue()), writer.valuesOf(ServerToClientModel.VALUE_CHECKBOX));
+        assertTrue(writer.valuesOf(ServerToClientModel.TEXT).contains("label"));
+
+        writer.clear();
+        checkBox.setValue(true);
+        checkBox.setValue(true);
+        checkBox.setValue(null);
+        assertEquals(List.of(PCheckBoxState.CHECKED.getValue(), PCheckBoxState.UNCHECKED.getValue()),
+            writer.valuesOf(ServerToClientModel.VALUE_CHECKBOX));
+        assertTrue(checkBox.toString().endsWith("state=UNCHECKED"));
+    }
+
+    @Test
+    public void inputAttributesAreSentOnChangeOnly() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        PWindow.getMain().add(checkBox);
+        writer.clear();
+
+        checkBox.setInputAttribute(null, "ignored");
+        checkBox.setInputAttribute("aria-label", "agree");
+        checkBox.setInputAttribute("aria-label", "agree");
+        assertEquals(List.of("agree"), writer.valuesAfter(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY, "aria-label"));
+        assertEquals(1, writer.count(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY));
+
+        checkBox.removeInputAttribute("aria-label");
+        checkBox.removeInputAttribute("aria-label");
+        checkBox.removeInputAttribute("unknown");
+        assertEquals(List.of("aria-label"), writer.valuesOf(ServerToClientModel.REMOVE_INPUT_ATTRIBUTE_KEY));
+    }
+
+    @Test
+    public void aTerminalValueChangeNotifiesOnlyOnRealChangeAndWithoutEcho() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        PWindow.getMain().add(checkBox);
+        final List<Boolean> values = new ArrayList<>();
+        final PValueChangeHandler<Boolean> handler = e -> values.add(e.getData());
+        checkBox.addValueChangeHandler(handler);
+        assertEquals(1, checkBox.getValueChangeHandlers().size());
+        writer.clear();
+
+        PEmulator.valueChange(checkBox, true);
+        PEmulator.valueChange(checkBox, true);
+        assertEquals(List.of(true), values);
+        assertEquals(PCheckBoxState.CHECKED, checkBox.getState());
+        assertTrue(writer.isEmpty());
+
+        assertTrue(checkBox.removeValueChangeHandler(handler));
+        assertFalse(checkBox.removeValueChangeHandler(handler));
+        PEmulator.valueChange(checkBox, false);
+        assertFalse(checkBox.getValue());
+        assertEquals(1, values.size());
+    }
+
+    @Test
+    public void aDisabledOrHiddenCheckBoxIgnoresTheTerminal() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        assertTrue(checkBox.getValueChangeHandlers().isEmpty());
+        assertFalse(checkBox.removeValueChangeHandler(e -> {
+        }));
+        checkBox.setEnabled(false);
+        PEmulator.valueChange(checkBox, true);
+        assertFalse(checkBox.getValue());
+        checkBox.setEnabled(true);
+        checkBox.setVisible(false);
+        PEmulator.valueChange(checkBox, true);
+        assertFalse(checkBox.getValue());
+    }
+
+    @Test
+    public void otherTerminalDataReachesTheDomHandlers() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        PWindow.getMain().add(checkBox);
+        final AtomicInteger clicks = new AtomicInteger();
+        checkBox.addClickHandler(e -> clicks.incrementAndGet());
+        PEmulator.click(checkBox);
+        checkBox.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue(), "x").build());
+        assertEquals(1, clicks.get());
+        assertFalse(checkBox.getValue());
     }
 }

@@ -197,7 +197,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     void clear() {
-        children.clear();
+        if (children != null) children.clear();
     }
 
     @Override
@@ -217,7 +217,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     protected String dumpDOM() {
         String DOM = "<div item=\"" + text + "\">";
 
-        Iterator<PTreeItem> iter = children.iterator();
+        final Iterator<PTreeItem> iter = iterator();
         while (iter.hasNext()) {
             DOM += iter.next().dumpDOM();
         }

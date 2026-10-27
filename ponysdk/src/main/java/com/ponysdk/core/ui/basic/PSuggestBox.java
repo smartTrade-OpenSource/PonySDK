@@ -202,7 +202,7 @@ public class PSuggestBox extends PWidget
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handler == null && textBox.removeValueChangeHandler(handler);
+        return textBox.removeValueChangeHandler(handler);
     }
 
     @Override
