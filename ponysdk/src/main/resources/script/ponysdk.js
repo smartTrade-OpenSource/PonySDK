@@ -63,6 +63,10 @@ var PonyWC = (function () {
         }
     }
 
+    // The sheets the application configured (wcSharedSheets), listed by the bootstrap page
+    var configured = document.querySelector('meta[name="pony-wc-shared-sheets"]');
+    if (configured) _sheets.push.apply(_sheets, configured.content.split(' ').filter(Boolean));
+
     return {
         registerSharedSheet: function (href) { _sheets.push(href); },
         initShadow: initShadow,

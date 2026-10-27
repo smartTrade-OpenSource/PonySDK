@@ -14,18 +14,18 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 
 async function open(page, oraclePage) {
     const legacy = await (await page.request.get(BASE_URL + 'ponyterminal/legacy.js')).text();
-    await page.addInitScript(source => {
-        // ponysdk.js sets pony to the terminal (its var keeps this property), then starts it: the legacy layer goes first
+    // ponysdk.js sets pony to the terminal (its var keeps this property), then starts it: the legacy layer goes first.
+    // Its source is part of the init script, which the page's policy allows, where new Function would be eval
+    await page.addInitScript({ content: `
         let terminal;
         Object.defineProperty(window, 'pony', {
             configurable: true,
             get: () => terminal,
             set: value => {
-                if (terminal === undefined) new Function(source)();
+                if (terminal === undefined) (function () {\n${legacy}\n})();
                 terminal = value;
             },
-        });
-    }, legacy);
+        });` });
     await page.goto(BASE_URL + '#oracle-' + oraclePage);
     await expect(page.locator('html')).toHaveAttribute('data-pony-legacy', '');
 }

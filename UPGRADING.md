@@ -31,6 +31,11 @@
 | `PCookies.setCookie(name, value, expires, domain, path, secure, sameSite)` (path and domain in the other order than `setCookie(name, value, expires, path)`) | `setCookie(name, value, CookieOptions.expires(instant).withDomain(domain).withPath(path).secure().sameSite(SameSite.STRICT))` ([ADR-0012](docs/decisions/0012-api-surface.md)) |
 | `new PCookies()` | `UIContext.getCookies()`, which creates it |
 
+Deprecated, for JavaScript source needs `'unsafe-eval'`: `PScript.execute` → `PScript.call(window, functionName,
+args...)`, `PObject.evalTerminalScript` → `callTerminalFunction(functionName, args...)`, `new TextFunction(java, js)` →
+`TextFunction.named(java, functionName)`. The function is one of `window`, defined by the application's scripts. With
+`setScriptEvalEnabled(false)` the deprecated three throw `IllegalStateException` and the policy forbids eval.
+
 The `UIContext` constructors no longer take the upgrade request; `PSuite` builds its context accordingly.
 
 `PSuite` moves from JUnit 4 to JUnit 6 (Jupiter): its setup runs as `@BeforeAll` / `@AfterAll`, and the `ponysdk`
@@ -58,6 +63,18 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
   ([ADR-0004](docs/decisions/0004-terminal-chunks.md)). A content security policy must allow module scripts from
   the application's origin.
 - Its page opens the WebSocket in an inline script; a custom page without it connects as before.
+- Its page is served with a Content-Security-Policy and `X-Content-Type-Options: nosniff`
+  ([ADR-0015](docs/decisions/0015-content-security-policy.md), [security](docs/guide/security.md)). What to check:
+  - scripts from another origin than the page, not in `setJavascript` (a script that loads another): add the origin
+    with `addScriptSources`;
+  - inline scripts added to the page by overriding `addScript`: allow them in an override of
+    `buildContentSecurityPolicy`, or move them to a file;
+  - a site that shows the application in a frame: list its origin in `setWsAllowedOrigins`;
+  - HTML sent to the terminal (`PHTML`, `setInnerHTML`, `setAttribute`) with `onclick=` attributes or `javascript:`
+    URLs: the policy blocks them; listen with handlers instead;
+  - an application with its own policy: `setContentSecurityPolicyEnabled(false)`.
+- The reconnection flag and the web components' shared sheets are `<meta>` elements (`pony-reconnection`,
+  `pony-wc-shared-sheets`) instead of inline scripts.
 - It sends `Cache-Control` and `Last-Modified` and answers conditional requests.
 - `ponyapp.json` is the manifest of an embedded application ([ADR-0008](docs/decisions/0008-embedded-application.md)):
   a resource of the application by that name is no longer served.

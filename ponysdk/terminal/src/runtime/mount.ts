@@ -67,7 +67,8 @@ export class PageMount implements Mount {
     }
 
     get transparentReconnection(): boolean {
-        return (window as PageHooks).ponyReconnectMode === true;
+        return (window as PageHooks).ponyReconnectMode === true
+            || document.querySelector('meta[name="pony-reconnection"]') !== null;
     }
 
     connectionLost(): boolean {

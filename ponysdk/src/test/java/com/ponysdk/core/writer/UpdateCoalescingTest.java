@@ -217,6 +217,7 @@ public class UpdateCoalescingTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void methodCallsAndSideEffectsAreNeverCoalesced() {
         final PButton[] b = new PButton[1];
         ctx.execute(() -> { b[0] = Element.newPButton("ok"); root.add(b[0]); });

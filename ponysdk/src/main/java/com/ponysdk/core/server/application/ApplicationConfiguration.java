@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -98,6 +100,12 @@ public class ApplicationConfiguration {
      */
     private final Set<String> servedResourceExtensions = new HashSet<>(Set.of("html", "htm", "js", "mjs", "css", "map",
         "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "avif", "woff", "woff2", "ttf", "otf"));
+    /** See {@link #setContentSecurityPolicyEnabled(boolean)}. */
+    private boolean contentSecurityPolicyEnabled = true;
+    /** See {@link #setScriptEvalEnabled(boolean)}. */
+    private boolean scriptEvalEnabled = true;
+    /** See {@link #addScriptSources(String...)}. */
+    private final Set<String> scriptSources = new LinkedHashSet<>();
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
     private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
     /**
@@ -404,6 +412,9 @@ public class ApplicationConfiguration {
         public Builder meta(final Set<String> v)                   { config.setMeta(v); return this; }
         public Builder wcSharedSheets(final Set<String> v)         { config.setWcSharedSheets(v); return this; }
         public Builder servedResourceExtensions(final String... v)  { config.addServedResourceExtensions(v); return this; }
+        public Builder contentSecurityPolicyEnabled(final boolean v) { config.setContentSecurityPolicyEnabled(v); return this; }
+        public Builder scriptEvalEnabled(final boolean v)          { config.setScriptEvalEnabled(v); return this; }
+        public Builder scriptSources(final String... v)            { config.addScriptSources(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
@@ -627,6 +638,47 @@ public class ApplicationConfiguration {
         for (final String extension : extensions) {
             servedResourceExtensions.add(extension.toLowerCase(Locale.ROOT).replaceFirst("^\\.", ""));
         }
+    }
+
+    public boolean isContentSecurityPolicyEnabled() {
+        return contentSecurityPolicyEnabled;
+    }
+
+    /**
+     * The bootstrap page is served with a Content-Security-Policy (ADR-0015): scripts from the application's origin,
+     * the origins of {@link #setJavascript(Set)} and {@link #addScriptSources(String...)}, no plugin, no
+     * {@code <base>} elsewhere, frames only by the application and {@link #setWsAllowedOrigins(Set)}. On by default;
+     * off for an application that sends its own policy.
+     */
+    public void setContentSecurityPolicyEnabled(final boolean contentSecurityPolicyEnabled) {
+        this.contentSecurityPolicyEnabled = contentSecurityPolicyEnabled;
+    }
+
+    public boolean isScriptEvalEnabled() {
+        return scriptEvalEnabled;
+    }
+
+    /**
+     * Whether JavaScript source may be sent to the terminal, which evaluates it: {@code PScript.execute},
+     * {@code PObject.evalTerminalScript}, a {@code TextFunction} built from source. Off, the policy forbids
+     * {@code 'unsafe-eval'} and these throw {@link IllegalStateException}: functions are called by name
+     * ({@code PScript.call}, {@code callTerminalFunction}, {@code TextFunction.named}). On by default.
+     */
+    public void setScriptEvalEnabled(final boolean scriptEvalEnabled) {
+        this.scriptEvalEnabled = scriptEvalEnabled;
+    }
+
+    /** The script origins the policy allows besides the application's and those of {@link #getJavascript()}. */
+    public Set<String> getScriptSources() {
+        return Collections.unmodifiableSet(scriptSources);
+    }
+
+    /**
+     * Allows scripts from more origins, e.g. {@code "https://cdn.example.com"} for a script a page loads itself:
+     * any CSP source expression.
+     */
+    public void addScriptSources(final String... sources) {
+        scriptSources.addAll(Arrays.asList(sources));
     }
 
     public int getMaxProtocolVersion() {

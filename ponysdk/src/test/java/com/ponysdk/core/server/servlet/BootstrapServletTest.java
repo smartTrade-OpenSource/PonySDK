@@ -133,8 +133,8 @@ public class BootstrapServletTest {
         assertTrue(html.contains("name=\"robots\" content=\"noindex\""), "custom meta");
         assertTrue(html.contains("<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>"), "style link");
         assertTrue(html.contains("ponyterminal/terminal.js"), "terminal script");
-        assertTrue(html.contains("window.ponyReconnectMode = true"), "reconnect script");
-        assertTrue(html.contains("pony.wc.registerSharedSheet('shared.css')"), "wc shared sheet");
+        assertTrue(html.contains("<meta name=\"pony-reconnection\" content=\"true\">"), "reconnection flag");
+        assertTrue(html.contains("<meta name=\"pony-wc-shared-sheets\" content=\"shared.css\">"), "wc shared sheet");
         assertTrue(html.contains("src=\"script/app.js\""), "app script");
         assertTrue(html.contains("<div id=\"loading\">Loading MyApp"), "loading");
         assertTrue(html.contains("<noscript>"), "noscript");
@@ -152,8 +152,8 @@ public class BootstrapServletTest {
 
         assertTrue(html.contains("<title>Bare</title>"));
         assertTrue(html.contains("ponyterminal/terminal.js"), "terminal script always present");
-        assertFalse(html.contains("window.ponyReconnectMode"), "no reconnect script when disabled");
-        assertFalse(html.contains("registerSharedSheet"), "no shared-sheet registration");
+        assertFalse(html.contains("pony-reconnection"), "no reconnection flag when disabled");
+        assertFalse(html.contains("pony-wc-shared-sheets"), "no shared sheets");
         assertTrue(html.contains("<div id=\"loading\">Loading Bare"));
     }
 
@@ -404,5 +404,111 @@ public class BootstrapServletTest {
         final String path = "/com/ponysdk/core/server/servlet/BootstrapServlet.class";
         assertEquals(-1, servlet.getLastModified(request("", path)));
     }
-}
 
+    // ---- Content Security Policy (ADR-0015) ----
+
+    /** The headers the bootstrap page is served with, by name. */
+    private static Map<String, String> pageHeaders(final ApplicationConfiguration config) throws IOException {
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+        final Map<String, String> headers = new java.util.HashMap<>();
+        Mockito.doAnswer(call -> headers.put(call.getArgument(0), call.getArgument(1))).when(response)
+            .setHeader(Mockito.anyString(), Mockito.anyString());
+        servletWith(config).handleRequest(request("", "/"), response, "/index.html");
+        return headers;
+    }
+
+    private static String sha256(final String script) throws Exception {
+        final byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(script.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return "'sha256-" + java.util.Base64.getEncoder().encodeToString(digest) + "'";
+    }
+
+    private static ApplicationConfiguration configuration() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+        return config;
+    }
+
+    @Test
+    public void theBootstrapPageRunsOneInlineScriptWhoseHashThePolicyAllows() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        config.setReconnectionTimeoutMs(5000);
+        config.setWcSharedSheets(Set.of("css/shared.css"));
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+
+        final java.util.regex.Matcher inline = java.util.regex.Pattern.compile("<script[^>]*>([^<]+)</script>").matcher(html);
+        assertTrue(inline.find(), "the early socket");
+        final String script = inline.group(1);
+        assertFalse(inline.find(), "no other inline script: " + html);
+        assertTrue(html.contains("<meta name=\"pony-reconnection\" content=\"true\">"), "the reconnection flag");
+        assertTrue(html.contains("<meta name=\"pony-wc-shared-sheets\" content=\"css/shared.css\">"), "the shared sheets");
+
+        final String policy = pageHeaders(config).get("Content-Security-Policy");
+        assertNotNull(policy, "the page carries a policy");
+        assertTrue(policy.startsWith("script-src 'self' " + sha256(script)), policy);
+        assertTrue(policy.contains("; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"), policy);
+        assertFalse(policy.contains("unsafe-inline"), policy);
+    }
+
+    @Test
+    public void thePolicyAllowsWhatTheConfigurationLoadsAndTheSitesThatEmbedTheApplication() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        config.setJavascript(new java.util.LinkedHashSet<>(List.of("script/app.js", "https://cdn.example/lib/x.js",
+            "https://static.example:8443/y.js")));
+        config.addScriptSources("https://api.example");
+        config.setWsAllowedOrigins(Set.of("https://portal.example"));
+
+        final String policy = pageHeaders(config).get("Content-Security-Policy");
+
+        assertTrue(policy.contains(" https://cdn.example "), policy);
+        assertTrue(policy.contains(" https://static.example:8443 "), policy);
+        assertTrue(policy.contains(" https://api.example "), policy);
+        assertFalse(policy.contains("script/app.js"), "a path of the application is 'self': " + policy);
+        assertTrue(policy.endsWith("frame-ancestors 'self' https://portal.example"), policy);
+    }
+
+    /** CSP has no syntax for an IPv6 address: Chrome rejects the whole expression and logs an error on every page. */
+    @Test
+    public void anOriginAtAnIpv6AddressIsLeftOut() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        config.setWsAllowedOrigins(Set.of("http://[::1]:8082", "http://localhost:8082"));
+        config.setJavascript(Set.of("http://[::1]:9000/x.js"));
+
+        final String policy = pageHeaders(config).get("Content-Security-Policy");
+
+        assertFalse(policy.contains("[::1]"), policy);
+        assertTrue(policy.endsWith("frame-ancestors 'self' http://localhost:8082"), policy);
+    }
+
+    @Test
+    public void evalIsAllowedUntilTheApplicationTurnsItOff() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        assertTrue(pageHeaders(config).get("Content-Security-Policy").contains(" 'unsafe-eval';"), "on by default");
+
+        config.setScriptEvalEnabled(false);
+        assertFalse(pageHeaders(config).get("Content-Security-Policy").contains("unsafe-eval"));
+    }
+
+    @Test
+    public void anApplicationThatSendsItsOwnPolicyTurnsPonySdksOff() throws Exception {
+        final ApplicationConfiguration config = configuration();
+        config.setContentSecurityPolicyEnabled(false);
+        assertNull(pageHeaders(config).get("Content-Security-Policy"));
+    }
+
+    @Test
+    public void noResponseIsSniffedIntoAnotherType() throws Exception {
+        assertEquals("nosniff", pageHeaders(configuration()).get("X-Content-Type-Options"), "the page");
+        final HttpServletResponse file = served(servletOnTheClasspath(new ApplicationConfiguration()), "/script/ponysdk.js",
+            new ByteArrayOutputStream());
+        Mockito.verify(file).setHeader("X-Content-Type-Options", "nosniff");
+    }
+
+    @Test
+    public void aSharedSheetCannotBreakOutOfItsAttribute() {
+        final ApplicationConfiguration config = configuration();
+        config.setWcSharedSheets(Set.of("a\"><script>x</script>.css"));
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("content=\"a&quot;>&lt;script>x&lt;/script>.css\""), html);
+    }
+}

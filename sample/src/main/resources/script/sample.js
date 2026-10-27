@@ -195,3 +195,31 @@
 
   });
 })();
+
+// Functions the showcase calls by name (PScript.call, TextFunction.named): the showcase runs without eval (ADR-0015)
+
+/** The "P" monogram of the top bar as the favicon, inline SVG. */
+function showcaseFavicon() {
+  var l = document.createElement('link');
+  l.rel = 'icon';
+  l.type = 'image/svg+xml';
+  l.href = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+    + '<rect width="32" height="32" rx="8" fill="#0f172a"/><text x="16" y="22" font-family="Arial" '
+    + 'font-size="17" font-weight="700" fill="#fff" text-anchor="middle">P</text></svg>');
+  document.head.appendChild(l);
+}
+
+/** The text of the oracle's functional label: the same as its Java function. */
+function ponies(args) {
+  return args[0] + ' ponies';
+}
+
+/** The oracle's script whose result comes back. */
+function oracleProduct(a, b) {
+  return a * b;
+}
+
+/** The oracle's cookies, read back through a script. */
+function oracleCookies() {
+  return document.cookie;
+}

@@ -27,13 +27,35 @@ import java.util.function.Function;
 
 /**
  * An immutable function that takes an array as argument and returns a String.
- * It wraps a Java {@link Function} and its JS equivalent.
+ * It wraps a Java {@link Function} and its JS equivalent: the name of a function of the page
+ * ({@link #named(Function, String)}), or JavaScript source, which the browser runs only with {@code 'unsafe-eval'}.
  * It can be used to create a PFunction in a PWindow
  */
 public class TextFunction {
 
     private final Function<Object[], String> javaFunction;
     private final String jsFunction;
+    private final String jsFunctionName;
+
+    private TextFunction(final Function<Object[], String> javaFunction, final String jsFunction, final String jsFunctionName) {
+        this.javaFunction = javaFunction;
+        this.jsFunction = jsFunction;
+        this.jsFunctionName = jsFunctionName;
+    }
+
+    /**
+     * Sample:
+     * <ul>
+     * <li><pre>javaFunction: args -&#62; args[0] + " ponies"</pre></li>
+     * <li>jsFunctionName: {@code ponies}, defined by a script of the application as
+     * <pre>function ponies(args) { return args[0] + ' ponies'; }</pre></li>
+     * </ul>
+     *
+     * @param jsFunctionName a function of the terminal's window, which receives the args array and returns the text
+     */
+    public static TextFunction named(final Function<Object[], String> javaFunction, final String jsFunctionName) {
+        return new TextFunction(javaFunction, null, jsFunctionName);
+    }
 
     /**
      * Sample :
@@ -44,15 +66,21 @@ public class TextFunction {
      *
      * @param javaFunction The java function.
      * @param jsFunction   The js function.
+     * @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #named(Function, String)}
      */
+    @Deprecated(since = "3.0")
     public TextFunction(final Function<Object[], String> javaFunction, final String jsFunction) {
-        super();
-        this.javaFunction = javaFunction;
-        this.jsFunction = jsFunction;
+        this(javaFunction, jsFunction, null);
     }
 
+    /** The JavaScript source, null for a function called by name. */
     public String getJsFunction() {
         return jsFunction;
+    }
+
+    /** The name of the page's function, null for a function given as source. */
+    public String getJsFunctionName() {
+        return jsFunctionName;
     }
 
     public Function<Object[], String> getJavaFunction() {
@@ -61,7 +89,7 @@ public class TextFunction {
 
     @Override
     public String toString() {
-        return "function(args){ " + jsFunction + " }]";
+        return jsFunctionName != null ? "function " + jsFunctionName + "(args)" : "function(args){ " + jsFunction + " }";
     }
 
 }

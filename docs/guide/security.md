@@ -42,6 +42,41 @@ configuration.addServedResourceExtensions("json"); // translations kept in a jar
 
 The files of the servlet context (a web application's directory) are all served: they are public by construction.
 
+## Content Security Policy
+
+The bootstrap page is served with a policy ([ADR-0015](../decisions/0015-content-security-policy.md)): an HTML
+injection (a label set with `setInnerHTML` from user data) cannot run script, and no other site can show the
+application in a frame.
+
+```
+Content-Security-Policy: script-src 'self' 'sha256-…' [script origins] ['unsafe-eval'];
+    object-src 'none'; base-uri 'self'; frame-ancestors 'self' [wsAllowedOrigins]
+```
+
+- The page's one inline script, which opens the WebSocket early, is allowed by its hash; no other inline script runs.
+- Scripts come from the application's origin, the origins of the absolute URLs in `setJavascript`, and those added
+  with `addScriptSources("https://cdn.example.com")`.
+- `frame-ancestors`: the application and the pages of `setWsAllowedOrigins`, the ones that embed it. A CSP source
+  cannot name an IPv6 address: such an origin is left out, with a warning.
+- Every response of `BootstrapServlet` carries `X-Content-Type-Options: nosniff`.
+- `style-src`, `connect-src`, `img-src` are not set: the application restricts them if it wants to.
+
+`'unsafe-eval'` is there for the APIs that send JavaScript source: `PScript.execute`, `evalTerminalScript`, a
+`TextFunction` built from source, all deprecated. An application calls the functions of its own scripts by name
+instead, and turns eval off:
+
+```java
+configuration.setScriptEvalEnabled(false); // no 'unsafe-eval'; the source APIs throw IllegalStateException
+
+PScript.call(PWindow.getMain(), "showToast", "Saved", 3000); // window.showToast("Saved", 3000)
+widget.callTerminalFunction("highlight", "#ff0");            // window.highlight(element, "#ff0")
+TextFunction.named(args -> args[0] + " ponies", "ponies");    // window.ponies(args)
+```
+
+An application that sends its own policy (a proxy in front) calls `setContentSecurityPolicyEnabled(false)`. One that
+adds inline scripts to the page overrides `BootstrapServlet.buildContentSecurityPolicy` to allow them. An `index.html`
+of the application's own files is served as it is, without a policy.
+
 ## Log-injection hardening
 
 Untrusted client values (the reconnection parameter, malformed inbound frames) are sanitised before being logged, so a client cannot forge log lines by injecting newlines or control characters.
@@ -52,6 +87,7 @@ Untrusted client values (the reconnection parameter, malformed inbound frames) a
 - Inbound size **bounded** (1 MB) and slow consumers **disconnected** — one connection cannot exhaust memory.
 - UIContext access **scoped to the HTTP session** — no IDOR.
 - Static resources **path-guarded** — no traversal — and **web files only** from the classpath — no class, configuration or key store.
+- Content Security Policy **on**: no inline script but the hashed one, no frame by another site, `nosniff`.
 - Transparent reconnection **off** by default — no silent resume of stale state (important for trading apps, where stale market data must never be replayed unnoticed).
 
 > Each item above is backed by dedicated tests (the Origin matrix, cross-session denial, path-safety, and the configuration defaults), so the secure defaults cannot silently regress.

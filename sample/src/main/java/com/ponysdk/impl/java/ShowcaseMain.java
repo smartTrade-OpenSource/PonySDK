@@ -47,6 +47,8 @@ public class ShowcaseMain {
         configuration.setWsAllowedOrigins(Set.of("http://[::1]:" + PORTAL_PORT, "http://localhost:" + PORTAL_PORT,
             "http://127.0.0.1:" + PORTAL_PORT));
         configuration.setEntryPointClass(UISampleEntryPoint.class);
+        // No JavaScript source sent to the browser: its policy forbids eval (ADR-0015)
+        configuration.setScriptEvalEnabled(false);
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
         // Map.of have no defined iteration order.

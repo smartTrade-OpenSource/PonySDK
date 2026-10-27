@@ -301,7 +301,11 @@ public enum ServerToClientModel {
     DISPATCH_EVENT(ValueTypeModel.ARRAY),
 
     // With CREATE_CONTEXT, to an embedded terminal only (ADR-0009): its context's keys, "K.S"
-    CONTEXT_KEYS(ValueTypeModel.STRING);
+    CONTEXT_KEYS(ValueTypeModel.STRING),
+
+    // A function of the terminal's window, called by name (ADR-0015): on a PScript, then optionally FUNCTION_ARGS,
+    // COMMAND_ID, FIXDELAY; on a widget, called with its element then FUNCTION_ARGS; at a PFunction's creation
+    FUNCTION_NAME(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

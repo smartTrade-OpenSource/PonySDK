@@ -77,7 +77,8 @@ final class MiscPage {
         p.add(sectionTitle("Script"));
         // region pscript
         final PButton alertBtn = Element.newPButton("Run JS alert");
-        alertBtn.addClickHandler(e -> PScript.execute(PWindow.getMain(), "alert('Hello from PScript!')"));
+        // A function of the page, called by name: no JavaScript source travels, the page needs no 'unsafe-eval'
+        alertBtn.addClickHandler(e -> PScript.call(PWindow.getMain(), "alert", "Hello from PScript!"));
         // endregion
         p.add(labeled("PScript", alertBtn, Source.code(MiscPage.class, "pscript")));
 

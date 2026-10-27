@@ -240,8 +240,37 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         saveUpdate(writer -> writer.write(ServerToClientModel.BIND, functionName));
     }
 
+    /**
+     * Calls {@code window[functionName](element, args...)} in the terminal, the element being this object's: a
+     * function the application's own scripts define (ADR-0015).
+     *
+     * @param args strings, numbers, booleans or null
+     */
+    public void callTerminalFunction(final String functionName, final Object... args) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.FUNCTION_NAME, functionName);
+            if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
+        });
+    }
+
+    /** @deprecated JavaScript source needs {@code 'unsafe-eval'}: {@link #callTerminalFunction(String, Object...)} */
+    @Deprecated(since = "3.0")
     public void evalTerminalScript(final String script) {
+        requireScriptEval("evalTerminalScript", "callTerminalFunction");
         saveUpdate(writer -> writer.write(ServerToClientModel.EVAL, script));
+    }
+
+    /**
+     * Refuses an API that sends JavaScript source when the application runs without eval
+     * ({@link com.ponysdk.core.server.application.ApplicationConfiguration#setScriptEvalEnabled(boolean)}): the browser
+     * would block it, here the developer learns which call to replace.
+     */
+    static void requireScriptEval(final String api, final String replacement) {
+        final UIContext context = UIContext.get();
+        if (context != null && !context.getConfiguration().isScriptEvalEnabled())
+            throw new IllegalStateException(api + " sends JavaScript source, and this application runs without eval "
+                    + "(ApplicationConfiguration.setScriptEvalEnabled(false)): call a function of the page by name with "
+                    + replacement);
     }
 
     public void sendToNative(final JsonObject data) {

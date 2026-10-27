@@ -39,12 +39,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class BootstrapServlet extends HttpServlet {
 
@@ -147,6 +154,9 @@ public class BootstrapServlet extends HttpServlet {
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
             throws IOException {
+        // A script, a stylesheet or the page is taken for what its type says, never sniffed into another (ADR-0015)
+        response.setHeader("X-Content-Type-Options", "nosniff");
+
         // Reject path traversal before touching the servlet context / classpath.
         if (!isSafeResourcePath(path)) {
             log.warn("Rejected unsafe resource path");
@@ -178,6 +188,8 @@ public class BootstrapServlet extends HttpServlet {
         } else {
             if (path.equals(INDEX_URL)) {
                 response.setHeader("Cache-Control", REVALIDATE);
+                if (configuration.isContentSecurityPolicyEnabled())
+                    response.setHeader("Content-Security-Policy", buildContentSecurityPolicy());
                 try (OutputStream out = response.getOutputStream()) {
                     out.write(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
                 }
@@ -338,7 +350,67 @@ public class BootstrapServlet extends HttpServlet {
                     + escapeAttribute(String.join(" ", new java.util.TreeSet<>(parents))) + "\"")).append(NEW_LINE);
         }
 
+        // Read by the terminal and ponysdk.js: data, not inline scripts, which the Content-Security-Policy would have
+        // to allow (ADR-0015)
+        if (configuration.getReconnectionTimeoutMs() > 0) {
+            sb.append(String.format(META_PATTERN, "name=\"pony-reconnection\" content=\"true\"")).append(NEW_LINE);
+        }
+        final Set<String> wcSheets = configuration.getWcSharedSheets();
+        if (wcSheets != null && !wcSheets.isEmpty()) {
+            sb.append(String.format(META_PATTERN, "name=\"pony-wc-shared-sheets\" content=\""
+                    + escapeAttribute(String.join(" ", wcSheets)) + "\"")).append(NEW_LINE);
+        }
+
         return sb.toString();
+    }
+
+    /**
+     * The policy of the page PonySDK builds (ADR-0015): its one inline script by hash, the script origins the
+     * configuration names, eval unless the application turned it off, frames by the pages that embed it. An
+     * application that adds inline scripts to the page overrides this to allow them.
+     */
+    protected String buildContentSecurityPolicy() {
+        final Set<String> scripts = new LinkedHashSet<>();
+        scripts.add("'self'");
+        scripts.add(EARLY_SOCKET_HASH);
+        final Set<String> configured = configuration.getJavascript();
+        if (configured != null) configured.forEach(url -> {
+            final String origin = originOf(url);
+            if (origin != null) scripts.add(origin);
+        });
+        scripts.addAll(configuration.getScriptSources());
+        if (configuration.isScriptEvalEnabled()) scripts.add("'unsafe-eval'");
+
+        final Set<String> ancestors = new LinkedHashSet<>();
+        ancestors.add("'self'");
+        final Set<String> parents = configuration.getWsAllowedOrigins();
+        if (parents != null) new TreeSet<>(parents).forEach(parent -> {
+            final String origin = originOf(parent);
+            if (origin != null) ancestors.add(origin);
+        });
+
+        return "script-src " + String.join(" ", scripts) + "; object-src 'none'; base-uri 'self'; frame-ancestors "
+                + String.join(" ", ancestors);
+    }
+
+    /**
+     * The origin of an absolute or scheme-relative URL; null for a path of the application, and for an IPv6 address,
+     * which a CSP source expression cannot name (the browser would reject it and log an error on each page).
+     */
+    private static String originOf(final String url) {
+        try {
+            final URI uri = new URI(url);
+            if (uri.getHost() == null) return null;
+            if (uri.getHost().startsWith("[")) {
+                log.warn("An IPv6 address cannot appear in a Content-Security-Policy, left out: {}", url);
+                return null;
+            }
+            final String authority = uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort());
+            return uri.getScheme() == null ? authority : uri.getScheme() + "://" + authority;
+        } catch (final URISyntaxException e) {
+            log.warn("Not a URL, left out of the Content-Security-Policy: {}", url);
+            return null;
+        }
     }
 
     private static String escapeAttribute(final String value) {
@@ -367,7 +439,7 @@ public class BootstrapServlet extends HttpServlet {
      * history token is the decoded hash); main window only: a child window ("1" parameter) attaches to
      * its parent's context instead.
      */
-    static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">(function(){"
+    static final String EARLY_SOCKET_SOURCE = "(function(){"
             + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
             + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
             + "e={opened:false,messages:[],times:[],closeEvent:null};"
@@ -378,16 +450,22 @@ public class BootstrapServlet extends HttpServlet {
             + "e.socket.onopen=function(){e.opened=true;};"
             + "e.socket.onmessage=function(m){e.messages.push(m.data);e.times.push(m.timeStamp);};"
             + "e.socket.onclose=function(c){e.closeEvent=c;};"
-            + "window.ponyEarlySocket=e;})();</script>";
+            + "window.ponyEarlySocket=e;})();";
+    static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">" + EARLY_SOCKET_SOURCE + "</script>";
+    /** The source expression that allows it in the Content-Security-Policy: a constant, hashed once. */
+    static final String EARLY_SOCKET_HASH = "'sha256-" + sha256(EARLY_SOCKET_SOURCE) + "'";
+
+    private static String sha256(final String source) {
+        try {
+            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8)));
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Every Java platform has SHA-256", e);
+        }
+    }
 
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
         sb.append(EARLY_SOCKET_SCRIPT).append(NEW_LINE);
-
-        // Enable transparent WebSocket reconnection on the client side when the server supports it
-        if (configuration != null && configuration.getReconnectionTimeoutMs() > 0) {
-            sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
-        }
 
         // Deferred: the terminal starts once the page is parsed, after ponysdk.js and the application scripts; the
         // legacy layer, when asked for, runs just before it
@@ -397,19 +475,6 @@ public class BootstrapServlet extends HttpServlet {
         }
         // A module: it loads its rarely shown widgets on demand (docs/decisions/0004-terminal-chunks.md)
         sb.append(String.format(MODULE_SCRIPT_PATTERN, rootPath + "ponyterminal/terminal.js")).append(NEW_LINE);
-
-        // Inject shared WC stylesheets as an inline script so they are registered
-        // before application scripts define their web components.
-        final Set<String> wcSheets = configuration.getWcSharedSheets();
-        if (wcSheets != null && !wcSheets.isEmpty()) {
-            sb.append("<script type=\"text/javascript\">").append(NEW_LINE);
-            sb.append("document.onPonyLoaded(function() {").append(NEW_LINE);
-            for (final String sheet : wcSheets) {
-                sb.append("  pony.wc.registerSharedSheet('").append(sheet).append("');").append(NEW_LINE);
-            }
-            sb.append("});").append(NEW_LINE);
-            sb.append("</script>").append(NEW_LINE);
-        }
 
         final Set<String> scripts = configuration.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {

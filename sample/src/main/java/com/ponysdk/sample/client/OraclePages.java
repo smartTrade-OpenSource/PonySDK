@@ -214,12 +214,12 @@ final class OraclePages {
         });
         final PElement run = Element.newPElement("button");
         run.setInnerText("Run");
-        run.addDomHandler((PClickHandler) e -> PScript.execute(PWindow.getMain(), "6 * 7", new PScript.ExecutionCallback() {
+        run.addDomHandler((PClickHandler) e -> PScript.call(PWindow.getMain(), "oracleProduct", new Object[] { 6, 7 }, new PScript.ExecutionCallback() {
 
             @Override
             public void onSuccess(final String result) {
                 context.getCookies().setCookie("oracle", "baked-" + result);
-                PScript.execute(PWindow.getMain(), "document.cookie", new PScript.ExecutionCallback() {
+                PScript.call(PWindow.getMain(), "oracleCookies", null, new PScript.ExecutionCallback() {
 
                     @Override
                     public void onSuccess(final String cookies) {
@@ -230,13 +230,13 @@ final class OraclePages {
                     @Override
                     public void onFailure(final String message) {
                     }
-                });
+                }, null);
             }
 
             @Override
             public void onFailure(final String message) {
             }
-        }), PClickEvent.TYPE);
+        }, null), PClickEvent.TYPE);
         section.add(run);
         return section;
     }
@@ -295,7 +295,7 @@ final class OraclePages {
         image.addClickHandler(e -> {
         });
         final PFunctionalLabel functional = Element.newPFunctionalLabel(
-            new TextFunction(args -> args[0] + " ponies", "return args[0] + ' ponies';"), 3);
+            TextFunction.named(args -> args[0] + " ponies", "ponies"), 3);
         panel.add(label, html, anchor, image, functional);
         return panel;
     }

@@ -15,6 +15,7 @@ import type { Reader } from '../protocol/reader.ts';
 import { log } from './log.ts';
 import { listenByName } from './named-events.ts';
 import { apply, BaseObject, type Context, type Setters, type TerminalObject } from './object.ts';
+import { pageFunction } from './page-function.ts';
 
 /**
  * Event type bits of PREVENT_EVENT and STOP_EVENT: the server's PEventType codes, which are GWT's Event.ONxxx
@@ -486,6 +487,13 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     [K.ENSURE_DEBUG_ID, (w, r) => w.element.setAttribute('pid', r.str ?? '')],
     [K.EVAL, (w, r) => {
         new Function('element', `return ${r.str ?? ''}`)(w.element);
+    }],
+    [K.FUNCTION_NAME, (w, r) => {
+        const name = r.str ?? '';
+        let args: unknown[] = [];
+        if (r.read() === K.FUNCTION_ARGS) args = r.array;
+        else r.rewind();
+        pageFunction(name)(w.element, ...args);
     }],
     [K.BIND, (w, r) => w.bind(r.str ?? '')],
     [K.NATIVE, (w, r) => w.sendToBinding(r.str ?? 'null')],

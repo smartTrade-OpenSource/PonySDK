@@ -430,7 +430,9 @@ public class PWindow extends PObject {
         return functions;
     }
 
+    @SuppressWarnings("deprecation")
     private PFunction createPFunction(final TextFunction function) {
+        if (function.getJsFunctionName() == null) PObject.requireScriptEval("A TextFunction built from source", "TextFunction.named");
         final PFunction pf = new PFunction(function);
         pf.attach(this, null);
         return pf;
