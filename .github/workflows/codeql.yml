@@ -1,0 +1,37 @@
+name: CodeQL
+
+# Security analysis of the Java server and the TypeScript terminal; findings appear under Security > Code scanning.
+# build-mode none reads the sources without building them.
+
+on:
+  push:
+    branches: [master, NC_V3]
+  pull_request:
+  schedule:
+    - cron: '17 4 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [java-kotlin, javascript-typescript]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
