@@ -5,6 +5,8 @@
 package com.ponysdk.core.server.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 
@@ -102,5 +104,38 @@ public class CommunicationSanityCheckerTest {
     public void probesEveryHeartbeatPeriodWhenShorter() {
         assertEquals(5, probesIn10Checks(2000));
         assertEquals(10, probesIn10Checks(500));
+    }
+
+    /** A check that throws is logged: the periodic task keeps running until stopped. */
+    @Test
+    public void aFailingCheckDoesNotStopTheChecker() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
+        Mockito.when(uiContext.getConfiguration()).thenReturn(configuration);
+        Mockito.when(uiContext.isSuspended()).thenThrow(new IllegalStateException("broken"));
+        final CommunicationSanityChecker checker = new CommunicationSanityChecker(uiContext);
+
+        checker.start();
+        try {
+            assertTrue(checker.started.get());
+            Mockito.verify(uiContext, Mockito.timeout(5_000).atLeast(2)).isSuspended();
+        } finally {
+            checker.stop();
+        }
+        assertFalse(checker.started.get());
+    }
+
+    @Test
+    public void aZeroHeartbeatNeverStarts() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
+        configuration.setHeartBeatPeriod(0);
+        Mockito.when(uiContext.getConfiguration()).thenReturn(configuration);
+        final CommunicationSanityChecker checker = new CommunicationSanityChecker(uiContext);
+
+        checker.start();
+        assertFalse(checker.started.get());
+        checker.stop();
+        assertFalse(checker.started.get());
     }
 }

@@ -68,18 +68,24 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'INSTRUCTION'
                 value = 'COVEREDRATIO'
-                minimum = 0.50
+                minimum = 0.92
             }
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
-                minimum = 0.47
+                minimum = 0.92
             }
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.43
+                minimum = 0.82
             }
+        }
+        // Every UI and server package: at least 80% of its lines (checked package by package).
+        rule {
+            element = 'PACKAGE'
+            includes = ['com.ponysdk.core.ui*', 'com.ponysdk.core.server*']
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.80 }
         }
         // Per-package ratchets on the critical server packages: pin current line coverage so it
         // cannot silently regress. Raise these minimums as coverage improves (never lower them).

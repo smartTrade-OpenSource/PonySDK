@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -161,5 +162,103 @@ public class SchedulerTest {
         scheduler.createContext("ctx").execute(() -> {});
         scheduler.shutdown();
         assertTrue(scheduler.awaitTermination(TIMEOUT_S * 1000), "scheduler must terminate after shutdown");
+    }
+
+    @Test
+    public void testThreadFactoryBuildsThePoolThreads() throws InterruptedException {
+        final Scheduler named = new Scheduler(1, r -> new Thread(r, "pony-test-scheduler"));
+        try {
+            final CountDownLatch latch = new CountDownLatch(1);
+            final List<String> threadNames = Collections.synchronizedList(new ArrayList<>());
+            named.createContext("ctx").execute(() -> {
+                threadNames.add(Thread.currentThread().getName());
+                latch.countDown();
+            });
+            assertTrue(latch.await(TIMEOUT_S, SECONDS));
+            assertEquals(List.of("pony-test-scheduler"), threadNames);
+        } finally {
+            named.shutdown();
+            assertTrue(named.awaitTermination(TIMEOUT_S * 1000));
+        }
+    }
+
+    @Test
+    public void testDelayedAndPeriodicTasksAreRejectedOnceShutdown() {
+        final SchedulingContext ctx = scheduler.createContext("ctx");
+        scheduler.shutdown();
+
+        assertThrows(RejectedExecutionException.class, () -> ctx.executeLater(10, () -> {}));
+        assertThrows(RejectedExecutionException.class, () -> ctx.schedule(10, () -> {}));
+    }
+
+    @Test
+    public void testExecuteOnceShutdownIsDropped() throws InterruptedException {
+        final SchedulingContext ctx = scheduler.createContext("ctx");
+        scheduler.shutdown();
+        assertTrue(scheduler.awaitTermination(TIMEOUT_S * 1000));
+
+        final AtomicBoolean ran = new AtomicBoolean(false);
+        ctx.execute(() -> ran.set(true));
+        ctx.executeAndWait(() -> ran.set(true));
+
+        assertFalse(ran.get(), "a task submitted after shutdown must never run");
+        assertTrue(ctx.awaitDestruction(TIMEOUT_S * 1000));
+    }
+
+    @Test
+    public void testShutdownDropsTheContextsStillQueued() throws InterruptedException {
+        final Scheduler single = new Scheduler(1);
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch interrupted = new CountDownLatch(1);
+        final AtomicBoolean queuedRan = new AtomicBoolean(false);
+
+        single.createContext("busy").execute(() -> {
+            started.countDown();
+            try {
+                new CountDownLatch(1).await();
+            } catch (final InterruptedException e) {
+                interrupted.countDown();
+            }
+        });
+        assertTrue(started.await(TIMEOUT_S, SECONDS));
+        final SchedulingContext queued = single.createContext("queued");
+        queued.execute(() -> queuedRan.set(true)); // waits behind the busy context on the only thread
+
+        single.shutdown();
+
+        assertTrue(interrupted.await(TIMEOUT_S, SECONDS), "shutdown must interrupt the running task");
+        assertTrue(single.awaitTermination(TIMEOUT_S * 1000));
+        assertFalse(queuedRan.get(), "a context still queued at shutdown must not run");
+        assertTrue(queued.awaitDestruction(TIMEOUT_S * 1000));
+    }
+
+    @Test
+    public void testForceExecuteLaterRunsAfterDelay() throws InterruptedException {
+        final SchedulingContext ctx = scheduler.createContext("ctx");
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        ctx.forceExecuteLater(30, latch::countDown);
+
+        assertTrue(latch.await(TIMEOUT_S, SECONDS), "delayed real-time task must eventually run");
+    }
+
+    @Test
+    public void testAwaitDestructionReturnsOnceTheContextIsDestroyed() throws InterruptedException {
+        final SchedulingContext ctx = scheduler.createContext("ctx");
+        assertFalse(ctx.awaitDestruction(20), "a live context is not destroyed");
+
+        ctx.destroy();
+        assertTrue(ctx.awaitDestruction(TIMEOUT_S * 1000));
+    }
+
+    @Test
+    public void testExecuteAndWaitRethrowsTheTaskException() {
+        final SchedulingContext ctx = scheduler.createContext("ctx");
+        final IllegalStateException failure = new IllegalStateException("boom");
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> ctx.executeAndWait(() -> {
+            throw failure;
+        }));
+        assertSame(failure, thrown);
     }
 }

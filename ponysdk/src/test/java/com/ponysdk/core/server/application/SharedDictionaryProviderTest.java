@@ -131,4 +131,41 @@ public class SharedDictionaryProviderTest {
         assertEquals(2, preSeed.size(), "pre-seed list is capped at preSeedSize");
         assertEquals(List.of("a", "b"), preSeed, "ordered by frequency desc");
     }
+
+    @Test
+    public void loadSkipsMalformedLinesAndUsesTheDefaultPreSeedSize() throws IOException {
+        Files.write(tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME),
+            List.of("12\tfirst", "not-a-number\tbad", "\tno-frequency", "7\t", "no tab", "5\tsecond"), StandardCharsets.UTF_8);
+
+        final SharedDictionaryProvider p = new SharedDictionaryProvider(tmpDir);
+        providers.add(p);
+
+        assertEquals(List.of("first", "second"), p.getPreSeedStrings());
+        assertEquals(2, p.globalSize());
+    }
+
+    @Test
+    public void anUnreadableDictionaryStartsEmpty() throws IOException {
+        // A directory where the file is expected: reading it fails
+        Files.createDirectory(tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME));
+
+        final SharedDictionaryProvider p = newProvider(512);
+
+        assertTrue(p.getPreSeedStrings().isEmpty());
+        assertEquals(0, p.globalSize());
+    }
+
+    @Test
+    public void aFailedPersistIsLoggedAndKeepsThePreviousPreSeed() throws IOException {
+        // The persist directory's parent is a regular file: the directory cannot be created
+        final Path blocker = Files.createFile(tmpDir.resolve("blocker"));
+        final SharedDictionaryProvider p = new SharedDictionaryProvider(blocker.resolve("dict"), 512);
+        providers.add(p);
+        p.recordBulkUsage(Map.of("hello", 10L));
+
+        p.persist();
+
+        assertTrue(p.getPreSeedStrings().isEmpty());
+        assertEquals(1, p.globalSize());
+    }
 }

@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.service.query;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
@@ -107,6 +108,16 @@ public class QueryTest {
         Mockito.when(expected.getPojoProperty()).thenReturn(key);
         query.addCriterion(expected);
         assertEquals(expected, query.getCriterion(key));
+    }
+
+    @Test
+    public void testGetCriterionSkipsOtherPropertiesAndReturnsNullWhenAbsent() {
+        final Criterion name = new Criterion("name");
+        final Criterion price = new Criterion("price");
+        query.addCriteria(List.of(name, price));
+
+        assertEquals(price, query.getCriterion("price"));
+        assertNull(query.getCriterion("volume"));
     }
 
 }

@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class ApplicationConfigurationTest {
@@ -212,5 +213,138 @@ public class ApplicationConfigurationTest {
         final boolean expected = true;
         config.setTabindexOnlyFormField(expected);
         assertEquals(expected, config.isTabindexOnlyFormField());
+    }
+
+    @Test
+    public void testBuilderAppliesEverySetting() {
+        final ApplicationConfiguration.ReconnectionListener listener = uiContext -> {};
+        final ApplicationConfiguration built = ApplicationConfiguration.builder()
+            .applicationID("id")
+            .applicationName("name")
+            .applicationDescription("description")
+            .applicationContextName("context")
+            .entryPointClass(EntryPoint.class)
+            .sessionTimeout(42)
+            .heartBeatPeriod(7, TimeUnit.SECONDS)
+            .enableClientToServerHeartBeat(false)
+            .reconnectionTimeoutMs(15_000)
+            .maxRecordingEntries(99)
+            .reconnectionListener(listener)
+            .javascript(Set.of("a.js"))
+            .style(Map.of("main", "main.css"))
+            .meta(Set.of("viewport"))
+            .wcSharedSheets(Set.of("shared.css"))
+            .servedResourceExtensions(".JSON")
+            .contentSecurityPolicyEnabled(false)
+            .scriptSources("https://cdn.example.com")
+            .debugMode(true)
+            .tabindexOnlyFormField(true)
+            .legacyClassNames(true)
+            .stringDictionaryEnabled(false)
+            .stringDictionaryMaxSize(128)
+            .stringDictionaryMinLength(2)
+            .stringDictionaryMaxEvictionsPerFlush(5)
+            .stringDictionaryAdmitOnSecondUse(false)
+            .stringDictionaryPersistenceEnabled(false)
+            .stringDictionaryPersistPath("dict")
+            .stringDictionaryPreSeedSize(16)
+            .wsOriginCheckEnabled(false)
+            .wsAllowedOrigins(Set.of("https://host.example.com"))
+            .wsMaxInboundMessageSize(2048)
+            .wsInputBufferSize(512)
+            .wsDeflateLevel(-1)
+            .maxProtocolVersion(ProtocolVersion.V1)
+            .updateCoalescingEnabled(false)
+            .wsIdleTimeoutMs(30_000)
+            .wsSendTimeoutMs(1_000)
+            .wsPermessageDeflateEnabled(false)
+            .build();
+
+        assertEquals("id", built.getApplicationID());
+        assertEquals("name", built.getApplicationName());
+        assertEquals("description", built.getApplicationDescription());
+        assertEquals("context", built.getApplicationContextName());
+        assertEquals(EntryPoint.class, built.getEntryPointClass());
+        assertEquals(42, built.getSessionTimeout());
+        assertEquals(7, built.getHeartBeatPeriod());
+        assertEquals(TimeUnit.SECONDS, built.getHeartBeatPeriodTimeUnit());
+        assertFalse(built.isEnableClientToServerHeartBeat());
+        assertEquals(15_000, built.getReconnectionTimeoutMs());
+        assertEquals(99, built.getMaxRecordingEntries());
+        assertSame(listener, built.getReconnectionListener());
+        assertEquals(Set.of("a.js"), built.getJavascript());
+        assertEquals(Map.of("main", "main.css"), built.getStyle());
+        assertEquals(Set.of("viewport"), built.getMeta());
+        assertEquals(Set.of("shared.css"), built.getWcSharedSheets());
+        assertTrue(built.getServedResourceExtensions().contains("json"));
+        assertFalse(built.isContentSecurityPolicyEnabled());
+        assertEquals(Set.of("https://cdn.example.com"), built.getScriptSources());
+        assertTrue(built.isDebugMode());
+        assertTrue(built.isTabindexOnlyFormField());
+        assertTrue(built.isLegacyClassNames());
+        assertFalse(built.isStringDictionaryEnabled());
+        assertEquals(128, built.getStringDictionaryMaxSize());
+        assertEquals(2, built.getStringDictionaryMinLength());
+        assertEquals(5, built.getStringDictionaryMaxEvictionsPerFlush());
+        assertFalse(built.isStringDictionaryAdmitOnSecondUse());
+        assertFalse(built.isStringDictionaryPersistenceEnabled());
+        assertEquals("dict", built.getStringDictionaryPersistPath());
+        assertEquals(16, built.getStringDictionaryPreSeedSize());
+        assertFalse(built.isWsOriginCheckEnabled());
+        assertEquals(Set.of("https://host.example.com"), built.getWsAllowedOrigins());
+        assertEquals(2048, built.getWsMaxInboundMessageSize());
+        assertEquals(512, built.getWsInputBufferSize());
+        assertEquals(-1, built.getWsDeflateLevel());
+        assertEquals(ProtocolVersion.V1, built.getMaxProtocolVersion());
+        assertFalse(built.isUpdateCoalescingEnabled());
+        assertEquals(30_000, built.getWsIdleTimeoutMs());
+        assertEquals(1_000, built.getWsSendTimeoutMs());
+        assertFalse(built.isWsPermessageDeflateEnabled());
+    }
+
+    @Test
+    public void testServedResourceExtensionsAreWebFilesOnlyByDefaultAndReadOnly() {
+        final Set<String> extensions = config.getServedResourceExtensions();
+        assertTrue(extensions.contains("js"));
+        assertTrue(extensions.contains("woff2"));
+        assertFalse(extensions.contains("class"));
+        assertFalse(extensions.contains("properties"));
+        assertThrows(UnsupportedOperationException.class, () -> extensions.add("class"));
+
+        config.addServedResourceExtensions("Json", ".TXT");
+        assertTrue(config.getServedResourceExtensions().contains("json"));
+        assertTrue(config.getServedResourceExtensions().contains("txt"));
+    }
+
+    @Test
+    public void testScriptSourcesKeepInsertionOrderAndAreReadOnly() {
+        config.addScriptSources("https://b.example.com", "https://a.example.com");
+        assertEquals(java.util.List.of("https://b.example.com", "https://a.example.com"), java.util.List.copyOf(config.getScriptSources()));
+        assertThrows(UnsupportedOperationException.class, () -> config.getScriptSources().clear());
+    }
+
+    @Test
+    public void testMaxProtocolVersionIsBounded() {
+        assertEquals(ProtocolVersion.CURRENT, config.getMaxProtocolVersion());
+        assertThrows(IllegalArgumentException.class, () -> config.setMaxProtocolVersion(ProtocolVersion.V1 - 1));
+        assertThrows(IllegalArgumentException.class, () -> config.setMaxProtocolVersion(ProtocolVersion.CURRENT + 1));
+        config.setMaxProtocolVersion(ProtocolVersion.CURRENT);
+        assertEquals(ProtocolVersion.CURRENT, config.getMaxProtocolVersion());
+    }
+
+    @Test
+    public void testDeflateLevelIsBounded() {
+        assertEquals(3, config.getWsDeflateLevel());
+        assertThrows(IllegalArgumentException.class, () -> config.setWsDeflateLevel(-2));
+        assertThrows(IllegalArgumentException.class, () -> config.setWsDeflateLevel(10));
+        config.setWsDeflateLevel(9);
+        assertEquals(9, config.getWsDeflateLevel());
+    }
+
+    @Test
+    public void testSessionAccessPolicyDefaultsToSameHttpSessionAndRejectsNull() {
+        assertSame(SessionAccessPolicy.SAME_HTTP_SESSION, config.getSessionAccessPolicy());
+        assertThrows(NullPointerException.class, () -> config.setSessionAccessPolicy(null));
+        assertSame(SessionAccessPolicy.SAME_HTTP_SESSION, config.getSessionAccessPolicy());
     }
 }

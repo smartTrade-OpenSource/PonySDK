@@ -29,6 +29,10 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.server.websocket.WebsocketMonitor;
+
+import io.opentelemetry.api.OpenTelemetry;
+
 /**
  * Verifies {@link PonySDKMetrics#utf8Length(String)} matches the real UTF-8 wire size
  * (the bytes-received metric must count bytes, not characters).
@@ -45,6 +49,46 @@ public class PonySDKMetricsTest {
         check("\uD83D\uDE80");              // 🚀 = 4 bytes (surrogate pair)
         check("a\u00e9\u20ac\uD83D\uDE80z"); // mixed
         check("{\"k\":\"\u00e9\uD83D\uDE80\"}");
+    }
+
+    @Test
+    public void contextLifecycleMovesTheActiveCount() {
+        final PonySDKMetrics metrics = new PonySDKMetrics(OpenTelemetry.noop(), "app");
+        assertEquals(0, metrics.getActiveContexts());
+
+        metrics.onContextCreated();
+        metrics.onContextCreated();
+        assertEquals(2, metrics.getActiveContexts());
+
+        metrics.onContextDestroyed("error");
+        assertEquals(1, metrics.getActiveContexts());
+
+        metrics.contextDestroyListener().onBeforeDestroy(null);
+        assertEquals(0, metrics.getActiveContexts());
+    }
+
+    @Test
+    public void bytesAreAccumulated() {
+        final PonySDKMetrics metrics = new PonySDKMetrics(OpenTelemetry.noop(), "app");
+        metrics.recordBytesSent(100);
+        metrics.recordBytesSent(23);
+        metrics.recordBytesReceived(7);
+
+        assertEquals(123, metrics.getTotalBytesSent());
+        assertEquals(7, metrics.getTotalBytesReceived());
+    }
+
+    @Test
+    public void websocketMonitorCountsReceivedMessagesInUtf8Bytes() {
+        final PonySDKMetrics metrics = new PonySDKMetrics(OpenTelemetry.noop(), "app");
+        final WebsocketMonitor monitor = metrics.websocketMonitor();
+
+        monitor.onMessageReceived(null, "caf\u00e9");
+        monitor.onMessageProcessed(null, "ignored");
+        monitor.onMessageUnprocessed(null, "ignored");
+
+        assertEquals(5, metrics.getTotalBytesReceived());
+        assertEquals(0, metrics.getTotalBytesSent());
     }
 
     private static void check(final String s) {
