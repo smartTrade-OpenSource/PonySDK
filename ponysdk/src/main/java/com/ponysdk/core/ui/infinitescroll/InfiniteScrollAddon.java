@@ -247,11 +247,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
                 fullDataIndex++;
             }
 
-            if (currentIndexWidget == null) {
-                currentIndex = 0;
-            }
-            updateCurrentIndexWidget();
-
             // create missing widget
             while (rows.size() < dataToDraw.size()) {
                 final W newWidget = dataProvider.handleUI(fullDataIndex, dataToDraw.get(index), null);
@@ -265,6 +260,12 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             while (dataToDraw.size() < rows.size()) {
                 removeWidgetFromContainer(rows.remove(index));
             }
+
+            if (currentIndexWidget == null) {
+                currentIndex = 0;
+            }
+            updateCurrentIndexWidget();
+
             callTerminalMethod(FUNCTION_ON_DRAW);
         } finally {
             widget.removeStyleName(STYLE_IS_LOADING);

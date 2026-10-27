@@ -24,7 +24,7 @@ public class ColorInputFormField extends AbstractInputFormField<ColorInputFormFi
 
     @Override
     public void setValue(Color color) {
-        input.setText(color.toHexString());
+        input.setText(String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()));
     }
 
     public static class Color {

@@ -94,23 +94,27 @@ public class DataGrid<T> implements IsPWidget {
     }
 
     public void addData(final T data) {
-        if (rows.containsData(data)) {
-            final int indexBefore = rows.getPosition(data);
-            if (indexBefore != -1) {
-                rows.remove(data);
-                rows.add(data);
-                final int indexAfter = rows.headSet(data).size();
-                if (indexBefore == indexAfter) {
-                    update(indexAfter, data);
-                } else {
-                    draw(Math.min(indexBefore, indexAfter), data);
-                }
-            } else {
-                //Update
-            }
+        final T previous = rows.getData(data);
+        if (previous != null) {
+            replace(previous, data);
         } else {
             rows.add(data);
             draw(rows.headSet(data).size(), data);
+        }
+    }
+
+    private void replace(final T previous, final T data) {
+        final int indexBefore = rows.getPosition(previous);
+        rows.remove(previous);
+        rows.add(data);
+        final int indexAfter = rows.getPosition(data);
+        if (indexBefore == indexAfter) {
+            update(indexAfter, data);
+        } else if (indexBefore < indexAfter) {
+            // The rows between the old and the new position move up by one
+            draw(indexBefore, rows.higher(previous));
+        } else {
+            draw(indexAfter, data);
         }
     }
 
@@ -157,21 +161,14 @@ public class DataGrid<T> implements IsPWidget {
     }
 
     public void update(final T data, final Function<T, T> merge) {
-        final int indexBefore = rows.getPosition(data);
-        if (indexBefore != -1) {
-            rows.remove(data);
-            rows.add(merge.apply(data));
-            final int indexAfter = rows.getPosition(data);
-            if (indexBefore == indexAfter) {
-                update(indexAfter, data);
-            } else {
-                draw(Math.min(indexBefore, indexAfter), data);
-            }
+        final T merged = merge.apply(data);
+        final T previous = rows.getData(data);
+        if (previous != null) {
+            replace(previous, merged);
         } else {
-            rows.add(data);
-            draw(rows.headSet(data).size(), data);
+            rows.add(merged);
+            draw(rows.headSet(merged).size(), merged);
         }
-
     }
 
     private void update(final int r, final T data) {

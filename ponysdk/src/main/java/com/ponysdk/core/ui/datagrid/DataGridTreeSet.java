@@ -64,6 +64,10 @@ public class DataGridTreeSet<E> extends TreeSet<E> {
         return map.containsKey(keyProvider.apply(e));
     }
 
+    public E getData(final E e) {
+        return map.get(keyProvider.apply(e));
+    }
+
     @Override
     public void clear() {
         super.clear();

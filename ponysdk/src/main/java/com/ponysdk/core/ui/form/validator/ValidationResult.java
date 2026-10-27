@@ -83,7 +83,7 @@ public class ValidationResult {
 
     @Override
     public String toString() {
-        return "valid : " + valid + (data != null ? " ; data : " + data : "") + (valid ? " ; " + errorMessage : "");
+        return "valid : " + valid + (data != null ? " ; data : " + data : "") + (valid ? "" : " ; " + errorMessage);
     }
 
 }

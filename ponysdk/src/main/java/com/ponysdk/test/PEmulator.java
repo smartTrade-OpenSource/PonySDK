@@ -35,7 +35,8 @@ public class PEmulator {
     }
 
     public static void addonData(PObject object, JsonObject value) {
-        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), "NATIVE").add("NATIVE", value.toString()).build();
+        // As the terminal's sendDataToServer: the addon data is a JSON object under NATIVE
+        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), value).build();
         object.onClientData(jsonObject);
     }
 }

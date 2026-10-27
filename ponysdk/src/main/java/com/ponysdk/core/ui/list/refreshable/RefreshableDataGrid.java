@@ -145,8 +145,9 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
         // update model
         for (int i = rowIndex; i < rows.size(); i++) {
-            final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> cellRow = cells.get(i);
+            final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> cellRow = cells.remove(i + 1);
             if (cellRow != null) {
+                cells.put(i, cellRow);
                 for (final Cell<D, ? extends IsPWidget> entry : cellRow.values()) {
                     entry.setRow(i);
                 }
