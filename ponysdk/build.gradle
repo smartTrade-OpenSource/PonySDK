@@ -68,66 +68,23 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'INSTRUCTION'
                 value = 'COVEREDRATIO'
-                minimum = 0.92
+                minimum = 0.98
             }
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
-                minimum = 0.92
+                minimum = 0.98
             }
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.82
+                minimum = 0.93
             }
         }
-        // Every UI and server package: at least 80% of its lines (checked package by package).
+        // Every package: at least 92% of its lines (checked package by package).
         rule {
             element = 'PACKAGE'
-            includes = ['com.ponysdk.core.ui*', 'com.ponysdk.core.server*']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.80 }
-        }
-        // Per-package ratchets on the critical server packages: pin current line coverage so it
-        // cannot silently regress. Raise these minimums as coverage improves (never lower them).
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.server.application']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.80 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.server.websocket']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.83 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.server.servlet']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.80 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.server.concurrent']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.79 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.server.context']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.78 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.writer']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.93 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.model']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.97 }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.ponysdk.core.ui.fdc3']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.90 }
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.92 }
         }
     }
 }
