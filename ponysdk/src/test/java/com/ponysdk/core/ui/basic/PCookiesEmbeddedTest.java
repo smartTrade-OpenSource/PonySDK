@@ -25,6 +25,7 @@ import com.ponysdk.testutil.CapturingModelWriter;
 
 import jakarta.json.Json;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -140,11 +141,28 @@ public class PCookiesEmbeddedTest extends PSuite {
         }
     }
 
+    @Test
+    public void aCookieWrittenOverHttpsIsSecureEvenWithoutTheOption() {
+        final PCookies cookies = new PCookies(requests::add);
+        cookies.setCookie("theme", "dark");
+
+        assertTrue(answered(true).getSecure(), "it only goes back to the application's own HTTPS origin");
+        requests.clear();
+        cookies.setCookie("theme", "light");
+        assertFalse(answered(false).getSecure(), "over HTTP, as the application asked");
+    }
+
     /** The cookie the response to the terminal's request sets. */
     private Cookie answered() {
+        return answered(false);
+    }
+
+    private Cookie answered(final boolean https) {
         assertEquals(1, requests.size(), "one request to the application's origin");
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.isSecure()).thenReturn(https);
         final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-        requests.get(0).onStream(null, response, UIContext.get());
+        requests.get(0).onStream(request, response, UIContext.get());
         final ArgumentCaptor<Cookie> cookie = ArgumentCaptor.forClass(Cookie.class);
         Mockito.verify(response).addCookie(cookie.capture());
         Mockito.verify(response).setStatus(HttpServletResponse.SC_NO_CONTENT);

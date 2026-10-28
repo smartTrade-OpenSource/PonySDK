@@ -298,9 +298,10 @@ public class PCookies {
         return cookie;
     }
 
-    /** What the terminal's request gets: the cookie, and nothing else. */
+    /** What the terminal's request gets: the cookie, Secure over HTTPS (it only goes back to that origin), and nothing else. */
     private static StreamHandler setting(final Cookie cookie) {
         return (request, response, uiContext) -> {
+            if (request.isSecure()) cookie.setSecure(true);
             response.addCookie(cookie);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         };
