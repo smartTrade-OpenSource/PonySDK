@@ -45,7 +45,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -193,6 +195,24 @@ public class ConfigSelectorDataGridViewTest extends PSuite {
         Assertions.assertEquals(80, first.getColumnConfigs().get(0).getWidth());
         Assertions.assertEquals(State.PINNED_SHOWN, stateOf(first, "name"));
         Assertions.assertTrue(decoded.get(1).getConfig().getColumnConfigs().isEmpty());
+    }
+
+    @Test
+    public void aColumnStateThisVersionDoesNotKnowIsDecodedAsNone() throws DecodeException {
+        final DataGridConfig<String> config = new DataGridConfigBuilder<String>()
+            .addColumnConfig(new ColumnConfig<>("name", State.PINNED_SHOWN, 120))
+            .build();
+        final String encoded = view.encodeConfigEntries(List.of(ConfigSelectorDataGridView.e("c", config)));
+        // The same entry written by a version with a state named otherwise
+        final String bytes = new String(Base64.getDecoder().decode(encoded), StandardCharsets.ISO_8859_1)
+            .replace("PINNED_SHOWN", "PINNED_SHOWX");
+        final String unknown = Base64.getEncoder().encodeToString(bytes.getBytes(StandardCharsets.ISO_8859_1));
+
+        final ColumnConfig<String> decoded = view.decodeConfigEntries(unknown).get(0).getConfig().getColumnConfigs().get(0);
+
+        Assertions.assertEquals("name", decoded.getColumnId());
+        Assertions.assertNull(decoded.getState());
+        Assertions.assertEquals(120, decoded.getWidth());
     }
 
     @Test

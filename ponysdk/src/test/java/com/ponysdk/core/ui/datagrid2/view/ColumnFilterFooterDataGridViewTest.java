@@ -107,6 +107,14 @@ public class ColumnFilterFooterDataGridViewTest extends PSuite {
     }
 
     @Test
+    public void aKeyUpInTheFooterNeitherFiltersNorDisablesIt() {
+        DomEvents.keyUp(footer(), 65);
+
+        Assertions.assertEquals(List.of("apple", "banana", "cherry"), view.getFilteredData().getData());
+        Assertions.assertTrue(footer().isEnabled());
+    }
+
+    @Test
     public void configCarriesFooterFilters() throws Exception {
         type("err");
 

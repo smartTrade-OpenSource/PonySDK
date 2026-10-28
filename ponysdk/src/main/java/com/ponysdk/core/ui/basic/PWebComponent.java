@@ -32,8 +32,6 @@ import com.ponysdk.core.util.OffHeapJsonStore;
 import com.ponysdk.core.writer.ModelWriter;
 import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
@@ -76,8 +74,6 @@ import java.util.function.Consumer;
  * A library's Custom Elements Manifest gives typed classes of its elements: {@link com.ponysdk.core.tools.WebComponentGenerator}.
  */
 public class PWebComponent extends PComplexPanel {
-
-    private static final Logger log = LoggerFactory.getLogger(PWebComponent.class);
 
     private static final String WC_EVENT_NAME_KEY = ClientToServerModel.WC_EVENT_NAME.toStringValue();
     private static final String WC_EVENT_DETAIL_KEY = ClientToServerModel.WC_EVENT_DETAIL.toStringValue();
@@ -450,36 +446,32 @@ public class PWebComponent extends PComplexPanel {
         // Cheap guard first: scalar / array properties are common and not mergeable — don't pay a
         // parse (and an exception) to find that out.
         if (!looksLikeJsonObject(oldJson) || !looksLikeJsonObject(newJson)) return null;
-        try {
-            final JsonObject oldObj = parseJson(oldJson);
-            final JsonObject newObj = parseJson(newJson);
-            if (oldObj == null || newObj == null) return null;
+        // A parse failure is null (parseJson); past it, nothing throws: the keys and values come from the parsed objects
+        final JsonObject oldObj = parseJson(oldJson);
+        final JsonObject newObj = parseJson(newJson);
+        if (oldObj == null || newObj == null) return null;
 
-            final JsonObjectBuilder patch = JSON.createObjectBuilder();
-            boolean hasDiff = false;
+        final JsonObjectBuilder patch = JSON.createObjectBuilder();
+        boolean hasDiff = false;
 
-            // Keys in new but changed or added
-            for (final Map.Entry<String, JsonValue> e : newObj.entrySet()) {
-                final JsonValue newVal = e.getValue();
-                if (!newVal.equals(oldObj.get(e.getKey()))) {
-                    if (newVal.getValueType() == JsonValue.ValueType.NULL) return null; // see javadoc
-                    patch.add(e.getKey(), newVal);
-                    hasDiff = true;
-                }
+        // Keys in new but changed or added
+        for (final Map.Entry<String, JsonValue> e : newObj.entrySet()) {
+            final JsonValue newVal = e.getValue();
+            if (!newVal.equals(oldObj.get(e.getKey()))) {
+                if (newVal.getValueType() == JsonValue.ValueType.NULL) return null; // see javadoc
+                patch.add(e.getKey(), newVal);
+                hasDiff = true;
             }
-            // Keys removed (present in old, absent in new)
-            for (final String key : oldObj.keySet()) {
-                if (!newObj.containsKey(key)) {
-                    patch.addNull(key);
-                    hasDiff = true;
-                }
-            }
-
-            return hasDiff ? patch.build().toString() : null;
-        } catch (final Exception e) {
-            log.debug("Cannot compute JSON patch, falling back to full send", e);
-            return null;
         }
+        // Keys removed (present in old, absent in new)
+        for (final String key : oldObj.keySet()) {
+            if (!newObj.containsKey(key)) {
+                patch.addNull(key);
+                hasDiff = true;
+            }
+        }
+
+        return hasDiff ? patch.build().toString() : null;
     }
 
     /** True if the first non-whitespace char is '{' (a necessary condition for a JSON object). */

@@ -178,6 +178,23 @@ public class PScriptTest extends PSuite {
     }
 
     @Test
+    public void aScriptDestroyedOutsideOfItsContextIsReleasedFromIt() {
+        final PWindow window = openWindow();
+        PScript.call(window, "x");
+        final PScript script = scriptOf(window);
+        final UIContext context = UIContext.get();
+
+        UIContext.remove();
+        try {
+            script.onDestroy();
+        } finally {
+            UIContext.setCurrent(context);
+        }
+
+        assertNull(scriptOf(window));
+    }
+
+    @Test
     public void aCallNeedsAWindow() {
         assertThrows(IllegalArgumentException.class, () -> PScript.call(null, "x"));
     }

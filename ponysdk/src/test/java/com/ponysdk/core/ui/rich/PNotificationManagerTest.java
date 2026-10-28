@@ -92,6 +92,20 @@ public class PNotificationManagerTest extends PSuite {
     }
 
     @Test
+    public void aClickClosesAHumanizedOrAWarningNotification() {
+        for (final Notification notification : List.of(Notification.HUMANIZED, Notification.WARNING_MESSAGE)) {
+            PNotificationManager.notify("note", notification);
+            final PPopupPanel popup = lastPopup();
+            final int count = PWindow.getMain().getPRootPanel().getWidgetCount();
+
+            PEmulator.click(popup);
+
+            assertFalse(popup.isVisible(), notification.name());
+            assertEquals(count - 1, PWindow.getMain().getPRootPanel().getWidgetCount(), notification.name());
+        }
+    }
+
+    @Test
     public void testWidgetNotifications() {
         final PLabel widget = Element.newPLabel("w");
         PNotificationManager.notify(PWindow.getMain(), widget, Notification.HUMANIZED);

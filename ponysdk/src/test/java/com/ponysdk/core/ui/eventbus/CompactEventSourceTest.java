@@ -43,6 +43,17 @@ public class CompactEventSourceTest {
     }
 
     @Test
+    public void theRegistrationOfARepeatedAddRemovesTheHandler() {
+        final CompactEventSource s = new CompactEventSource();
+        final EventHandler h = new EventHandler() {};
+        s.addHandler(A, h);
+
+        s.addHandler(A, h).removeHandler();
+
+        assertTrue(s.getEventHandlers(A).isEmpty());
+    }
+
+    @Test
     public void registrationRemovesTheHandler() {
         final CompactEventSource s = new CompactEventSource();
         final EventHandler h = new EventHandler() {};

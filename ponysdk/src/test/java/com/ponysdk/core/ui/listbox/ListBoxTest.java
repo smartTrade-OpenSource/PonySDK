@@ -1378,6 +1378,64 @@ public class ListBoxTest extends PSuite {
         assertNull(box.getItemContainer().getCurrentItemIndex());
     }
 
+    @Test
+    public void anIndexTheProviderHasNoDataForSelectsNothing() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration(), new ListBoxDataProvider<String>() {
+
+            @Override
+            public int getFullDataSize(final String containsLabelFilter) {
+                return 0;
+            }
+
+            @Override
+            public List<ListBoxItem<String>> getDataByIds(final Collection<Object> ids) {
+                return List.of();
+            }
+
+            @Override
+            public List<ListBoxItem<String>> getData(final int beginIndex, final int maxSize, final String containsLabelFilter) {
+                return null;
+            }
+
+            @Override
+            public ListBoxItem<String> getItemFromData(final String selectedData) {
+                return null;
+            }
+        });
+
+        box.setSelectedIndex(0);
+
+        assertTrue(box.getSelectedDataList().isEmpty());
+    }
+
+    @Test
+    public void aScrollReportedBeyondTheLastItemShowsTheFirstItemAgain() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration(), items("pear", "apple", "fig")));
+        box.open();
+        writer.clear();
+
+        // A position the terminal reported for a longer list: no row is left to be the current one
+        box.getItemContainer().onClientData(jakarta.json.Json.createObjectBuilder()
+            .add(com.ponysdk.core.model.ClientToServerModel.NATIVE.toStringValue(),
+                jakarta.json.Json.createObjectBuilder().add("beginIndex", 5).add("maxVisibleItem", 10))
+            .build());
+
+        assertTrue(writer.addonMethods(box.getItemContainer()).contains("showIndex"));
+    }
+
+    @Test
+    public void upBackToTheFirstItemOfAProviderInGroupMode() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().enableGroup(), new ListDataProvider("a", "b", "c")));
+        box.open();
+        assertEquals("a", currentLabel(box));
+        DropDownTestEvents.keyDown(box.getContainer().asWidget(), PKeyCodes.DOWN);
+        assertEquals("b", currentLabel(box));
+
+        DropDownTestEvents.keyDown(box.getContainer().asWidget(), PKeyCodes.UP);
+
+        assertEquals("a", currentLabel(box));
+    }
+
     // Helpers
 
     private static List<ListBoxItem<String>> items(final String... labels) {

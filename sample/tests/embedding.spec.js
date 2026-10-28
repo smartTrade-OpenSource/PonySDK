@@ -464,6 +464,29 @@ test('two PonySDK versions on a page: each application runs on its own version\'
   await expect.poll(() => page.evaluate(() => window.removedTicket.shadowRoot.querySelector('.pony-ticket') === null)).toBe(true);
 });
 
+test('taken out while the terminal of another version starts its application: that application stops', async ({ page }) => {
+  await openPortal(page);
+  let release = () => {};
+  const held = new Promise(resolve => { release = resolve; });
+  await page.route('**/sample/late/ponyapp.json', async route => {
+    const response = await route.fetch({ url: route.request().url().replace('/late/', '/') });
+    await route.fulfill({ response, json: { ...(await response.json()), terminal: '../v2/ponyterminal/terminal.js' } });
+  });
+  await page.route(/\/sample\/v2\/ponyterminal\//, async route => {
+    if (/\/chunks\/pony-app\.js/.test(route.request().url())) await held; // mountPonyApp waits for it
+    await route.fulfill({ response: await route.fetch({ url: route.request().url().replace('/sample/v2/ponyterminal/', '/sample/ponyterminal/') }) });
+  });
+  const sockets = [];
+  page.on('websocket', ws => sockets.push(ws.url()));
+  const requested = page.waitForRequest(/\/sample\/v2\/ponyterminal\/chunks\/pony-app\.js/);
+  await embed(page, 'late', 'late/', { view: 'ticket' });
+  await requested;
+  await page.evaluate(() => document.getElementById('late').remove());
+  release();
+  await page.waitForTimeout(1000);
+  expect(sockets.filter(url => url.includes('/late/'))).toEqual([]);
+});
+
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto(BASE_URL + '#embedding');
@@ -570,6 +593,33 @@ test('another site: a stylesheet its server serves without CORS loads as it is, 
   expect(link).toEqual({ crossOrigin: null, loaded: true });
 });
 
+test('another site: a stylesheet refused with CORS after its element left the page loads nothing more', async ({ page }) => {
+  const warned = [];
+  page.on('console', m => { if (m.type() === 'warning' && /refused with CORS/.test(m.text())) warned.push(m.text()); });
+  let refuse = () => {};
+  const refused = new Promise(resolve => { refuse = resolve; });
+  let held = 0;
+  await page.route(url => url.href === new URL('css/showcase.css', BASE_URL).href, async route => {
+    if ((await route.request().headerValue('origin')) === null) return route.continue();
+    held++;
+    await refused;
+    await route.abort();
+  });
+  await page.goto(OTHER_SITE_PORTAL);
+  await expect.poll(() => held).toBeGreaterThan(0);
+  await page.waitForTimeout(1000); // every element's request
+  const others = await page.evaluate(() => {
+    document.getElementById('ticket-1').remove();
+    return [...document.querySelectorAll('pony-app')]
+      .filter(e => [...(e.shadowRoot?.querySelectorAll('link') ?? [])].some(l => l.href.endsWith('css/showcase.css'))).length;
+  });
+  refuse();
+  // The others load it as it is, the one gone no more
+  await expect.poll(() => warned.length).toBe(others);
+  await page.waitForTimeout(500);
+  expect(warned.length).toBe(others);
+});
+
 /** A new <pony-app> element in the portal, of the application's URL plus suffix, or without src when suffix is null. */
 async function embed(page, id, suffix, attributes = {}, credential = undefined) {
   await page.evaluate(([id, suffix, attributes, credential]) => {
@@ -583,7 +633,7 @@ async function embed(page, id, suffix, attributes = {}, credential = undefined) 
   return page.locator(`#${id}`);
 }
 
-test('in an element: a host event listened to then no longer, a number as an event\'s detail, a window titled before it is ready, a reload that starts the application again, menus and picker gone', async ({ page, context }) => {
+test('in an element: a host event listened to then no longer, a number as an event\'s detail, a window titled before it is ready, a reload that starts the application again, menus and picker gone, an addon\'s own request', async ({ page, context }) => {
   await openPortal(page);
   const app = await embed(page, 'host', '#terminal-host');
   const status = app.getByLabel('Status');
@@ -598,8 +648,15 @@ test('in an element: a host event listened to then no longer, a number as an eve
     e.dispatchEvent(new CustomEvent('ping', { detail: 2 })); // no longer listened to
     e.addEventListener('number', event => e.setAttribute('data-number', JSON.stringify(/** @type {CustomEvent} */ (event).detail)));
   });
+  // An update the host's object does not know: skipped, the application goes on
+  const skipped = page.waitForEvent('console', m => m.type() === 'warning' && /has no property FUNCTION_NAME/.test(m.text()));
+  await app.getByRole('button', { name: 'Call on host' }).click();
+  await skipped;
   await app.getByRole('button', { name: 'Send number' }).click();
   await expect(app).toHaveAttribute('data-number', '42'); // a number, not its text
+  // An addon's own HTTP request, from another origin than the application's: the context's key goes with it
+  await app.getByRole('button', { name: 'Ask' }).click();
+  await expect(app.getByText('Asked', { exact: true })).toHaveAttribute('data-answer', 'answer to life');
   await expect(status).toHaveText('Status: ping 1, unlistened');
 
   const opened = context.waitForEvent('page');

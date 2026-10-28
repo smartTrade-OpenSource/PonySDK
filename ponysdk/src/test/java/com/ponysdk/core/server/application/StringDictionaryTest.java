@@ -503,4 +503,13 @@ public class StringDictionaryTest {
         assertEquals(100, captor.getAllValues().get(1).size());
         assertEquals(Long.valueOf(1L), captor.getAllValues().get(1).get("later 99"));
     }
+
+    /** 2^31 uses of one entry: about 4 s. */
+    @Test
+    public void theUsageCountOfAnEntrySaturatesInsteadOfWrapping() {
+        final StringDictionary dict = new StringDictionary();
+        for (long i = 0; i <= Integer.MAX_VALUE; i++) dict.intern("hot!");
+
+        assertEquals(Map.of("hot!", (long) Integer.MAX_VALUE), dict.getSessionFrequency());
+    }
 }

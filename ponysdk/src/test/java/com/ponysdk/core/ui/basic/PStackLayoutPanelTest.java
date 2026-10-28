@@ -38,6 +38,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -184,6 +185,27 @@ public class PStackLayoutPanelTest extends PSuite {
         panel.onDestroy();
         assertNull(panel.getWindow());
         assertNull(child.getWindow());
+    }
+
+    @Test
+    public void aChildFailingToBeDestroyedIsLoggedAndTheNextIsDestroyed() {
+        final PStackLayoutPanel panel = Element.newPStackLayoutPanel(PUnit.PX);
+        PWindow.getMain().add(panel);
+        panel.add(new PLabel() {
+
+            @Override
+            public void onDestroy() {
+                throw new IllegalStateException("failing child");
+            }
+        }, "failing", false, 10);
+        final PLabel next = Element.newPLabel("next");
+        panel.add(next, "next", false, 10);
+
+        try (LogCapture log = LogCapture.of(PStackLayoutPanel.class)) {
+            panel.onDestroy();
+            assertEquals(List.of("ERROR An error occurred while trying to process the destroy event"), log.events());
+        }
+        assertNull(next.getWindow());
     }
 
     @Test

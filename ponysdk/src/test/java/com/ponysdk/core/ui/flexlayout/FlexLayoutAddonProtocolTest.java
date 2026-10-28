@@ -44,10 +44,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PRootPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
 
 public class FlexLayoutAddonProtocolTest extends PSuite {
@@ -657,6 +660,31 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         assertFalse(addon.isPopOut("t1"));
         recorder.assertLast(addon, "restorePopOut", "t1", null);
         assertFalse(addon.getTabWidgets().containsKey("t1"));
+
+        // Popped out again: no widget left to release, the window opens all the same
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+        assertTrue(addon.isPopOut("t1"));
+        assertEquals("t1", lastTab.get());
+    }
+
+    @Test
+    public void theButtonOfAPopOutWindowPutsTheTabBack() {
+        final List<PLabel> built = new ArrayList<>();
+        addon.setWidgetFactory((component, tabId) -> {
+            final PLabel label = Element.newPLabel(component);
+            built.add(label);
+            return label;
+        });
+        addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+        final PRootPanel windowRoot = (PRootPanel) ((PWidget) built.get(0).getParent()).getParent();
+        final PButton popIn = (PButton) windowRoot.getWidget(0);
+
+        PEmulator.click(popIn);
+
+        assertFalse(addon.isPopOut("t1"));
+        assertSame(built.get(1), addon.getTabWidgets().get("t1"));
+        recorder.assertLast(addon, "restorePopOut", "t1", id(built.get(1)));
     }
 
     @Test

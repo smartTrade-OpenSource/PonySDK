@@ -25,6 +25,8 @@ package com.ponysdk.core.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 
 public class SynchronizedWeakCacheTest {
@@ -50,5 +52,22 @@ public class SynchronizedWeakCacheTest {
         });
         assertSame(winner, result);
         assertSame(winner, cache.getOrCompute("v", k -> fail("cached")));
+    }
+
+    @Test
+    public void aNullValueIsComputedAgainOnEveryCall() {
+        final SynchronizedWeakCache<String> cache = new SynchronizedWeakCache<>();
+        final AtomicInteger computed = new AtomicInteger();
+
+        assertNull(cache.getOrCompute(null, k -> {
+            computed.incrementAndGet();
+            return null;
+        }));
+        assertNull(cache.getOrCompute(null, k -> {
+            computed.incrementAndGet();
+            return null;
+        }));
+
+        assertEquals(2, computed.get());
     }
 }

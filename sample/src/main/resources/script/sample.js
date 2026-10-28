@@ -195,6 +195,16 @@
 
   });
 
+  // AskAddOn: asks its question by an HTTP request of its own, writes the answer on its element
+  AbstractAddon.defineAddon("com.ponysdk.sample.client.page.addon.AskAddOn", {
+    initDom: function () {
+      var element = this.element;
+      this.sendDataToServer({ question: this.options.question }, function (answer) {
+        element.setAttribute("data-answer", answer);
+      });
+    }
+  });
+
   // HighlightAddOn: its creation arguments are a JSON object, {"color": ...}
   AbstractAddon.defineAddon("com.ponysdk.sample.client.page.addon.HighlightAddOn", {
     init: function () {

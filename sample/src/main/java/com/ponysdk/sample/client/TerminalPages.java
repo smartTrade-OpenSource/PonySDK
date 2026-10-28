@@ -103,6 +103,7 @@ import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.sample.client.page.addon.AskAddOn;
 import com.ponysdk.sample.client.page.addon.HighlightAddOn;
 
 import jakarta.json.Json;
@@ -1012,6 +1013,10 @@ final class TerminalPages {
             status.add("unlistened");
         });
         button(panel, "Send number", () -> host.dispatchEvent("number", Json.createValue(42)));
+        button(panel, "Call on host", () -> host.callTerminalFunction("onHost")); // no function: the terminal skips it
+        final PLabel asked = Element.newPLabel("Asked");
+        panel.add(asked);
+        button(panel, "Ask", () -> new AskAddOn(asked, "life"));
         button(panel, "Reload", () -> PWindow.getMain().reload());
         button(panel, "Open titled", () -> {
             final PWindow window = Element.newPWindow("host-child", "width=300,height=200");

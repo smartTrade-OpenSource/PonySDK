@@ -27,8 +27,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.json.JsonObject;
 import java.time.Duration;
@@ -42,12 +40,12 @@ import java.util.Map;
  */
 public class PScript extends PObject {
 
-    private static final Logger log = LoggerFactory.getLogger(PScript.class);
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
 
     private Map<Long, ExecutionCallback> callbacksByID;
     private long executionID = 0;
     private String key;
+    private UIContext uiContext;
 
     private PScript() {
     }
@@ -60,6 +58,7 @@ public class PScript extends PObject {
             if (script == null) {
                 final PScript newScript = new PScript();
                 newScript.key = key;
+                newScript.uiContext = uiContext;
                 uiContext.setAttribute(key, newScript);
                 newScript.attach(window, null);
                 return newScript;
@@ -80,12 +79,7 @@ public class PScript extends PObject {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        try {
-            UIContext.get().removeAttribute(key);
-        } catch (Exception e) {
-            log.error("An error occurred while trying to process the destroy event", e);
-        }
-
+        uiContext.removeAttribute(key); // its own context: the calling thread may hold another, or none
     }
 
     /**

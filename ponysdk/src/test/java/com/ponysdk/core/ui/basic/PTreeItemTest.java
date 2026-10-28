@@ -24,12 +24,15 @@ package com.ponysdk.core.ui.basic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -225,6 +228,27 @@ public class PTreeItemTest extends PSuite {
         parent.onDestroy();
         assertNull(parent.getWindow());
         assertNull(child.getWindow());
+    }
+
+    @Test
+    public void aChildFailingToBeDestroyedIsLoggedAndTheNextIsDestroyed() {
+        final PTree tree = Element.newPTree();
+        final PTreeItem parent = tree.add("parent");
+        parent.add(new PTreeItem("failing") {
+
+            @Override
+            public void onDestroy() {
+                throw new IllegalStateException("failing item");
+            }
+        });
+        final PTreeItem next = parent.add("next");
+        PWindow.getMain().add(tree);
+
+        try (LogCapture log = LogCapture.of(PTreeItem.class)) {
+            parent.onDestroy();
+            assertEquals(List.of("ERROR An error occurred while trying to process the destroy event"), log.events());
+        }
+        assertNull(next.getWindow());
     }
 
     @Test

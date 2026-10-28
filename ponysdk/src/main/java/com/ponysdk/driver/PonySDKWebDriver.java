@@ -526,8 +526,11 @@ public class PonySDKWebDriver implements WebDriver {
 
     private void onMessage(final ServerToClientModel model, final Object value) {
         if (model == ServerToClientModel.END) {
-            onMessage(messageInConstruction);
-            messageInConstruction.clear();
+            try {
+                onMessage(messageInConstruction);
+            } finally {
+                messageInConstruction.clear(); // a listener failure must not leak this message into the next one
+            }
         } else {
             messageInConstruction.add(new PonyFrame(model, value));
         }

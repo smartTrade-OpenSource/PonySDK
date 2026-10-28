@@ -692,6 +692,34 @@ public class UIContextReconnectionTest {
     }
 
     /**
+     * Destroyed by another thread while the close path suspends it: suspended but dead, it cannot be resumed.
+     * The configuration read of suspend() stands for that thread, deterministically.
+     */
+    @Test
+    public void testAContextDestroyedWhileItIsSuspendedCannotBeResumed() {
+        final UIContext[] context = new UIContext[1];
+        final ApplicationConfiguration destroying = new ApplicationConfiguration() {
+
+            @Override
+            public int getMaxRecordingEntries() {
+                context[0].destroy();
+                return 100;
+            }
+        };
+        destroying.setHeartBeatPeriod(0, TimeUnit.SECONDS);
+        destroying.setStringDictionaryEnabled(false);
+        context[0] = new UIContext(oldSocket, txnContext, destroying);
+
+        context[0].suspend(30_000);
+
+        assertTrue(context[0].isSuspended());
+        assertFalse(context[0].isAlive());
+        final IllegalStateException e = assertThrows(IllegalStateException.class,
+            () -> context[0].resume(Mockito.mock(WebSocket.class)));
+        assertTrue(e.getMessage().contains("already destroyed"));
+    }
+
+    /**
      * Resume on a dead UIContext — should throw because it's not suspended.
      * (destroy() sets alive=false AND suspended=false)
      */

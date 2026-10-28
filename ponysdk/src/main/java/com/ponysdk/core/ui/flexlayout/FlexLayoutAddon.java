@@ -236,7 +236,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     public void isBorderVisible(final String side, final Consumer<Boolean> callback) {
         getModel(model -> {
-            final boolean visible = model != null && model.contains("\"side\":\"" + side + "\"")
+            final boolean visible = model.contains("\"side\":\"" + side + "\"") // never null: handleModelSnapshot
                 && !model.contains("\"side\":\"" + side + "\",\"hidden\":true");
             callback.accept(visible);
         });

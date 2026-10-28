@@ -246,6 +246,19 @@ public class DropDownContainerTest extends PSuite {
     }
 
     @Test
+    public void clickOnAMultilevelDropDownWhoseContainerTheApplicationShowedLeavesItAsItIs() {
+        final DefaultDropDownContainerConfiguration configuration = new DefaultDropDownContainerConfiguration();
+        configuration.enableMultilevel();
+        final TestDropDown dropDown = attach(new TestDropDown(configuration));
+        dropDown.getContainer().show();
+
+        PEmulator.click(dropDown.mainButton);
+
+        assertFalse(dropDown.isOpen());
+        assertTrue(dropDown.getContainer().isVisible());
+    }
+
+    @Test
     public void placeholderTitle() {
         final TestDropDown dropDown = attach(new TestDropDown(titled()));
 

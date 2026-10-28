@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
@@ -192,6 +193,26 @@ public class PMenuBarTest extends PSuite {
         menuBar.onDestroy();
         assertTrue(destroyed[0]);
         assertNull(item.getWindow());
+    }
+
+    @Test
+    public void anItemFailingToBeDestroyedIsLoggedAndTheNextIsDestroyed() {
+        final PMenuBar menuBar = Element.newPMenuBar();
+        PWindow.getMain().add(menuBar);
+        menuBar.addItem(new PMenuItem("failing") {
+
+            @Override
+            public void onDestroy() {
+                throw new IllegalStateException("failing item");
+            }
+        });
+        final PMenuItem next = menuBar.addItem("next");
+
+        try (LogCapture log = LogCapture.of(PMenuBar.class)) {
+            menuBar.onDestroy();
+            assertEquals(List.of("ERROR An error occurred while trying to process the destroy event"), log.events());
+        }
+        assertNull(next.getWindow());
     }
 
     @Test

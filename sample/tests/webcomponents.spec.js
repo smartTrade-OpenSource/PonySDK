@@ -99,6 +99,20 @@ test.describe('Web Components', () => {
     expect(errors).toEqual([]);
   });
 
+  test('object property: a patch on a value the page made no object starts from an empty object', async ({ page }) => {
+    const errors = trackErrors(page);
+    await openWebComponentsTab(page);
+    const stats = page.locator('my-stats');
+    await expect(stats.locator('[data-key="desk"]')).toContainText('FX Spot EUR/USD');
+
+    await stats.evaluate(el => { /** @type {any} */ (el).stats = []; }); // the page's own script
+    await page.getByRole('button', { name: 'Patch: +1 trade' }).click();
+
+    await expect(stats.locator('[data-key="trades"]')).toContainText('1');
+    await expect(stats.locator('[data-key="desk"]')).toHaveCount(0); // only the patched keys
+    expect(errors).toEqual([]);
+  });
+
   test('transparent reconnection: dictionary entries lost in flight are re-announced', async ({ page }) => {
     const errors = trackErrors(page);
     const sockets = [];

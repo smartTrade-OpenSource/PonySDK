@@ -41,6 +41,7 @@ import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PElement;
@@ -959,6 +960,70 @@ public class DefaultDataGridViewTest extends PSuite {
         final DefaultDataGridView<String, String> noAdapter = new DefaultDataGridView<>();
         noAdapter.asWidget().onDestroy();
         Assertions.assertNull(noAdapter.asWidget().getWindow());
+    }
+
+    @Test
+    public void aRowWithoutKeyIgnoresClicksAndIsLeftOutOfARange() throws Exception {
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
+        source.setFilterController(new FilterController<>());
+        final DefaultDataGridView<String, String> v = new DefaultDataGridView<>(source);
+        v.setAdapter(new TestAdapter(List.of(new CapturingColumnDefinition())) {
+
+            @Override
+            public String getKey(final String data) {
+                return "b".equals(data) ? null : data;
+            }
+        });
+        final CountDownLatch drawn = new CountDownLatch(1);
+        v.addDrawListener(count -> drawn.countDown());
+        v.getController().setData(List.of("a", "b", "c"));
+        Assertions.assertTrue(drawn.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        final PComplexPanel root = (PComplexPanel) v.asWidget();
+        final PComplexPanel body = (PComplexPanel) ((PComplexPanel) ((PComplexPanel) root.getWidget(1)).getWidget(0)).getWidget(1);
+
+        DomEvents.click(body.getWidget(1), false);
+        Assertions.assertEquals(0, v.getLiveSelectedDataCount());
+
+        DomEvents.click(body.getWidget(0), false);
+        DomEvents.click(body.getWidget(2), true);
+        Assertions.assertEquals(List.of("a", "c"), v.getLiveSelectedData().getData());
+    }
+
+    @Test
+    public void aSortThenTheClearOfAnUnsortedColumnBeforeTheDrawStillDraws() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("c", "a", "b")));
+        final CountDownLatch drawn = new CountDownLatch(1);
+        g.grid.addDrawListener(count -> drawn.countDown());
+        final UIContext context = UIContext.get();
+
+        // Both client events processed before the draw they schedule runs: it waits for the context held here
+        context.acquire();
+        try {
+            g.name.getController().sort(true);
+            g.len.getController().clearSort();
+        } finally {
+            context.release();
+            UIContext.setCurrent(context);
+        }
+
+        Assertions.assertTrue(drawn.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS), "the sort is drawn");
+        Assertions.assertEquals(List.of("a", "b", "c"), g.texts(0));
+    }
+
+    @Test
+    public void aDrawOutsideOfAUIContextIsLogged() throws Exception {
+        final Grid g = new Grid(true);
+        g.drawAfter(() -> g.grid.getController().setData(List.of("a")));
+        final UIContext context = UIContext.get();
+
+        UIContext.remove();
+        try (LogCapture log = LogCapture.of(DefaultDataGridView.class)) {
+            g.grid.refresh();
+            Assertions.assertEquals(List.of("ERROR Cannot draw data from data source"), log.events());
+        } finally {
+            UIContext.setCurrent(context);
+        }
     }
 
     @Test

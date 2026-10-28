@@ -22,6 +22,7 @@
  */
 package com.ponysdk.core.ui.datagrid2.view;
 
+import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -37,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.CapturingColum
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.RecordingAdapter;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
+import jakarta.json.Json;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -194,6 +196,62 @@ public class ColumnVisibilitySelectorDataGridViewTest extends PSuite {
         Assertions.assertFalse(checkBox(1).getValue());
         PEmulator.click(applyButton());
         Assertions.assertEquals(State.UNPINNED_HIDDEN, stateOf("name"));
+    }
+
+    @Test
+    public void withoutHooksApplyCancelAndRestoreStillWork() {
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
+        source.setFilterController(new FilterController<>());
+        view = new ColumnVisibilitySelectorDataGridView<>(new DefaultDataGridView<>(source));
+        view.setAdapter(new RecordingAdapter(List.<ColumnDefinition<String>> of(name, len), true));
+
+        DomEvents.booleanValueChange(checkBox(1), false);
+        PEmulator.click(applyButton());
+        Assertions.assertEquals(State.UNPINNED_HIDDEN, stateOf("name"));
+
+        DomEvents.booleanValueChange(checkBox(0), false);
+        PEmulator.click(layout().getWidget(2));
+        Assertions.assertTrue(checkBox(0).getValue());
+
+        PEmulator.click(layout().getWidget(3));
+        Assertions.assertTrue(checkBox(1).getValue());
+    }
+
+    @Test
+    public void aKeyUpInTheSearchBoxChangesNothing() {
+        DomEvents.keyUp(searchBox(), 65);
+
+        Assertions.assertTrue(columnsWidget().getWidget(0).isVisible());
+        Assertions.assertTrue(columnsWidget().getWidget(1).isVisible());
+    }
+
+    @Test
+    public void resizingOrMovingAColumnLeavesCheckBoxesUnchanged() {
+        final DefaultDataGridView<String, String> grid = (DefaultDataGridView<String, String>) view.getView();
+        for (final PAddOn addon : grid.asWidget().getAddons()) {
+            if (!addon.getClass().getSimpleName().equals("Addon")) continue;
+            DomEvents.terminalData(addon, Json.createObjectBuilder().add("col", 0).add("cw", 200));
+            DomEvents.terminalData(addon, Json.createObjectBuilder().add("col", 0).add("to", 1));
+        }
+
+        Assertions.assertEquals(200, widthOf("name"));
+        Assertions.assertEquals(List.of("len", "name"), columnIds().subList(0, 2));
+        Assertions.assertTrue(checkBox(0).getValue());
+        Assertions.assertTrue(checkBox(1).getValue());
+        Assertions.assertTrue(checkBox(1).isEnabled());
+    }
+
+    private int widthOf(final String columnId) {
+        for (final DataGridConfig.ColumnConfig<String> config : view.getConfig().getColumnConfigs()) {
+            if (config.getColumnId().equals(columnId)) return config.getWidth();
+        }
+        throw new AssertionError("no column " + columnId);
+    }
+
+    private List<String> columnIds() {
+        final List<String> ids = new ArrayList<>();
+        view.getConfig().getColumnConfigs().forEach(c -> ids.add(c.getColumnId()));
+        return ids;
     }
 
     private State stateOf(final String columnId) {

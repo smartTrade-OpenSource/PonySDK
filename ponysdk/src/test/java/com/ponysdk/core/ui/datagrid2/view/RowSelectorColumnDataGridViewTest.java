@@ -23,6 +23,7 @@
 package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.datagrid2.DomEvents;
@@ -37,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.RecordingAdapter;
 import com.ponysdk.test.PSuite;
+import jakarta.json.Json;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -208,6 +210,27 @@ public class RowSelectorColumnDataGridViewTest extends PSuite {
         name.getController().clearSort();
 
         Assertions.assertEquals(List.of("a"), view.getLiveSelectedData().getData());
+    }
+
+    @Test
+    public void movingAnotherColumnKeepsTheSelectorFirstAndTheSelection() throws Exception {
+        final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
+        source.setFilterController(new FilterController<>());
+        base = new DefaultDataGridView<>(source);
+        view = new RowSelectorColumnDataGridView<>(base);
+        view.setAdapter(new RecordingAdapter(List.of(new DefaultColumnDefinition<>("name", v -> v, (v, s) -> {
+        }), new DefaultColumnDefinition<>("len", String::length, (v, s) -> {
+        })), true));
+        drawAfter(() -> view.getController().setData(List.of("a", "b")));
+        view.getController().select("a");
+
+        for (final PAddOn addon : base.asWidget().getAddons()) {
+            if (addon.getClass().getSimpleName().equals("Addon")) DomEvents.terminalData(addon, Json.createObjectBuilder().add("col", 1).add("to", 2));
+        }
+
+        Assertions.assertEquals(List.of(COLUMN_ID, "len", "name"), columnIds(view.getConfig()));
+        Assertions.assertEquals(List.of("a"), view.getLiveSelectedData().getData());
+        Assertions.assertTrue(rowCheckBox(0).getValue());
     }
 
     @Test

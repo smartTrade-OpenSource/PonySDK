@@ -41,6 +41,9 @@ public class PNotificationManager {
     public static final int warningDuration = 6000;
     public static final int trayDuration = 6000;
 
+    private PNotificationManager() {
+    }
+
     public static void notify(final String message, final Notification notification) {
         notify(PWindow.getMain(), message, notification);
     }

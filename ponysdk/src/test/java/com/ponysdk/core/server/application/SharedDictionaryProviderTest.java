@@ -97,6 +97,22 @@ public class SharedDictionaryProviderTest {
     }
 
     @Test
+    public void aProviderOfTheWorkingDirectoryPersistsThere() throws IOException {
+        final Path file = Path.of(SharedDictionaryProvider.DEFAULT_FILE_NAME);
+        assertFalse(Files.exists(file));
+        try {
+            final SharedDictionaryProvider p = new SharedDictionaryProvider(Path.of(""), 512);
+            p.recordBulkUsage(Map.of("hello", 10L));
+
+            p.shutdown();
+
+            assertTrue(Files.readString(file).contains("hello"));
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
     public void persistAppliesDecayAndFileFormat() throws IOException {
         final SharedDictionaryProvider p = newProvider(512);
         p.recordBulkUsage(Map.of("hello", 10L));

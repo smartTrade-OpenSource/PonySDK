@@ -160,7 +160,6 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     public void setWidgetFactory(final BiFunction<String, String, PWidget> factory) {
-        this.widgetFactory = component -> factory.apply(component, null);
         addon.setWidgetFactory(factory);
         addon.setOnExternalDrop((tabId, component, config) -> {
             final String instanceKey = config != null ? config : tabId;

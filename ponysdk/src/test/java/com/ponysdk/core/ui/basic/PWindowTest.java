@@ -37,6 +37,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
@@ -472,6 +473,30 @@ public class PWindowTest extends PSuite {
         assertFalse(window.isOpened());
         assertFalse(PWindow.getMain().getSubWindows().contains(window));
         assertTrue(window.getSubWindows().isEmpty());
+    }
+
+    @Test
+    public void aRootPanelFailingToBeDestroyedIsLoggedAndTheWindowStillDestroysItsPanels() {
+        final PWindow window = Element.newPWindow(PWindow.getMain(), "w", null);
+        window.open();
+        final PRootPanel failing = window.getPRootPanel("failing");
+        final PRootPanel other = window.getPRootPanel("other");
+        // An add-on that unbinds itself while its widget iterates its add-ons: the iteration fails
+        new PAddOnComposite<>(failing) {
+
+            @Override
+            public void onDestroy() {
+                super.onDestroy();
+                failing.getAddons().remove(this);
+            }
+        };
+
+        try (LogCapture log = LogCapture.of(PWindow.class)) {
+            window.onDestroy();
+            assertEquals(List.of("ERROR An error occurred while trying to process the destroy event"), log.events());
+        }
+        assertNull(failing.getWindow());
+        assertNull(other.getWindow());
     }
 
     @Test

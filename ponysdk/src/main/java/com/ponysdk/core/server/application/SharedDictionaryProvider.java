@@ -116,7 +116,8 @@ public class SharedDictionaryProvider {
      * @param preSeedSize      Maximum number of strings to pre-seed into new sessions
      */
     public SharedDictionaryProvider(final Path persistDirectory, final int preSeedSize) {
-        this.persistPath = persistDirectory.resolve(DEFAULT_FILE_NAME);
+        // Absolute: the file of an empty (working) directory has a parent to create
+        this.persistPath = persistDirectory.toAbsolutePath().resolve(DEFAULT_FILE_NAME);
         this.preSeedSize = preSeedSize > 0 ? preSeedSize : DEFAULT_PRESEED_SIZE;
         load();
 

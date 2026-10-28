@@ -80,8 +80,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         if (widget != null) {
             if (widget.getParent() == tree) {
                 // Held by another item of this tree: it moves here, the tree orphans it below
-                final PTreeItem previous = tree.itemOf(widget);
-                if (previous != this) previous.widget = null;
+                tree.itemOf(widget).widget = null; // never this item: it adopts its widget only below, once
             } else if (widget.getParent() != null) {
                 widget.removeFromParent();
             }

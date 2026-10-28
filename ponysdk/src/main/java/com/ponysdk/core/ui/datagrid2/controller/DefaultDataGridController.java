@@ -378,10 +378,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
                                         final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
-        viewSnapshot = new DataGridSnapshot(threadSnapshot);
+        // The request as asked: the snapshot of the caller may hold its live sorts and filters, which change without a
+        // new request (a sort cleared on a column without one)
+        final DataGridSnapshot requested = new DataGridSnapshot(threadSnapshot);
+        viewSnapshot = requested;
         if (dataSource.shouldBeCalledAsynchronously()) {
             CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture.supplyAsync(new DataGetterFromSrc(
-                    () -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, dataSrcRowIndex, threadSnapshot.start));
+                    () -> dataSource.getRows(dataSrcRowIndex, dataSize), requested, dataSrcRowIndex, threadSnapshot.start));
 
             completableFuture = completableFuture.thenApply(dataResponse -> {
                 if (dataResponse.id < lastProcessedID.get()) {
@@ -408,15 +411,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             lastProcessedID.set(currentProcessID);
             PScheduler.schedule(() -> {
                 try {
+                    // A later request replaces this one: the last one is the view's current state
                     if (currentProcessID < lastProcessedID.get()) {
                         return;
                     }
-                    if (viewSnapshot.equals(threadSnapshot)) {
-                        final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
-                                threadSnapshot.start);
-                        if (currentProcessID == lastProcessedID.get()) {
-                            consumer.accept(new Pair<>(result, null));
-                        }
+                    final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
+                            threadSnapshot.start);
+                    if (currentProcessID == lastProcessedID.get()) {
+                        consumer.accept(new Pair<>(result, null));
                     }
                 } catch (final Exception e) {
                     log.error("Cannot display data", e);

@@ -25,6 +25,9 @@ package com.ponysdk.core.model;
 
 public class DomHandlerConverter {
 
+    private DomHandlerConverter() {
+    }
+
     public static HandlerModel convert(final DomHandlerType type) {
         if (DomHandlerType.BLUR == type) return HandlerModel.HANDLER_DOM_BLUR;
         else if (DomHandlerType.CHANGE_HANDLER == type) return HandlerModel.HANDLER_DOM_CHANGE_HANDLER;

@@ -32,6 +32,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -224,6 +225,55 @@ public class PonySDKServerRunTest {
             assertSame(failure, reported[0]);
 
             driver.ignoreSessionStatusChanges();
+            driver.close();
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    public void withoutSessionListenerAFailureIsIgnoredAndAReconnectionStartsAFreshSession() throws Exception {
+        final PonySDKServer server = server();
+        server.start();
+        try {
+            final CountDownLatch failed = new CountDownLatch(1);
+            final CountDownLatch hello = new CountDownLatch(1);
+            final CountDownLatch clicked = new CountDownLatch(1);
+            final List<List<PonyFrame>> afterFailure = new CopyOnWriteArrayList<>();
+            final PonySDKWebDriver driver = new PonySDKWebDriver(new PonyMessageListener() {
+
+                @Override
+                public void onSendMessage(final JsonObject message) {
+                }
+
+                @Override
+                public void onReceiveMessage(final List<PonyFrame> message) {
+                    final Object text = PonySDKWebDriver.findValueForModel(message, ServerToClientModel.TEXT);
+                    if (failed.getCount() == 1) {
+                        if ("Go".equals(text)) {
+                            failed.countDown();
+                            throw new IllegalStateException("listener failure");
+                        }
+                        return;
+                    }
+                    afterFailure.add(List.copyOf(message));
+                    if ("Go".equals(text)) hello.countDown();
+                    if ("Clicked".equals(text)) clicked.countDown();
+                }
+            }, null, null, true);
+
+            final String url = "ws://127.0.0.1:" + port(server) + "/app/ws";
+            driver.get(url);
+            assertTrue(failed.await(10, TimeUnit.SECONDS));
+            final String first = driver.getSessionId();
+
+            driver.get(url);
+            assertNotEquals(first, driver.getSessionId(), "a new session replaces the first one");
+            assertTrue(hello.await(10, TimeUnit.SECONDS), "the new session received its widgets");
+            // Nothing of the failed message leaks into the next one
+            assertEquals(ServerToClientModel.CREATE_CONTEXT, afterFailure.get(0).get(0).getModel());
+            driver.findElement(By.tagName("BUTTON")).click();
+            assertTrue(clicked.await(10, TimeUnit.SECONDS), "the click ran on the server");
             driver.close();
         } finally {
             server.stop();

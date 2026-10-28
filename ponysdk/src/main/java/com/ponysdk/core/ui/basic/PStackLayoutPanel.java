@@ -123,14 +123,18 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
     @Override
     public void add(final PWidget w) {
-        log.error("Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
-        throw new UnsupportedOperationException(
-                "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
+        throw unsupportedAdd();
     }
 
     @Override
     public void add(final IsPWidget w) {
-        add(w.asWidget());
+        throw unsupportedAdd();
+    }
+
+    private static UnsupportedOperationException unsupportedAdd() {
+        final String message = "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead";
+        log.error(message);
+        return new UnsupportedOperationException(message);
     }
 
     @Override

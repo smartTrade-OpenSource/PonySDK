@@ -25,10 +25,12 @@ package com.ponysdk.core.ui.basic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.test.PSuite;
 
 public class PPanelTest extends PSuite {
@@ -100,6 +102,27 @@ public class PPanelTest extends PSuite {
         panel.onDestroy();
         assertEquals(2, destroyed.get());
         assertNull(a.getWindow());
+    }
+
+    @Test
+    public void aChildFailingToBeDestroyedIsLoggedAndTheNextIsDestroyed() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PLabel failing = new PLabel() {
+
+            @Override
+            public void onDestroy() {
+                throw new IllegalStateException("failing child");
+            }
+        };
+        final PLabel next = Element.newPLabel();
+        panel.add(failing, next);
+        PWindow.getMain().add(panel);
+
+        try (LogCapture log = LogCapture.of(PPanel.class)) {
+            panel.onDestroy();
+            assertEquals(List.of("ERROR An error occurred while trying to process the destroy event"), log.events());
+        }
+        assertNull(next.getWindow());
     }
 
 }

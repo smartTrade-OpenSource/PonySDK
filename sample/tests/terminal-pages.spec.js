@@ -1001,6 +1001,18 @@ test('layouts: an animated constraint, children at the end and the start of thei
     await expect(page.getByLabel('Header panel')).toHaveText('HeaderContentFooter');
 });
 
+test('popups: a modal popup whose dialog another script of the page closes is hidden', async ({ page }) => {
+    await open(page, 'popup');
+    await button(page, 'Show modal').click();
+    const modal = page.getByText('Modal popup', { exact: true });
+    await expect(modal).toBeVisible();
+
+    await page.evaluate(() => /** @type {HTMLDialogElement} */ (document.querySelector('dialog[open]')).close());
+
+    await expect(modal).toBeHidden();
+    await expect(status(page)).toHaveText('Status: modal closed');
+});
+
 test('popups: a modal auto-hide popup hides on a press on its backdrop, not on one in it', async ({ page }) => {
     await open(page, 'popup');
     await button(page, 'Show modal').click();

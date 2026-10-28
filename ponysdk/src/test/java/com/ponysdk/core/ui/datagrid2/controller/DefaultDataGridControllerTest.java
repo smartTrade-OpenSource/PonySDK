@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -402,6 +403,17 @@ public class DefaultDataGridControllerTest extends PSuite {
         controller.setFilter("small", qtyColumn, (item, helper) -> item.qty < 6, true, false);
         controller.clearFilters();
         Assertions.assertEquals(List.of("a", "b", "c"), ids(controller.getFilteredData().getData()));
+    }
+
+    @Test
+    public void clearingTheFiltersOfAColumnKeepsTheGeneralFilters() {
+        controller.setData(List.of(new Item("a", 1), new Item("b", 5), new Item("c", 7)));
+        controller.setFilter(filter("odd", item -> item.qty != 5, true));
+        controller.setFilter("small", qtyColumn, (item, helper) -> item.qty < 6, true, false);
+
+        controller.clearFilters(qtyColumn);
+
+        Assertions.assertEquals(List.of("a", "c"), ids(controller.getFilteredData().getData()));
     }
 
     @Test
@@ -857,6 +869,41 @@ public class DefaultDataGridControllerTest extends PSuite {
 
             Assertions.assertEquals(List.of(), first, "the first answer is older than the one shown");
         }
+    }
+
+    @Test
+    public void theLastAsynchronousRequestIsDeliveredWhenTheSnapshotOfTheCallerChangesMeanwhile() throws Exception {
+        final CountDownLatch changed = new CountDownLatch(1);
+        final DefaultCacheDataSource<String, Item> asyncSource = new DefaultCacheDataSource<>() {
+
+            @Override
+            public boolean shouldBeCalledAsynchronously() {
+                return true;
+            }
+
+            @Override
+            public LiveDataView<Item> getRows(final int dataSrcRowIndex, final int dataSize) {
+                try {
+                    changed.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return super.getRows(dataSrcRowIndex, dataSize);
+            }
+        };
+        asyncSource.setFilterController(new FilterController<>());
+        final DefaultDataGridController<String, Item> async = new DefaultDataGridController<>(asyncSource);
+        async.setAdapter(new TestAdapter(List.of(qtyColumn)));
+        async.setData(List.of(new Item("a", 1), new Item("b", 2)));
+        final CompletableFuture<Pair<DefaultDataGridController<String, Item>.DataSrcResult, Throwable>> result = new CompletableFuture<>();
+        final DataGridSnapshot snapshot = snapshot(0, 2, 0);
+
+        async.prepareLiveDataOnScreen(0, 2, snapshot, result::complete);
+        // The view passes its live sorts: a sort cleared without a redraw changes them
+        snapshot.sorts.put(0, 1);
+        changed.countDown();
+
+        Assertions.assertEquals(2, result.get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getFirst().liveDataView.getLiveData().size());
     }
 
     @Test

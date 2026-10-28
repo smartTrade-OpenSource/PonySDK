@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
@@ -175,6 +178,19 @@ public class PImageTest extends PSuite {
         }
         assertEquals("data:image/png;base64," + Base64.getEncoder().encodeToString(bytes),
             new PImage.ClassPathURL(RESOURCE).toUrl());
+    }
+
+    @Test
+    public void aResourceGoneBeforeItIsReadIsLogged() throws Exception {
+        final Path classes = Path.of(PImageTest.class.getResource("PImageTest.class").toURI()).getParent();
+        final Path resource = Files.createTempFile(classes, "vanishing", ".png");
+        final PImage.ClassPathURL url = new PImage.ClassPathURL("com/ponysdk/core/ui/basic/" + resource.getFileName());
+        Files.delete(resource);
+
+        try (LogCapture log = LogCapture.of(PImage.class)) {
+            assertTrue(url.toUrl().startsWith("data:image/png;base64,"));
+            assertEquals(List.of("ERROR Cannot load resource from " + url), log.events());
+        }
     }
 
     @Test

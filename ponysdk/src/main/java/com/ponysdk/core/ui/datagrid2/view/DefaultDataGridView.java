@@ -1172,11 +1172,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             unpinnedCells.forEach(CellManager::unselect);
         }
 
-        @Override
-        public String toString() {
-            return "Row [relativeIndex=" + relativeIndex + ", key=" + key + ", data=" + data + ", extended=" + extended + "]";
-        }
-
     }
 
     private class PinnedTable extends Table {
@@ -1598,7 +1593,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setVisibility(final boolean columnVisible) {
             primary.asPendingWidget().setVisible(!columnVisible);
             primary.asWidget().setVisible(columnVisible && !extendedMode);
-            if (extended != null) extended.asWidget().setVisible(columnVisible && extendedMode);
+            if (extended != null) extended.asWidget().setVisible(columnVisible); // only in the extended mode
 
             final PComplexPanel td = getTableCell();
             if (!columnVisible) {
@@ -1683,10 +1678,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         public void checkPosition() {
             callTerminalMethod("checkPosition");
-        }
-
-        public void showLoadingPanel() {
-            callTerminalMethod("showLoading");
         }
 
         public void hideLoadingPanel() {
