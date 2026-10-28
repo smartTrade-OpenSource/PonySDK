@@ -192,4 +192,20 @@ public class PDisclosurePanelTest extends PSuite {
         panel.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue(), true).build());
         assertTrue(panel.isShown());
     }
+
+    @Test
+    public void testClearRemovesTheContent() {
+        final PDisclosurePanel panel = Element.newPDisclosurePanel("header");
+        PWindow.getMain().add(panel);
+        final PLabel content = Element.newPLabel("c");
+        panel.setContent(content);
+        writer.clear();
+
+        panel.clear();
+
+        assertNull(panel.getContent());
+        assertNull(content.getParent());
+        assertEquals(List.of(panel.getID()), writer.valuesAfter(ServerToClientModel.TYPE_REMOVE, content.getID()));
+        assertFalse(panel.remove(null));
+    }
 }

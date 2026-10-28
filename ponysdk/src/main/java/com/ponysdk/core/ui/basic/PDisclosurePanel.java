@@ -141,7 +141,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
 
     @Override
     public void clear() {
-        setContent(null);
+        if (content != null) remove(content);
     }
 
     @Override
@@ -158,9 +158,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         }
     }
 
+    /** The child was just removed from its parent. */
     private void adopt(final PWidget child) {
-        if (child.getParent() == null) child.setParent(this);
-        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+        child.setParent(this);
     }
 
     public void addCloseHandler(final PCloseHandler handler) {

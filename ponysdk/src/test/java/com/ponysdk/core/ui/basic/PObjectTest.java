@@ -52,6 +52,9 @@ import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 public class PObjectTest extends PSuite {
 
@@ -497,5 +500,58 @@ public class PObjectTest extends PSuite {
         assertFalse(label.isInitialized());
         window.open();
         assertTrue(label.isInitialized());
+    }
+
+    @Test
+    public void stackedWritesOfADestroyedObjectAreDropped() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PLabel child = Element.newPLabel();
+        panel.add(child);
+        child.setStyleProperty("color", "red");
+        child.saveAdd(child.getID(), panel.getID(), new ServerBinaryModel(ServerToClientModel.INDEX, 0));
+        child.saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        child.onDestroy();
+
+        child.stackedInstructions.runAll();
+        child.saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        assertTrue(writer.isEmpty());
+    }
+
+    @Test
+    public void anAddWithoutModelsNamesTheObjectAndItsParent() {
+        final PLabel label = attachedLabel();
+        writer.clear();
+        label.saveAdd(label.getID(), 7, (ServerBinaryModel[]) null);
+        assertEquals(List.of(7), writer.valuesAfter(ServerToClientModel.TYPE_ADD, label.getID()));
+    }
+
+    @Test
+    public void anInitializedObjectIsCreatedOnce() {
+        final PLabel label = attachedLabel();
+        writer.clear();
+        label.init();
+        assertTrue(writer.isEmpty());
+    }
+
+    @Test
+    public void anObjectDestroyedBeforeItsWindowOpensIsNeverCreated() {
+        final PWindow window = Element.newPWindow(null, null);
+        final PLabel label = Element.newPLabel("l");
+        window.add(label);
+        label.onDestroy();
+        writer.clear();
+
+        window.open();
+
+        assertFalse(writer.valuesOf(ServerToClientModel.TYPE_CREATE).contains(label.getID()));
+    }
+
+    @Test
+    public void aStackedTwoFieldUpdateOfADestroyedObjectIsDropped() {
+        final PLabel child = Element.newPLabel();
+        child.saveUpdate(ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red");
+        child.onDestroy();
+        child.stackedInstructions.runAll();
+        assertTrue(writer.isEmpty());
     }
 }

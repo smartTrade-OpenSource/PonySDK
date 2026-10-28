@@ -148,6 +148,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     protected void applyInit() {
+        if (destroy) return; // destroyed while waiting for its window or frame
         final ModelWriter writer = writer();
         writer.beginObject(window);
         writeFrameId(writer);
@@ -322,11 +323,12 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         else safeStackedInstructions().append(() -> writeUpdate(key1, value1, key2, value2));
     }
 
-    /** The writer of this object's context, resolved through its window when possible (no ThreadLocal). */
+    /**
+     * The writer of this object's context, resolved through its window (no ThreadLocal): a live object writes once
+     * attached, a destroyed one never.
+     */
     private ModelWriter writer() {
-        final PWindow w = window;
-        final ModelWriter writer = w != null ? w.contextWriter() : null;
-        return writer != null ? writer : UIContext.get().getWriter();
+        return window.contextWriter();
     }
 
     /** {@link com.ponysdk.core.writer.UpdateTarget}: updates of one run share the window / frame header. */
