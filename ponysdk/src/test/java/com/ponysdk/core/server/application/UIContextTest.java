@@ -26,6 +26,11 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.servlet.http.HttpSession;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -139,6 +144,34 @@ public class UIContextTest {
 
         Mockito.verify(object, Mockito.never()).onClientData(Mockito.any());
         assertTrue(uiContext.isAlive());
+    }
+
+    /** An event for an object the server collected is expected (it raced the TYPE_GC); one never created is not. */
+    @Test
+    public void testOnlyAReferenceNeverCreatedIsLoggedAsAnError() {
+        final UIContext uiContext = liveContext();
+        final List<String> errors = new ArrayList<>();
+        final AbstractAppender capture = new AbstractAppender("capture", null, null, true, Property.EMPTY_ARRAY) {
+            @Override
+            public void append(final LogEvent event) {
+                if (event.getLevel() == Level.ERROR) errors.add(event.getMessage().getFormattedMessage());
+            }
+        };
+        capture.start();
+        final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getLogger(UIContext.class);
+        logger.addAppender(capture);
+        try {
+            uiContext.execute(() -> {
+                final int collected = uiContext.nextID(); // created, then collected: no longer in the cache
+                uiContext.fireClientData(instruction(collected));
+                assertEquals(List.of(), errors);
+                uiContext.fireClientData(instruction(collected + 1_000));
+            });
+        } finally {
+            logger.removeAppender(capture);
+        }
+
+        assertEquals(1, errors.size(), errors.toString());
     }
 
     @Test

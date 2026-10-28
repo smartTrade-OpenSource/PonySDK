@@ -390,7 +390,9 @@ public class UIContext {
                 final PObject object = getObject(objectID);
 
                 if (object == null) {
-                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
+                    // An id already given out is an object the server collected: its TYPE_GC raced this event
+                    if (objectID < objectCounter) log.debug("Instruction for collected object #{} dropped: {}", objectID, jsonObject);
+                    else log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
                     if (jsonObject.containsKey(KEY_PARENT_OBJECT_ID)) {
                         final int parentObjectID = jsonObject.getJsonNumber(KEY_PARENT_OBJECT_ID)
