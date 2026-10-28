@@ -393,6 +393,7 @@ public class PWebComponent extends PComplexPanel {
 
     @Override
     void init0() {
+        super.init0(); // the children added at no slot
         // Propagate attach to all declared slots so their children get initialized
         if (slots != null) {
             for (final SlotPanel sp : slots.values()) {

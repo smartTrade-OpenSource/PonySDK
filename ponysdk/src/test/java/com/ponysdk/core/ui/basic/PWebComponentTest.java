@@ -281,6 +281,16 @@ public class PWebComponentTest extends PSuite {
     }
 
     @Test
+    public void childAddedBeforeAttachIsAttachedWithTheComponent() {
+        final PWebComponent c = new PWebComponent("my-chart");
+        final PLabel child = Element.newPLabel();
+        c.add(child);
+        PWindow.getMain().add(c);
+        assertSame(PWindow.getMain(), child.getWindow());
+        assertTrue(child.isInitialized());
+    }
+
+    @Test
     public void jsonHelpersOfGeneratedClasses() {
         assertEquals("\"a\\\"b\"", PWebComponent.jsonOf("a\"b"));
         assertEquals("42", PWebComponent.jsonOf(42.0));

@@ -203,15 +203,14 @@ export class Widget extends BaseObject {
 
     // ---- handlers ----------------------------------------------------------------------------------------------------
 
+    /** The handlers of any widget: the DOM's and HANDLER_VISIBILITY; the others are a widget type's own. */
     override addHandler(reader: Reader, handler: number): void {
         if (HandlerModelDomHandler[handler]) this.addDomHandler(reader, HandlerModelToDomHandlerType[handler]!);
         else if (handler === H.HANDLER_VISIBILITY) this.observeVisibility();
-        else super.addHandler(reader, handler);
     }
 
-    override removeHandler(reader: Reader, handler: number): void {
+    override removeHandler(_reader: Reader, handler: number): void {
         if (handler === H.HANDLER_VISIBILITY) this.visibility?.unobserve(this.element);
-        else super.removeHandler(reader, handler);
     }
 
     /** Listens to a DOM event of the element until the widget is collected. */
@@ -242,11 +241,11 @@ export class Widget extends BaseObject {
             case D.MOUSE_WHELL:
                 this.listen<WheelEvent>('wheel', e => this.sendWheelEvent(type, e));
                 break;
-            case D.BLUR:
-                this.listen('blur', e => this.sendDomEvent(type, e));
+            case D.BLUR: // focus and blur do not bubble: those of the field, in an element that holds one
+                this.listen('blur', e => this.sendDomEvent(type, e), this.focusTarget);
                 break;
             case D.FOCUS:
-                this.listen('focus', e => this.sendDomEvent(type, e));
+                this.listen('focus', e => this.sendDomEvent(type, e), this.focusTarget);
                 break;
             case D.KEY_PRESS:
             case D.KEY_DOWN:
