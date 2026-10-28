@@ -135,6 +135,7 @@ public final class ProtocolBench {
                 }
             };
             socket.setUpgradeRequestData(new UpgradeRequestData(Map.of(), "bench", null));
+            socket.setProtocolVersion(protocolVersion); // as the handshake does: the context speaks the bench's version
             final TxnContext txn = new TxnContext(socket);
             final WebsocketEncoder direct = new WebsocketEncoder() {
                 @Override public void beginObject() {}
