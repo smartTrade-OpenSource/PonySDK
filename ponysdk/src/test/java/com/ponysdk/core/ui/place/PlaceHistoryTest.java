@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.place;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -87,6 +88,17 @@ public class PlaceHistoryTest extends PSuite {
         assertEquals(List.of(home), places);
         controller.goTo(Place.NOWHERE);
         assertEquals(List.of(home, Place.NOWHERE), places);
+    }
+
+    @Test
+    public void placeChangeRequestFiresOnTheRootBus() {
+        final List<Place> fired = new ArrayList<>();
+        final HandlerRegistration registration = UIContext.get().getRootEventBus().addHandler(PlaceChangeEvent.TYPE,
+            (PlaceChangeHandler) event -> fired.add(event.getNewPlace()));
+        PlaceChangeRequest.fire(this, Place.NOWHERE);
+        registration.removeHandler();
+        assertEquals(List.of(Place.NOWHERE), fired);
+        assertNotNull(new PlaceChangeRequest(), "public, implicitly constructible");
     }
 
     @Test

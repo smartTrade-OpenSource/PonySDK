@@ -195,4 +195,19 @@ public class ActivityManagerTest extends PSuite {
         placeRegistration.removeHandler();
         assertEquals(List.of(HOME), places);
     }
+
+    @Test
+    public void anActivityWithoutHooksShowsItsView() {
+        final AbstractActivity<PLabel> activity = new AbstractActivity<>() {
+        };
+        activity.view = Element.newPLabel("plain");
+        final PSimplePanel world = Element.newPSimplePanel();
+
+        activity.start(world, HOME);
+        activity.start(world, SETTINGS);
+
+        assertSame(activity.getView(), world.getWidget());
+        assertFalse(activity.getView().hasStyleName("pony-LoadingBox"));
+        assertFalse(activity.firstStart);
+    }
 }

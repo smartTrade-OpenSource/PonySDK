@@ -96,7 +96,7 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private String dictionaryGet(final int id) {
-        final String value = id >= 0 && id < dictionary.length ? dictionary[id] : null;
+        final String value = id < dictionary.length ? dictionary[id] : null; // a uint31: never negative
         if (value == null) throw new PonyIOException("Unknown dictionary ID: " + id);
         return value;
     }
@@ -379,8 +379,6 @@ public class PonySDKWebDriver implements WebDriver {
                     stringLength = b.getInt();
                     ascii = false;
                     break;
-                default:
-                    assert false; //unreachable
             }
         }
         length += stringLength;
@@ -418,76 +416,46 @@ public class PonySDKWebDriver implements WebDriver {
 
     private Object readArrayElementValue(final ByteBuffer b, final ArrayValueModel model) {
         length += model.getMinSize();
-        switch (model) {
-            case NULL:
-                return null;
-            case BOOLEAN_FALSE:
-                return Boolean.FALSE;
-            case BOOLEAN_TRUE:
-                return Boolean.TRUE;
-            case BYTE:
-                return b.get();
-            case SHORT:
-                return b.getShort();
-            case INTEGER:
-                return b.getInt();
-            case LONG:
-                return b.getLong();
-            case DOUBLE:
-                return b.getDouble();
-            case FLOAT:
-                return b.getFloat();
-            case STRING_ASCII_UINT8_LENGTH:
-                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedByte);
-            case STRING_ASCII_UINT16_LENGTH:
-                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort);
-            case STRING_UTF8_UINT8_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
-            case STRING_UTF8_UINT16_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
-            case STRING_UTF8_UINT32_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
-            case STRING_DICTIONARY_REF:
-                return dictionaryGet(getUint31(b)); // min size (2) already counted above
-            case STRING_DICTIONARY_ADD: {
+        return switch (model) {
+            case NULL -> null;
+            case BOOLEAN_FALSE -> Boolean.FALSE;
+            case BOOLEAN_TRUE -> Boolean.TRUE;
+            case BYTE -> b.get();
+            case SHORT -> b.getShort();
+            case INTEGER -> b.getInt();
+            case LONG -> b.getLong();
+            case DOUBLE -> b.getDouble();
+            case FLOAT -> b.getFloat();
+            case STRING_ASCII_UINT8_LENGTH -> getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedByte);
+            case STRING_ASCII_UINT16_LENGTH -> getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_UINT8_LENGTH -> getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
+            case STRING_UTF8_UINT16_LENGTH -> getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_UINT32_LENGTH -> getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
+            case STRING_DICTIONARY_REF -> dictionaryGet(getUint31(b)); // min size (2) already counted above
+            case STRING_DICTIONARY_ADD -> {
                 final int id = getUint31(b);
                 length += 1; // inner element tag
                 final Object value = readArrayElementValue(b, readArrayValueModel(b));
                 dictionaryPut(id, (String) value);
-                return value;
+                yield value;
             }
-            default:
-                throw new IllegalArgumentException("ArrayValueModel " + model + " is not supported");
-        }
+        };
     }
 
     private Object readModelValue(final ByteBuffer b, final ValueTypeModel type) {
-        switch (type) {
-            case NULL:
-                return null;
-            case BOOLEAN:
-                return readValue(b, 1, buff -> buff.get() == BooleanModel.TRUE.getValue());
-            case BYTE:
-                return readValue(b, 1, ByteBuffer::get);
-            case SHORT:
-                return readValue(b, 2, ByteBuffer::getShort);
-            case INTEGER:
-                return readValue(b, 4, ByteBuffer::getInt);
-            case LONG:
-                return readValue(b, 8, ByteBuffer::getLong);
-            case DOUBLE:
-                return readValue(b, 8, ByteBuffer::getDouble);
-            case FLOAT:
-                return readValue(b, 4, ByteBuffer::getFloat);
-            case STRING:
-                return readValue(b, 1, this::getString);
-            case ARRAY:
-                return readValue(b, 1, this::getArray);
-            case UINT31:
-                return readValue(b, 2, this::getUint31);
-            default:
-                throw new IllegalArgumentException("ValueTypeModel " + type + " is not supported");
-        }
+        return switch (type) {
+            case NULL -> null;
+            case BOOLEAN -> readValue(b, 1, buff -> buff.get() == BooleanModel.TRUE.getValue());
+            case BYTE -> readValue(b, 1, ByteBuffer::get);
+            case SHORT -> readValue(b, 2, ByteBuffer::getShort);
+            case INTEGER -> readValue(b, 4, ByteBuffer::getInt);
+            case LONG -> readValue(b, 8, ByteBuffer::getLong);
+            case DOUBLE -> readValue(b, 8, ByteBuffer::getDouble);
+            case FLOAT -> readValue(b, 4, ByteBuffer::getFloat);
+            case STRING -> readValue(b, 1, this::getString);
+            case ARRAY -> readValue(b, 1, this::getArray);
+            case UINT31 -> readValue(b, 2, this::getUint31);
+        };
     }
 
     private synchronized void onMessage(final ByteBuffer message) {
@@ -551,7 +519,7 @@ public class PonySDKWebDriver implements WebDriver {
             } else {
                 b.compact();
             }
-        } else if (b == buffer && !b.hasRemaining()) {
+        } else if (b == buffer) {
             b.clear();
         }
     }

@@ -140,6 +140,10 @@ public class PonySDKWebDriverTest {
             public void onReceiveCompressed(final int bytes) {
             }
         }, null, handleImplicitCommunication);
+        return attachSession(driver);
+    }
+
+    private PonySDKWebDriver attachSession(final PonySDKWebDriver driver) throws Exception {
         session = Mockito.mock(Session.class);
         remote = Mockito.mock(RemoteEndpoint.Basic.class);
         Mockito.when(session.getBasicRemote()).thenReturn(remote);
@@ -207,6 +211,9 @@ public class PonySDKWebDriverTest {
             .id(ServerToClientModel.TYPE_ADD, 2).end() // no parent
             .id(ServerToClientModel.TYPE_ADD, 2).id(ServerToClientModel.PARENT_OBJECT_ID, 98).end() // unknown parent
             .id(ServerToClientModel.TYPE_REMOVE, 2).end() // not attached
+            .id(ServerToClientModel.TYPE_REMOVE, 96).end() // unknown
+            .id(ServerToClientModel.TYPE_CREATE, 3).put(ServerToClientModel.WIDGET_TYPE, (byte) WidgetType.LABEL.getValue())
+            .id(ServerToClientModel.PARENT_OBJECT_ID, 95).end() // created in an unknown parent
             .id(ServerToClientModel.TYPE_UPDATE, 97).put(ServerToClientModel.TEXT, "lost").end() //
             .bytes());
 
@@ -214,7 +221,8 @@ public class PonySDKWebDriverTest {
         final PonyWebElement label = driver.findElementByPonyId(2);
         assertNull(label.getParent());
         assertNull(label.getText());
-        assertEquals(1, driver.findElements(By.tagName("LABEL")).size());
+        assertNull(driver.findElementByPonyId(3).getParent());
+        assertEquals(2, driver.findElements(By.tagName("LABEL")).size());
     }
 
     @Test
@@ -317,6 +325,17 @@ public class PonySDKWebDriverTest {
         assertTrue(label.getStyles().isEmpty());
         assertTrue(label.isDisplayed());
         assertEquals(3, received.size());
+    }
+
+    @Test
+    public void framesThatAreNotAnUpdateRunAreDispatchedAsReceived() throws Exception {
+        final PonySDKWebDriver driver = driver(false);
+        receive(driver, new Wire() //
+            .id(ServerToClientModel.TYPE_UPDATE, 1).id(ServerToClientModel.TYPE_UPDATE, 2).end() //
+            .put(ServerToClientModel.UPDATE_NEXT, null).put(ServerToClientModel.TEXT, "t").end() //
+            .bytes());
+        assertEquals(List.of("[model=TYPE_UPDATE, value=1, model=TYPE_UPDATE, value=2]",
+            "[model=UPDATE_NEXT, value=null, model=TEXT, value=t]"), received);
     }
 
     @Test
@@ -505,6 +524,31 @@ public class PonySDKWebDriverTest {
         Mockito.doThrow(new IOException("already closed")).when(session).close();
         driver.close();
         Mockito.verify(session).close();
+    }
+
+    @Test
+    public void withoutListenersMessagesAreStillDecodedAndSent() throws Exception {
+        final PonySDKWebDriver driver = attachSession(new PonySDKWebDriver(null, null, null, false));
+        receive(driver, new Wire().create(1, WidgetType.LABEL) //
+            .id(ServerToClientModel.TYPE_UPDATE, 1).put(ServerToClientModel.TEXT, "hi").end().bytes());
+        assertEquals("hi", driver.findElementByPonyId(1).getText());
+
+        driver.findElementByPonyId(1).click();
+        assertEquals(1, sent.size());
+    }
+
+    @Test
+    public void ioExceptionCarriesItsMessageAndCause() {
+        final Throwable cause = new IOException("cause");
+        assertNull(new PonyIOException().getMessage());
+        assertEquals("m", new PonyIOException("m").getMessage());
+        assertSame(cause, new PonyIOException(cause).getCause());
+        final PonyIOException full = new PonyIOException("m", cause, false, false);
+        assertEquals("m", full.getMessage());
+        assertSame(cause, full.getCause());
+        assertEquals(0, full.getStackTrace().length, "not writable");
+        full.addSuppressed(new IOException());
+        assertEquals(0, full.getSuppressed().length, "suppression disabled");
     }
 
     @Test

@@ -102,6 +102,14 @@ public class WebComponentGeneratorTest extends PSuite {
         writer.uninstall();
     }
 
+    @Test
+    public void mainWritesTheClassesOfTheManifest() throws Exception {
+        final Path manifest = Path.of(WebComponentGeneratorTest.class.getResource("/webcomponents/custom-elements.json").toURI());
+        final Path target = output.resolve("main");
+        WebComponentGenerator.main(new String[] { manifest.toString(), PACKAGE, target.toString() });
+        assertEquals(source, Files.readString(target.resolve("com/example/wc/PXGauge.java")));
+    }
+
     // ---- API ----
 
     @Test

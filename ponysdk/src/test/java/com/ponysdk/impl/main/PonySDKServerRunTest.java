@@ -184,6 +184,52 @@ public class PonySDKServerRunTest {
         }
     }
 
+    @Test
+    public void aListenerFailureIsReportedAsASessionError() throws Exception {
+        final PonySDKServer server = server();
+        server.start();
+        try {
+            final RuntimeException failure = new IllegalStateException("listener failure");
+            final CountDownLatch errored = new CountDownLatch(1);
+            final Throwable[] reported = new Throwable[1];
+            final PonySDKWebDriver driver = new PonySDKWebDriver(new PonyMessageListener() {
+
+                @Override
+                public void onSendMessage(final JsonObject message) {
+                }
+
+                @Override
+                public void onReceiveMessage(final List<PonyFrame> message) {
+                    throw failure;
+                }
+            }, null, new PonySessionListener() {
+
+                @Override
+                public void onOpen(final Session session) {
+                }
+
+                @Override
+                public void onClose(final Session session, final CloseReason closeReason) {
+                }
+
+                @Override
+                public void onError(final Session session, final Throwable thr) {
+                    reported[0] = thr;
+                    errored.countDown();
+                }
+            }, false);
+
+            driver.get("ws://127.0.0.1:" + port(server) + "/app/ws");
+            assertTrue(errored.await(10, TimeUnit.SECONDS), "the failure reached the session listener");
+            assertSame(failure, reported[0]);
+
+            driver.ignoreSessionStatusChanges();
+            driver.close();
+        } finally {
+            server.stop();
+        }
+    }
+
     /** Exposes the protected connector factories. */
     private static final class ConnectorServer extends PonySDKServer {
 

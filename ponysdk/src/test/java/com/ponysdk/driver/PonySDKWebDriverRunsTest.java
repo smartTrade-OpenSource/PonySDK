@@ -117,6 +117,7 @@ public class PonySDKWebDriverRunsTest {
         assertEquals("ws://h/app/ws?w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT, m.invoke(driver, "ws://h/app/ws"));
         assertEquals("ws://h/app/ws?a=1&w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT, m.invoke(driver, "ws://h/app/ws?a=1"));
         assertEquals("ws://h/app/ws?w=1", m.invoke(driver, "ws://h/app/ws?w=1"));
+        assertEquals("ws://h/app/ws?a=1&w=1", m.invoke(driver, "ws://h/app/ws?a=1&w=1"));
         driver.setProtocolVersion(1);
         assertEquals("ws://h/app/ws?w=1", m.invoke(driver, "ws://h/app/ws"));
     }

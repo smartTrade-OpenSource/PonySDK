@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
@@ -48,6 +50,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     public void setData(final int rowIndex, final K key, final D data) {
+        // Rows are dense: a row index past the last one would desynchronise the model from the view
+        Objects.checkIndex(rowIndex, rows.size() + 1);
         if (!cells.containsKey(rowIndex)) {
             addData(rowIndex, key, data);
         } else {
@@ -83,26 +87,16 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             if (rowIndex == previousIndex) {
                 rows.set(previousIndex, data);
                 keyByIndex.set(previousIndex, key);
-            } else if (rowIndex < rows.size()) {
+            } else {
                 // The key moves: the row it leaves takes what the target row showed, so no row is lost
                 final D displaced = rows.set(rowIndex, data);
                 keyByIndex.set(previousIndex, keyByIndex.set(rowIndex, key));
                 rows.set(previousIndex, displaced);
                 redraw(previousIndex, displaced);
-            } else {
-                rows.remove(previousIndex);
-                keyByIndex.remove(previousIndex);
-                rows.add(rowIndex, data);
-                keyByIndex.add(rowIndex, key);
             }
         } else {
-            if (rowIndex < rows.size()) {
-                rows.set(rowIndex, data);
-                keyByIndex.set(rowIndex, key);
-            } else {
-                rows.add(rowIndex, data);
-                keyByIndex.add(rowIndex, key);
-            }
+            rows.set(rowIndex, data);
+            keyByIndex.set(rowIndex, key);
         }
 
         redraw(rowIndex, data);
@@ -179,6 +173,21 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
     @Override
     public void remove(final D data) {
+        throw new RuntimeException("Use removeByKey(key)");
+    }
+
+    @Override
+    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
+        throw new RuntimeException("Use setData(rowIndex, key, data)");
+    }
+
+    @Override
+    public void insertSubList(final D fatherData, final List<D> datas) {
+        throw new RuntimeException("Use setData(rowIndex, key, data)");
+    }
+
+    @Override
+    public void removeSubList(final D fatherData) {
         throw new RuntimeException("Use removeByKey(key)");
     }
 

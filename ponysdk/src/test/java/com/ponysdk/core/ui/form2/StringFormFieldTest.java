@@ -59,6 +59,17 @@ public class StringFormFieldTest extends PSuite {
     }
 
     @Test
+    public void aReplacedValidatorNoLongerApplies() {
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
+        PWindow.getMain().add(formField);
+        formField.setValidator(value -> ValidationResult.KO());
+        assertEquals("Validation failed", formField.validate().getErrorMessage());
+
+        formField.setValidator(value -> ValidationResult.OK());
+        assertTrue(formField.validate().isValid());
+    }
+
+    @Test
     public void testValidatorAndRequired() {
         final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);

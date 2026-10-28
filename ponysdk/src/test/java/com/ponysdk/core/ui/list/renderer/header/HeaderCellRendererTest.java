@@ -25,8 +25,10 @@ package com.ponysdk.core.ui.list.renderer.header;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -76,6 +78,8 @@ public class HeaderCellRendererTest extends PSuite {
         assertEquals("descending", HeaderSortingHelper.getAssociatedStyleName(SortingType.DESCENDING));
         assertEquals("none", HeaderSortingHelper.getAssociatedStyleName(SortingType.NONE));
         assertEquals(SortingType.NONE, HeaderSortingHelper.getNextSortingType(null));
+        assertThrows(NullPointerException.class, () -> HeaderSortingHelper.getAssociatedStyleName(null));
+        assertNotNull(new HeaderSortingHelper(), "public, implicitly constructible");
     }
 
     @Test

@@ -195,6 +195,31 @@ public class PendingUpdatesTest {
     }
 
     @Test
+    public void aReplacedSlotIsSkippedWhenSortingByComparison() {
+        final PendingUpdates pending = new PendingUpdates();
+        final Object other = new Object();
+        final Target a = new Target(1, WINDOW);
+        text(pending, a, "x");
+        text(pending, new Target(2, other), "y");
+        text(pending, a, "x2");
+
+        assertEquals(List.of(List.of("TYPE_UPDATE=2", "TEXT=y"), List.of("TYPE_UPDATE=1", "TEXT=x2")),
+            drain(pending, ProtocolVersion.UPDATE_RUNS));
+    }
+
+    @Test
+    public void beyond255GroupsTheSlotOrderIsKept() {
+        final PendingUpdates pending = new PendingUpdates();
+        final List<List<String>> expected = new ArrayList<>();
+        for (int g = 0; g < 256; g++) {
+            final int id = 1000 - g;
+            text(pending, new Target(id, new Object()), "t");
+            expected.add(List.of("TYPE_UPDATE=" + id, "TEXT=t"));
+        }
+        assertEquals(expected, drain(pending, ProtocolVersion.UPDATE_RUNS));
+    }
+
+    @Test
     public void aLongRunIsSplitIntoBlocks() {
         final PendingUpdates pending = new PendingUpdates();
         final Target first = new Target(1, WINDOW);

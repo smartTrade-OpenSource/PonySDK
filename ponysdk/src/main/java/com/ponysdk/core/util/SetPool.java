@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.util;
 
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
@@ -448,7 +449,7 @@ public class SetPool<E> {
     /**
      * Used exclusively as a key to retrieve an equivalent ImmutableSet from a Map
      */
-    private abstract class MutableSet<D> implements Set<E> {
+    private abstract class MutableSet<D> extends AbstractSet<E> {
 
         private ImmutableSet originalSet;
         private D delta;
@@ -500,58 +501,9 @@ public class SetPool<E> {
             return size;
         }
 
-        @Override
-        public final boolean isEmpty() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean contains(final Object o) {
-            throw new UnsupportedOperationException();
-        }
-
+        /** Never iterated: a key only answers {@link #hashCode()}, {@link #size()} and {@link #containsAll}. */
         @Override
         public final Iterator<E> iterator() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final Object[] toArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final <T> T[] toArray(final T[] a) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean add(final Object e) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean remove(final Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean addAll(final Collection<? extends E> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean retainAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean removeAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final void clear() {
             throw new UnsupportedOperationException();
         }
 
@@ -571,10 +523,8 @@ public class SetPool<E> {
          */
         @Override
         public boolean equals(final Object o) {
-            if (o == this) return true;
-            if (o == null) return false;
+            if (o == null) return false; // a key the GC cleared
 
-            if (!(o instanceof SetPool<?>.ImmutableSet)) throw new IllegalArgumentException();
             final Collection<?> c = (Collection<?>) o;
             if (c.size() != size()) return false;
             /*

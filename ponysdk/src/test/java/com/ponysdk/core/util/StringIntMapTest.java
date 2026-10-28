@@ -133,5 +133,25 @@ public class StringIntMapTest {
     public void packedModeRejectsAValueAboveItsBound() {
         assertThrows(IllegalArgumentException.class, () ->
             new StringIntMap(4, 255).put("x", 1 << 20));
+        assertThrows(IllegalArgumentException.class, () -> new StringIntMap(4, 255).put("x", -1));
+    }
+
+    @Test
+    public void packedModeClears() {
+        final StringIntMap m = new StringIntMap(4, 255);
+        m.put("a", 7);
+        assertFalse(m.isEmpty());
+        m.clear();
+        assertTrue(m.isEmpty());
+        assertEquals(StringIntMap.MISSING, m.get("a"));
+    }
+
+    @Test
+    public void aBoundOf2Pow24OrMoreKeepsEveryIntValue() {
+        final StringIntMap m = new StringIntMap(4, 1 << 24);
+        m.put("big", Integer.MAX_VALUE);
+        m.put("negative", -5);
+        assertEquals(Integer.MAX_VALUE, m.get("big"));
+        assertEquals(-5, m.get("negative"));
     }
 }

@@ -158,6 +158,40 @@ public class SetPoolTest {
     }
 
     @Test
+    public void bulkOperationsDoNotAnswerAnotherSetWithTheSameHash() {
+        // {x, Aa} and {x, BB} have the same size and hash: each one, built first, must not answer for the other
+        final SetPool<String>.ImmutableSet x = empty.getAdd("x");
+        final SetPool<String>.ImmutableSet xbb = x.getAdd("BB");
+        final SetPool<String>.ImmutableSet xaa = x.getAddAll(Set.of("Aa"));
+        assertEquals(Set.of("x", "Aa"), xaa);
+
+        final SetPool<String>.ImmutableSet y = empty.getAdd("y");
+        final SetPool<String>.ImmutableSet yaa = y.getAdd("Aa");
+        final SetPool<String>.ImmutableSet yaabb = yaa.getAdd("BB");
+        assertEquals(Set.of("y", "BB"), yaabb.getRemoveAll(Set.of("Aa")));
+        assertEquals(Set.of("x", "BB"), xbb);
+    }
+
+    @Test
+    public void removalsDoNotAnswerAnotherSetWithTheSameHash() {
+        // {z, Aa} is pooled: removing Aa from {z, Aa, BB} gives {z, BB}, of the same size and hash
+        final SetPool<String>.ImmutableSet za = empty.getAdd("z").getAdd("Aa");
+        assertEquals(Set.of("z", "BB"), za.getAdd("BB").getRemove("Aa"));
+
+        // {x, BB} is pooled: retaining {x, Aa, BB} of {x, y, Aa} gives {x, Aa}
+        final SetPool<String>.ImmutableSet xbb = empty.getAdd("x").getAdd("BB");
+        final SetPool<String>.ImmutableSet xya = empty.getAdd("y").getAdd("Aa").getAdd("x");
+        assertEquals(Set.of("x", "Aa"), xya.getRetainAll(Set.of("x", "Aa", "BB")));
+
+        // "AaAa", "BBBB", "AaBB" and "BBAa" share their hash: {AaBB, BBAa} is pooled
+        final SetPool<String>.ImmutableSet mixed = empty.getAdd("AaBB").getAdd("BBAa");
+        final SetPool<String>.ImmutableSet w = empty.getAdd("w").getAdd("AaAa").getAdd("BBBB");
+        assertEquals(Set.of("AaAa", "BBBB"), w.getRemoveAll(Set.of("w")));
+        assertEquals(Set.of("AaBB", "BBAa"), mixed);
+        assertEquals(Set.of("x", "BB"), xbb);
+    }
+
+    @Test
     public void behavesAsAReadOnlySet() {
         final SetPool<String>.ImmutableSet ab = empty.getAddAll(ordered("a", "b"));
         assertEquals(2, ab.size());

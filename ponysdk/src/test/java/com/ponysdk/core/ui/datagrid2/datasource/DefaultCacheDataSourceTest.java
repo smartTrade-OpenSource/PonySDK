@@ -81,6 +81,26 @@ public class DefaultCacheDataSourceTest {
     }
 
     @Test
+    public void theSortedRowListsRejectADuplicateAndMissAnAbsentRow() {
+        final DefaultRow<Item> a = new DefaultRow<>(0, new Item("a", 1));
+        final DefaultRow<Item> b = new DefaultRow<>(1, new Item("b", 2));
+        final DefaultRow<Item> c = new DefaultRow<>(2, new Item("c", 3));
+        final List<DefaultRow<Item>> rows = new ArrayList<>();
+        source.insertRow(rows, a);
+        source.insertRow(rows, b);
+        source.insertRow(rows, c);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> source.insertRow(rows, b));
+        Assertions.assertEquals(List.of(a, b, c), rows);
+
+        final DefaultRow<Item> absent = new DefaultRow<>(3, new Item("d", 4));
+        Assertions.assertEquals(-1, source.findRowIndex(rows, absent));
+        Assertions.assertEquals(-1, source.removeRow(rows, absent));
+        Assertions.assertEquals(1, source.removeRow(rows, b));
+        Assertions.assertEquals(List.of(a, c), rows);
+    }
+
+    @Test
     public void descendingInsertionOrderPutsNewRowsFirst() {
         source = new DefaultCacheDataSource<>();
         source.setFilterController(new FilterController<>());

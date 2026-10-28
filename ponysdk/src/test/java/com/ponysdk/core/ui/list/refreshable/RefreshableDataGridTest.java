@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.DefaultSimpleListView;
 import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
@@ -158,10 +159,48 @@ public class RefreshableDataGridTest extends PSuite {
     }
 
     @Test
+    public void aRowBeyondTheLastIsRejected() {
+        grid.setData(0, "k1", "a");
+
+        assertThrows(IndexOutOfBoundsException.class, () -> grid.setData(2, "k2", "b"));
+        assertThrows(IndexOutOfBoundsException.class, () -> grid.setData(-1, "k2", "b"));
+
+        assertEquals(1, grid.getRowCount());
+        assertEquals(2, view.getRowCount());
+        assertEquals(-1, grid.removeByKey("k2"));
+    }
+
+    @Test
+    public void movingAColumnReordersTheViewToo() {
+        final GridTableWidget table = new GridTableWidget();
+        final RefreshableDataGrid<String, String> tableGrid = new RefreshableDataGrid<>(table);
+        tableGrid.addDataGridColumnDescriptor(valueColumn);
+        tableGrid.addDataGridColumnDescriptor(lengthColumn);
+        tableGrid.setData(0, "k1", "abc");
+
+        tableGrid.moveColumn(0, 1);
+
+        assertEquals(List.of(lengthColumn, valueColumn), tableGrid.getColumnDescriptors());
+        assertEquals("3", ((PLabel) table.getCell(1, 0).getWidget(0)).getText());
+        assertEquals("abc", ((PLabel) table.getCell(1, 1).getWidget(0)).getText());
+    }
+
+    @Test
     public void testIndexBasedApiIsRejected() {
         assertThrows(RuntimeException.class, () -> grid.setData(0, "a"));
         assertThrows(RuntimeException.class, () -> grid.setData(List.of("a")));
         assertThrows(RuntimeException.class, () -> grid.remove("a"));
+    }
+
+    @Test
+    public void rowsAreNotInsertedBehindTheKeys() {
+        grid.setData(0, "k1", "a");
+
+        assertThrows(RuntimeException.class, () -> grid.insertRow(0, 0, 1, Element.newPLabel()));
+        assertThrows(RuntimeException.class, () -> grid.insertSubList("a", List.of("b")));
+        assertThrows(RuntimeException.class, () -> grid.removeSubList("a"));
+        assertEquals(1, grid.getRowCount());
+        assertEquals("a", grid.getViewData(0));
     }
 
     @Test
