@@ -58,14 +58,14 @@ export class CheckBox extends FocusWidget {
             w.caption.textContent = r.str;
         }],
         [K.HTML, (w, r) => {
-            w.caption.innerHTML = r.str ?? '';
+            w.caption.innerHTML = r.str;
         }],
         [K.PUT_INPUT_ATTRIBUTE_KEY, (w, r) => {
-            const name = r.str ?? '';
+            const name = r.str;
             r.read(); // INPUT_ATTRIBUTE_VALUE
-            w.input.setAttribute(name, r.str ?? '');
+            w.input.setAttribute(name, r.str);
         }],
-        [K.REMOVE_ATTRIBUTE_KEY, (w, r) => w.input.removeAttribute(r.str ?? '')],
+        [K.REMOVE_ATTRIBUTE_KEY, (w, r) => w.input.removeAttribute(r.str)],
     ]);
 }
 
@@ -78,7 +78,7 @@ export class RadioButton extends CheckBox {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.NAME) {
-            this.input.name = reader.str ?? '';
+            this.input.name = reader.str;
             return true;
         }
         if (reader.key === K.VALUE_CHECKBOX) {

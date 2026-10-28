@@ -26,6 +26,10 @@ test('an escaped quote does not end a string', () => {
     assert.equal(pageSelector('[title="a \\" body"] body', ':host'), '[title="a \\" body"] [data-pony-body]');
 });
 
+test('an escaped quote in a compound on the root does not end its string', () => {
+    assert.equal(pageSelector('html[title="a \\" b"] .a', ':host'), ':host([title="a \\" b"]) .a');
+});
+
 test('in the page, the root is the element', () => {
     assert.equal(pageSelector(':root', 'pony-app'), 'pony-app');
     assert.equal(pageSelector('html.dark body .a', 'pony-app'), 'pony-app.dark [data-pony-body] .a');

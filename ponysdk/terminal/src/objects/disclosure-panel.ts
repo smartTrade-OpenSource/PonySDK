@@ -17,7 +17,7 @@ export class DisclosurePanel extends Widget {
 
     static create(context: Context, id: number, type: number, reader: Reader): DisclosurePanel {
         reader.read(); // the header text
-        return new DisclosurePanel(context, id, type, reader.str ?? '');
+        return new DisclosurePanel(context, id, type, reader.str);
     }
 
     private constructor(context: Context, id: number, type: number, header: string) {

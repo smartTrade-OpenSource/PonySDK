@@ -17,7 +17,7 @@ import { Widget } from '../runtime/widget.ts';
 
 /** A CSS length from a value and a PUnit. */
 function length(value: number, unit: number): string {
-    return `${value}${PUnitValue[unit] ?? 'px'}`;
+    return `${value}${PUnitValue[unit]!}`;
 }
 
 /** The styles a layer gives to its child, removed when the child leaves. */
@@ -59,11 +59,11 @@ export class LayoutPanel extends Widget {
     }
 
     protected override nodeOf(child: Widget): Element {
-        const layer = this.layers.get(child);
+        const layer = this.layers.get(child)!;
         this.layers.delete(child);
         release(child.element);
-        if (layer !== undefined) child.element.remove();
-        return layer ?? child.element;
+        child.element.remove();
+        return layer;
     }
 
     override update(reader: Reader): boolean {
@@ -86,9 +86,7 @@ export class LayoutPanel extends Widget {
             case K.WIDGET_HIDDEN: {
                 const hidden = reader.bool;
                 reader.read(); // WIDGET_ID
-                const child = this.context.object(reader.int);
-                const layer = child instanceof Widget ? this.layers.get(child) : undefined;
-                if (layer !== undefined) layer.hidden = hidden;
+                this.layers.get(this.context.object(reader.int) as Widget)!.hidden = hidden; // a child, for the server
                 return true;
             }
             default:
@@ -106,8 +104,7 @@ export class LayoutPanel extends Widget {
             reader.read();
             values.set(reader.key, reader.num);
         }
-        const layer = child instanceof Widget ? this.layers.get(child) : undefined;
-        if (layer === undefined) return;
+        const layer = this.layers.get(child as Widget)!; // a child, for the server
         const set = (property: 'left' | 'right' | 'width' | 'top' | 'bottom' | 'height', key: number): string =>
             values.has(key) ? length(values.get(key)!, unit) : '';
         const horizontal = values.has(K.LEFT) || values.has(K.RIGHT) || values.has(K.WIDTH);
@@ -165,15 +162,10 @@ export class RootLayoutPanel extends LayoutPanel {
     }
 }
 
-/** PSimpleLayoutPanel: one child, filling the panel; a new one replaces it. */
+/** PSimpleLayoutPanel: one child, filling the panel; the server removes it before adding another. */
 export class SimpleLayoutPanel extends LayoutPanel {
     static override create(context: Context, id: number, type: number, _reader: Reader): SimpleLayoutPanel {
         return new SimpleLayoutPanel(context, id, type, document.createElement('div'), 'pony-SimpleLayoutPanel');
-    }
-
-    override add(reader: Reader, child: TerminalObject): void {
-        for (const widget of [...this.children]) if (widget !== child) this.removeChild(widget);
-        super.add(reader, child);
     }
 }
 
@@ -489,15 +481,10 @@ export class HeaderPanel extends Widget {
         this.slots = slots;
     }
 
-    /** INDEX: 0 header, 1 content, 2 footer; without it, the content. */
+    /** INDEX: 0 header, 1 content, 2 footer. */
     override add(reader: Reader, child: TerminalObject): void {
-        let index = 1;
-        if (reader.read() === K.INDEX) index = reader.int;
-        else reader.rewind();
-        const slot = this.slots[index];
-        if (!(child instanceof Widget) || slot === undefined) return;
-        for (const widget of [...this.children]) if (slot.contains(widget.element)) this.removeChild(widget);
-        this.appendInside(slot, child);
+        reader.read(); // INDEX
+        this.appendInside(this.slots[reader.int]!, child as Widget); // the server removed the slot's widget before
     }
 
     override update(reader: Reader): boolean {

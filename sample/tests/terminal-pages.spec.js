@@ -91,6 +91,8 @@ test('widget: mouse, wheel, context menu and focus events reach the server; prev
     await expect(status(page)).toContainText(/\bover$/);
     await page.mouse.wheel(0, 120);
     await expect(status(page)).toContainText('wheel 1');
+    await target.click({ button: 'middle' });
+    await expect(status(page)).toContainText('down BUTTON_MIDDLE');
     await target.click({ button: 'right' });
     await expect(status(page)).toContainText('down BUTTON_RIGHT');
     await expect(status(page)).toContainText('menu');
@@ -154,7 +156,7 @@ test('widget: title, styles, full size, native binding, AJAX and terminal data',
 
     const answer = await page.evaluate(() => new Promise(resolve => {
         const ajax = /** @type {HTMLElement} */ (document.querySelector('[aria-label="Ajax"]'));
-        /** @type {any} */ (window).pony.sendDataToServer(ajax.id, { question: 'life' }, resolve);
+        /** @type {any} */ (window).pony.sendDataToServer(ajax.id, { question: 'life', none: null, count: 2 }, resolve);
     }));
     expect(answer).toBe('answer to life');
     await page.evaluate(() => {
@@ -340,7 +342,7 @@ test('tree: Home, End and Up move the focus; the server renames, collapses, remo
     await expect(page.getByRole('treeitem')).toHaveCount(0);
 });
 
-test('rich text: the formatter commands sent by the server, a toolbar list, a link from a prompt', async ({ page }) => {
+test('rich text: the formatter commands sent by the server, a toolbar list, a link and an image from a prompt', async ({ page }) => {
     await page.goto(BASE_URL + '#terminal-richtext');
     const area = page.getByRole('textbox', { name: 'Rich text' });
     await expect(area).toHaveText('Some text');
@@ -366,6 +368,13 @@ test('rich text: the formatter commands sent by the server, a toolbar list, a li
     page.once('dialog', dialog => dialog.dismiss());
     await page.getByRole('button', { name: 'Create Link' }).click();
     await expect(area.locator('a')).toHaveCount(1);
+    page.once('dialog', dialog => {
+        expect(dialog.message()).toBe('Enter an image URL:');
+        void dialog.accept('images/pony.png');
+    });
+    await area.click();
+    await page.getByRole('button', { name: 'Insert Image' }).click();
+    await expect(area.locator('img[src="images/pony.png"]')).toHaveCount(1);
 
     await button(page, 'Plain text').click();
     await expect(area).toHaveText('Plain');
@@ -664,7 +673,9 @@ test('misc: a context the server ends asks the page to reload, through ponysdk.j
 test('window.pony: the methods of the GWT terminal that pages and addons call', async ({ page }) => {
     const sockets = [];
     page.on('websocket', ws => sockets.push(ws));
-    await open(page, 'misc');
+    await page.goto(BASE_URL + '?from=test#terminal-misc'); // a query the base URL leaves out
+    await expect(page.getByLabel('Status')).toBeVisible();
+    expect(await page.evaluate(() => /** @type {any} */ (window).pony.getHostPageBaseURL())).toBe(BASE_URL);
     const pony = await page.evaluate(() => {
         const terminal = /** @type {any} */ (window).pony;
         const id = terminal.getContextId();
@@ -721,8 +732,9 @@ test('a block the server would not send: a property an object does not have, a t
     // WIDGET_FULL_SIZE 201 (no value), END 4. The cookies are object #0.
     socket.send(Buffer.from([7, 0, 0, 201, 4]));
     socket.send(Buffer.from([6, 0x7f, 0, 194, 127, 4]));
-    await expect.poll(() => warned.filter(w => /object #0 has no property WIDGET_FULL_SIZE|has no type #127 yet/.test(w)).length)
-        .toBe(2);
+    socket.send(Buffer.from([7, 0, 1, 201, 4])); // the main window, #1
+    await expect.poll(() => warned.filter(w => /#[01] has no property WIDGET_FULL_SIZE|has no type #127 yet/.test(w)).length)
+        .toBe(3);
     await button(page, 'Later').click();
     await expect(status(page)).toContainText('script 12'); // the page goes on
 });
@@ -734,4 +746,302 @@ test('misc: a root panel in an element of the page, by its id; an id the page do
     await expect(page.locator('#loading')).toContainText('In the zone');
     await button(page, 'No zone').click();
     await expect.poll(() => messages.some(m => m.includes('No element #nowhere'))).toBe(true); // the error, to the server
+});
+
+test('window: one of another URL, which is no terminal\'s; a frame whose URL has a query; the tabindex option passed on; the page reloaded by the server', async ({ page }) => {
+    await open(page, 'window');
+    await page.evaluate(() => /** @type {any} */ (window).pony.setTabindexOnlyFormField(true));
+    const [blank] = await Promise.all([page.waitForEvent('popup'), button(page, 'Open blank').click()]);
+    await expect(blank).toHaveURL('about:blank');
+    await blank.close();
+
+    await button(page, 'Frame').click();
+    await expect(page.locator('iframe[title="Query frame"]')).toHaveAttribute('src', /frame-demo\.html\?demo&.*=true$/);
+
+    const [child] = await Promise.all([page.waitForEvent('popup'), button(page, 'Open window').click()]);
+    await expect(child.getByText('Child content')).toBeVisible();
+    expect(await child.evaluate(() => /** @type {any} */ (window).pony.isTabindexOnlyFormField())).toBe(true);
+    await Promise.all([child.waitForEvent('close'), button(page, 'Close').click()]);
+
+    await Promise.all([page.waitForEvent('load'), button(page, 'Reload page').click()]);
+    await expect(status(page)).toHaveText('Status:'); // another context
+});
+
+test('tree: an item inserted first, the last children removed, a field as an item, moved; an item opened before it is added; no selection', async ({ page }) => {
+    await page.goto(BASE_URL + '#terminal-tree');
+    const item = name => page.getByRole('treeitem', { name, exact: true });
+    const children = page.locator('[role=treeitem]', { hasText: 'First' }).locator(':scope > [role=group] > [role=treeitem]');
+    await expect(children).toHaveText(['Child A', 'Child B']);
+    await button(page, 'Insert first').click();
+    await expect(children).toHaveText(['Child zero', 'Child A', 'Child B']);
+    await button(page, 'Remove B').click();
+    await expect(item('First')).toHaveAttribute('aria-expanded', 'true');
+    await button(page, 'Remove children').click();
+    await expect(children).toHaveCount(0);
+    await expect(item('First')).not.toHaveAttribute('aria-expanded');
+
+    await button(page, 'Field item').click();
+    const field = page.getByLabel('Item field');
+    await field.pressSequentially('ab'); // the tree's keys are an item's, not those of a field in it
+    await expect(field).toHaveValue('ab');
+    await expect(field).toBeFocused();
+    await button(page, 'Move field').click();
+    await expect(page.getByRole('treeitem').last().getByLabel('Item field')).toHaveValue('ab');
+    await expect(page.getByLabel('Item field')).toHaveCount(1);
+
+    await button(page, 'Add opened').click();
+    await expect(item('Opened')).toHaveAttribute('aria-expanded', 'true');
+    await expect(item('Inner')).toBeVisible();
+
+    await item('Second').click();
+    await expect(item('Second')).toHaveAttribute('aria-selected', 'true');
+    await button(page, 'Unselect').click();
+    await expect(page.locator('[role=treeitem][aria-selected="true"]')).toHaveCount(0);
+});
+
+test('menu: a click on an open item closes it; Home, End and other keys; a submenu\'s submenu by the keyboard; an item without a command; a bar removed while a submenu shows', async ({ page }) => {
+    await open(page, 'menu');
+    const item = name => page.getByRole('menuitem', { name, exact: true });
+    await item('File').click();
+    await expect(item('New')).toBeVisible();
+    await item('File').click(); // its submenu shows: it closes
+    await expect(item('New')).toBeHidden();
+
+    await item('File').focus();
+    await page.keyboard.press('End');
+    await expect(item('Help')).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(item('File')).toBeFocused();
+    await page.keyboard.press('x'); // not a key of the bar
+    await expect(item('File')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(item('New')).toBeFocused();
+    await page.keyboard.press('x'); // a key of neither the submenu nor the bar under it
+    await expect(item('New')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(item('Recent')).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(item('Recent one')).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await expect(item('Recent one')).toBeHidden();
+    await expect(item('Recent')).toBeFocused();
+
+    await item('File').focus();
+    await page.keyboard.press('Enter'); // its submenu shows already: it stays
+    await expect(item('New')).toBeFocused();
+    await item('Plain').click(); // no command: nothing sent
+    await page.mouse.click(5, 5);
+    await expect(item('New')).toBeHidden();
+
+    await item('File').focus();
+    await page.keyboard.press('Enter');
+    await expect(item('New')).toBeFocused();
+    await button(page, 'Remove menu').focus(); // no press outside the menus: the submenu still shows
+    await expect(item('New')).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('menubar')).toHaveCount(0);
+    await expect(status(page)).toHaveText('Status:');
+});
+
+test('forms: keys on tabs and on a tab\'s field; a list with nothing chosen; a file taken off; a masked field set, focused, pasted into, typed over; addons on widgets that show', async ({ page }) => {
+    await open(page, 'forms');
+    const tab = name => page.getByRole('tab', { name, exact: true });
+    await tab('First').focus();
+    await page.keyboard.press('ArrowLeft'); // from the first, the last
+    await expect(page.getByRole('tab').nth(2)).toBeFocused();
+    await expect(page.getByText('Third panel')).toBeVisible();
+    await page.keyboard.press('Home');
+    await expect(tab('First')).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowLeft');
+    await expect(tab('First')).toBeFocused();
+    await page.keyboard.press('x'); // not a key of the tabs
+    await expect(tab('First')).toBeFocused();
+    await page.evaluate(() => /** @type {HTMLElement} */ (document.activeElement).blur());
+    await page.getByLabel('Tab field').dispatchEvent('keydown', { key: 'ArrowRight' }); // from a tab's field, no tab focused
+    await expect(page.getByText('First panel')).toBeVisible();
+
+    const list = page.getByLabel('Choices');
+    await list.selectOption(['Two']);
+    await expect(status(page)).toHaveText('Status: choices [1]');
+    await list.selectOption([]);
+    await expect(status(page)).toHaveText('Status: choices [1], choices []');
+    await list.selectOption(['One']);
+    await expect(status(page)).toContainText('choices [0]');
+    await button(page, 'Deselect').click();
+    await expect.poll(() => list.evaluate(e => /** @type {HTMLSelectElement} */ (e).selectedIndex)).toBe(-1);
+
+    const file = page.getByLabel('Form file');
+    await file.setInputFiles({ name: 'pony.txt', mimeType: 'text/plain', buffer: Buffer.from('pony') });
+    await expect(status(page)).toContainText(/file \S*pony\.txt$/);
+    await file.setInputFiles([]);
+    await expect(status(page)).toContainText(/file \S*pony\.txt, file (null)?$/);
+
+    const masked = page.getByLabel('Masked');
+    await button(page, 'Set masked').click();
+    await expect(masked).toHaveValue('12/__'); // the x refused, and what follows it
+    await masked.focus(); // by no press: the cursor goes where typing goes on at once
+    await expect.poll(() => masked.evaluate(e => /** @type {HTMLInputElement} */ (e).selectionStart)).toBe(3);
+    // a text field's paste and drop carry their text (data, no dataTransfer), in each browser
+    await masked.evaluate(e => e.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertFromPaste', data: '7',
+        bubbles: true, cancelable: true })));
+    await masked.evaluate(e => e.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertFromDrop', data: '8',
+        bubbles: true, cancelable: true })));
+    await expect(masked).toHaveValue('12/78');
+    await masked.evaluate(e => /** @type {HTMLInputElement} */ (e).setSelectionRange(0, 2));
+    await page.keyboard.type('9'); // over the selection cut: typed over what was pulled back
+    await expect(masked).toHaveValue('98/__');
+
+    const errors = [];
+    page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+    await button(page, 'Highlight').click(); // JSON creation arguments, a widget attached already
+    await expect(page.getByText('Highlighted', { exact: true })).toHaveCSS('outline-color', 'rgb(1, 2, 3)');
+    await button(page, 'Highlight in no color').click(); // its script refuses it: reported, the page goes on
+    await expect.poll(() => errors.some(e => /could not be created/.test(e))).toBe(true);
+    await button(page, 'Deselect').click();
+    await expect(page.getByText('Unhighlighted', { exact: true })).toHaveCSS('outline-style', 'none');
+});
+
+test('date box: a text that is no date marked, the date cleared by the server, years by Shift+PageUp; removed while its picker shows, which hides', async ({ page }) => {
+    await open(page, 'datebox');
+    const box = page.getByLabel('Date', { exact: true });
+    await box.fill('no date');
+    await box.press('Enter');
+    await expect(box).toHaveAttribute('aria-invalid', 'true');
+    await button(page, 'Clear date').click();
+    await expect(box).toHaveValue('');
+    await expect(box).not.toHaveAttribute('aria-invalid');
+
+    await box.fill('2024-05-15 09:30');
+    await box.focus();
+    await box.press('ArrowDown');
+    await box.press('ArrowDown'); // into the days
+    const month = page.locator('.pony-DateBoxPopup .pony-DatePicker-month');
+    const year = Number(/\d{4}/.exec(/** @type {string} */ (await month.textContent()))?.[0]);
+    await page.keyboard.press('Shift+PageUp');
+    await expect(month).toContainText(String(year - 1));
+    const popup = page.locator('.pony-DateBoxPopup');
+    await button(page, 'Remove box').focus(); // no press outside: the picker still shows
+    await expect(popup).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(box).toHaveCount(0);
+    await expect(popup).toBeHidden(); // the focus left it
+});
+
+test('widget: a binding to a function the page lacks, a native message to no binding, an element\'s style name, a listener\'s options changed', async ({ page }) => {
+    const messages = sent(page);
+    await open(page, 'widget');
+    await button(page, 'Bind nowhere').click();
+    await expect.poll(() => messages.some(m => m.includes('No function terminalNowhere'))).toBe(true); // the error, to the server
+    await button(page, 'Native unbound').click();
+    await expect.poll(() => messages.some(m => /NATIVE message for .*not bound/.test(m))).toBe(true);
+    await button(page, 'Restyle element').click();
+    await expect(page.getByText('Plain element')).toHaveAttribute('class', 'restyled');
+    await button(page, 'Listen with detail').click();
+    await page.getByText('Watched', { exact: true }).click();
+    await expect(status(page)).toContainText('detail 1');
+});
+
+test('panels: a composite styled by the server, a cell panel\'s default alignment, borders taken off, a row past the last, a table cleared', async ({ page }) => {
+    await page.goto(BASE_URL + '#terminal-panels');
+    await button(page, 'Style composite').click();
+    await expect(page.getByText('Wrapped by a composite')).toHaveClass(/\bcomposed\b/);
+    await button(page, 'Add centered').click();
+    await expect(page.getByLabel('Column').locator('.pony-Cell', { hasText: 'Centered' })).toHaveCSS('text-align', 'center');
+    const table = page.getByLabel('Table');
+    const rows = table.locator(':scope > tbody > tr');
+    await button(page, 'No borders').click();
+    await expect(page.getByLabel('Cells')).toHaveCSS('border-top-width', '0px');
+    await expect(table).toHaveCSS('border-top-width', '0px');
+    await expect(rows.nth(0).locator(':scope > td').first()).toHaveCSS('border-top-width', '0px');
+    await button(page, 'Row 5').click();
+    await expect(rows).toHaveCount(6);
+    await button(page, 'Clear table').click();
+    await expect(table.locator('.pony-Label')).toHaveCount(0);
+    await expect(rows).toHaveCount(6); // the cells stay
+});
+
+test('layouts: an animated constraint, children at the end and the start of their layers, north, south and line start splitters, a split\'s west removed, a header panel resized', async ({ page }) => {
+    await open(page, 'layout');
+    const aligned = page.getByLabel('Aligned');
+    const layer = text => aligned.locator('.pony-Layer', { hasText: text });
+    await button(page, 'Animate').click();
+    await expect(layer('Top')).toHaveCSS('top', '20px');
+    await expect(layer('Top')).toHaveCSS('height', '20px');
+    await button(page, 'Align').click();
+    await expect.poll(() => aligned.getByText('Top').evaluate(e => [e.style.top, e.style.bottom])).toEqual(['', '0px']);
+    await expect.poll(() => aligned.getByText('Bottom').evaluate(e => [e.style.top, e.style.bottom])).toEqual(['0px', '']);
+
+    const vertical = page.getByLabel('Rows');
+    const drag = async (splitter, dx, dy) => {
+        const box = /** @type {{x: number, y: number, width: number, height: number}} */ (await splitter.boundingBox());
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(box.x + box.width / 2 + dx, box.y + box.height / 2 + dy, { steps: 4 });
+        await page.mouse.up();
+    };
+    const splitters = vertical.locator(':scope > .pony-Splitter');
+    await expect(splitters).toHaveCount(3);
+    await expect(splitters.nth(0)).toHaveAttribute('aria-orientation', 'horizontal');
+    await drag(splitters.nth(0), 0, 20); // north, toward the center
+    await expect(vertical.getByText('North')).toHaveCSS('height', '70px');
+    await drag(splitters.nth(1), 0, -20); // south, toward the center
+    await expect(vertical.getByText('South')).toHaveCSS('height', '70px');
+    await drag(splitters.nth(2), 10, 0); // line start
+    await expect(vertical.getByText('Start')).toHaveCSS('width', '70px');
+
+    const split = page.getByLabel('Split', { exact: true });
+    await button(page, 'Remove split west').click();
+    await expect(split.getByText('Split west')).toHaveCount(0);
+    await expect(split.locator('.pony-Splitter')).toHaveCount(0);
+
+    await button(page, 'Resize header').click(); // the layout is CSS: nothing to do
+    await button(page, 'Hide layered').click(); // a round trip after it
+    await expect(page.getByText('Layered', { exact: true })).toBeHidden();
+    await expect(page.getByLabel('Header panel')).toHaveText('HeaderContentFooter');
+});
+
+test('popups: a modal auto-hide popup hides on a press on its backdrop, not on one in it', async ({ page }) => {
+    await open(page, 'popup');
+    await button(page, 'Show modal').click();
+    const modal = page.getByText('Modal popup', { exact: true });
+    await expect(modal).toBeVisible();
+    await modal.click();
+    await expect(modal).toBeVisible();
+    const box = /** @type {{x: number, y: number, width: number, height: number}} */ (await modal.boundingBox());
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height + 40); // on the backdrop, under it
+    await expect(modal).toBeHidden();
+    await expect(status(page)).toHaveText('Status: modal closed');
+});
+
+test('misc: a cookie with every attribute, removed with its domain; a cookie the page cannot decode; a link taken off', async ({ page, context }) => {
+    await context.addInitScript(() => {
+        const cookie = /** @type {PropertyDescriptor} */ (Object.getOwnPropertyDescriptor(Document.prototype, 'cookie'));
+        const written = [];
+        Object.defineProperty(document, 'cookie', {
+            configurable: true,
+            get: () => cookie.get?.call(document),
+            set: value => {
+                written.push(value);
+                document.documentElement.dataset['cookies'] = written.join(' | ');
+                cookie.set?.call(document, value);
+            },
+        });
+    });
+    await open(page, 'misc');
+    await page.evaluate(() => { document.cookie = 'odd=%E0%A4;path=/'; });
+    await page.reload(); // the terminal sends the page's cookies as it starts
+    await expect(status(page)).toBeVisible();
+    await button(page, 'Read odd').click();
+    await expect(status(page)).toHaveText('Status: odd %E0%A4'); // as the page has it
+    await button(page, 'Bake options').click();
+    await expect(page.locator('html')).toHaveAttribute('data-cookies',
+        'options=v;expires=Fri, 01 Jan 2100 00:00:00 GMT;domain=pony.example;path=/;secure;SameSite=Lax');
+    await button(page, 'Eat options').click();
+    await expect(page.locator('html')).toHaveAttribute('data-cookies', /\| options=;domain=pony\.example;path=\/;expires=Fri, 02-Jan-1970 00:00:00 GMT$/);
+
+    const anchor = page.getByText('Anchor', { exact: true });
+    await expect(anchor).toHaveAttribute('href', '#terminal-misc');
+    await button(page, 'Unlink').click();
+    await expect(anchor).not.toHaveAttribute('href');
 });

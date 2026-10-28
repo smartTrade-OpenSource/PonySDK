@@ -16,7 +16,7 @@ import { pageFunction } from '../runtime/page-function.ts';
 export class Script extends BaseObject {
     override update(reader: Reader): boolean {
         if (reader.key !== K.FUNCTION_NAME) return super.update(reader);
-        const name = reader.str ?? '';
+        const name = reader.str;
         let args: unknown[] = [];
         if (reader.read() === K.FUNCTION_ARGS) args = reader.array;
         else reader.rewind();
@@ -61,7 +61,7 @@ export class JsFunction extends BaseObject {
 
     static create(context: Context, id: number, type: number, reader: Reader): JsFunction {
         reader.read(); // FUNCTION_NAME
-        const name = reader.str ?? '';
+        const name = reader.str;
         return new JsFunction(context, id, type, (args: unknown) => pageFunction(name)(args));
     }
 

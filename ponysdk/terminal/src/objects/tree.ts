@@ -41,10 +41,8 @@ export class Tree extends Widget {
         this.adopt(root);
     }
 
-    /** The server adds the root item to the tree: adopted at its creation, its element never shows. */
-    override add(reader: Reader, child: TerminalObject): void {
-        if (child instanceof TreeItem && child.isRoot) return;
-        super.add(reader, child);
+    /** The server adds only the root item to the tree: adopted at its creation, its element never shows. */
+    override add(): void {
     }
 
     override remove(reader: Reader, child: TerminalObject): void {
@@ -56,8 +54,7 @@ export class Tree extends Widget {
             case K.ANIMATION:
                 return true;
             case K.SELECTED_INDEX: {
-                const item = reader.int === -1 ? null : this.context.object(reader.int);
-                this.select(item instanceof TreeItem ? item : null, false);
+                this.select(reader.int === -1 ? null : this.context.object(reader.int) as TreeItem, false);
                 return true;
             }
             case K.CLEAR:
@@ -109,7 +106,7 @@ export class Tree extends Widget {
 
     private onTreeKey(event: KeyboardEvent): void {
         const items = this.visibleItems();
-        const current = items.findIndex(i => i.element === document.activeElement);
+        const current = items.findIndex(i => i.element === this.focused);
         if (current === -1) return;
         const item = items[current]!;
         let target: TreeItem | undefined;
@@ -157,14 +154,14 @@ export class TreeItem extends Widget {
     private readonly toggleElement: HTMLSpanElement;
 
     static create(context: Context, id: number, type: number, reader: Reader): TreeItem {
-        let text: string | null = null;
+        let text = '';
         if (reader.read() === K.TEXT) text = reader.str;
         else reader.rewind();
         let tree: TerminalObject | undefined;
         if (reader.read() === K.TREE_ROOT) tree = context.object(reader.int);
         else reader.rewind();
         const item = new TreeItem(context, id, type, tree instanceof Tree ? tree : null);
-        if (text !== null) item.content.textContent = text;
+        item.content.textContent = text;
         return item;
     }
 

@@ -42,7 +42,7 @@ export class StackLayoutPanel extends Widget {
     /** The header, HTML, then its size. */
     override add(reader: Reader, child: TerminalObject): void {
         reader.read();
-        const html = reader.str ?? '';
+        const html = reader.str;
         reader.read();
         const size = reader.num;
         if (!(child instanceof Widget)) return;
@@ -67,8 +67,7 @@ export class StackLayoutPanel extends Widget {
     }
 
     override remove(_reader: Reader, child: TerminalObject): void {
-        const index = this.stacks.findIndex(s => s.widget === child);
-        if (index === -1) return;
+        const index = this.stacks.findIndex(s => s.widget === child); // a stack's, for the server
         const [removed] = this.stacks.splice(index, 1);
         this.removeChild(removed!.widget);
         for (const p of ['position', 'left', 'right', 'top', 'bottom']) removed!.widget.element.style.removeProperty(p);

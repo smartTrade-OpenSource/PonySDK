@@ -12,6 +12,11 @@ const DIGIT = /^\p{Nd}$/u;
 const LETTER = /^\p{L}$/u;
 const GROUP = /\{\{([A0]+)\}\}/g;
 
+/** The element with the focus: the document's, or that of the shadow root of a <pony-app> element (ADR-0008). */
+function focused(node: Node): Element | null {
+    return (node.getRootNode() as Document | ShadowRoot).activeElement;
+}
+
 function accepts(slot: Slot, char: string): boolean {
     if (slot.kind === 'digit') return DIGIT.test(char);
     if (slot.kind === 'letter') return LETTER.test(char);
@@ -153,7 +158,7 @@ export class Mask {
         // else at once; before a key typed meanwhile in any case
         let pressed = false;
         field.addEventListener('pointerdown', () => {
-            pressed = document.activeElement !== field;
+            pressed = focused(field) !== field;
         }, { signal });
         field.addEventListener('focus', () => {
             this.cursorPending = true;
@@ -166,7 +171,7 @@ export class Mask {
     }
 
     private placeCursor(): void {
-        if (!this.cursorPending || document.activeElement !== this.field) return;
+        if (!this.cursorPending || focused(this.field) !== this.field) return;
         this.cursorPending = false;
         this.field.value = this.value.text;
         this.field.setSelectionRange(this.value.insertPosition, this.value.insertPosition);
@@ -191,15 +196,15 @@ export class Mask {
         event.preventDefault();
         this.placeCursor();
         const before = this.value.text;
-        const start = this.field.selectionStart ?? 0;
-        const end = this.field.selectionEnd ?? start;
+        const start = this.field.selectionStart!; // a text field's
+        const end = this.field.selectionEnd!;
         const type = event.inputType;
         if (type.startsWith('delete')) {
             if (end > start) this.cut(start, end);
             else if (type.endsWith('Backward')) this.removeAt(start - 1, Math.max(start - 1, 0));
             else this.removeAt(start, start);
         } else if (type === 'insertText' || type === 'insertReplacementText' || type === 'insertFromPaste' || type === 'insertFromDrop') {
-            const text = event.data ?? event.dataTransfer?.getData('text/plain') ?? '';
+            const text = event.data!; // a text field's insertions carry their text: typed, pasted, dropped (Input Events)
             let position = start;
             if (end > start) this.cut(start, end);
             for (const char of text) {

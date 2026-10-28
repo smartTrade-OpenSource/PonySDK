@@ -188,6 +188,11 @@ export class Widget extends BaseObject {
         }
     }
 
+    /** The element with the focus: the document's, or that of the shadow root of a <pony-app> element (ADR-0008). */
+    protected get focused(): Element | null {
+        return (this.element.getRootNode() as Document | ShadowRoot).activeElement;
+    }
+
     removeFromParent(): void {
         this.parent?.removeChild(this);
     }
@@ -361,8 +366,7 @@ export class Widget extends BaseObject {
 
     private observeVisibility(): void {
         this.visibility ??= new IntersectionObserver(entries => {
-            const entry = entries[0];
-            if (entry === undefined) return;
+            const entry = entries[0]!;
             const message = about(this.id);
             message[C.HANDLER_WIDGET_VISIBILITY] = entry.isIntersecting;
             this.context.send(message);
@@ -386,7 +390,7 @@ export class Widget extends BaseObject {
     setStyleName(names: string): void {
         this.element.className = this.typeClass === null ? names : `${this.typeClass} ${names}`.trim();
         if (this.context.session.legacy) {
-            this.element.setAttribute('data-gwt-primary', names.trim().split(/\s+/)[0] ?? '');
+            this.element.setAttribute('data-gwt-primary', names.trim().split(/\s+/)[0]!);
         }
     }
 
@@ -430,11 +434,11 @@ export function setStyle(element: HTMLElement, name: string, value: string): voi
 }
 
 /** Splits names on spaces: the server may send several in one. */
-function names(value: string | null): string[] {
-    return value === null ? [] : value.split(/\s+/).filter(name => name.length > 0);
+function names(value: string): string[] {
+    return value.split(/\s+/).filter(name => name.length > 0);
 }
 
-function next(reader: Reader): string | null {
+function next(reader: Reader): string {
     reader.read();
     return reader.str;
 }
@@ -442,26 +446,26 @@ function next(reader: Reader): string | null {
 const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>([
     [K.ADD_STYLE_NAME, (w, r) => w.element.classList.add(...names(r.str))],
     [K.REMOVE_STYLE_NAME, (w, r) => w.removeStyleNames(names(r.str))],
-    [K.STYLE_NAME, (w, r) => w.setStyleName(r.str ?? '')],
+    [K.STYLE_NAME, (w, r) => w.setStyleName(r.str)],
     [K.WIDGET_VISIBLE, (w, r) => w.setVisible(r.bool)],
     [K.WIDGET_TITLE, (w, r) => {
         if (r.str) w.element.title = r.str;
         else w.element.removeAttribute('title');
     }],
     [K.PUT_PROPERTY_KEY, (w, r) => {
-        const name = r.str ?? '';
+        const name = r.str;
         (w.element as unknown as Record<string, unknown>)[name] = next(r);
     }],
     [K.PUT_ATTRIBUTE_KEY, (w, r) => {
-        const name = r.str ?? '';
-        w.element.setAttribute(name, next(r) ?? '');
+        const name = r.str;
+        w.element.setAttribute(name, next(r));
     }],
     [K.PUT_STYLE_KEY, (w, r) => {
-        const name = r.str ?? '';
-        setStyle(w.element, name, next(r) ?? '');
+        const name = r.str;
+        setStyle(w.element, name, next(r));
     }],
-    [K.REMOVE_ATTRIBUTE_KEY, (w, r) => w.element.removeAttribute(r.str ?? '')],
-    [K.REMOVE_STYLE_KEY, (w, r) => setStyle(w.element, r.str ?? '', '')],
+    [K.REMOVE_ATTRIBUTE_KEY, (w, r) => w.element.removeAttribute(r.str)],
+    [K.REMOVE_STYLE_KEY, (w, r) => setStyle(w.element, r.str, '')],
     [K.FORCE_DOM_ID, w => {
         w.element.id = String(w.id);
     }],
@@ -471,10 +475,10 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     }],
     [K.FOCUS_PREVENT_SCROLL, w => w.focusTarget.focus({ preventScroll: true })],
     [K.WIDGET_WIDTH, (w, r) => {
-        w.element.style.width = r.str ?? '';
+        w.element.style.width = r.str;
     }],
     [K.WIDGET_HEIGHT, (w, r) => {
-        w.element.style.height = r.str ?? '';
+        w.element.style.height = r.str;
     }],
     [K.WIDGET_FULL_SIZE, w => {
         w.element.style.width = '100%';
@@ -483,18 +487,18 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     [K.TABINDEX, (w, r) => {
         w.focusTarget.tabIndex = r.int;
     }],
-    [K.ENSURE_DEBUG_ID, (w, r) => w.element.setAttribute('pid', r.str ?? '')],
+    [K.ENSURE_DEBUG_ID, (w, r) => w.element.setAttribute('pid', r.str)],
     [K.FUNCTION_NAME, (w, r) => {
-        const name = r.str ?? '';
+        const name = r.str;
         let args: unknown[] = [];
         if (r.read() === K.FUNCTION_ARGS) args = r.array;
         else r.rewind();
         pageFunction(name)(w.element, ...args);
     }],
-    [K.BIND, (w, r) => w.bind(r.str ?? '')],
-    [K.NATIVE, (w, r) => w.sendToBinding(r.str ?? 'null')],
+    [K.BIND, (w, r) => w.bind(r.str)],
+    [K.NATIVE, (w, r) => w.sendToBinding(r.str)],
     [K.PREVENT_EVENT, (w, r) => w.preventEvent(r.int)],
     [K.STOP_EVENT, (w, r) => w.stopEvent(r.int)],
-    [K.LISTEN_EVENT, (w, r) => w.listenEvent(r.str ?? '{}')],
-    [K.UNLISTEN_EVENT, (w, r) => w.unlistenEvent(r.str ?? '')],
+    [K.LISTEN_EVENT, (w, r) => w.listenEvent(r.str)],
+    [K.UNLISTEN_EVENT, (w, r) => w.unlistenEvent(r.str)],
 ]);

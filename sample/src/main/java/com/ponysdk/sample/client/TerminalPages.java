@@ -11,11 +11,13 @@ import java.text.SimpleDateFormat;
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.ponysdk.core.model.PAlignment;
 import com.ponysdk.core.model.PFontSize;
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PJustification;
@@ -33,6 +35,10 @@ import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PDatePicker;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PComposite;
+import com.ponysdk.core.ui.basic.PHeaderPanel;
+import com.ponysdk.core.ui.basic.PHost;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -97,6 +103,7 @@ import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.sample.client.page.addon.HighlightAddOn;
 
 import jakarta.json.Json;
 
@@ -123,7 +130,10 @@ final class TerminalPages {
         Map.entry("collect", TerminalPages::collect),
         Map.entry("generic", TerminalPages::generic),
         Map.entry("webcomponent", TerminalPages::webComponent),
-        Map.entry("datebox", TerminalPages::dateBox));
+        Map.entry("datebox", TerminalPages::dateBox),
+        Map.entry("menu", TerminalPages::menu),
+        Map.entry("forms", TerminalPages::forms),
+        Map.entry("host", TerminalPages::host));
 
     private TerminalPages() {
     }
@@ -162,6 +172,7 @@ final class TerminalPages {
         final Status status = new Status();
         panel.add(status.label);
         PWindow.getMain().setTitle("Terminal window page");
+        panel.add(Element.newPLabel("Terminal window page")); // twice: in the dictionary, from the main window's blocks
         final PWindow[] child = new PWindow[1];
         button(panel, "Open window", () -> {
             final PWindow window = Element.newPWindow("terminal-child", "width=400,height=300");
@@ -183,6 +194,13 @@ final class TerminalPages {
         button(panel, "Print", () -> child[0].print());
         button(panel, "Close", () -> child[0].close());
         button(panel, "Navigate", () -> child[0].getLocation().replace("about:blank"));
+        button(panel, "Open blank", () -> Element.newPWindow(false, "about:blank", "terminal-blank", "width=300,height=200").open());
+        button(panel, "Reload page", () -> PWindow.getMain().reload());
+        button(panel, "Frame", () -> {
+            final com.ponysdk.core.ui.basic.PFrame frame = Element.newPFrame("html/frame-demo.html?demo");
+            frame.setAttribute("title", "Query frame");
+            panel.add(frame);
+        });
         return panel;
     }
 
@@ -271,6 +289,15 @@ final class TerminalPages {
             watched.removeVisibilityHandler(visibility);
             clicks[0].removeHandler();
         });
+        final PLabel unbound = Element.newPLabel("Unbound");
+        final PElement plain = Element.newDiv();
+        plain.setInnerText("Plain element");
+        panel.add(unbound, plain);
+        button(panel, "Bind nowhere", () -> unbound.bindTerminalFunction("terminalNowhere"));
+        button(panel, "Native unbound", () -> unbound.sendToNative(Json.createObjectBuilder().add("text", "lost").build()));
+        button(panel, "Restyle element", () -> plain.setStyleName("restyled"));
+        button(panel, "Listen with detail", () -> clicks[0] = watched.addEventListener("click",
+            PEventOptions.fields("type", "detail"), e -> status.add("detail " + e.getFields().getInt("detail", -1))));
         return panel;
     }
 
@@ -363,7 +390,41 @@ final class TerminalPages {
                 + e.getLayoutResizeData().stream().map(d -> String.valueOf((int) d.getSize())).reduce((a, b) -> a + "/" + b).orElse(""));
         split.addLayoutResizeHandler(resized);
 
-        panel.add(layout, simple, dock, split);
+        final PLayoutPanel aligned = Element.newPLayoutPanel();
+        aligned.setAttribute("aria-label", "Aligned");
+        aligned.setWidth("200px");
+        aligned.setHeight("60px");
+        final PLabel top = Element.newPLabel("Top");
+        final PLabel bottom = Element.newPLabel("Bottom");
+        aligned.add(top);
+        aligned.add(bottom);
+
+        final PSplitLayoutPanel vertical = Element.newPSplitLayoutPanel();
+        vertical.setAttribute("aria-label", "Rows");
+        vertical.setWidth("300px");
+        vertical.setHeight("200px");
+        vertical.addNorth(Element.newPLabel("North"), 50);
+        vertical.addSouth(Element.newPLabel("South"), 50);
+        vertical.addLineStart(Element.newPLabel("Start"), 60);
+        vertical.add(Element.newPLabel("Vertical center"));
+
+        final PHeaderPanel header = Element.newPHeaderPanel();
+        header.setAttribute("aria-label", "Header panel");
+        header.setHeaderWidget(Element.newPLabel("Header"));
+        header.setContentWidget(Element.newPLabel("Content"));
+        header.setFooterWidget(Element.newPLabel("Footer"));
+
+        panel.add(layout, simple, dock, split, aligned, vertical, header);
+        button(panel, "Animate", () -> {
+            aligned.setWidgetTopHeight(top, 20, 20, PUnit.PX);
+            aligned.animate(Duration.ofMillis(200));
+        });
+        button(panel, "Align", () -> {
+            aligned.setWidgetVerticalPosition(top, PAlignment.END);
+            aligned.setWidgetVerticalPosition(bottom, PAlignment.BEGIN);
+        });
+        button(panel, "Remove split west", () -> split.remove(west));
+        button(panel, "Resize header", header::resize);
         button(panel, "Hide layered", () -> layout.setWidgetHidden(layered, true));
         button(panel, "Remove layered", () -> layout.remove(layered));
         button(panel, "Hide east", () -> dock.setWidgetHidden(east, true));
@@ -427,7 +488,31 @@ final class TerminalPages {
         table.getColumnFormatter().removeStyleName(0, "wide");
         table.getColumnFormatter().setWidth(0, "60px");
 
-        panel.add(scroll, cells, table);
+        final PLabel wrapped = Element.newPLabel("Wrapped by a composite");
+        final PComposite<PLabel> composite = new PComposite<>() {
+            {
+                initWidget(wrapped);
+            }
+
+            @Override
+            public String dumpDOM() {
+                return wrapped.dumpDOM();
+            }
+        };
+        final PVerticalPanel column = Element.newPVerticalPanel();
+        column.setAttribute("aria-label", "Column");
+        panel.add(scroll, cells, table, composite, column);
+        button(panel, "Style composite", () -> composite.addStyleName("composed"));
+        button(panel, "Add centered", () -> {
+            column.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
+            column.add(Element.newPLabel("Centered"));
+        });
+        button(panel, "No borders", () -> {
+            cells.setBorderWidth(0);
+            table.setBorderWidth(0);
+        });
+        button(panel, "Row 5", () -> table.insertRow(5));
+        button(panel, "Clear table", table::clear);
         button(panel, "Scroll to 30", () -> {
             scroll.setHorizontalScrollPosition(30);
             scroll.setVerticalScrollPosition(30);
@@ -448,7 +533,7 @@ final class TerminalPages {
         final PTree tree = Element.newPTree();
         tree.setAnimationEnabled(true);
         final PTreeItem first = tree.add("First");
-        first.add("Child A");
+        final PTreeItem childA = first.add("Child A");
         final PTreeItem childB = first.add("Child B");
         tree.add("Second");
         tree.add("Third");
@@ -457,6 +542,22 @@ final class TerminalPages {
         button(panel, "Rename", () -> first.setText("Renamed"));
         button(panel, "Collapse", () -> first.setState(false));
         button(panel, "Remove B", () -> first.remove(childB));
+        button(panel, "Insert first", () -> first.add(0, Element.newPTreeItem("Child zero")));
+        button(panel, "Remove children", () -> {
+            first.remove(childA);
+            first.remove(first.get(0));
+        });
+        final PTextBox field = Element.newPTextBox();
+        field.setAttribute("aria-label", "Item field");
+        button(panel, "Field item", () -> tree.add(Element.newPTreeItem(field)));
+        button(panel, "Move field", () -> tree.add(Element.newPTreeItem(field)));
+        button(panel, "Add opened", () -> {
+            final PTreeItem opened = Element.newPTreeItem("Opened");
+            opened.add("Inner");
+            opened.setState(true);
+            tree.add(opened);
+        });
+        button(panel, "Unselect", () -> tree.setSelectedItem(null));
         button(panel, "Clear", tree::clear);
         return panel;
     }
@@ -505,6 +606,15 @@ final class TerminalPages {
             PWindow.getMain().add(dialog);
             dialog.setPopupPosition(400, 300);
             dialog.show();
+        });
+        button(panel, "Show modal", () -> {
+            final PPopupPanel popup = Element.newPPopupPanel(true);
+            popup.setModal(true);
+            popup.setWidget(Element.newPLabel("Modal popup"));
+            popup.addCloseHandler(e -> status.add("modal closed"));
+            PWindow.getMain().add(popup);
+            popup.setPopupPosition(100, 100);
+            popup.show();
         });
         button(panel, "Show draggable popup", () -> {
             final PPopupPanel popup = Element.newPPopupPanel(false);
@@ -620,6 +730,15 @@ final class TerminalPages {
             context.getCookies().removeCookie("terminal", PCookies.CookieOptions.path("/"));
             PScript.call(PWindow.getMain(), "oracleCookies", null, callback, null);
         });
+        button(panel, "Bake options", () -> context.getCookies().setCookie("options", "v",
+            PCookies.CookieOptions.expires(Instant.parse("2100-01-01T00:00:00Z")).withDomain("pony.example").withPath("/")
+                .secure().sameSite(PCookies.SameSite.LAX)));
+        button(panel, "Eat options", () -> context.getCookies().removeCookie("options",
+            PCookies.CookieOptions.domain("pony.example").withPath("/")));
+        button(panel, "Read odd", () -> status.add("odd " + context.getCookies().getCookie("odd")));
+        final PAnchor anchor = Element.newPAnchor("Anchor", "#terminal-misc");
+        panel.add(anchor);
+        button(panel, "Unlink", () -> anchor.setHref(null));
         button(panel, "Change", () -> {
             linked.setText("Changed");
             wrapped.setWordWrap(false);
@@ -670,7 +789,12 @@ final class TerminalPages {
         menu.addItem("Collected menu", () -> {
         });
         final PDateBox date = Element.newPDateBox();
-        held[0].add(counter, split, suggest, menu, date);
+        final PLabel watched = Element.newPLabel("Collected watcher");
+        watched.addVisibilityHandler(e -> {
+        });
+        watched.addEventListener("click", PEventOptions.fields("type"), e -> {
+        });
+        held[0].add(counter, split, suggest, menu, date, watched);
         panel.add(held[0]);
         final PLabel status = Element.newPLabel("Held");
         status.setAttribute("aria-label", "Status");
@@ -837,6 +961,102 @@ final class TerminalPages {
         panel.add(spacer, box);
         button(panel, "Unmark", () -> picker.removeStyleFromDates("marked", styled));
         button(panel, "Day first", () -> box.setDateFormat(new SimpleDateFormat("dd/MM/yyyy HH:mm")));
+        button(panel, "Clear date", () -> box.setValue(null));
+        button(panel, "Remove box", () -> panel.remove(box));
+        return panel;
+    }
+
+    /** A bar with a submenu that has its own, an item without a command, a bar removed while a submenu shows. */
+    private static IsPWidget menu() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+        final PMenuBar bar = Element.newPMenuBar();
+        final PMenuBar file = Element.newPMenuBar(true);
+        file.addItem("New", () -> status.add("new"));
+        final PMenuBar recent = Element.newPMenuBar(true);
+        recent.addItem("Recent one", () -> status.add("recent"));
+        file.addItem("Recent", recent);
+        file.addItem("Plain");
+        bar.addItem("File", file);
+        bar.addItem("Edit", () -> status.add("edit"));
+        bar.addItem("Help", () -> status.add("help"));
+        panel.add(bar);
+        button(panel, "Remove menu", () -> panel.remove(bar));
+        return panel;
+    }
+
+    /**
+     * In a {@code <pony-app>} element: an event of the host listened to, then no longer; an event with a number as its
+     * detail; a window titled before it is ready; the application reloaded, a submenu and a date picker showing.
+     */
+    private static IsPWidget host() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+        final PHost host = PHost.get();
+        if (host == null) {
+            status.add("not embedded");
+            return panel;
+        }
+        final PMenuBar menu = Element.newPMenuBar();
+        final PMenuBar submenu = Element.newPMenuBar(true);
+        submenu.addItem("Host sub item", () -> status.add("sub"));
+        menu.addItem("Host menu", submenu);
+        final PDateBox date = Element.newPDateBox();
+        date.setAttribute("aria-label", "Host date");
+        panel.add(menu, date);
+        final HandlerRegistration ping = host.addEventListener("ping", detail -> status.add("ping " + detail));
+        button(panel, "Unlisten ping", () -> {
+            ping.removeHandler();
+            status.add("unlistened");
+        });
+        button(panel, "Send number", () -> host.dispatchEvent("number", Json.createValue(42)));
+        button(panel, "Reload", () -> PWindow.getMain().reload());
+        button(panel, "Open titled", () -> {
+            final PWindow window = Element.newPWindow("host-child", "width=300,height=200");
+            window.add(Element.newPLabel("Host child content"));
+            window.open();
+            window.setTitle("Titled at once"); // before the window is ready
+        });
+        return panel;
+    }
+
+    /**
+     * A tab whose tab is a field, a list of several choices, a file input, a masked field set by the server, addons on
+     * widgets that show already.
+     */
+    private static IsPWidget forms() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+        final PTabPanel tabs = Element.newPTabPanel();
+        tabs.setAttribute("aria-label", "Form tabs");
+        tabs.add(Element.newPLabel("First panel"), "First");
+        tabs.add(Element.newPLabel("Second panel"), "Second");
+        final PTextBox tabField = Element.newPTextBox();
+        tabField.setAttribute("aria-label", "Tab field");
+        tabs.add(Element.newPLabel("Third panel"), tabField);
+        final PListBox list = Element.newPListBox();
+        list.setAttribute("aria-label", "Choices");
+        list.setMultipleSelect(true);
+        list.addItem("One");
+        list.addItem("Two");
+        list.addChangeHandler(e -> status.add("choices " + list.getSelectedIndexes()));
+        final PFileUpload upload = Element.newPFileUpload();
+        upload.setAttribute("aria-label", "Form file");
+        upload.addChangeHandler(e -> status.add("file " + upload.getFileName()));
+        final PTextBox masked = Element.newPTextBox();
+        masked.setAttribute("aria-label", "Masked");
+        masked.applyMask("{{00}}/{{00}}", true, "_");
+        final PLabel highlighted = Element.newPLabel("Highlighted");
+        final PLabel unhighlighted = Element.newPLabel("Unhighlighted");
+        panel.add(tabs, list, upload, masked, highlighted, unhighlighted);
+        // addons on widgets that show already
+        button(panel, "Highlight", () -> new HighlightAddOn(highlighted, "rgb(1, 2, 3)"));
+        button(panel, "Highlight in no color", () -> new HighlightAddOn(unhighlighted, ""));
+        button(panel, "Deselect", () -> list.setSelectedIndex(-1));
+        button(panel, "Set masked", () -> masked.setText("12x4"));
         return panel;
     }
 

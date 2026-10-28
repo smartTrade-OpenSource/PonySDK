@@ -14,7 +14,7 @@ const CONTENT: Setters<FocusWidget> = new Map<number, (w: FocusWidget, r: Reader
         w.element.textContent = r.str;
     }],
     [K.HTML, (w, r) => {
-        w.element.innerHTML = r.str ?? '';
+        w.element.innerHTML = r.str;
     }],
 ]);
 
@@ -52,8 +52,8 @@ export class Anchor extends FocusWidget {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.HREF) {
-            if (reader.str === null) this.element.removeAttribute('href');
-            else this.element.setAttribute('href', reader.str);
+            if (reader.str) this.element.setAttribute('href', reader.str);
+            else this.element.removeAttribute('href');
             return true;
         }
         return apply(CONTENT, this, reader) || super.update(reader);

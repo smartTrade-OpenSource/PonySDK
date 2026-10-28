@@ -252,6 +252,9 @@ test('a lost connection: the host is told, then the applications resume their co
   offline = true;
   for (const ws of sockets.splice(0)) await ws.close({ code: 4000, reason: 'simulated network drop' });
   await expect(page.locator('#status')).toHaveAttribute('data-state', 'lost');
+  // One taken out while it waits for the server: it stops trying, the others go on
+  await page.evaluate(() => document.getElementById('showcase').remove());
+  await page.waitForTimeout(2500); // longer than a retry period
   offline = false;
   await expect(page.locator('#status')).toHaveAttribute('data-state', 'back', { timeout: 15000 });
 
@@ -413,6 +416,20 @@ test('the legacy class names of an embedded application: on its container, not o
   await expect(styled).toHaveClass(name('app-button')); // the server's style name in place of the primary name
   await expect(styled).not.toHaveClass(name('gwt-Button'));
   await expect(page.locator('html')).not.toHaveAttribute('data-pony-legacy');
+
+  // Two in the host's document: its pointer and focus events listened to once
+  await page.evaluate(() => {
+    for (const id of ['legacy-a', 'legacy-b']) {
+      const app = document.createElement('pony-app');
+      app.id = id;
+      app.setAttribute('isolation', 'none');
+      app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src') + '#oracle-legacy');
+      document.querySelector('.portal-app').append(app);
+    }
+  });
+  for (const id of ['legacy-a', 'legacy-b']) {
+    await expect(page.locator(`#${id}`).getByRole('button', { name: 'Plain' })).toHaveClass(name('gwt-Button'), { timeout: 15000 });
+  }
 });
 
 test('two PonySDK versions on a page: each application runs on its own version\'s terminal (ADR-0009)', async ({ page }) => {
@@ -441,6 +458,10 @@ test('two PonySDK versions on a page: each application runs on its own version\'
     document.querySelector('.portal-app').append(app);
   });
   await expect.poll(() => page.evaluate(() => window.__createLen), { timeout: 15000 }).toBe(5);
+
+  // Taken out of the page: the other terminal's application goes
+  await page.evaluate(() => { window.removedTicket = document.getElementById('ticket-1'); window.removedTicket.remove(); });
+  await expect.poll(() => page.evaluate(() => window.removedTicket.shadowRoot.querySelector('.pony-ticket') === null)).toBe(true);
 });
 
 test('the Embedding page: an application embeds another and drives it from Java', async ({ page }) => {
@@ -547,4 +568,179 @@ test('another site: a stylesheet its server serves without CORS loads as it is, 
     return sheet && { crossOrigin: sheet.crossOrigin, loaded: sheet.sheet !== null };
   });
   expect(link).toEqual({ crossOrigin: null, loaded: true });
+});
+
+/** A new <pony-app> element in the portal, of the application's URL plus suffix, or without src when suffix is null. */
+async function embed(page, id, suffix, attributes = {}, credential = undefined) {
+  await page.evaluate(([id, suffix, attributes, credential]) => {
+    const app = /** @type {any} */ (document.createElement('pony-app'));
+    app.id = id;
+    if (suffix !== null) app.setAttribute('src', /** @type {any} */ (window).portalApp + suffix);
+    for (const [name, value] of Object.entries(attributes)) app.setAttribute(name, value);
+    if (credential !== undefined) app.credential = () => credential;
+    document.querySelector('.portal-app').append(app);
+  }, [id, suffix, attributes, credential]);
+  return page.locator(`#${id}`);
+}
+
+test('in an element: a host event listened to then no longer, a number as an event\'s detail, a window titled before it is ready, a reload that starts the application again, menus and picker gone', async ({ page, context }) => {
+  await openPortal(page);
+  const app = await embed(page, 'host', '#terminal-host');
+  const status = app.getByLabel('Status');
+  await expect(status).toHaveText('Status:', { timeout: 15000 });
+  // A message of the host page's own origin: not one of the application's windows
+  await page.evaluate(() => window.postMessage({ pony: 'ready' }, '*'));
+  await app.evaluate(e => e.dispatchEvent(new CustomEvent('ping', { detail: 1 })));
+  await expect(status).toHaveText('Status: ping 1');
+  await app.getByRole('button', { name: 'Unlisten ping' }).click();
+  await expect(status).toHaveText('Status: ping 1, unlistened');
+  await app.evaluate(e => {
+    e.dispatchEvent(new CustomEvent('ping', { detail: 2 })); // no longer listened to
+    e.addEventListener('number', event => e.setAttribute('data-number', JSON.stringify(/** @type {CustomEvent} */ (event).detail)));
+  });
+  await app.getByRole('button', { name: 'Send number' }).click();
+  await expect(app).toHaveAttribute('data-number', '42'); // a number, not its text
+  await expect(status).toHaveText('Status: ping 1, unlistened');
+
+  const opened = context.waitForEvent('page');
+  await app.getByRole('button', { name: 'Open titled' }).click();
+  const child = await opened;
+  await expect(child.getByText('Host child content')).toBeVisible({ timeout: 15000 });
+  await expect(child).toHaveTitle('Titled at once'); // after the title its init gives
+  await child.close();
+
+  // Reloaded with a submenu and a date picker showing: the application goes with them
+  await app.getByRole('menuitem', { name: 'Host menu' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(app.getByRole('menuitem', { name: 'Host sub item' })).toBeVisible();
+  await app.getByLabel('Host date').focus();
+  const picker = app.locator('.pony-DateBoxPopup');
+  await expect(picker).toBeVisible();
+  await app.getByRole('button', { name: 'Reload' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(status).toHaveText('Status:', { timeout: 15000 }); // another context
+  await expect(app.getByRole('menuitem', { name: 'Host sub item' })).toBeHidden();
+  await expect(picker).toBeHidden();
+});
+
+test('elements: one without src stays as it is; one whose src lacks its final slash, one whose credential is no text, one with history="hash"', async ({ page }) => {
+  const errors = trackErrors(page);
+  await openPortal(page);
+  const empty = await embed(page, 'empty', null);
+  const unslashed = await embed(page, 'unslashed', '', { view: 'ticket' }, 42);
+  await page.locator('#unslashed').evaluate(e => e.setAttribute('src', e.getAttribute('src').replace(/\/$/, '')));
+  await expect(unslashed.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
+  await expect(unslashed.locator('.pony-ticket-origin')).toContainText('no credential');
+  await expect(empty).toHaveText('');
+
+  const hashed = await embed(page, 'hashed', '#inputs', { history: 'hash' });
+  await hashed.locator('.pony-tab', { hasText: 'Layouts' }).click({ timeout: 15000 });
+  await expect(hashed.locator('.pony-crumb')).toContainText('Layouts');
+  expect(new URL(page.url()).hash).not.toBe(''); // the host page's fragment: the application's history
+  expect(errors).toEqual([]);
+});
+
+test('a manifest of an earlier version, without a terminal, with a stylesheet of another origin; a manifest refused; a terminal that runs no application', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.addInitScript(() => {
+    const crossOrigin = /** @type {PropertyDescriptor} */ (Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'crossOrigin'));
+    const recorded = /** @type {any} */ (window).crossOrigins = [];
+    Object.defineProperty(HTMLLinkElement.prototype, 'crossOrigin', {
+      configurable: true,
+      get() { return crossOrigin.get?.call(this); },
+      set(value) {
+        if (this.href === '' && this.id === 'portal-sheet') recorded.push(value);
+        crossOrigin.set?.call(this, value);
+      },
+    });
+  });
+  const portal = new URL(PORTAL_URL).origin;
+  await page.route('**/refused/ponyapp.json', route => route.fulfill({ status: 503,
+    headers: { 'Access-Control-Allow-Origin': portal, 'Access-Control-Allow-Credentials': 'true' } }));
+  await page.route('**/sample/ponyapp.json', async route => {
+    const response = await route.fetch();
+    const manifest = await response.json();
+    delete manifest.terminal; // an application of an earlier version runs on the element's terminal
+    manifest.styles.push({ id: 'portal-sheet', href: `${portal}/portal.css` });
+    await route.fulfill({ response, json: manifest });
+  });
+  await page.route('**/sample/other/ponyapp.json', async route => {
+    const response = await route.fetch({ url: route.request().url().replace('/other/', '/') });
+    await route.fulfill({ response, json: { ...(await response.json()), terminal: 'not-pony.js' } });
+  });
+  await page.route('**/sample/other/not-pony.js', route => route.fulfill({ contentType: 'text/javascript', body: 'export const nothing = 0;',
+    headers: { 'Access-Control-Allow-Origin': '*' } }));
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.id = 'refused';
+    app.setAttribute('src', new URL('/refused/', /** @type {any} */ (window).portalApp).href);
+    document.querySelector('.portal-app').append(app);
+  });
+  await expect.poll(() => errors.some(e => /refused\/"> cannot start/.test(e))).toBe(true); // HTTP 503
+
+  const first = page.locator('#ticket-1'); // its manifest names no terminal: it runs on the element's
+  await expect(first.getByText('EUR / USD')).toBeVisible();
+  // read with CORS, without credentials: another origin than the application's
+  await expect.poll(() => page.evaluate(() => /** @type {any} */ (window).crossOrigins)).toContain('anonymous');
+
+  await embed(page, 'other', 'other/', { view: 'ticket' });
+  await expect.poll(() => errors.some(e => /other\/"> cannot start/.test(e))).toBe(true); // its terminal runs no application
+
+  // Taken out while the terminal of another version loads: it runs nothing
+  let release = () => {};
+  const held = new Promise(resolve => { release = resolve; });
+  await page.route('**/sample/slow/ponyapp.json', async route => {
+    const response = await route.fetch({ url: route.request().url().replace('/slow/', '/') });
+    await route.fulfill({ response, json: { ...(await response.json()), terminal: '../v2/ponyterminal/terminal.js' } });
+  });
+  await page.route(/\/sample\/v2\/ponyterminal\//, async route => {
+    await held;
+    await route.fulfill({ response: await route.fetch({ url: route.request().url().replace('/sample/v2/ponyterminal/', '/sample/ponyterminal/') }) });
+  });
+  const sockets = [];
+  page.on('websocket', ws => sockets.push(ws.url()));
+  const requested = page.waitForRequest(/\/sample\/v2\/ponyterminal\/terminal\.js/);
+  await embed(page, 'slow', 'slow/', { view: 'ticket' });
+  await requested;
+  await page.evaluate(() => document.getElementById('slow').remove());
+  release();
+  await page.waitForTimeout(1000);
+  expect(sockets.filter(url => url.includes('/slow/'))).toEqual([]);
+
+  // An application whose ponysdk.js is not the page's: the page's serves it
+  const warned = [];
+  page.on('console', m => { if (m.type() === 'warning') warned.push(m.text()); });
+  await page.route('**/sample/again/ponyapp.json', async route => {
+    const response = await route.fetch({ url: route.request().url().replace('/again/', '/') });
+    const { terminal, ...manifest } = await response.json(); // on the element's terminal
+    await route.fulfill({ response, json: { ...manifest, scripts: [`${manifest.scripts[0]}?again`], styles: [], sharedSheets: [] } });
+  });
+  await embed(page, 'again', 'again/', { view: 'ticket' });
+  await expect.poll(() => warned.some(w => /ponysdk\.js\?again not loaded: the page's ponysdk\.js serves/.test(w))).toBe(true);
+  await page.evaluate(() => document.getElementById('again').remove());
+});
+
+test('stylesheets: one the application imports is adapted too, one of another origin it imports cannot be, a selector that cannot be one stays', async ({ page, browserName }) => {
+  const warned = [];
+  page.on('console', m => { if (m.type() === 'warning') warned.push(m.text()); });
+  const portal = new URL(PORTAL_URL).origin;
+  await page.route('**/sample/css/showcase.css', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: `@import url("imported.css");\n@import url("${portal}/portal.css");\n`
+      + await response.text() });
+  });
+  await page.route('**/sample/css/imported.css', route => route.fulfill({ contentType: 'text/css',
+    body: 'html .pony-ticket-instrument { outline: 3px solid rgb(1, 2, 3); }\nhtml:has(.nothing) .nothing { color: red; }' }));
+  // An element of the application's own origin: the sheets its sheet imports from there can be read
+  await page.goto(BASE_URL + '#embedding');
+  const ticket = page.locator('pony-app.pony-embedding-ticket');
+  await expect(ticket.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
+  await expect(ticket.locator('.pony-ticket-instrument')).toHaveCSS('outline-color', 'rgb(1, 2, 3)');
+  // Chromium imports another origin's sheet without CORS, its rules hidden, and takes no :has() in :host(); Firefox
+  // and WebKit import it with the CORS of the sheet that imports it, and take the selector
+  if (browserName === 'chromium') {
+    await expect.poll(() => warned.some(w => /portal\.css: its rules cannot be read/.test(w))).toBe(true);
+    await expect.poll(() => warned.some(w => /":host\(:has\(\.nothing\)\) \.nothing" is no selector/.test(w))).toBe(true);
+  }
 });

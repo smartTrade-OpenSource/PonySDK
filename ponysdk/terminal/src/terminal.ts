@@ -229,9 +229,9 @@ export class Terminal implements Session, Host {
         this.streamKey = streamKey ?? null;
     }
 
-    /** The context's keys as useKeys takes them, for a child terminal fed by postMessage; null without. */
-    get contextKeys(): string | null {
-        return this.contextKey === null ? null : `${this.contextKey}.${this.streamKey}`;
+    /** The context's keys as useKeys takes them, for a child terminal fed by postMessage: an embedded terminal has them. */
+    get contextKeys(): string {
+        return `${this.contextKey!}.${this.streamKey!}`;
     }
 
     /**
@@ -264,10 +264,12 @@ export class Terminal implements Session, Host {
         });
     }
 
-    /** Fetched from the application's origin with its cookies, by an embedded terminal: the response sets one there. */
+    /**
+     * Fetched from the application's origin with its cookies, by an embedded terminal, whose context has its keys: the
+     * response sets one there.
+     */
     cookieRequested(requestId: number): void {
-        const headers: Record<string, string> = this.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: this.contextKey };
-        fetch(this.streamUrl(requestId), { credentials: 'include', headers })
+        fetch(this.streamUrl(requestId), { credentials: 'include', headers: { [CONTEXT_KEY_HEADER]: this.contextKey! } })
             .then(response => response.arrayBuffer()) // read to its end: Chrome reports a body left unread as aborted
             .catch(e => log.error('A cookie of the application could not be set', e));
     }
@@ -381,11 +383,7 @@ export class Terminal implements Session, Host {
 
     /** An entry of this terminal's string dictionary, for a child terminal that never received it. */
     dictionaryEntry(id: number): string | undefined {
-        try {
-            return this.dispatcher.reader.entry(id);
-        } catch {
-            return undefined;
-        }
+        return this.dispatcher.reader.entry(id); // the server's dictionary is the context's: this terminal has it
     }
 
     /**

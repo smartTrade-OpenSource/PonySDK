@@ -194,6 +194,16 @@
     }
 
   });
+
+  // HighlightAddOn: its creation arguments are a JSON object, {"color": ...}
+  AbstractAddon.defineAddon("com.ponysdk.sample.client.page.addon.HighlightAddOn", {
+    init: function () {
+      if (!this.options.color) throw new Error("HighlightAddOn: no color");
+    },
+    initDom: function () {
+      this.element.style.outline = "3px solid " + this.options.color;
+    }
+  });
 })();
 
 // Functions the showcase calls by name (PScript.call, TextFunction.named): the showcase runs without eval (ADR-0015)

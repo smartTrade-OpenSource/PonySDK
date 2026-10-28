@@ -32,7 +32,7 @@ export class SuggestOracle extends BaseObject {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.SUGGESTION) {
-            this.addSuggestion(reader.str ?? '');
+            this.addSuggestion(reader.str);
             return true;
         }
         if (reader.key === K.CLEAR) {
@@ -86,7 +86,6 @@ export class SuggestOracle extends BaseObject {
         if (query.length === 0) return [];
         let found: Set<string> | null = null;
         for (const word of words) {
-            if (word.length === 0) continue;
             const forWord = new Set<string>();
             for (const [known, candidates] of this.candidatesByWord) {
                 if (known.startsWith(word)) for (const c of candidates) forWord.add(c);
@@ -97,7 +96,7 @@ export class SuggestOracle extends BaseObject {
                 if (found.size < 2) break;
             }
         }
-        return found === null ? [] : [...found].sort();
+        return [...found!].sort(); // the query has a word
     }
 }
 
@@ -129,8 +128,6 @@ export class SuggestBox extends Widget {
     private current = -1;
     private currentText: string | null = null;
     private limit = 20;
-    private sendValueChange = false;
-    private sendSelection = false;
 
     static create(context: Context, id: number, type: number, reader: Reader): SuggestBox {
         reader.read(); // ORACLE
@@ -160,7 +157,6 @@ export class SuggestBox extends Widget {
         this.listen<KeyboardEvent>('keydown', e => this.onKeyDown(e), this.input);
         this.listen('keyup', () => this.refresh(), this.input);
         this.listen('change', () => {
-            if (!this.sendValueChange) return;
             const message = about(this.id);
             message[C.HANDLER_STRING_VALUE_CHANGE] = this.input.value;
             this.context.send(message);
@@ -183,10 +179,9 @@ export class SuggestBox extends Widget {
         return super.update(reader);
     }
 
+    /** The server always listens to the value and the selection (PSuggestBox.init0). */
     override addHandler(reader: Reader, handler: number): void {
-        if (handler === H.HANDLER_STRING_VALUE_CHANGE) this.sendValueChange = true;
-        else if (handler === H.HANDLER_STRING_SELECTION) this.sendSelection = true;
-        else super.addHandler(reader, handler);
+        if (handler !== H.HANDLER_STRING_VALUE_CHANGE && handler !== H.HANDLER_STRING_SELECTION) super.addHandler(reader, handler);
     }
 
     private refresh(): void {
@@ -218,9 +213,7 @@ export class SuggestBox extends Widget {
         this.current = index;
         const options = this.list.children;
         for (let i = 0; i < options.length; i++) options[i]!.setAttribute('aria-selected', String(i === index));
-        const option = options[index];
-        if (option !== undefined) this.input.setAttribute('aria-activedescendant', option.id);
-        else this.input.removeAttribute('aria-activedescendant');
+        this.input.setAttribute('aria-activedescendant', options[index]!.id); // the index of a suggestion
     }
 
     private get shown(): boolean {
@@ -252,12 +245,10 @@ export class SuggestBox extends Widget {
 
     /** The suggestion's replacement goes in the box, which does not count it as typed: as GWT's SuggestBox. */
     private take(index: number): void {
-        const suggestion = this.suggestions[index];
-        if (suggestion === undefined) return;
+        const suggestion = this.suggestions[index]!; // one shown
         this.currentText = suggestion.replacement;
         this.input.value = suggestion.replacement;
         this.hideList();
-        if (!this.sendSelection) return;
         const message = about(this.id);
         message[C.HANDLER_STRING_SELECTION] = suggestion.display;
         message[C.REPLACEMENT_STRING] = suggestion.replacement;

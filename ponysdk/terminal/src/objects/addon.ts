@@ -11,7 +11,7 @@ import { Widget } from '../runtime/widget.ts';
 /** The creation arguments of an addon: PADDON_CREATION (JSON) or PADDON_CREATION_ARGS (an array), if any. */
 function creationArguments(reader: Reader): unknown {
     reader.read();
-    if (reader.key === K.PADDON_CREATION) return JSON.parse(reader.str ?? 'null');
+    if (reader.key === K.PADDON_CREATION) return JSON.parse(reader.str);
     if (reader.key === K.PADDON_CREATION_ARGS) return reader.array;
     reader.rewind();
     return null;
@@ -20,7 +20,7 @@ function creationArguments(reader: Reader): unknown {
 function factory(context: Context, reader: Reader): (id: number, args: unknown, widgetId: string | null,
                                                      element: HTMLElement | null) => AddOn {
     reader.read(); // FACTORY
-    const signature = reader.str ?? '';
+    const signature = reader.str;
     const found = context.addOnFactory(signature);
     if (found === undefined) throw new Error(`AddOn factory not found for signature: ${signature}`);
     return found;
@@ -58,7 +58,7 @@ export class AddOnObject extends BaseObject {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.PADDON_METHOD) {
-            const method = reader.str ?? '';
+            const method = reader.str;
             if (reader.read() === K.PADDON_ARGUMENTS) {
                 this.call(method, reader.array);
             } else {
@@ -113,8 +113,7 @@ export class AddOnComposite extends AddOnObject {
         }
         const widgetId = reader.int; // WIDGET_ID
         const object = new AddOnComposite(context, id, type);
-        const widget = context.object(widgetId);
-        if (!(widget instanceof Widget)) throw new Error(`${object}: #${widgetId} is not a widget`);
+        const widget = context.object(widgetId) as Widget;
         object.widget = widget;
         widget.onAttachChange(attached => {
             if (attached) {
@@ -135,10 +134,9 @@ export class AddOnComposite extends AddOnObject {
         return object;
     }
 
+    /** Destroyed, the call is discarded by AddOnObject's; the pending ones went with the destruction. */
     protected override call(method: string, args: unknown): void {
-        if (this.destroyed) {
-            log.warn(`${this} is destroyed: ${method} is discarded`);
-        } else if (this.initialized && this.widget?.attached) {
+        if (this.destroyed || (this.initialized && this.widget?.attached)) {
             this.flush();
             super.call(method, args);
         } else {

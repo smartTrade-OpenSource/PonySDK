@@ -186,7 +186,7 @@ export class DatePicker extends Widget {
                 const add = reader.key === K.ADD_DATE_STYLE;
                 const dates = reader.array;
                 reader.read(); // STYLE_NAME
-                const names = (reader.str ?? '').split(/\s+/).filter(n => n.length > 0);
+                const names = (reader.str).split(/\s+/).filter(n => n.length > 0);
                 for (const timestamp of dates) {
                     const date = fromServer(Number(timestamp));
                     if (date !== null) this.styleDate(key(date), names, add);
@@ -313,8 +313,7 @@ export class DatePicker extends Widget {
     }
 
     private onGridKey(event: KeyboardEvent): void {
-        const cell = (event.target as Element).closest<HTMLElement>('[role=gridcell]');
-        if (cell === null) return;
+        const cell = (event.target as Element).closest<HTMLElement>('[role=gridcell]')!; // the grid's focusable elements
         const current = this.dateAt(Number(cell.dataset['index']));
         let target: Date;
         switch (event.key) {
@@ -409,7 +408,7 @@ export class DateBox extends Widget {
         reader.read(); // PICKER
         const picker = context.object(reader.int);
         reader.read(); // DATE_FORMAT_PATTERN
-        const format = new DateFormat(reader.str ?? '');
+        const format = new DateFormat(reader.str);
         let value: string | null = null;
         if (reader.read() === K.VALUE) value = reader.str;
         else reader.rewind();
@@ -474,11 +473,11 @@ export class DateBox extends Widget {
     override update(reader: Reader): boolean {
         switch (reader.key) {
             case K.VALUE:
-                this.setDate(this.format.parse(reader.str ?? ''));
+                this.setDate(this.format.parse(reader.str));
                 return true;
             case K.DATE_FORMAT_PATTERN: {
                 const date = this.parse(true);
-                this.format = new DateFormat(reader.str ?? '');
+                this.format = new DateFormat(reader.str);
                 this.setDate(date);
                 return true;
             }
@@ -527,7 +526,6 @@ export class DateBox extends Widget {
 
     /** Shows the picker at the month of the field's date; shown already, it shows that month again, as GWT. */
     private show(): void {
-        if (this.input.disabled) return;
         this.picker.setCurrentMonth(this.parse(false) ?? new Date());
         const r = this.input.getBoundingClientRect();
         this.popup.style.left = `${r.left + window.scrollX}px`;

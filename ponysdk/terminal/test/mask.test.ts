@@ -52,3 +52,20 @@ test('pulls the next characters back when one goes', () => {
     assert.equal(value.insertPosition, 4);
     assert.equal(value.remove(-1, 0), false);
 });
+
+test('a mask ends with its own characters; an empty free character shows as a space', () => {
+    const value = new MaskValue('{{00}}%', true, '');
+    assert.equal(value.text, '  %');
+    typed(value, '12');
+    assert.equal(value.text, '12%');
+    assert.equal(value.insertPosition, 3); // full
+});
+
+test('refuses a character in a slot that does not take it, or over the mask\'s own', () => {
+    const value = new MaskValue('{{00}}/{{00}}', true, '_');
+    typed(value, '12');
+    assert.equal(value.fits(2, '/'), false); // the mask's own, typed over
+    assert.equal(value.insert(2, '/'), -1);
+    assert.equal(value.insert(0, 'x'), -1);
+    assert.equal(value.insert(5, '1'), -1); // past the end
+});

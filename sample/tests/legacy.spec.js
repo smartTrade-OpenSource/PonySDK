@@ -98,3 +98,13 @@ test('disclosure panel: open and closed', async ({ page }) => {
     await expect(panel).toHaveClass(name('gwt-DisclosurePanel-open'));
     await expect(page.getByText('Oracle details')).toHaveClass(name('header'));
 });
+
+test('loaded once the page is parsed, it decorates the document all the same', async ({ page }) => {
+    await page.goto(BASE_URL + '#oracle-legacy');
+    const plain = page.getByRole('button', { name: 'Plain' });
+    await expect(plain).toBeVisible();
+    await expect(plain).not.toHaveClass(name('gwt-Button'));
+    await page.addScriptTag({ url: BASE_URL + 'ponyterminal/legacy.js' });
+    await expect(page.locator('html')).toHaveAttribute('data-pony-legacy', '');
+    await expect(plain).toHaveClass(name('gwt-Button'));
+});

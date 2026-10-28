@@ -19,8 +19,8 @@ interface EarlySocket {
     socket: WebSocket;
     opened: boolean;
     messages: ArrayBuffer[];
-    /** The messages' arrival times (their events' timeStamp); absent from a page served before ADR-0005. */
-    times?: number[];
+    /** The messages' arrival times: their events' timeStamp. */
+    times: number[];
     closeEvent: CloseEvent | null;
 }
 
@@ -43,7 +43,7 @@ export class Socket {
         delete holder.ponyEarlySocket;
         const socket = new Socket(early.socket, listener);
         if (early.opened) socket.onOpen();
-        early.messages.forEach((message, i) => socket.onMessage(message, early.times?.[i] ?? performance.now()));
+        early.messages.forEach((message, i) => socket.onMessage(message, early.times[i]!));
         if (early.closeEvent !== null) socket.onClose(early.closeEvent);
         log.info(`WebSocket opened by the page, ${early.messages.length} messages replayed`);
         return socket;

@@ -27,8 +27,7 @@ export class HostObject extends BaseObject {
     private readonly own = new WeakSet<Event>();
 
     static create(context: Context, id: number, type: number): HostObject {
-        const embedding = context.session.embedding;
-        if (embedding === null) throw new Error(`#${id}: PHost is for an application in a <pony-app> element`);
+        const embedding = context.session.embedding!; // the server has a PHost for an embedded application only
         return new HostObject(context, id, type, embedding.element, embedding.attributes);
     }
 
@@ -74,10 +73,10 @@ export class HostObject extends BaseObject {
     override update(reader: Reader): boolean {
         switch (reader.key) {
             case K.WC_LISTEN_EVENT:
-                this.listenTo(reader.str ?? '');
+                this.listenTo(reader.str);
                 return true;
             case K.WC_UNLISTEN_EVENT: {
-                const name = reader.str ?? '';
+                const name = reader.str;
                 this.listeners.get(name)?.abort();
                 this.listeners.delete(name);
                 return true;
@@ -94,7 +93,6 @@ export class HostObject extends BaseObject {
     }
 
     private listenTo(name: string): void {
-        if (this.listeners.has(name)) return;
         const controller = new AbortController(); // aborted by WC_UNLISTEN_EVENT and destroy()
         this.listeners.set(name, controller);
         this.element.addEventListener(name, event => this.context.guard(() => {

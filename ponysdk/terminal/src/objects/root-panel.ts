@@ -18,7 +18,7 @@ export class RootPanel extends Widget {
         reader.read();
         let element: HTMLElement | null = context.session.body;
         if (reader.key === K.ROOT_ID) {
-            element = context.session.byId(reader.str ?? '');
+            element = context.session.byId(reader.str);
             if (element === null) throw new Error(`No element #${reader.str} for root panel #${id}`);
         } else {
             reader.rewind();

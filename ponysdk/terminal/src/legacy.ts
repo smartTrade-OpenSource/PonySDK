@@ -115,7 +115,8 @@ function day(e: Element): string[] {
 /** As GWT's selected item of a bar: under the pointer, or with its submenu open, or focused while none is hovered. */
 function menuItemSelected(e: Element): boolean {
     if (hovered.has(e) || e.getAttribute('aria-expanded') === 'true') return true;
-    return e === document.activeElement && !siblingItems(e).some(item => hovered.has(item));
+    // the focus of the document, or of the shadow root of a <pony-app> element
+    return e === (e.getRootNode() as Document | ShadowRoot).activeElement && !siblingItems(e).some(item => hovered.has(item));
 }
 
 function siblingItems(e: Element): Element[] {

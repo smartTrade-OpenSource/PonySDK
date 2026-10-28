@@ -33,7 +33,7 @@ export function pageSelector(selector: string, root: string): string | null {
         const c = selector[i]!;
         if (quote !== '') {
             if (c === '\\') {
-                out += c + (selector[i + 1] ?? '');
+                out += c + selector[i + 1]!; // the CSSOM's text ends no string open
                 i += 2;
                 continue;
             }
@@ -95,7 +95,7 @@ export function adaptStylesheet(sheet: CSSStyleSheet, root: string): void {
         log.warn(`${sheet.href}: its rules cannot be read (no CORS): left as written for a page`);
         return;
     }
-    adaptRules(rules, sheet.href ?? document.baseURI, root);
+    adaptRules(rules, sheet.href!, root); // a link's or an @import's
 }
 
 function adaptRules(rules: CSSRuleList, base: string, root: string): void {

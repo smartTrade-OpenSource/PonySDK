@@ -113,8 +113,8 @@ export class HtmlTable extends Widget {
     }
 }
 
-function names(value: string | null): string[] {
-    return value === null ? [] : value.split(/\s+/).filter(name => name.length > 0);
+function names(value: string): string[] {
+    return value.split(/\s+/).filter(name => name.length > 0);
 }
 
 /** The next models: ROW, then COLUMN. */
@@ -144,7 +144,7 @@ const HTML_TABLE: Setters<HtmlTable> = new Map<number, (w: HtmlTable, r: Reader)
         w.row(nextInt(r)).classList.add(...style);
     }],
     [K.ROW_FORMATTER_SET_STYLE_NAME, (w, r) => {
-        const style = r.str ?? '';
+        const style = r.str;
         w.row(nextInt(r)).className = style;
     }],
     [K.ROW_FORMATTER_REMOVE_STYLE_NAME, (w, r) => {
@@ -166,15 +166,15 @@ const HTML_TABLE: Setters<HtmlTable> = new Map<number, (w: HtmlTable, r: Reader)
         w.cell(...rowColumn(r)).classList.remove(...style);
     }],
     [K.CELL_FORMATTER_SET_STYLE_NAME, (w, r) => {
-        const style = r.str ?? '';
+        const style = r.str;
         w.cell(...rowColumn(r)).className = style;
     }],
     [K.VERTICAL_ALIGNMENT, (w, r) => {
-        const align = VERTICAL_ALIGN[r.int] ?? '';
+        const align = VERTICAL_ALIGN[r.int]!;
         w.cell(...rowColumn(r)).style.verticalAlign = align;
     }],
     [K.HORIZONTAL_ALIGNMENT, (w, r) => {
-        const align = TEXT_ALIGN[r.int] ?? '';
+        const align = TEXT_ALIGN[r.int]!;
         w.cell(...rowColumn(r)).style.textAlign = align;
     }],
     [K.SET_COL_SPAN, (w, r) => {
@@ -194,11 +194,11 @@ const HTML_TABLE: Setters<HtmlTable> = new Map<number, (w: HtmlTable, r: Reader)
         w.column(nextInt(r)).classList.remove(...style);
     }],
     [K.COLUMN_FORMATTER_SET_STYLE_NAME, (w, r) => {
-        const style = r.str ?? '';
+        const style = r.str;
         w.column(nextInt(r)).className = style;
     }],
     [K.COLUMN_FORMATTER_COLUMN_WIDTH, (w, r) => {
-        const width = r.str ?? '';
+        const width = r.str;
         w.column(nextInt(r)).style.width = width;
     }],
 ]);

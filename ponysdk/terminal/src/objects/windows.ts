@@ -24,17 +24,16 @@ function readWindowOperation(reader: Reader): WindowOperation | null {
     switch (key) {
         case K.PRINT:
         case K.RELOAD:
+        case K.FOCUS: // true: the server only focuses a window
             return [key, []];
         case K.WINDOW_LOCATION_REPLACE:
         case K.WINDOW_TITLE:
-            return [key, [reader.str ?? '']];
+            return [key, [reader.str]];
         case K.RESIZE_BY_X:
         case K.RESIZE_TO_WIDTH:
         case K.MOVE_BY_X:
         case K.MOVE_TO_X:
             return [key, [reader.number, nextNumber(reader)]]; // x, then y (or width, then height)
-        case K.FOCUS:
-            return [key, [reader.bool]];
         default:
             return null;
     }
@@ -54,10 +53,7 @@ export function applyWindowOperation(w: Window, [key, values]: WindowOperation):
         case K.RESIZE_TO_WIDTH: w.resizeTo(a, b); break;
         case K.MOVE_BY_X: w.moveBy(Math.trunc(a), Math.trunc(b)); break;
         case K.MOVE_TO_X: w.moveTo(Math.trunc(a), Math.trunc(b)); break;
-        case K.FOCUS:
-            if (values[0] === true) w.focus();
-            else w.blur();
-            break;
+        case K.FOCUS: w.focus(); break;
         case K.WINDOW_TITLE: w.document.title = values[0] as string; break;
     }
 }
@@ -98,11 +94,11 @@ export class Browser extends AbstractWindow {
                 return true;
             }
             if (reader.key === K.WINDOW_TITLE) {
-                embedding.notify('pony-title', reader.str ?? '');
+                embedding.notify('pony-title', reader.str);
                 return true;
             }
             if (reader.key === K.WINDOW_LOCATION_REPLACE) {
-                embedding.notify('pony-location', new URL(reader.str ?? '', this.context.session.hostPageBaseURL).href);
+                embedding.notify('pony-location', new URL(reader.str, this.context.session.hostPageBaseURL).href);
                 return true;
             }
         }
@@ -128,11 +124,11 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal, Bridge
         reader.read();
         const relative = reader.bool;
         reader.read();
-        let url = reader.str ?? '';
+        let url = reader.str;
         reader.read();
-        const name = reader.str ?? '';
+        const name = reader.str;
         reader.read();
-        const features = reader.str ?? '';
+        const features = reader.str;
         const session = context.session;
         const bridge = relative ? session.embedding?.children ?? null : null;
         if (relative) {

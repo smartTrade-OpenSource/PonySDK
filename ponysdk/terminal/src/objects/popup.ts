@@ -60,11 +60,9 @@ export class PopupPanel extends Widget {
         return this.element as HTMLDialogElement;
     }
 
-    /** The widget, which replaces the previous one. */
+    /** The widget: the server removes the previous one first. */
     override add(_reader: Reader, child: TerminalObject): void {
-        if (!(child instanceof Widget)) return;
-        for (const widget of [...this.children]) if (widget !== child) this.removeChild(widget);
-        this.appendInside(this.container, child);
+        this.appendInside(this.container, child as Widget);
     }
 
     override update(reader: Reader): boolean {
@@ -90,7 +88,7 @@ export class PopupPanel extends Widget {
                 this.glassEnabled = reader.bool;
                 return true;
             case K.POPUP_GLASS_STYLE_NAME:
-                this.glassStyleName = reader.str ?? '';
+                this.glassStyleName = reader.str;
                 return true;
             case K.MODAL:
                 this.modal = reader.bool;
@@ -144,7 +142,7 @@ export class PopupPanel extends Widget {
         this.showing = true;
         this.whileShown = new AbortController(); // aborted when hidden, and by destroy() through close()
         const signal = this.whileShown.signal;
-        if (this.glassEnabled) this.showGlass(signal);
+        if (this.glassEnabled) this.showGlass();
         if (this.modal) {
             this.dialog.removeAttribute('popover');
             this.dialog.showModal();
@@ -164,15 +162,13 @@ export class PopupPanel extends Widget {
         }
     }
 
-    private showGlass(signal: AbortSignal): void {
+    /** A press on it is outside the popup: the document's listener hides an auto-hide popup (show). */
+    private showGlass(): void {
         const glass = document.createElement('div');
         glass.setAttribute('popover', 'manual');
         glass.className = `pony-Glass ${this.glassStyleName}`.trim();
         this.context.session.body.append(glass);
         glass.showPopover(); // before the popup: under it in the top layer
-        glass.addEventListener('pointerdown', () => this.context.guard(() => {
-            if (this.autoHide && this.showing) this.hide();
-        }), { signal });
         this.glass = glass;
     }
 
@@ -181,12 +177,12 @@ export class PopupPanel extends Widget {
      * composed path: at the document, a press inside a <pony-app> element's shadow root targets the element.
      */
     private isOutside(event: PointerEvent): boolean {
-        const target = (event.composedPath()[0] ?? null) as Node | null;
+        const target = event.composedPath()[0] as Node;
         if (target === this.element) {
             const r = this.element.getBoundingClientRect();
             return event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom;
         }
-        return target === null || !this.element.contains(target);
+        return !this.element.contains(target);
     }
 
     /** Hides it and tells the server. */
@@ -283,7 +279,7 @@ export class DialogBox extends PopupPanel {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.POPUP_CAPTION) {
-            this.caption.innerHTML = reader.str ?? '';
+            this.caption.innerHTML = reader.str;
             return true;
         }
         if (reader.key === K.DRAGGABLE) {

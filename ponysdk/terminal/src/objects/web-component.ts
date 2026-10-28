@@ -17,7 +17,7 @@ export class WebComponent extends Widget {
 
     static create(context: Context, id: number, type: number, reader: Reader): WebComponent {
         reader.read(); // TAG
-        return new WebComponent(context, id, type, document.createElement(reader.str ?? 'div'));
+        return new WebComponent(context, id, type, document.createElement(reader.str));
     }
 
     override update(reader: Reader): boolean {
@@ -27,7 +27,7 @@ export class WebComponent extends Widget {
     override add(reader: Reader, child: TerminalObject): void {
         reader.read();
         if (reader.key === K.WC_SLOT_NAME && child instanceof Widget) {
-            child.element.setAttribute('slot', reader.str ?? '');
+            child.element.setAttribute('slot', reader.str);
             this.insert(child, this.children.length);
         } else if (reader.key === K.INDEX && child instanceof Widget) {
             this.insert(child, reader.int);
@@ -39,7 +39,6 @@ export class WebComponent extends Widget {
 
     /** A custom event, sent with its detail as JSON. */
     listenTo(name: string): void {
-        if (this.listeners.has(name)) return;
         const controller = new AbortController(); // aborted by stopListening and destroy()
         this.listeners.set(name, controller);
         const signal = controller.signal;
@@ -59,10 +58,10 @@ export class WebComponent extends Widget {
         this.listeners.delete(name);
     }
 
-    property(name: string, json: string | null): void {
+    property(name: string, json: string): void {
         const element = this.element as unknown as Record<string, unknown>;
         try {
-            element[name] = JSON.parse(json ?? 'null');
+            element[name] = JSON.parse(json);
         } catch {
             element[name] = json; // not JSON: a plain string
         }
@@ -72,12 +71,12 @@ export class WebComponent extends Widget {
      * A JSON merge patch (RFC 7396) of an object property, applied to a shallow copy that is then assigned:
      * components that detect changes by identity (Lit's hasChanged is !==) would miss a change made in place.
      */
-    patch(name: string, json: string | null): void {
+    patch(name: string, json: string): void {
         const element = this.element as unknown as Record<string, unknown>;
         const current = element[name];
         const next: Record<string, unknown> =
             typeof current === 'object' && current !== null && !Array.isArray(current) ? { ...current } : {};
-        for (const [key, value] of Object.entries(JSON.parse(json ?? '{}') as Record<string, unknown>)) {
+        for (const [key, value] of Object.entries(JSON.parse(json) as Record<string, unknown>)) {
             if (value === null) delete next[key];
             else next[key] = value;
         }
@@ -114,20 +113,20 @@ function next(reader: Reader): Reader {
 
 const WEB_COMPONENT: Setters<WebComponent> = new Map<number, (w: WebComponent, r: Reader) => void>([
     [K.WC_SET_PROPERTY, (w, r) => {
-        const name = r.str ?? '';
+        const name = r.str;
         w.property(name, next(r).str);
     }],
     [K.WC_PATCH_PROPERTY, (w, r) => {
-        const name = r.str ?? '';
+        const name = r.str;
         w.patch(name, next(r).str);
     }],
     [K.WC_REMOVE_PROPERTY, (w, r) => {
-        delete (w.element as unknown as Record<string, unknown>)[r.str ?? ''];
+        delete (w.element as unknown as Record<string, unknown>)[r.str];
     }],
-    [K.WC_LISTEN_EVENT, (w, r) => w.listenTo(r.str ?? '')],
-    [K.WC_UNLISTEN_EVENT, (w, r) => w.stopListening(r.str ?? '')],
+    [K.WC_LISTEN_EVENT, (w, r) => w.listenTo(r.str)],
+    [K.WC_UNLISTEN_EVENT, (w, r) => w.stopListening(r.str)],
     [K.WC_CALL_METHOD, (w, r) => {
-        const method = r.str ?? '';
+        const method = r.str;
         r.read();
         if (r.key === K.WC_METHOD_ARGS) {
             w.call(method, r.array);

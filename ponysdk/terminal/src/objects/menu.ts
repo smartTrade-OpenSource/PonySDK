@@ -66,7 +66,7 @@ export class MenuBar extends Widget {
     /** The bar at the top of this menu's chain. */
     get root(): MenuBar {
         let bar: MenuBar = this;
-        while (bar.parentItem?.bar) bar = bar.parentItem.bar;
+        while (bar.parentItem !== null) bar = bar.parentItem.bar;
         return bar;
     }
 
@@ -114,7 +114,7 @@ export class MenuBar extends Widget {
 
     private onMenuKey(event: KeyboardEvent): void {
         const items = this.items.filter(i => i.enabled);
-        const current = items.findIndex(i => i.element === document.activeElement);
+        const current = items.findIndex(i => i.element === this.focused);
         if (current === -1) return;
         const item = items[current]!;
         const next = this.vertical || this.parentItem !== null ? ['ArrowDown', 'ArrowUp'] : ['ArrowRight', 'ArrowLeft'];
@@ -127,7 +127,7 @@ export class MenuBar extends Widget {
         else if (event.key === 'ArrowDown' && item.submenu !== null) item.activate(true);
         else if (event.key === 'ArrowRight' && item.submenu !== null) item.activate(true);
         else if ((event.key === 'Escape' || event.key === 'ArrowLeft') && this.parentItem !== null) {
-            this.parentItem.bar?.closeSubmenus();
+            this.parentItem.bar.closeSubmenus();
             this.parentItem.element.focus();
         } else handled = false;
         if (handled) {
@@ -170,8 +170,9 @@ export class MenuItem extends Widget {
         });
     }
 
-    get bar(): MenuBar | null {
-        return this.parent instanceof MenuBar ? this.parent : null;
+    /** The server adds an item to a bar only; a removed one leaves the page, and has no events. */
+    get bar(): MenuBar {
+        return this.parent as MenuBar;
     }
 
     /** The submenu, in a popover inside this item. */
@@ -197,7 +198,7 @@ export class MenuItem extends Widget {
                 this.label.textContent = reader.str;
                 return true;
             case K.HTML:
-                this.label.innerHTML = reader.str ?? '';
+                this.label.innerHTML = reader.str;
                 return true;
             case K.ENABLED:
                 this.enabled = reader.bool;
@@ -217,7 +218,7 @@ export class MenuItem extends Widget {
     /** A click, Enter or Space: the submenu opens or closes, or the command runs. */
     activate(byKeyboard: boolean): void {
         const bar = this.bar;
-        if (!this.enabled || bar === null) return;
+        if (!this.enabled) return;
         if (this.submenu !== null) {
             if (bar.openItem === this && !byKeyboard) bar.closeSubmenus();
             else {
@@ -236,19 +237,20 @@ export class MenuItem extends Widget {
 
     private hover(): void {
         const bar = this.bar;
-        if (bar === null || !this.enabled) return;
+        if (!this.enabled) return;
         const menuOpen = bar.openItem !== null || bar.parentItem !== null;
         if (!menuOpen || bar.openItem === this) return;
         if (this.submenu !== null) bar.openSubmenu(this);
         else bar.closeSubmenus();
     }
 
+    /** Of an item with a submenu. */
     showSubmenu(beside: boolean): void {
-        if (this.popup === null) return;
+        const popup = this.popup!;
         const r = this.element.getBoundingClientRect();
-        this.popup.style.left = `${(beside ? r.right : r.left) + window.scrollX}px`;
-        this.popup.style.top = `${(beside ? r.top : r.bottom) + window.scrollY}px`;
-        this.popup.showPopover();
+        popup.style.left = `${(beside ? r.right : r.left) + window.scrollX}px`;
+        popup.style.top = `${(beside ? r.top : r.bottom) + window.scrollY}px`;
+        popup.showPopover();
         this.element.setAttribute('aria-expanded', 'true');
     }
 

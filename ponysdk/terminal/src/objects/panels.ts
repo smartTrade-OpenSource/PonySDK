@@ -153,8 +153,7 @@ export class Composite extends Widget {
 
     override update(reader: Reader): boolean {
         if (reader.key !== K.WIDGET_ID) return super.update(reader);
-        const inner = this.context.object(reader.int);
-        if (!(inner instanceof Widget)) throw new Error(`${this}: #${reader.int} is not a widget`);
+        const inner = this.context.object(reader.int) as Widget;
         inner.removeFromParent();
         this.element = inner.element;
         this.children.push(inner);
@@ -214,7 +213,7 @@ export class CellPanel extends Widget {
     protected override nodeOf(child: Widget): Element {
         const cell = this.cells.get(child);
         this.cells.delete(child);
-        return cell ?? child.element;
+        return cell!;
     }
 
     override update(reader: Reader): boolean {
@@ -225,7 +224,7 @@ export class CellPanel extends Widget {
     cellOf(reader: Reader): HTMLDivElement | undefined {
         reader.read(); // WIDGET_ID
         const child = this.context.object(reader.int);
-        return child instanceof Widget ? this.cells.get(child) : undefined;
+        return this.cells.get(child as Widget);
     }
 
     setDefaultAlignment(horizontal: number | null, vertical: number | null): void {
@@ -235,13 +234,13 @@ export class CellPanel extends Widget {
 }
 
 function alignHorizontally(cell: HTMLElement, alignment: number): void {
-    const [items, text] = HORIZONTAL[alignment] ?? ['stretch', 'left'];
+    const [items, text] = HORIZONTAL[alignment]!;
     cell.style.alignItems = items;
     cell.style.textAlign = text;
 }
 
 function alignVertically(cell: HTMLElement, alignment: number): void {
-    cell.style.justifyContent = VERTICAL[alignment] ?? 'flex-start';
+    cell.style.justifyContent = VERTICAL[alignment]!;
 }
 
 const CELL_PANEL: Setters<CellPanel> = new Map<number, (w: CellPanel, r: Reader) => void>([
@@ -256,12 +255,12 @@ const CELL_PANEL: Setters<CellPanel> = new Map<number, (w: CellPanel, r: Reader)
         if (cell) alignVertically(cell, alignment);
     }],
     [K.CELL_WIDTH, (w, r) => {
-        const width = r.str ?? '';
+        const width = r.str;
         const cell = w.cellOf(r);
         if (cell) cell.style.width = width;
     }],
     [K.CELL_HEIGHT, (w, r) => {
-        const height = r.str ?? '';
+        const height = r.str;
         const cell = w.cellOf(r);
         if (cell) cell.style.height = height;
     }],

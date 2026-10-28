@@ -49,8 +49,8 @@ export class Reader {
     int = 0;
     num = 0;
     bool = false;
-    /** Null for an empty string, as the server writes null and "" alike. */
-    str: string | null = null;
+    /** Empty for null too: the server writes null and "" alike. */
+    str = '';
     array: unknown[] = [];
 
     private bytes: Uint8Array = new Uint8Array(0);
@@ -160,10 +160,9 @@ export class Reader {
         return end;
     }
 
-    /** Moves past the current block, keeping the dictionary entries it adds. */
+    /** Moves past the current block, which is complete, keeping the dictionary entries it adds. */
     skipBlock(): void {
-        const start = this.position;
-        if (this.scanBlock(true) === INCOMPLETE) this.position = start;
+        this.scanBlock(true);
     }
 
     /**
@@ -178,7 +177,7 @@ export class Reader {
 
     /** The name of a model key, for messages. */
     static keyName(key: number): string {
-        return nameOf(K, key) ?? `#${key}`;
+        return nameOf(K, key)!; // a key read is known
     }
 
     private define(id: number, value: string): string {
@@ -248,27 +247,23 @@ export class Reader {
         return view.getInt32(position) * 4294967296 + view.getUint32(position + 4);
     }
 
-    private string(): string | null {
+    private string(): string {
         const tag = this.uint8();
         if (tag === T.STRING_DICTIONARY_REF) return this.entry(this.uint31());
         if (tag === T.STRING_DICTIONARY_ADD) {
-            return this.define(this.uint31(), this.inlineString(this.uint8()) ?? '');
+            return this.define(this.uint31(), this.inlineString(this.uint8()));
         }
         return this.inlineString(tag);
     }
 
     /** A string given its length byte: the length itself up to STRING_ASCII_UINT8, else a tag. */
-    private inlineString(tag: number): string | null {
-        if (tag <= T.STRING_ASCII_UINT8) return this.text(true, tag);
-        if (tag === T.STRING_ASCII_UINT16) return this.text(true, this.uint16());
-        if (tag === T.STRING_ASCII_UINT32) return this.text(true, this.int32());
-        if (tag === T.STRING_UTF8_UINT8) return this.text(false, this.uint8());
-        if (tag === T.STRING_UTF8_UINT16) return this.text(false, this.uint16());
-        return this.text(false, this.int32());
-    }
-
-    private text(ascii: boolean, length: number): string | null {
-        return length === 0 ? null : this.chars(ascii, length);
+    private inlineString(tag: number): string {
+        if (tag <= T.STRING_ASCII_UINT8) return this.chars(true, tag);
+        if (tag === T.STRING_ASCII_UINT16) return this.chars(true, this.uint16());
+        if (tag === T.STRING_ASCII_UINT32) return this.chars(true, this.int32());
+        if (tag === T.STRING_UTF8_UINT8) return this.chars(false, this.uint8());
+        if (tag === T.STRING_UTF8_UINT16) return this.chars(false, this.uint16());
+        return this.chars(false, this.int32());
     }
 
     private chars(ascii: boolean, length: number): string {
@@ -318,7 +313,7 @@ export class Reader {
         }
     }
 
-    /** An inline string element of an array: unlike a model value, an empty one is "". */
+    /** An inline string element of an array. */
     private arrayString(type: number): string {
         switch (type) {
             case A.STRING_ASCII_UINT8_LENGTH:
@@ -399,7 +394,7 @@ export class Reader {
             const start = this.position;
             const length = this.uint8();
             if (keepEntries) {
-                this.define(id, this.inlineString(length) ?? '');
+                this.define(id, this.inlineString(length));
             } else {
                 this.position = start;
                 this.skipString(false);
@@ -457,6 +452,7 @@ function json(value: string): unknown {
 function fromCharCodes(b: Uint8Array, p: number, n: number): string {
     const c = String.fromCharCode;
     switch (n) {
+        case 0: return '';
         case 1: return c(b[p]!);
         case 2: return c(b[p]!, b[p + 1]!);
         case 3: return c(b[p]!, b[p + 1]!, b[p + 2]!);

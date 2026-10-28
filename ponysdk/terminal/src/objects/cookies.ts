@@ -16,21 +16,18 @@ const EXPIRED = 'Fri, 02-Jan-1970 00:00:00 GMT';
  * through a request to the application's origin (HANDLER_COOKIE_REQUEST, ADR-0009).
  */
 export class Cookies extends BaseObject {
-    private readonly embedded: boolean;
-
     constructor(context: Context) {
         super(context, 0, -1);
-        this.embedded = context.session.embedding !== null;
         const message = about(0);
-        message[C.COOKIES] = [...(this.embedded ? new Map<string, string>() : readCookies())].map(([name, value]) => ({ [C.COOKIE_NAME]: name, [C.COOKIE_VALUE]: value }));
+        message[C.COOKIES] = [...(context.session.embedding !== null ? new Map<string, string>() : readCookies())].map(([name, value]) => ({ [C.COOKIE_NAME]: name, [C.COOKIE_VALUE]: value }));
         context.send(message);
     }
 
     override update(reader: Reader): boolean {
         if (reader.key === K.ADD_COOKIE) {
-            const name = reader.str ?? '';
+            const name = reader.str;
             reader.read(); // VALUE
-            const value = reader.str ?? '';
+            const value = reader.str;
             const expires = optional(reader, K.COOKIE_EXPIRE)?.num;
             const domain = optional(reader, K.COOKIE_DOMAIN)?.str;
             const path = optional(reader, K.COOKIE_PATH)?.str;
@@ -42,24 +39,19 @@ export class Cookies extends BaseObject {
             if (path) cookie += `;path=${path}`;
             if (secure) cookie += ';secure';
             if (sameSite) cookie += `;SameSite=${sameSite}`;
-            this.write(cookie);
+            document.cookie = cookie;
             return true;
         }
         if (reader.key === K.REMOVE_COOKIE) {
-            let cookie = `${encodeURIComponent(reader.str ?? '')}=`;
+            let cookie = `${encodeURIComponent(reader.str)}=`;
             const domain = optional(reader, K.COOKIE_DOMAIN)?.str; // a cookie set with a domain is removed with it
             const path = optional(reader, K.COOKIE_PATH)?.str;
             if (domain) cookie += `;domain=${domain}`;
             if (path) cookie += `;path=${path}`;
-            this.write(`${cookie};expires=${EXPIRED}`);
+            document.cookie = `${cookie};expires=${EXPIRED}`;
             return true;
         }
         return super.update(reader);
-    }
-
-    private write(cookie: string): void {
-        if (this.embedded) this.context.warn('A cookie write ignored: the page is the host\'s', this.id);
-        else document.cookie = cookie;
     }
 }
 

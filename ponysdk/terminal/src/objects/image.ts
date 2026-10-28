@@ -15,7 +15,7 @@ export class Image extends Widget {
     static create(context: Context, id: number, type: number, reader: Reader): Image {
         const img = document.createElement('img');
         if (reader.read() === K.URL) {
-            img.src = reader.str ?? '';
+            img.src = reader.str;
             if (reader.read() === K.POSITION_LEFT) {
                 const left = reader.int;
                 reader.read();
@@ -36,7 +36,7 @@ export class Image extends Widget {
 
     override update(reader: Reader): boolean {
         if (reader.key === K.URL) {
-            (this.element as HTMLImageElement).src = reader.str ?? '';
+            (this.element as HTMLImageElement).src = reader.str;
             return true;
         }
         return super.update(reader);

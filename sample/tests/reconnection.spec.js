@@ -122,6 +122,28 @@ test('a page busy for two heartbeat periods keeps its connection: its browser an
   expect(sockets.length).toBe(1); // and no reconnection
 });
 
+test('a server silent for two heartbeat periods: the page closes the connection, then connects again', async ({ page }) => {
+  test.slow();
+  let silent = false;
+  let sockets = 0;
+  await page.routeWebSocket(/\/sample\/ws\b/, ws => {
+    const first = sockets++ === 0;
+    const server = ws.connectToServer();
+    ws.onMessage(message => server.send(message));
+    server.onMessage(message => { if (!(first && silent)) ws.send(message); }); // the first goes half-open
+  });
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  const clickMe = page.getByRole('button', { name: 'Click me' });
+  await expect(clickMe).toBeVisible({ timeout: 10000 });
+  silent = true;
+  const banner = page.locator('#reconnecting');
+  await expect(banner).toBeVisible({ timeout: 20000 }); // past the 10 s of two periods of 5 s
+  await expect(banner).toBeHidden({ timeout: 15000 }); // on another connection
+  expect(sockets).toBeGreaterThan(1);
+  await clickMe.click();
+  await expect(page.getByText(/server handled click #1/)).toBeVisible();
+});
+
 test('a short drop: a banner while the connection is lost, then the same context resumes', async ({ page }) => {
   const sockets = await routeSockets(page);
   await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });

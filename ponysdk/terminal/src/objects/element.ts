@@ -11,7 +11,7 @@ import { Widget } from '../runtime/widget.ts';
 export class ElementWidget extends Widget {
     static create(context: Context, id: number, type: number, reader: Reader): ElementWidget {
         reader.read(); // TAG
-        return new ElementWidget(context, id, type, document.createElement(reader.str ?? 'div'));
+        return new ElementWidget(context, id, type, document.createElement(reader.str));
     }
 
     override update(reader: Reader): boolean {
@@ -32,9 +32,9 @@ export class ElementWidget extends Widget {
 
 const ELEMENT: Setters<ElementWidget> = new Map<number, (w: ElementWidget, r: Reader) => void>([
     [K.HTML, (w, r) => {
-        w.element.innerHTML = r.str ?? '';
+        w.element.innerHTML = r.str;
     }],
     [K.TEXT, (w, r) => {
-        w.element.textContent = r.str ?? '';
+        w.element.textContent = r.str;
     }],
 ]);

@@ -100,8 +100,7 @@ export class TabPanel extends Widget {
     }
 
     override remove(_reader: Reader, child: TerminalObject): void {
-        const index = this.tabs.findIndex(t => t.widget === child);
-        if (index === -1) return;
+        const index = this.tabs.findIndex(t => t.widget === child); // a tab's, for the server
         const [removed] = this.tabs.splice(index, 1);
         for (const widget of [...this.children]) {
             if (removed!.tab.contains(widget.element) || removed!.panel.contains(widget.element)) this.removeChild(widget);
@@ -157,7 +156,7 @@ export class TabPanel extends Widget {
     }
 
     private onArrow(event: KeyboardEvent): void {
-        const current = this.tabs.findIndex(t => t.tab === document.activeElement);
+        const current = this.tabs.findIndex(t => t.tab === this.focused);
         if (current === -1) return;
         const last = this.tabs.length - 1;
         const next = event.key === 'ArrowRight' ? (current === last ? 0 : current + 1)

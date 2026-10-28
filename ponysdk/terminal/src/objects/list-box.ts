@@ -52,7 +52,7 @@ export class ListBox extends FocusWidget {
 const LIST_BOX: Setters<ListBox> = new Map<number, (w: ListBox, r: Reader) => void>([
     [K.CLEAR, w => w.select.replaceChildren()],
     [K.ITEM_INSERTED, (w, r) => {
-        const text = r.str ?? '';
+        const text = r.str;
         if (r.read() === K.INDEX) {
             w.insertItem(text, r.int);
         } else {
@@ -64,12 +64,12 @@ const LIST_BOX: Setters<ListBox> = new Map<number, (w: ListBox, r: Reader) => vo
         const items = r.array;
         r.read(); // ITEM_GROUP
         const group = document.createElement('optgroup');
-        group.label = r.str ?? '';
+        group.label = r.str;
         for (const item of items) group.append(new Option(String(item)));
         w.select.append(group);
     }],
     [K.ITEM_UPDATED, (w, r) => {
-        const text = r.str ?? '';
+        const text = r.str;
         r.read(); // INDEX
         const option = w.select.options[r.int];
         if (option !== undefined) option.text = text;

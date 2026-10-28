@@ -133,7 +133,7 @@ export class Dispatcher implements Context {
             r.read(); // END, or first an embedded terminal's keys (ADR-0009)
             let keys: string | null = null;
             if (r.key === K.CONTEXT_KEYS) {
-                keys = r.str ?? null;
+                keys = r.str;
                 r.read(); // END
             }
             if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds, keys)) return false;
@@ -277,7 +277,7 @@ export class Dispatcher implements Context {
                     break;
                 }
                 case K.TYPE_HISTORY:
-                    this.historyItem(r.str ?? '');
+                    this.historyItem(r.str);
                     break;
                 default:
                     log.warn(`Unknown instruction ${Reader.keyName(key)}`);
@@ -380,7 +380,7 @@ export class Dispatcher implements Context {
             return;
         }
         r.read(); // PARENT_OBJECT_ID
-        const parent = r.int === -1 ? object : this.object(r.int);
+        const parent = this.object(r.int);
         if (parent === undefined) {
             log.warn(`Cannot remove ${object} from the unknown #${r.int}`);
             r.skipBlock();

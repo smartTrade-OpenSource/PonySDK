@@ -141,3 +141,11 @@ test('parses a time zone written as GMT, UTC or Z, and refuses another', () => {
     assert.equal(format.parse('2026-03-05T14:07GMT-02:30')?.getTime(), Date.UTC(2026, 2, 5, 16, 37));
     assert.equal(format.parse('2026-03-05T14:07CET'), null);
 });
+
+test('refuses a name it does not know and a date out of range; reads spaces before a number', () => {
+    assert.equal(new DateFormat('d MMM yyyy').parse('5 brumaire 2026'), null);
+    assert.equal(new DateFormat('EEE d/M/yyyy').parse('Someday 5/3/2026'), null);
+    assert.equal(new DateFormat('h:mm a').parse('1:30 XM'), null);
+    assert.equal(new DateFormat('yyyy').parse('999999999'), null);
+    assert.deepEqual(new DateFormat('d/M/yyyy').parse(' 5/3/2026'), new Date(2026, 2, 5));
+});

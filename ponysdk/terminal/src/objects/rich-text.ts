@@ -88,23 +88,23 @@ export class RichTextArea extends FocusWidget {
         }
         const valueCommand = VALUE_COMMANDS.get(reader.key);
         if (valueCommand !== undefined) {
-            this.exec(valueCommand, reader.str ?? '');
+            this.exec(valueCommand, reader.str);
             return true;
         }
         switch (reader.key) {
             case K.HTML:
-                this.element.innerHTML = reader.str ?? '';
+                this.element.innerHTML = reader.str;
                 this.selection = null;
                 return true;
             case K.TEXT:
-                this.element.textContent = reader.str ?? '';
+                this.element.textContent = reader.str;
                 this.selection = null;
                 return true;
             case K.FONT_SIZE:
-                this.exec('fontSize', String(FONT_SIZES[reader.int] ?? 3));
+                this.exec('fontSize', String(FONT_SIZES[reader.int]!));
                 return true;
             case K.JUSTIFICATION:
-                this.exec(JUSTIFICATIONS[reader.int] ?? 'justifyLeft');
+                this.exec(JUSTIFICATIONS[reader.int]!);
                 return true;
             case K.SELECT_ALL: {
                 this.element.focus();

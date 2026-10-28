@@ -39,10 +39,10 @@ export class TextBoxBase extends FocusWidget {
         return apply(TEXT_BOX, this, reader) || super.update(reader);
     }
 
-    text(value: string | null): void {
+    text(value: string): void {
         this.lastValue = value;
-        if (this.mask !== undefined) this.mask.load(value ?? '');
-        else this.field.value = value ?? '';
+        if (this.mask !== undefined) this.mask.load(value);
+        else this.field.value = value;
     }
 
     /** MASK: the field takes the mask's characters only, and sends its value at each change. */
@@ -66,8 +66,7 @@ export class TextBoxBase extends FocusWidget {
             super.onKey(type, event, filter);
             return;
         }
-        if (!this.enabled) return;
-        const keyCode = event.keyCode | 0;
+        const keyCode = event.keyCode | 0; // enabled: a disabled field has no key events
         if (filter === null || filter.includes(keyCode)) {
             if (this.field.value !== this.lastValue) {
                 this.lastValue = this.field.value;
@@ -129,7 +128,7 @@ export class TextBoxBase extends FocusWidget {
 
 const TEXT_BOX: Setters<TextBoxBase> = new Map<number, (w: TextBoxBase, r: Reader) => void>([
     [K.TEXT, (w, r) => w.text(r.str)],
-    [K.PLACEHOLDER, (w, r) => w.element.setAttribute('placeholder', r.str ?? '')],
+    [K.PLACEHOLDER, (w, r) => w.element.setAttribute('placeholder', r.str)],
     [K.SELECT_ALL, w => (w.element as Field).select()],
     [K.CURSOR_POSITION, (w, r) => w.select(r.int, 0)],
     [K.SELECTION_RANGE_START, (w, r) => {
@@ -137,13 +136,13 @@ const TEXT_BOX: Setters<TextBoxBase> = new Map<number, (w: TextBoxBase, r: Reade
         r.read(); // SELECTION_RANGE_LENGTH
         w.select(start, r.int);
     }],
-    [K.REGEX_FILTER, (w, r) => w.setFilter(r.str ?? '')],
+    [K.REGEX_FILTER, (w, r) => w.setFilter(r.str)],
     [K.MASK, (w, r) => {
-        const mask = r.str ?? '';
+        const mask = r.str;
         r.read(); // VISIBILITY
         const showMask = r.bool;
         r.read(); // REPLACEMENT_STRING
-        w.setMask(mask, showMask, r.str ?? ' ');
+        w.setMask(mask, showMask, r.str);
     }],
     [K.VISIBLE_LENGTH, (w, r) => {
         (w.element as HTMLInputElement).size = r.int;

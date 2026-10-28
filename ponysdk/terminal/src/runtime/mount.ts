@@ -71,9 +71,9 @@ export class PageMount implements Mount {
             || document.querySelector('meta[name="pony-reconnection"]') !== null;
     }
 
+    /** The listeners of ponysdk.js, which the page has (BootstrapServlet), then the page's notice. */
     connectionLost(): boolean {
-        const listeners = (document as unknown as { onConnectionLostListeners?: (() => void)[] }).onConnectionLostListeners ?? [];
-        for (const listener of listeners) {
+        for (const listener of (document as unknown as { onConnectionLostListeners: (() => void)[] }).onConnectionLostListeners) {
             try {
                 listener();
             } catch (e) {
@@ -97,10 +97,8 @@ export class PageMount implements Mount {
         else this.reload();
     }
 
-    /** Through ponysdk.js when it is there. */
+    /** Through ponysdk.js, which the page has (BootstrapServlet). */
     reload(): void {
-        const doReload = (document as unknown as { doReload?: () => void }).doReload;
-        if (typeof doReload === 'function') doReload();
-        else location.reload();
+        (document as unknown as { doReload: () => void }).doReload();
     }
 }

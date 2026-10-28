@@ -17,8 +17,6 @@ export class ParentBridge implements ChildBridge {
     private readonly origin: string;
     /** Each child, with the dictionary entries it has not received yet; null until it said it is ready. */
     private readonly children = new Map<BridgedChild, Set<number> | null>();
-    /** The window operations asked before the child was ready: run once it is. */
-    private readonly operations = new Map<BridgedChild, WindowOperation[]>();
 
     constructor(terminal: Terminal, origin: string, signal: AbortSignal) {
         this.terminal = terminal;
@@ -35,7 +33,6 @@ export class ParentBridge implements ChildBridge {
 
     unregister(child: BridgedChild): void {
         this.children.delete(child);
-        this.operations.delete(child);
         if (this.children.size === 0) this.terminal.dispatcher.reader.onEntry = undefined;
     }
 
@@ -50,15 +47,10 @@ export class ParentBridge implements ChildBridge {
         target.postMessage(bytes.slice(), this.origin); // a copy of the slice, not of the buffer it is cut from
     }
 
+    /** Of a ready window: the server holds the operations on a window until it is (PWindow.init); none once it closed. */
     operate(child: BridgedChild, operation: WindowOperation): void {
         const target = child.target;
-        if (this.children.get(child) === null || target === null) {
-            const queued = this.operations.get(child) ?? [];
-            queued.push(operation);
-            this.operations.set(child, queued);
-        } else {
-            this.send(target, { pony: 'window', operation });
-        }
+        if (target !== null) this.send(target, { pony: 'window', operation });
     }
 
     private received(event: MessageEvent): void {
@@ -85,13 +77,10 @@ export class ParentBridge implements ChildBridge {
 
     /** The child's page is ready: it gets what it cannot ask for, then the server is told, which sends its blocks. */
     private ready(child: BridgedChild): void {
-        const target = child.target;
-        if (target === null) return;
+        const target = child.target!; // the window its message came from
         const reader = this.terminal.dispatcher.reader;
         this.send(target, { pony: 'init', keys: this.terminal.contextKeys, title: child.title, entries: reader.entries() });
         this.children.set(child, new Set());
-        for (const operation of this.operations.get(child) ?? []) this.send(target, { pony: 'window', operation });
-        this.operations.delete(child);
         if (child.kind === 'window') this.terminal.setReadyWindow(child.id);
         else this.terminal.setReadyFrame(child.id);
     }

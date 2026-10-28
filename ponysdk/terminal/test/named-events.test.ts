@@ -47,6 +47,18 @@ test('reads a value JSON cannot write as its text', () => {
     assert.deepEqual(readFields(event, ['detail']), { detail: '[object Object]' });
 });
 
+test('reads a value JSON writes nothing for, a function, as null', () => {
+    const event = new CustomEvent('pick', { detail: () => undefined });
+    assert.deepEqual(readFields(event, ['detail']), { detail: null });
+});
+
+test('a stopped event goes no further than the listened element', () => {
+    const { element, sent } = listening('{"name":"pick","stop":true}');
+    assert.equal(fire(element, 1).cancelBubble, true); // its propagation stopped
+    assert.equal(sent.length, 1);
+    assert.equal(fire(listening('{"name":"pick"}').element, 1).cancelBubble, false);
+});
+
 test('sends each event with its fields, prevented when asked, until unlistened', () => {
     const { element, sent, controller } = listening('{"name":"pick","fields":["detail"],"prevent":true}');
     const event = fire(element, 1);

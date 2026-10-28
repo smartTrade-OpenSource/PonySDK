@@ -23,7 +23,7 @@ export class Frame extends Widget implements ChildTerminal, BridgedChild {
     static create(context: Context, id: number, type: number, reader: Reader): Frame {
         reader.read();
         let url = '';
-        if (reader.key === K.URL) url = reader.str ?? '';
+        if (reader.key === K.URL) url = reader.str;
         else reader.rewind();
         const session = context.session;
         url += `${url.includes('?') ? '&' : '?'}${C.UI_CONTEXT_ID}=${session.contextId}&${C.FRAME_ID}=${id}`;

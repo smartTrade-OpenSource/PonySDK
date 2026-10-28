@@ -40,7 +40,7 @@ export class FileUpload extends Widget {
     override update(reader: Reader): boolean {
         switch (reader.key) {
             case K.NAME:
-                this.input.name = reader.str ?? '';
+                this.input.name = reader.str;
                 return true;
             case K.ENABLED:
                 this.input.disabled = !reader.bool;
@@ -75,7 +75,7 @@ export class FileUpload extends Widget {
     private submit(streamRequestId: number): void {
         const session = this.context.session;
         const data = new FormData();
-        for (const file of this.input.files ?? []) data.append(this.input.name, file);
+        for (const file of this.input.files!) data.append(this.input.name, file);
         // The application's origin: the host's in a page, another in a <pony-app> element (ADR-0008), whose context's
         // key proves it when the session cookie does not come (ADR-0009)
         const headers: Record<string, string> = session.contextKey === null ? {} : { [CONTEXT_KEY_HEADER]: session.contextKey };

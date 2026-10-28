@@ -30,7 +30,7 @@ function value(reader: Reader): unknown {
         case V.FLOAT:
             return reader.num;
         case V.STRING:
-            return reader.str;
+            return reader.str === '' ? null : reader.str; // the fixtures write "" as the server does: as null
         case V.ARRAY:
             return reader.array;
         default:
