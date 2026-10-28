@@ -90,7 +90,7 @@ export class ScrollPanel extends SimplePanel {
                 e.scrollTop = reader.int;
                 return true;
             case K.SCROLL_TO: {
-                const to = reader.num; // 0 bottom, 1 left, 2 right, 3 top
+                const to = reader.int; // 0 bottom, 1 left, 2 right, 3 top
                 if (to === 0) e.scrollTop = e.scrollHeight;
                 else if (to === 1) e.scrollLeft = 0;
                 else if (to === 2) e.scrollLeft = e.scrollWidth;

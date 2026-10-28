@@ -7,7 +7,7 @@ export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', '
 /** Sunday first, as Date.getDay(). */
 export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const NUMERIC = new Set(['y', 'd', 'h', 'H', 'k', 'K', 'm', 's', 'S']);
+const NUMERIC = new Set(['y', 'Y', 'd', 'h', 'H', 'k', 'K', 'm', 's', 'S']);
 
 type Part = { literal: string } | { field: string; count: number };
 

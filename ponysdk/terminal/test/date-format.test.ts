@@ -109,3 +109,35 @@ test('reads what a user types as Java\'s SimpleDateFormat does', () => {
         assert.deepEqual(written(pattern, parsed!), written(pattern, local(date)), `${pattern} ${text}`);
     }
 });
+
+test('formats the era, a quote and an unknown letter', () => {
+    assert.equal(new DateFormat("''yyyy G").format(date), "'2026 AD");
+    assert.equal(new DateFormat('GGGG').format(date), 'Anno Domini');
+    const bc = new Date(2000, 0, 1);
+    bc.setFullYear(-5);
+    assert.equal(new DateFormat('yyyy G').format(bc), '0005 BC');
+    assert.equal(new DateFormat('GGGG').format(bc), 'Before Christ');
+    assert.equal(new DateFormat('QQ yyyy').format(date), 'QQ 2026');
+});
+
+test('parses the era, a negative year and an unknown letter as itself', () => {
+    assert.equal(new DateFormat('yyyy G').parse('0005 BC')?.getFullYear(), -4);
+    assert.equal(new DateFormat('yyyy GGGG').parse('2026 Anno Domini')?.getFullYear(), 2026);
+    assert.equal(new DateFormat('yyyy G').parse('2026 XY'), null);
+    assert.equal(new DateFormat('y').parse('-12')?.getFullYear(), -12);
+    assert.deepEqual(new DateFormat('QQ dd/MM/yyyy').parse('QQ 05/03/2026'), new Date(2026, 2, 5));
+    assert.equal(new DateFormat('QQ yyyy').parse('Q 2026'), null);
+});
+
+test('parses the week year it formats', () => {
+    const format = new DateFormat('dd/MM/YYYY');
+    assert.equal(format.format(date), '05/03/2026');
+    assert.deepEqual(format.parse('05/03/2026'), new Date(2026, 2, 5));
+});
+
+test('parses a time zone written as GMT, UTC or Z, and refuses another', () => {
+    const format = new DateFormat("yyyy-MM-dd'T'HH:mmz");
+    for (const zone of ['GMT', 'UTC', 'Z']) assert.equal(format.parse(`2026-03-05T14:07${zone}`)?.getTime(), Date.UTC(2026, 2, 5, 14, 7));
+    assert.equal(format.parse('2026-03-05T14:07GMT-02:30')?.getTime(), Date.UTC(2026, 2, 5, 16, 37));
+    assert.equal(format.parse('2026-03-05T14:07CET'), null);
+});

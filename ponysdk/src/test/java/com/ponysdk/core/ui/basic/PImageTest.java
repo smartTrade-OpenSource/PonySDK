@@ -72,6 +72,16 @@ public class PImageTest extends PSuite {
         assertEquals(List.of(4), writer.valuesOf(ServerToClientModel.IMAGE_HEIGHT));
     }
 
+    /** The terminal reads the clip by position: left, top, width, height (image.ts). */
+    @Test
+    public void theClipIsWrittenInTheOrderTheTerminalReadsIt() {
+        PWindow.getMain().add(Element.newPImage("img.png", 1, 2, 3, 4));
+        final List<ServerToClientModel> models = writer.models();
+        final int left = models.indexOf(ServerToClientModel.POSITION_LEFT);
+        assertEquals(List.of(ServerToClientModel.POSITION_LEFT, ServerToClientModel.POSITION_TOP, ServerToClientModel.IMAGE_WIDTH,
+            ServerToClientModel.IMAGE_HEIGHT), models.subList(left, left + 4));
+    }
+
     @Test
     public void aUrlWithoutPositionSendsNoPosition() {
         PWindow.getMain().add(Element.newPImage("img.png"));
@@ -126,6 +136,20 @@ public class PImageTest extends PSuite {
 
         image.setStream((request, response, uiContext) -> {
         });
+
+        assertEquals(List.of(image.getID()), writer.valuesOf(ServerToClientModel.TYPE_ADD_HANDLER));
+        assertEquals(List.of(HandlerModel.HANDLER_EMBEDDED_STREAM_REQUEST.getValue()), writer.valuesOf(ServerToClientModel.HANDLER_TYPE));
+        assertEquals(1, writer.count(ServerToClientModel.STREAM_REQUEST_ID));
+    }
+
+    @Test
+    public void setStreamBeforeTheImageIsAddedAsksOnceItIsCreated() {
+        final PImage image = Element.newPImage();
+        image.setStream((request, response, uiContext) -> {
+        });
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_ADD_HANDLER));
+
+        PWindow.getMain().add(image);
 
         assertEquals(List.of(image.getID()), writer.valuesOf(ServerToClientModel.TYPE_ADD_HANDLER));
         assertEquals(List.of(HandlerModel.HANDLER_EMBEDDED_STREAM_REQUEST.getValue()), writer.valuesOf(ServerToClientModel.HANDLER_TYPE));
