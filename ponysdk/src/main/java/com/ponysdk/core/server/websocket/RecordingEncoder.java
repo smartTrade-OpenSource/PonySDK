@@ -108,7 +108,7 @@ public final class RecordingEncoder implements WebsocketEncoder {
     }
 
     private void checkOverflow() {
-        if (maxEntries > 0 && entries.size() > maxEntries && !overflowed) {
+        if (maxEntries > 0 && entries.size() > maxEntries) { // encode() and endObject() record nothing once overflowed
             overflowed = true;
             // the handler says what it does about it (UIContext: logs and destroys the session)
             if (overflowHandler != null) overflowHandler.onOverflow(entries.size(), maxEntries);

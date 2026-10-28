@@ -137,10 +137,9 @@ public class IntObjectHashMap<V> {
         int next = (idx + 1) & mask;
         while (occupied[next]) {
             final int natural = mix(keys[next]) & mask;
-            // If 'next' is displaced from its natural position past 'idx',
-            // move it back to fill the gap
-            if ((next > idx && (natural <= idx || natural > next)) ||
-                (next < idx && (natural <= idx && natural > next))) {
+            // If 'next' is at least as far from its natural position as from the gap (cyclic distances),
+            // the gap is on its probe chain: move it back to fill the gap
+            if (((next - natural) & mask) >= ((next - idx) & mask)) {
                 keys[idx] = keys[next];
                 values[idx] = values[next];
                 occupied[idx] = true;

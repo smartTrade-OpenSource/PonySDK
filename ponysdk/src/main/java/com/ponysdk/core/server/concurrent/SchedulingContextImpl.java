@@ -44,6 +44,8 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 	private final ConcurrentLinkedQueue<Runnable> realTimeTasks = new ConcurrentLinkedQueue<>();
 	private final ConcurrentLinkedQueue<Runnable> standardTasks = new ConcurrentLinkedQueue<>();
 	private final AtomicReference<PeriodicTaskHolder> nextPeriodicTask = new AtomicReference<>(null);
+	// the number of times this context waits in the scheduler executor queue (a benign race can queue it twice)
+	private final AtomicInteger queued = new AtomicInteger(0);
 
 	// Weak set of scheduled tasks relative to this context, they should be
 	// cancelled when the context is destroyed
@@ -98,7 +100,11 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		executeAndWait0(task, true);
 	}
 
-	private void executeAndWait0(final Runnable task, final boolean realtime) throws InterruptedException {
+	// T, only in the throws clause, is inferred as RuntimeException at the call sites: the task's failure is
+	// rethrown as is
+	@SuppressWarnings("unchecked")
+	private <T extends Throwable> void executeAndWait0(final Runnable task, final boolean realtime)
+			throws InterruptedException, T {
 		if (!alive)
 			return;
 		final FutureTask<?> future = new FutureTask<>(task, null);
@@ -113,7 +119,7 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 				break;
 			}
 		} catch (final ExecutionException e) {
-			rethrowUnchecked(e.getCause());
+			throw (T) e.getCause();
 		}
 	}
 
@@ -153,7 +159,7 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		final ConcurrentLinkedQueue<Runnable> taskQueue = realtime ? realTimeTasks : standardTasks;
 		taskQueue.offer(task);
 		if (taskCount.getAndIncrement() == 0) {
-			scheduler.executeContext(this, realtime);
+			queue(realtime);
 		}
 	}
 
@@ -202,6 +208,7 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 
 	@Override
 	public void run() {
+		queued.decrementAndGet();
 		// Work stealing on the realtime context queue
 		while (realTimeTasks.isEmpty()) {
 			final SchedulingContextImpl realtimeContext = scheduler.pollRealtimeContext();
@@ -249,7 +256,7 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		if (currentTaskCount > 0) {
 			// potential benign race there : we might insert the context twice in the queue,
 			// but it is supported
-			scheduler.executeContext(this, false);
+			queue(false);
 		}
 	}
 
@@ -258,12 +265,10 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		if (task == null && !onlyRealtimeTasks)
 			task = standardTasks.poll();
 		if (task == null && !onlyRealtimeTasks) {
+			// taskCount > 0 and both queues empty: the counted task is the periodic one in the slot
 			final PeriodicTaskHolder pTask = nextPeriodicTask.getAndSet(null);
-			if (pTask != null) {
-				task = pTask.getTask();
-				pTask.setTicketNumber(ticketGenerator.incrementAndGet());
-			}
-
+			task = pTask.getTask();
+			pTask.setTicketNumber(ticketGenerator.incrementAndGet());
 		}
 		return task;
 	}
@@ -282,30 +287,24 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		}
 	}
 
-	/** Throws {@code t} as is: T, only in the throws clause, is inferred as RuntimeException at the call sites. */
-	@SuppressWarnings("unchecked")
-	static <T extends Throwable> void rethrowUnchecked(final Throwable t) throws T {
-		throw (T) t;
-	}
-
 	void tryRegisterPeriodicTask(final PeriodicTaskHolder candidate) {
 		if (!alive)
 			return;
-		boolean race = true;
-		while (race) {
-			if (nextPeriodicTask.compareAndSet(null, candidate)) {
-				// fast path : no pending scheduled task -> register as the next periodic one
-				if (taskCount.getAndIncrement() == 0) {
-					scheduler.executeContext(this, false);
-				}
-				race = false;
-			} else {
-				// try to steal the slot of a newer ticket
-				final PeriodicTaskHolder currentTask = nextPeriodicTask.get();
-				race = currentTask == null || candidate.getTicketNumber() < currentTask.getTicketNumber()
-						&& !nextPeriodicTask.compareAndSet(currentTask, candidate);
-			}
+		// An empty slot counts a new task; a candidate with an older ticket steals the slot of a newer one
+		if (nextPeriodicTask.getAndAccumulate(candidate, SchedulingContextImpl::olderTicket) == null
+				&& taskCount.getAndIncrement() == 0) {
+			queue(false);
 		}
+	}
+
+	private static PeriodicTaskHolder olderTicket(final PeriodicTaskHolder current,
+			final PeriodicTaskHolder candidate) {
+		return current == null || candidate.getTicketNumber() < current.getTicketNumber() ? candidate : current;
+	}
+
+	private void queue(final boolean realtime) {
+		queued.incrementAndGet(); // before the executor can run it
+		scheduler.executeContext(this, realtime);
 	}
 
 	Scheduler getScheduler() {
@@ -314,6 +313,10 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 
 	boolean isAlive() {
 		return alive;
+	}
+
+	boolean isQueued() {
+		return queued.get() > 0;
 	}
 
 }

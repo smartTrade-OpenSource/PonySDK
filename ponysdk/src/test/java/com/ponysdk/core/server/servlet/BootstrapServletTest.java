@@ -581,6 +581,43 @@ public class BootstrapServletTest {
     }
 
     @Test
+    public void aBrowserLeavingBeforeTheResponseIsCommittedIsAnswered500() throws IOException {
+        final String path = "/script/app.js";
+        final TestableBootstrapServlet servlet = servletServing(path, tempFile("content"));
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getOutputStream()).thenThrow(new IOException("browser left"));
+
+        servlet.doGet(request("", path), response);
+
+        Mockito.verify(response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    public void aRequestWithoutPathServesTheBootstrapPage() throws IOException {
+        final TestableBootstrapServlet servlet = servletWith(configuration());
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        final HttpServletRequest request = request(null, null);
+
+        servlet.doGet(request, response(body));
+
+        assertTrue(body.toString().startsWith("<!doctype html>"), body.toString());
+        assertEquals(-1L, servlet.getLastModified(request));
+    }
+
+    @Test
+    public void getPathOfARequestWithoutContextPathIsItsUri() {
+        assertEquals("/x.js", new BootstrapServlet().getPath(request(null, "/x.js")));
+    }
+
+    @Test
+    public void theBootstrapPageAndUnsafePathsHaveNoModificationTime() {
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(new ApplicationConfiguration());
+        for (final String uri : new String[] { "/app", "/app/index.html", "/app/script/../conf/x.js" }) {
+            assertEquals(-1L, servlet.getLastModified(request("/app", uri)), uri);
+        }
+    }
+
+    @Test
     public void aFailureAfterTheResponseIsCommittedSendsNothingMore() throws IOException {
         final String path = "/script/app.js";
         final TestableBootstrapServlet servlet = servletServing(path, tempFile("content"));

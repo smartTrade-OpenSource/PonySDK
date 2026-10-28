@@ -442,6 +442,7 @@ public class UIContextTest {
         assertEquals(uiContext, uiContext);
         assertNotEquals(uiContext, null);
         assertNotEquals(uiContext, "a string");
+        assertNotEquals(uiContext, liveContext());
         assertEquals(uiContext.getID(), uiContext.hashCode());
     }
 

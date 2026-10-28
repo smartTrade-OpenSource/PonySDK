@@ -223,6 +223,32 @@ public class WebSocketConnectionTest {
     }
 
     @Test
+    public void aWriteFromTheThreadOfAnotherContextLeavesTheLockToItsCaller() {
+        final UIContext created = open();
+        UIContext.setCurrent(Mockito.mock(UIContext.class));
+        final int before = sent.size();
+
+        webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        UIContext.remove();
+        created.execute(webSocket::flush);
+
+        assertEquals(before + 1, sent.size(), "written as is, then sent");
+    }
+
+    @Test
+    public void anIntWriteOutsideTheContextTakesItsLock() {
+        final UIContext created = open();
+        UIContext.remove();
+        final int before = sent.size();
+
+        webSocket.encodeInt(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        created.execute(webSocket::flush);
+
+        assertEquals(before + 1, sent.size(), "written under the context's lock, then sent");
+        assertFalse(created.isHeldByCurrentThread());
+    }
+
+    @Test
     public void anIntWriteWithAListenerGoesThroughTheListenedPath() {
         final UIContext created = open();
         final WebSocket.Listener listener = Mockito.mock(WebSocket.Listener.class);

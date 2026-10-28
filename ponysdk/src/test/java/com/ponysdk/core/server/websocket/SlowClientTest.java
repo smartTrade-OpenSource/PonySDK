@@ -90,6 +90,19 @@ public class SlowClientTest {
     }
 
     @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void withoutChunkSizeEachWriteLeavesAloneAndNothingEmptyIsSent() throws IOException {
+        final ManualSession s = new ManualSession();
+        final WebSocketPusher p = new WebSocketPusher(s.session, 0, 2_000, new ByteBufferPool(1 << 12, 8));
+
+        p.put(bytes(3, 1)); // the chunk check flushes the fresh, empty buffer: nothing to send
+        assertEquals(0, s.sends());
+        p.put(bytes(3, 2)); // the first write leaves before the second
+        assertEquals(1, s.sends());
+
+        assertArrayEquals(bytes(3, 1), s.wire.toByteArray());
+    }
+
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void flushesMadeMeanwhileGoOutTogetherInOrder() throws IOException {
         final ManualSession s = new ManualSession();
         final WebSocketPusher p = new WebSocketPusher(s.session, 1 << 15, 2_000, new ByteBufferPool(1 << 12, 8));

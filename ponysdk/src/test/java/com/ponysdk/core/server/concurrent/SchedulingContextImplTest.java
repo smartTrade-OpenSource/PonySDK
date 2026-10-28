@@ -416,4 +416,66 @@ public class SchedulingContextImplTest {
 
         assertEquals(List.of("older", "newer", "older", "newer"), ran);
     }
+
+    @Test
+    public void testSchedule_aNewerPeriodicTaskLeavesTheSlotToAnOlderOne() {
+        final List<String> ran = new ArrayList<>();
+        final Runnable older = schedulePeriodic(() -> ran.add("older"), mock(ScheduledFuture.class));
+        final Runnable newer = schedulePeriodic(() -> ran.add("newer"), mock(ScheduledFuture.class));
+        older.run();
+        ctx.run(); // older gets ticket 1
+        newer.run();
+        ctx.run(); // newer gets ticket 2
+
+        older.run(); // older waits in the slot
+        newer.run(); // ticket 2 > 1: the slot stays to older
+        older.run(); // already in the slot
+        ctx.run();
+        ctx.run();
+
+        assertEquals(List.of("older", "newer", "older"), ran);
+        verify(scheduler, times(3)).executeContext(ctx, false);
+    }
+
+    @Test
+    public void testSchedule_aTickOfAContextWithPendingTasksDoesNotQueueItAgain() {
+        final List<String> ran = new ArrayList<>();
+        final Runnable tick = schedulePeriodic(() -> ran.add("tick"), mock(ScheduledFuture.class));
+        ctx.execute(() -> ran.add("task"));
+
+        tick.run();
+
+        verify(scheduler).executeContext(ctx, false);
+        ctx.run();
+        ctx.run();
+        assertEquals(List.of("task", "tick"), ran);
+    }
+
+    @Test
+    public void testSchedule_aPeriodicTaskFailingBeforeItsFutureIsKnownIsCancelled() {
+        final ScheduledFuture<?> future = mock(ScheduledFuture.class);
+        // The executor ticks and the context runs the failing task before schedulePeriodicTask returns
+        doAnswer(inv -> {
+            inv.getArgument(2, Runnable.class).run();
+            ctx.run();
+            verify(future, never()).cancel(anyBoolean());
+            return future;
+        }).when(scheduler).schedulePeriodicTask(anyLong(), eq(ctx), any());
+
+        ctx.schedule(10, () -> {
+            throw new IllegalStateException("boom");
+        });
+
+        verify(future).cancel(true);
+    }
+
+    @Test
+    public void testAwaitDestruction_waitsForTheTasksPendingInADestroyedContext() throws InterruptedException {
+        ctx.execute(() -> {});
+        ctx.destroy();
+
+        assertFalse(ctx.awaitDestruction(0), "the pending task is not consumed yet");
+        ctx.run();
+        assertTrue(ctx.awaitDestruction(0));
+    }
 }

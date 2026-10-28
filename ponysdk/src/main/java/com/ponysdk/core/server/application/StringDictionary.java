@@ -404,20 +404,18 @@ public class StringDictionary {
         final int candidates = size - preSeedCount;
         if (candidates <= 0) return NOT_INTERNED; // only pre-seeded entries — never evicted
 
-        int victim = NOT_INTERNED;
-        int victimCount = Integer.MAX_VALUE;
         int idx = evictionCursor >= preSeedCount && evictionCursor < size ? evictionCursor : preSeedCount;
-        // Every slot holds a string: an evicted one is refilled by the caller at once
-        for (int n = 0; n < candidates; n++) {
+        int victim = idx;
+        int victimCount = usageCount[idx];
+        // Every slot holds a string: an evicted one is refilled by the caller at once. A single use is the least
+        for (int n = 1; n < candidates && victimCount > 1; n++) {
+            if (++idx == size) idx = preSeedCount;
             final int count = usageCount[idx];
             if (count < victimCount) {
                 victim = idx;
                 victimCount = count;
-                if (count <= 1) break; // can't do better than a single use
             }
-            if (++idx == size) idx = preSeedCount;
         }
-        if (victim == NOT_INTERNED) return NOT_INTERNED;
 
         evictionCursor = victim + 1;
         stringToId.remove(idToString.get(victim));

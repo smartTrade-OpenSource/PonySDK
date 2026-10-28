@@ -257,6 +257,18 @@ public class SchedulerTest {
     }
 
     @Test
+    public void testShutdownLeavesTheContextsThatAlreadyRanToTheirOwner() throws InterruptedException {
+        final SchedulingContextImpl ran = (SchedulingContextImpl) scheduler.createContext("ran");
+        final CountDownLatch done = new CountDownLatch(1);
+        ran.execute(done::countDown);
+        assertTrue(done.await(TIMEOUT_S, SECONDS));
+
+        scheduler.shutdown();
+
+        assertTrue(ran.isAlive(), "a context no longer in the executor queue is not destroyed");
+    }
+
+    @Test
     public void testContextsQueuedBehindABusyOneRunInTheirOrder() throws InterruptedException {
         final Scheduler single = new Scheduler(1);
         try {

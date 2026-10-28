@@ -25,12 +25,15 @@ package com.ponysdk.core.server.context;
 
 import com.ponysdk.test.ModelWriterForTest;
 import com.ponysdk.test.PSuite;
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.util.IntObjectHashMap;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFrame;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.writer.ModelWriter;
@@ -43,6 +46,8 @@ import java.lang.ref.Reference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.json.Json;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -136,7 +141,23 @@ public class PObjectCacheTest extends PSuite {
     }
 
     @Test
-    public void testACollectedObjectWithoutWindowIsForgottenSilently() throws ReflectiveOperationException {
+    public void testACollectedObjectOfAFrameIsForgottenAndTheClientToldItsFrame() throws ReflectiveOperationException {
+        final PFrame frame = Element.newPFrame("a");
+        PWindow.getMain().add(frame);
+        frame.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_OPEN.toStringValue(), "a").build());
+        final PLabel label = Element.newPLabel();
+        frame.add(label);
+        cache.add(label);
+        collect(label.getID());
+        written.clear();
+
+        assertNull(cache.get(label.getID()));
+        assertEquals(List.of("begin " + PWindow.getMain().getID(), ServerToClientModel.FRAME_ID + " " + frame.getID(),
+            ServerToClientModel.TYPE_GC + " " + label.getID()), written);
+    }
+
+    @Test
+    public void testACollectedObjectWithoutWindowIsForgottenSilently()throws ReflectiveOperationException {
         final PObject detached = Element.newButton();
         cache.add(detached);
         collect(detached.getID());

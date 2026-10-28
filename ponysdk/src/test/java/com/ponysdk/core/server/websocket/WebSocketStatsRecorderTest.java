@@ -38,6 +38,7 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
@@ -159,6 +160,25 @@ public class WebSocketStatsRecorderTest {
         assertTrue(recorder.start(10, SECONDS));
         recorder.stop();
         assertFalse(recorder.start(10, SECONDS), "start after stop must return false (already finished)");
+    }
+
+    @Test
+    public void testARecordRacingTheStopIsNotCounted() {
+        final UIContext ctx = mock(UIContext.class);
+        UIContext.setCurrent(ctx);
+        final WebSocketStatsRecorder recorder = new WebSocketStatsRecorder(null);
+        final AtomicReference<WebSocketStats> summary = new AtomicReference<>();
+        // The recording stops between record()'s check that it is started and its first count of the session
+        when(ctx.getAttribute(anyString())).thenAnswer(inv -> {
+            summary.set(recorder.stop());
+            return null;
+        });
+        assertTrue(recorder.start(10, SECONDS));
+
+        recorder.record(MODEL, 1, 1, 1);
+
+        assertEquals(0, summary.get().getSummaryCount());
+        Mockito.verify(ctx, Mockito.never()).setAttribute(anyString(), any());
     }
 
     @Test

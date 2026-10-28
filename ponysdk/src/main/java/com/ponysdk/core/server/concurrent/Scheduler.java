@@ -2,17 +2,16 @@ package com.ponysdk.core.server.concurrent;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * An executor that provides context isolation and priorities of tasks within a
@@ -30,20 +29,26 @@ public final class Scheduler {
 
 	private final ScheduledThreadPoolExecutor executor;
 	private final ConcurrentLinkedQueue<SchedulingContextImpl> realtimeContexts = new ConcurrentLinkedQueue<>();
+	// The contexts created here, for shutdown() to destroy the ones still in the executor queue: shutdownNow()
+	// hands back the executor's own wrappers, not the contexts
+	private final Set<SchedulingContextImpl> contexts = Collections
+			.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	public Scheduler(final int poolSize) {
 		this(poolSize, Executors.defaultThreadFactory());
 	}
 
 	public Scheduler(final int poolSize, final ThreadFactory factory) {
-		executor = new ContextAwareExecutor(poolSize, factory);
+		executor = new ScheduledThreadPoolExecutor(poolSize, factory);
 	}
 
 	/**
 	 * Create a new {@link SchedulingContext} that can be used to submit new tasks
 	 */
 	public SchedulingContext createContext(final String name) {
-		return new SchedulingContextImpl(name, this);
+		final SchedulingContextImpl context = new SchedulingContextImpl(name, this);
+		contexts.add(context);
+		return context;
 	}
 
 	/**
@@ -51,12 +56,13 @@ public final class Scheduler {
 	 * possible.<br>
 	 */
 	public void shutdown() {
-		for (final Runnable r : executor.shutdownNow()) {
-			if (r instanceof QueuedContext queued) {
-				queued.context.destroy();
+		executor.shutdownNow();
+		synchronized (contexts) {
+			for (final SchedulingContextImpl context : contexts) {
+				if (context.isQueued())
+					context.destroy();
 			}
 		}
-
 		realtimeContexts.clear();
 	}
 
@@ -107,71 +113,6 @@ public final class Scheduler {
 
 	SchedulingContextImpl pollRealtimeContext() {
 		return realtimeContexts.poll();
-	}
-
-	// The executor queues its own wrappers, so shutdownNow() cannot hand the contexts back unless the
-	// wrapper keeps them
-	private static final class ContextAwareExecutor extends ScheduledThreadPoolExecutor {
-
-		ContextAwareExecutor(final int poolSize, final ThreadFactory factory) {
-			super(poolSize, factory);
-		}
-
-		@Override
-		protected <V> RunnableScheduledFuture<V> decorateTask(final Runnable runnable,
-				final RunnableScheduledFuture<V> task) {
-			return runnable instanceof SchedulingContextImpl context ? new QueuedContext<>(context, task) : task;
-		}
-	}
-
-	private record QueuedContext<V>(SchedulingContextImpl context, RunnableScheduledFuture<V> task)
-			implements RunnableScheduledFuture<V> {
-
-		@Override
-		public void run() {
-			task.run();
-		}
-
-		@Override
-		public boolean isPeriodic() {
-			return false;
-		}
-
-		@Override
-		public long getDelay(final TimeUnit unit) {
-			return task.getDelay(unit);
-		}
-
-		@Override
-		public int compareTo(final Delayed other) {
-			return task.compareTo(other instanceof QueuedContext<?> queued ? queued.task : other);
-		}
-
-		@Override
-		public boolean cancel(final boolean mayInterruptIfRunning) {
-			return task.cancel(mayInterruptIfRunning);
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return task.isCancelled();
-		}
-
-		@Override
-		public boolean isDone() {
-			return task.isDone();
-		}
-
-		@Override
-		public V get() throws InterruptedException, ExecutionException {
-			return task.get();
-		}
-
-		@Override
-		public V get(final long timeout, final TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
-			return task.get(timeout, unit);
-		}
 	}
 
 }

@@ -257,6 +257,21 @@ public class StringDictionaryTest {
     }
 
     @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void evictionScanWrapsPastTheEndToTheColdestEntryBeforeTheCursor() {
+        final StringDictionary dict = new StringDictionary(3, 1, 32);
+        for (final String s : new String[] { "a", "b", "c", "a", "b", "c" }) dict.internOrGet(s); // counts 2
+        final int x = InternResult.id(dict.internOrGet("x")); // evicts "a" (id 0), the cursor moves to 1; "x" used once
+
+        final int y = InternResult.id(dict.internOrGet("y")); // from the cursor: b (2), c (2), then x (1) at id 0
+
+        assertEquals(0, x);
+        assertEquals(0, y, "the scan wrapped to the coldest entry");
+        assertEquals(StringDictionary.NOT_INTERNED, dict.getId("x"));
+        assertEquals("b", dict.getString(1));
+        assertEquals("c", dict.getString(2));
+    }
+
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     public void evictionSkipsPreSeededEntriesButEvictsRegularOnes() {
         final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
         Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("seed0", "seed1"));

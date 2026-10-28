@@ -99,12 +99,10 @@ public class CommunicationSanityChecker {
     }
 
     public void stop() {
-        if (isStarted()) {
-            if (sanityChecker != null) {
-                sanityChecker.cancel(false);
-                sanityChecker = null;
-            }
-            started.set(false);
+        // Only one of concurrent stops (the destroy listener, the check finding the connection dead) cancels
+        if (started.compareAndSet(true, false)) {
+            sanityChecker.cancel(false);
+            sanityChecker = null;
             log.info("Stop communication sanity checker on UIContext #{}", uiContext.getID());
         }
     }
@@ -129,31 +127,24 @@ public class CommunicationSanityChecker {
 
         final long now = clock.getAsLong();
         final long lastReceived = uiContext.getLastReceivedTime();
-        switch (currentState) {
-            case OK -> {
-                if (now - lastReceived >= heartBeatPeriod) {
-                    suspectTime = now;
-                    currentState = CommunicationState.SUSPECT;
-                    if (log.isDebugEnabled()) log.debug("Nothing received on UIContext #{} for {} ms, connection suspected",
-                        uiContext.getID(), now - lastReceived);
-                }
+        if (currentState == CommunicationState.KO) return;
+        if (currentState == CommunicationState.OK) {
+            if (now - lastReceived >= heartBeatPeriod) {
+                suspectTime = now;
+                currentState = CommunicationState.SUSPECT;
+                if (log.isDebugEnabled()) log.debug("Nothing received on UIContext #{} for {} ms, connection suspected",
+                    uiContext.getID(), now - lastReceived);
             }
-            case SUSPECT -> {
-                if (lastReceived >= suspectTime) {
-                    currentState = CommunicationState.OK;
-                    suspectTime = -1;
-                } else if (now - suspectTime >= heartBeatPeriod) {
-                    log.info("Nothing received on UIContext #{} for {} ms, not even a pong: the connection is dead",
-                        uiContext.getID(), now - lastReceived);
-                    currentState = CommunicationState.KO;
-                    stop();
-                    uiContext.connectionDead();
-                    return;
-                }
-            }
-            case KO -> {
-                return;
-            }
+        } else if (lastReceived >= suspectTime) { // SUSPECT
+            currentState = CommunicationState.OK;
+            suspectTime = -1;
+        } else if (now - suspectTime >= heartBeatPeriod) {
+            log.info("Nothing received on UIContext #{} for {} ms, not even a pong: the connection is dead",
+                uiContext.getID(), now - lastReceived);
+            currentState = CommunicationState.KO;
+            stop();
+            uiContext.connectionDead();
+            return;
         }
 
         if (now - lastReceived >= heartBeatPeriod / 2) uiContext.ping();

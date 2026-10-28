@@ -457,9 +457,7 @@ public class BootstrapServlet extends HttpServlet {
     private static String sha256(final String source) {
         try {
             return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8)));
-        } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Every Java platform has SHA-256", e);
-        }
+        } catch (final NoSuchAlgorithmException e) { throw new IllegalStateException("Every Java platform has SHA-256", e); }
     }
 
     protected String addScript(final HttpServletRequest request) {
@@ -469,7 +467,7 @@ public class BootstrapServlet extends HttpServlet {
         // Deferred: the terminal starts once the page is parsed, after ponysdk.js and the application scripts; the
         // legacy layer, when asked for, runs just before it
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
-        if (configuration != null && configuration.isLegacyClassNames()) {
+        if (configuration.isLegacyClassNames()) {
             sb.append(String.format(DEFERRED_SCRIPT_PATTERN, rootPath + "ponyterminal/legacy.js")).append(NEW_LINE);
         }
         // A module: it loads its rarely shown widgets on demand (docs/decisions/0004-terminal-chunks.md)

@@ -36,8 +36,10 @@ import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.server.application.ContextDestroyListener;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 
@@ -71,6 +73,49 @@ public class PSchedulerTest {
 
         // It must be cancelled, otherwise a repeating task would keep running after a cancel.
         Mockito.verify(future).cancel(false);
+    }
+
+    /**
+     * A task scheduled while its context is being destroyed (not alive, its destroy listeners not called yet) must
+     * not make the context forget the tasks it already had: the destroy cancels them.
+     */
+    @Test
+    public void aTaskScheduledDuringTheDestroyLeavesTheOthersToIt() throws ReflectiveOperationException {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        final int before = timerQueueSize();
+        final UIRunnable first = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
+        final ArgumentCaptor<ContextDestroyListener> destroy = ArgumentCaptor.forClass(ContextDestroyListener.class);
+        Mockito.verify(context).addContextDestroyListener(destroy.capture());
+
+        Mockito.when(context.isAlive()).thenReturn(false);
+        final UIRunnable late = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
+        late.cancel();
+        destroy.getValue().onBeforeDestroy(context);
+
+        assertEquals(before, timerQueueSize(), "the destroy cancels the first task");
+        first.run();
+        Mockito.verify(context, Mockito.never()).execute(Mockito.any());
+    }
+
+    /** A context destroyed before the destroy listener is registered (which it then ignores) leaves nothing behind. */
+    @Test
+    public void aTaskOfAContextDestroyedWhileItRegistersIsCancelled() throws ReflectiveOperationException {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        Mockito.doAnswer(inv -> Mockito.when(context.isAlive()).thenReturn(false)).when(context)
+            .addContextDestroyListener(Mockito.any());
+        final int before = timerQueueSize();
+
+        final UIRunnable task = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
+
+        assertEquals(before, timerQueueSize(), "the task leaves the timer");
+        task.run();
+        Mockito.verify(context, Mockito.never()).execute(Mockito.any());
+        final UIRunnable next = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
+        assertEquals(before, timerQueueSize(), "a dead context takes no task");
+        next.run();
+        Mockito.verify(context, Mockito.never()).execute(Mockito.any());
     }
 
     /** Tasks waiting in the shared timer (all sessions). */
@@ -171,27 +216,16 @@ public class PSchedulerTest {
     }
 
     @Test
-    public void aRepeatedTaskOfADeadContextStopsAtItsFirstRun() throws Exception {
+    public void aRepeatedTaskOfADeadContextNeverRuns() throws Exception {
         final UIContext context = Mockito.mock(UIContext.class);
         Mockito.when(context.isAlive()).thenReturn(false);
-        final CountDownLatch ran = new CountDownLatch(1);
-        Mockito.when(context.execute(Mockito.any())).thenAnswer(invocation -> {
-            ran.countDown();
-            return false;
-        });
         final int before = timerQueueSize();
 
-        PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
-        assertTrue(ran.await(5, TimeUnit.SECONDS));
+        final UIRunnable task = PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
 
-        await(() -> {
-            try {
-                return timerQueueSize() == before;
-            } catch (final ReflectiveOperationException e) {
-                throw new AssertionError(e);
-            }
-        });
-        Mockito.verify(context, Mockito.times(1)).execute(Mockito.any());
+        assertEquals(before, timerQueueSize(), "it leaves the timer at once");
+        task.run();
+        Mockito.verify(context, Mockito.never()).execute(Mockito.any());
         Mockito.verify(context, Mockito.never()).addContextDestroyListener(Mockito.any());
     }
 }

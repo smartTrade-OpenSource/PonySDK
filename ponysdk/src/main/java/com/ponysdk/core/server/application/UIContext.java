@@ -741,12 +741,12 @@ public class UIContext {
      * @see #destroy()
      */
     public void addContextDestroyListener(final ContextDestroyListener listener) {
-        final Set<ContextDestroyListener> dl = destroyListeners;
+        Set<ContextDestroyListener> dl = destroyListeners;
         if (dl == null) {
             if (!alive) return; // already destroyed — ignore silently
-            destroyListeners = new HashSet<>(4);
+            destroyListeners = dl = new HashSet<>(4);
         }
-        if (destroyListeners != null) destroyListeners.add(listener);
+        dl.add(listener);
     }
 
     /**
@@ -1058,16 +1058,13 @@ public class UIContext {
 
     /** {@link SessionAdmin}'s read-only view of this context; safe from any thread. */
     SessionInfo snapshot() {
-        final boolean isSuspended = suspended;
-        SessionInfo.Suspension info = null;
-        if (isSuspended) {
-            final RecordingEncoder recorder = recordingEncoder;
-            info = new SessionInfo.Suspension(suspendedAt, suspensionTimeoutMs,
-                recorder == null ? 0 : recorder.getWrittenEntries(), recorder == null ? 0 : recorder.getHeldEntries(),
-                configuration.getMaxRecordingEntries());
-        }
+        // One read: the recorder exists exactly while the context is suspended (set before suspended, cleared after)
+        final RecordingEncoder recorder = recordingEncoder;
+        final SessionInfo.Suspension info = recorder == null ? null
+                : new SessionInfo.Suspension(suspendedAt, suspensionTimeoutMs, recorder.getWrittenEntries(),
+                    recorder.getHeldEntries(), configuration.getMaxRecordingEntries());
         final SessionInfo.State state = !alive ? SessionInfo.State.DESTROYED
-                : isSuspended ? SessionInfo.State.SUSPENDED : SessionInfo.State.CONNECTED;
+                : recorder != null ? SessionInfo.State.SUSPENDED : SessionInfo.State.CONNECTED;
         return new SessionInfo(ID, state, getRoundtripLatency(), reconnectionHeld, info);
     }
 
@@ -1145,10 +1142,7 @@ public class UIContext {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final UIContext uiContext = (UIContext) o;
-        return ID == uiContext.ID;
+        return this == o; // every context has its own ID
     }
 
     @Override

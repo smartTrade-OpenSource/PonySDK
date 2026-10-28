@@ -88,10 +88,10 @@ class WebSocketStatsRecorder {
 
     private Map<Object, VolatileRecord> getModelRecords(final ServerToClientModel model,
                                                         final AtomicReferenceArray<Map<Object, VolatileRecord>> stats) {
-        Map<Object, VolatileRecord> records = stats.get(modelToIndex(model));
+        Map<Object, VolatileRecord> records = stats.get(model.ordinal());
         if (records == null) {
             records = new ConcurrentHashMap<>();
-            stats.set(modelToIndex(model), records);
+            stats.set(model.ordinal(), records);
         }
         return records;
     }
@@ -101,14 +101,11 @@ class WebSocketStatsRecorder {
         if (context == null) return null; // a write of no context (the reload order of a lost one): not counted
         AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
         if (stats == null) {
-            stats = new AtomicReferenceArray<>(MODELS.length + 1);
+            stats = new AtomicReferenceArray<>(MODELS.length);
             final Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats = this.allStats;
-            if (allStats != null) {
+            if (allStats == null) return null; // stopped since record() read startTime
             context.setAttribute(KEY, stats);
-                allStats.add(stats);
-                return stats;
-        }
-            return null;
+            allStats.add(stats);
         }
         return stats;
     }
@@ -126,10 +123,6 @@ class WebSocketStatsRecorder {
         return true;
     }
 
-    private static int modelToIndex(final ServerToClientModel model) {
-        return model == null ? MODELS.length : model.ordinal();
-    }
-
     private static void forEachUIContext(final Consumer<UIContext> consumer) {
         for (final Application app : SessionManager.get().getApplications()) {
             for (final UIContext context : app.getUIContexts()) {
@@ -145,17 +138,17 @@ class WebSocketStatsRecorder {
     }
 
     public synchronized WebSocketStats stop() {
-        if (this.startTime == null || summary != null) return null; //not started OR stopped
+        if (this.startTime == null) return null; // not started or stopped: stop() clears it
         try {
-        final LocalDateTime startTime = this.startTime;
-        this.startTime = null;
-        final LocalDateTime endTime = LocalDateTime.now();
-        scheduler.shutdownNow();
+            final LocalDateTime startTime = this.startTime;
+            this.startTime = null;
+            final LocalDateTime endTime = LocalDateTime.now();
+            scheduler.shutdownNow();
             final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = aggregateStats();
-        summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
-        if (listener != null) listener.accept(summary);
-        log.info("Recording stopped, Statistics Summary: {}", summary);
-        return summary;
+            summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
+            if (listener != null) listener.accept(summary);
+            log.info("Recording stopped, Statistics Summary: {}", summary);
+            return summary;
         } finally {
             forEachUIContext(uiContext -> uiContext.removeAttribute(KEY));
         }
@@ -167,7 +160,7 @@ class WebSocketStatsRecorder {
         this.allStats = null;
         for (final AtomicReferenceArray<Map<Object, VolatileRecord>> s : allStats) {
             for (int i = 0; i < s.length(); i++) {
-                final ServerToClientModel model = i >= MODELS.length ? null : MODELS[i];
+                final ServerToClientModel model = MODELS[i];
                 final Map<Object, VolatileRecord> records = s.get(i);
                 if (records != null) {
                     for (final Map.Entry<Object, VolatileRecord> recordEntry : records.entrySet()) {

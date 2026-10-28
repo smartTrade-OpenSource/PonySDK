@@ -46,7 +46,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Accumulates binary protocol data into a ByteBuffer and flushes it
@@ -470,7 +469,8 @@ public class WebSocketPusher implements Closeable {
 
     private void write(final ServerToClientModel model) throws IOException {
         putModelKey(model);
-        if (statsRecorder != null) record(model, null, MODEL_KEY_SIZE, 0);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, null, MODEL_KEY_SIZE, 0);
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
@@ -480,25 +480,29 @@ public class WebSocketPusher implements Closeable {
     private void write(final ServerToClientModel model, final byte value) throws IOException {
         putModelKey(model);
         put(value);
-        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
     }
 
     private void write(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         putInt(value);
-        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
     }
 
     private void write(final ServerToClientModel model, final long longValue) throws IOException {
         putModelKey(model);
         putLong(longValue);
-        if (statsRecorder != null) record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
     }
 
     private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
         putModelKey(model);
         putDouble(doubleValue);
-        if (statsRecorder != null) record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
     }
 
     private void write(final ServerToClientModel model, final Object[] value) throws IOException {
@@ -518,13 +522,15 @@ public class WebSocketPusher implements Closeable {
         for (final Object o : value) {
             dataBytes += putArrayElement(o);
         }
-        if (statsRecorder != null) record(model, value, metaBytes, dataBytes, Arrays::toString);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, Arrays::toString);
     }
 
     private void writeUint31(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         final int bytes = putUint31(value);
-        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, bytes);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, MODEL_KEY_SIZE, bytes);
     }
 
     private int putUint31(final int value) throws IOException {
@@ -669,7 +675,8 @@ public class WebSocketPusher implements Closeable {
             metaBytes += 1;
             dataBytes = 0;
         }
-        if (statsRecorder != null) record(model, value, metaBytes, dataBytes);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
     }
 
     private void putModelKey(final ServerToClientModel model) throws IOException {
@@ -685,7 +692,7 @@ public class WebSocketPusher implements Closeable {
     }
 
     // ── Stats recording ──────────────────────────────────────────────────
-    // Every write site guards with "statsRecorder != null" before calling record(): the arguments
+    // Every write site reads statsRecorder once and records only when it is set: the arguments
     // (boxed primitives, "ref:" + id) would otherwise be built on every write even though stats
     // recording is off in production.
 
@@ -703,24 +710,12 @@ public class WebSocketPusher implements Closeable {
     }
 
     public static boolean isRecordingStats() {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        return recorder != null && recorder.isStarted();
+        return statsRecorder != null; // cleared by the recorder's stop
     }
 
     public static WebSocketStats stopRecordingStats() {
         final WebSocketStatsRecorder recorder = statsRecorder;
         return recorder != null ? recorder.stop() : null;
-    }
-
-    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
-                                   final Function<T, Object> valueConverter) {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, valueConverter);
-    }
-
-    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
     }
 
     // Jetty 12 connection exposing true post-compression wire byte counters (set by WebSocket at open).
@@ -790,7 +785,8 @@ public class WebSocketPusher implements Closeable {
         putModelKey(model);
         putUnsignedByte(ValueTypeModel.STRING_DICTIONARY_REF);
         final int idBytes = putUint31(id);
-        if (statsRecorder != null) record(model, "ref:" + id, MODEL_KEY_SIZE + 1, idBytes);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, "ref:" + id, MODEL_KEY_SIZE + 1, idBytes);
     }
 
     private void writeStringOrRef(final ServerToClientModel model, final String value) throws IOException {
@@ -833,7 +829,8 @@ public class WebSocketPusher implements Closeable {
         final int idBytes = putUint31(id);
         final int byteLength = encodeStringToBuffer(value);
         putStringBytes(value, byteLength);
-        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE + 1 + idBytes, byteLength);
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, MODEL_KEY_SIZE + 1 + idBytes, byteLength);
     }
 
     private int putArrayStringElementOrRef(final String s) throws IOException {

@@ -127,7 +127,7 @@ public class WebSocketStats {
         writer.write('\n');
         writer.write(Objects.toString(p.getFirst()));
         writer.write(separator);
-        writer.write(Objects.toString(modelToValueType(p.getFirst())));
+        writer.write(Objects.toString(p.getFirst().getTypeModel()));
         writer.write(separator);
         Object v = p.getSecond().getKey();
         if (isGrouped()) {
@@ -344,7 +344,7 @@ public class WebSocketStats {
         for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
             for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
                 final Record record = recordEntry.getValue();
-                final ValueTypeModel valueType = modelToValueType(entry.getKey());
+                final ValueTypeModel valueType = entry.getKey().getTypeModel();
                 map.computeIfAbsent(valueType, vt -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
                     (long) record.getCount() * record.getDataBytes());
             }
@@ -359,7 +359,7 @@ public class WebSocketStats {
             for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
                 final Record record = recordEntry.getValue();
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
-                final Pair<ValueTypeModel, String> pair = new Pair<>(modelToValueType(entry.getKey()), groupName);
+                final Pair<ValueTypeModel, String> pair = new Pair<>(entry.getKey().getTypeModel(), groupName);
                 map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
                     (long) record.getCount() * record.getDataBytes());
             }
@@ -409,10 +409,6 @@ public class WebSocketStats {
             }
         }
         return map;
-    }
-
-    private static ValueTypeModel modelToValueType(final ServerToClientModel model) {
-        return model == null ? null : model.getTypeModel();
     }
 
     public boolean isGrouped() {

@@ -2,7 +2,6 @@ package com.ponysdk.core.server.concurrent;
 
 import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.locks.LockSupport;
 
 //Wrap the real runnable of a scheduled future task so that the ScheduledFuture provided by the executor is
 //strongly referenced until executed. Needed to forbid SchedulingContextImpl.scheduledTasks to drop weak references.
@@ -12,7 +11,10 @@ class PeriodicTaskHolder {
 	private final Runnable task;
 	private final SchedulingContextImpl context;
 	private long ticketNumber = 0; // ensure fairness between delayed periodicTasks
+	// Dekker pair: a failure before the future is known is seen by schedulePeriodicTask, otherwise by the
+	// failing task itself
 	private volatile ScheduledFuture<?> future;
+	private volatile boolean failed;
 
 	static PeriodicTaskHolder schedulePeriodicTask(final SchedulingContextImpl context, final long periodInMillis,
 			final Runnable task) {
@@ -20,6 +22,8 @@ class PeriodicTaskHolder {
 		final ScheduledFuture<?> future = context.getScheduler().schedulePeriodicTask(periodInMillis, context,
 				pTask::run);
 		pTask.future = future;
+		if (pTask.failed)
+			future.cancel(true);
 		return pTask;
 	}
 
@@ -53,11 +57,10 @@ class PeriodicTaskHolder {
 		try {
 			task.run();
 		} catch (final Throwable t) {
-			while (future == null) {
-				// shouldn't occur for too long
-				LockSupport.parkNanos(1);
-			}
-			future.cancel(true);
+			failed = true;
+			final ScheduledFuture<?> f = future;
+			if (f != null)
+				f.cancel(true);
 			throw t; // precise rethrow: run() throws nothing checked
 		}
 	}

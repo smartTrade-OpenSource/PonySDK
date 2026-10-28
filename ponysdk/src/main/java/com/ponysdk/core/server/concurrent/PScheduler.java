@@ -156,17 +156,20 @@ public class PScheduler {
 
     private void registerTask(final UIRunnable runnable) {
         runnablesByUIContexts.compute(runnable.uiContext, (uiContext, runnables) -> {
-            if (uiContext.isAlive()) {
-                if (runnables == null) {
-                    runnables = ConcurrentHashMap.newKeySet();
-                    uiContext.addContextDestroyListener(this::destroy);
-                }
-                runnables.add(runnable);
-                return runnables;
-            } else {
-                return null;
+            // A context being destroyed takes no new task, and keeps its tasks for its destroy listener to cancel
+            if (!uiContext.isAlive()) return runnables;
+            if (runnables == null) {
+                runnables = ConcurrentHashMap.newKeySet();
+                uiContext.addContextDestroyListener(this::destroy);
             }
+            runnables.add(runnable);
+            return runnables;
         });
+        // Destroyed meanwhile: its destroy listener may have run before it was registered, and is then ignored
+        if (!runnable.uiContext.isAlive()) {
+            runnable.onCancel();
+            destroy(runnable.uiContext);
+        }
     }
 
     public static final class UIRunnable implements Runnable {

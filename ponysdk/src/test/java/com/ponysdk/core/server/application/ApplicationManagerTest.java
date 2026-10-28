@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -143,6 +145,36 @@ public class ApplicationManagerTest {
             manager.shutdown();
         }
         assertTrue(Files.exists(tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME)), "shutdown persists");
+    }
+
+    @Test
+    public void twoFirstConnectionsAtOnceShareOneDictionary() throws InterruptedException {
+        final ApplicationManager manager = manager(null);
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
+        configuration.setStringDictionaryPersistPath(tmpDir.toString());
+        manager.setConfiguration(configuration);
+        final AtomicReference<SharedDictionaryProvider> second = new AtomicReference<>();
+        final Thread other = new Thread(() -> second.set(manager.getSharedDictionaryProvider()));
+
+        final SharedDictionaryProvider first;
+        synchronized (manager) {
+            other.start();
+            // The other connection found no provider and now waits for the one creating it
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (other.getState() != Thread.State.BLOCKED) {
+                assertTrue(System.nanoTime() < deadline, "the other connection never waited");
+                Thread.onSpinWait();
+            }
+            first = manager.getSharedDictionaryProvider();
+        }
+        other.join(5_000);
+
+        try {
+            assertNotNull(first);
+            assertSame(first, second.get());
+        } finally {
+            manager.shutdown();
+        }
     }
 
 }

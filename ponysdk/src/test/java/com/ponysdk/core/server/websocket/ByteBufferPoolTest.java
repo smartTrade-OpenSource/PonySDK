@@ -26,6 +26,7 @@ public class ByteBufferPoolTest {
         pool.release(b);
         pool.release(c); // full: discarded
         pool.release(ByteBuffer.allocateDirect(2048)); // another capacity: discarded
+        pool.release(null); // nothing to return
         assertEquals(2, pool.availableCount());
 
         final ByteBuffer again = pool.acquire();

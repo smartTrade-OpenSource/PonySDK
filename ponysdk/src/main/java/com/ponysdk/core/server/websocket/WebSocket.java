@@ -39,6 +39,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
@@ -258,18 +259,20 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         return false;
     }
 
-    /** The CREATE_CONTEXT block, with no context behind it, then a normal close: the terminal reloads its page. */
-    private void sendContextLost() {
+    /**
+     * The CREATE_CONTEXT block, with no context behind it, then a normal close: the terminal reloads its page. The
+     * pusher is fresh (nothing sent, nothing failed): an IOException cannot happen, onWebSocketOpen would log it.
+     */
+    private void sendContextLost() throws IOException {
         try {
             websocketPusher.encode(ServerToClientModel.CREATE_CONTEXT, reconnectContextId);
             websocketPusher.encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, false);
             websocketPusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 0);
             websocketPusher.encode(ServerToClientModel.END, null);
             websocketPusher.flush();
-        } catch (final IOException e) {
-            log.info("Cannot tell the terminal of UIContext #{} to reload", reconnectContextId, e);
+        } finally {
+            session.close(StatusCode.NORMAL, "context lost", Callback.NOOP);
         }
-        session.close(StatusCode.NORMAL, "context lost", Callback.NOOP);
     }
 
     @Override
@@ -363,9 +366,10 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void onWebSocketText(final String message) {
-        if (this.listener != null) {
-            listener.onIncomingText(message);
-            sampleIncomingWireBytes();
+        final Listener l = this.listener; // one read: a concurrent setListener(null) cannot come between
+        if (l != null) {
+            l.onIncomingText(message);
+            sampleIncomingWireBytes(l);
         }
         if (isAlive()) {
             try {
@@ -397,11 +401,11 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 } else if (jsonObject.containsKey(KEY_INSTRUCTIONS)) {
                     processInstructions(jsonObject);
                 } else if (jsonObject.containsKey(KEY_ERROR)) {
-                    processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
+                    processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG, Level.ERROR);
                 } else if (jsonObject.containsKey(KEY_WARN)) {
-                    processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
+                    processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG, Level.WARN);
                 } else if (jsonObject.containsKey(KEY_INFO)) {
-                    processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
+                    processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG, Level.INFO);
                 } else {
                     log.error("Unknown message from terminal #{} : {}", uiContext.getID(), message);
                 }
@@ -491,7 +495,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         });
     }
 
-    private void processTerminalLog(final JsonObject json, final ClientToServerModel level) {
+    private void processTerminalLog(final JsonObject json, final ClientToServerModel level, final Level logLevel) {
         final String message = json.getJsonString(level.toStringValue()).getString();
         String objectInformation = "";
 
@@ -500,11 +504,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             objectInformation = object == null ? "NA" : object.toString();
         }
 
-        switch (level) {
-            case INFO_MSG -> { if (log.isInfoEnabled()) log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
-            case WARN_MSG -> { if (log.isWarnEnabled()) log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
-            case ERROR_MSG -> { if (log.isErrorEnabled()) log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
-        }
+        log.atLevel(logLevel).log(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
     }
 
     @Override
@@ -536,12 +536,12 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
      * incoming hook. Sampled on each inbound text message; totals over any window are exact, though a
      * burst between samples is attributed as a single increment.
      */
-    private void sampleIncomingWireBytes() {
+    private void sampleIncomingWireBytes(final Listener l) {
         if (connection == null) return;
         final long total = connection.getBytesIn();
         final long delta = total - lastBytesIn;
         lastBytesIn = total;
-        reportIncomingWireBytes(delta);
+        reportIncomingWireBytes(l, delta);
     }
 
     /**
@@ -549,9 +549,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
      * int-typed onIncomingWebSocketFrame callback cannot overflow on long-lived connections (the outgoing side is
      * WebSocketPusher#sampleOutgoingWireBytes).
      */
-    private void reportIncomingWireBytes(long delta) {
-        final Listener l = this.listener;
-        if (l == null) return;
+    private static void reportIncomingWireBytes(final Listener l, long delta) {
         while (delta > 0) {
             final int chunk = (int) Math.min(delta, Integer.MAX_VALUE);
             l.onIncomingWebSocketFrame(0, chunk);
@@ -574,9 +572,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
-            final UIContext context = uiContext;
-            if (context != null && !roundTripRequested
-                    && System.currentTimeMillis() - context.getLastSentTime() < ROUNDTRIP_PIGGYBACK_WINDOW_MS) {
+            // isAlive(): the context is set, and never unset
+            if (!roundTripRequested && System.currentTimeMillis() - uiContext.getLastSentTime() < ROUNDTRIP_PIGGYBACK_WINDOW_MS) {
                 roundTripRequested = true;
                 return;
             }
@@ -607,7 +604,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         traceOut = loggerOut.isTraceEnabled();
         try {
             websocketPusher.flush();
-            if (uiContext != null) uiContext.onMessageSent();
+            uiContext.onMessageSent(); // every caller checked isAlive()
         } catch (final IOException e) {
             log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
             uiContext.onDestroy(StatusCode.SERVER_ERROR);
@@ -660,7 +657,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         final UIContext owner = this.uiContext;
-        if ((owner == null || !owner.isHeldByCurrentThread()) && UIContext.get() == null) {
+        if (!owner.isHeldByCurrentThread() && UIContext.get() == null) { // the context is set at open, before any write
             log.warn("encode in websocket without current ui context acquired", new Exception());
             uiContext.acquire();
             try {
@@ -685,8 +682,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     @Override
     public void encodeInt(final ServerToClientModel model, final int value) {
         final UIContext owner = this.uiContext;
-        if (owner == null || !owner.isHeldByCurrentThread() || listener != null || traceOut) {
-            encode(model, (Object) value); // rare paths (no context / monitoring): keep the generic behaviour
+        if (!owner.isHeldByCurrentThread() || listener != null || traceOut) {
+            encode(model, (Object) value); // rare paths (outside the lock / monitoring): keep the generic behaviour
             return;
         }
         try {
