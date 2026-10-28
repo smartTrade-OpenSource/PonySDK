@@ -363,6 +363,21 @@ public class PListBoxTest extends PSuite {
     }
 
     @Test
+    public void testNothingChosenFromClient() {
+        final PListBox listBox = attachedListBox();
+        listBox.setMultipleSelect(true);
+        listBox.addItem("a");
+        listBox.addItem("b");
+        listBox.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_CHANGE.toStringValue(), "1").build());
+
+        // the terminal's selection without any item chosen, as the GWT terminal's
+        listBox.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_CHANGE.toStringValue(), "-1").build());
+        assertEquals(-1, listBox.getSelectedIndex());
+        assertEquals(List.of(), listBox.getSelectedIndexes());
+        assertNull(listBox.getSelectedItem());
+    }
+
+    @Test
     public void testChangeIgnoredWhenDisabledOrHidden() {
         final PListBox listBox = attachedListBox();
         listBox.addItem("a");

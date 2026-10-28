@@ -260,4 +260,18 @@ public class PTreeItemTest extends PSuite {
         assertEquals(1, parent.size());
         assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE));
     }
+
+    @Test
+    public void aWidgetMovesFromOneItemToAnotherOfItsTree() {
+        final PTree tree = Element.newPTree();
+        PWindow.getMain().add(tree);
+        final PLabel field = Element.newPLabel("field");
+        final PTreeItem first = tree.add(Element.newPTreeItem(field));
+
+        final PTreeItem second = tree.add(Element.newPTreeItem(field));
+
+        assertSame(field, second.getWidget());
+        assertNull(first.getWidget(), "the item it left holds it no more");
+        assertSame(tree, field.getParent());
+    }
 }

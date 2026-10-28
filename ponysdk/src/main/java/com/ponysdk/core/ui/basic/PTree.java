@@ -137,6 +137,11 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
         }
     }
 
+    /** The item holding a widget of this tree, null for none. */
+    PTreeItem itemOf(final PWidget widget) {
+        return childWidgets.get(widget);
+    }
+
     void adopt(final PWidget widget, final PTreeItem item) {
         if (!childWidgets.containsKey(widget)) {
             childWidgets.put(widget, item);

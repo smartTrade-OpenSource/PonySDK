@@ -84,8 +84,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
             this.selectedIndex = Integer.parseInt(tokens[0]);
 
-            for (final String index : tokens) {
-                selectedItems.add(Integer.valueOf(index));
+            // -1 alone: nothing chosen
+            if (selectedIndex >= 0) {
+                for (final String index : tokens) {
+                    selectedItems.add(Integer.valueOf(index));
+                }
             }
 
             this.selectedIndexes.clear();
