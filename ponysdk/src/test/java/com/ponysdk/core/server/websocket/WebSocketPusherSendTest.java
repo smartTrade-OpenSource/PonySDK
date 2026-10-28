@@ -28,10 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Callback;
@@ -41,6 +43,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.StringDictionary;
@@ -114,7 +117,12 @@ public class WebSocketPusherSendTest {
 
     /** A pusher whose pooled buffers hold a single 9-byte frame: no two flushes share a buffer. */
     private static WebSocketPusher stuckClient(final ManualSession client, final long timeoutMillis) throws IOException {
-        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, timeoutMillis, new ByteBufferPool(12, 8));
+        return stuckClient(client, timeoutMillis, new ByteBufferPool(12, 8));
+    }
+
+    private static WebSocketPusher stuckClient(final ManualSession client, final long timeoutMillis, final ByteBufferPool pool)
+        throws IOException {
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, timeoutMillis, pool);
         for (long i = 0; i <= WebSocketPusher.QUEUE_LIMIT; i++) {
             pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, i);
             pusher.flush();
@@ -186,6 +194,165 @@ public class WebSocketPusherSendTest {
         final IOException failure = assertThrows(IOException.class, () -> pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 9L));
         assertEquals("reset", failure.getCause().getMessage());
         assertTrue(pusher.isClosed());
+    }
+
+    @Test
+    public void aTimedOutFlushGivesItsBufferBackToThePool() throws IOException {
+        final ManualSession client = new ManualSession();
+        final ByteBufferPool pool = new ByteBufferPool(12, 8);
+        final WebSocketPusher pusher = stuckClient(client, 20, pool);
+
+        assertThrows(IOException.class, pusher::flush);
+        client.complete(0);
+
+        assertEquals(pool.totalAllocated(), pool.availableCount(), "no buffer lost with the flush that timed out");
+    }
+
+    @Test
+    public void anInterruptedFlushGivesItsBufferBackToThePool() throws IOException {
+        final ManualSession client = new ManualSession();
+        final ByteBufferPool pool = new ByteBufferPool(12, 8);
+        final WebSocketPusher pusher = stuckClient(client, 60_000, pool);
+
+        Thread.currentThread().interrupt();
+        assertThrows(IOException.class, pusher::flush);
+        Thread.interrupted();
+        for (int i = 0; i <= WebSocketPusher.QUEUE_LIMIT; i++) client.complete(i);
+
+        assertEquals(pool.totalAllocated(), pool.availableCount(), "no buffer lost with the interrupted flush");
+    }
+
+    /**
+     * The connection fails while a flush waits for room behind a stuck client: the flush fails with that error, its
+     * buffer is not sent on the failed connection.
+     */
+    @Test
+    public void aSendFailingWhileAFlushWaitsFailsThatFlush() throws Exception {
+        final ManualSession client = new ManualSession();
+        final ByteBufferPool pool = new ByteBufferPool(12, 8);
+        final WebSocketPusher pusher = stuckClient(client, 60_000, pool);
+        final CompletableFuture<Throwable> outcome = new CompletableFuture<>();
+        final Thread flusher = Thread.ofPlatform().start(() -> {
+            try {
+                pusher.flush();
+                outcome.complete(null);
+            } catch (final Throwable e) {
+                outcome.complete(e);
+            }
+        });
+        while (flusher.getState() != Thread.State.TIMED_WAITING) Thread.onSpinWait();
+
+        client.callbacks.get(0).fail(new IOException("reset"));
+
+        final Throwable failure = outcome.get(5, TimeUnit.SECONDS);
+        assertInstanceOf(IOException.class, failure, "the waiting flush fails");
+        assertEquals("reset", failure.getCause().getMessage());
+        assertEquals(1, client.sent.size(), "nothing sent on the failed connection");
+        assertTrue(pusher.isClosed());
+        assertEquals(pool.totalAllocated(), pool.availableCount(), "every buffer back to the pool");
+    }
+
+    /** A client catching up while a flush waits empties the queue: the flush is then sent, not failed. */
+    @Test
+    public void aFlushWaitingWhileTheClientCatchesUpIsSent() throws Exception {
+        for (int run = 0; run < 50; run++) {
+            final ManualSession client = new ManualSession();
+            final ByteBufferPool pool = new ByteBufferPool(12, 8);
+            final WebSocketPusher pusher = stuckClient(client, 60_000, pool);
+            final CompletableFuture<Throwable> outcome = new CompletableFuture<>();
+            final Thread flusher = Thread.ofPlatform().start(() -> {
+                try {
+                    pusher.flush();
+                    outcome.complete(null);
+                } catch (final Throwable e) {
+                    outcome.complete(e);
+                }
+            });
+            while (flusher.getState() != Thread.State.TIMED_WAITING) Thread.onSpinWait();
+
+            for (int i = 0; i <= WebSocketPusher.QUEUE_LIMIT; i++) client.complete(i); // the client catches up
+
+            assertNull(outcome.get(5, TimeUnit.SECONDS), "the waiting flush succeeds");
+            flusher.join();
+            assertFalse(pusher.isClosed());
+            assertEquals(WebSocketPusher.QUEUE_LIMIT + 2, client.sent.size(), "the flushed buffer is sent");
+        }
+    }
+
+    @Test
+    public void aFirstValueLargerThanAPooledBufferGrowsTheEmptyBuffer() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(4, 8));
+
+        pusher.putLong(0x0102030405060708L);
+        pusher.flush();
+
+        assertArrayEquals(ByteBuffer.allocate(8).putLong(0x0102030405060708L).array(), client.sent.get(0));
+    }
+
+    @Test
+    public void aShortStringOfWideCharactersGrowsTheEncodingBuffer() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(1 << 10, 8));
+        final String accented = "é".repeat(100); // under the JDK encoder's threshold, 300 bytes at worst
+
+        pusher.encode(ServerToClientModel.TEXT, accented);
+        pusher.flush();
+
+        final byte[] utf8 = accented.getBytes(StandardCharsets.UTF_8);
+        assertArrayEquals(concat(new byte[] { (byte) ServerToClientModel.TEXT.getValue(), (byte) ValueTypeModel.STRING_UTF8_UINT8,
+            (byte) utf8.length }, utf8), client.sent.get(0));
+    }
+
+    @Test
+    public void encodeIntWritesAnIntAndTakesTheBoxedPathForAnyOtherModel() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(64, 8));
+
+        pusher.encodeInt(ServerToClientModel.HEARTBEAT_PERIOD, 5);
+        pusher.encodeInt(ServerToClientModel.END, 0);
+        pusher.flush();
+
+        assertArrayEquals(new byte[] { (byte) ServerToClientModel.HEARTBEAT_PERIOD.getValue(), 0, 0, 0, 5,
+            (byte) ServerToClientModel.END.getValue() }, client.sent.get(0));
+    }
+
+    @Test
+    public void aNegativeUint31IsRefused() {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(64, 8));
+
+        assertThrows(IllegalArgumentException.class, () -> pusher.encodeInt(ServerToClientModel.TYPE_CREATE, -1));
+    }
+
+    @Test
+    public void negativeArrayNumbersTakeTheSmallestWidthThatHoldsThem() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(256, 8));
+
+        pusher.encode(ServerToClientModel.PADDON_ARGUMENTS,
+            new Object[] { -200L, -40_000L, Long.MIN_VALUE, -200, -40_000, (short) -200 });
+        pusher.flush();
+
+        final ByteBuffer expected = ByteBuffer.allocate(64).put((byte) ServerToClientModel.PADDON_ARGUMENTS.getValue()).put((byte) 6)
+            .put(ArrayValueModel.SHORT.getValue()).putShort((short) -200)
+            .put(ArrayValueModel.INTEGER.getValue()).putInt(-40_000)
+            .put(ArrayValueModel.LONG.getValue()).putLong(Long.MIN_VALUE)
+            .put(ArrayValueModel.SHORT.getValue()).putShort((short) -200)
+            .put(ArrayValueModel.INTEGER.getValue()).putInt(-40_000)
+            .put(ArrayValueModel.SHORT.getValue()).putShort((short) -200)
+            .flip();
+        final byte[] bytes = new byte[expected.remaining()];
+        expected.get(bytes);
+        assertArrayEquals(bytes, client.sent.get(0));
+    }
+
+    @Test
+    public void rebaseWithoutAConnectionDoesNothing() {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(64, 8));
+        pusher.rebaseWireBytes();
+        assertEquals(-1, pusher.getWireBytesSent());
     }
 
     @Test
@@ -294,6 +461,10 @@ public class WebSocketPusherSendTest {
             pusher.encode(ServerToClientModel.TEXT, "dictionary value");
             pusher.encode(ServerToClientModel.PADDON_ARGUMENTS, new Object[] { 1, "x" });
             pusher.encodeInt(ServerToClientModel.TYPE_UPDATE, 7);
+            pusher.encode(ServerToClientModel.HANDLER_TYPE, (byte) 1);
+            pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2);
+            pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 3L);
+            pusher.encode(ServerToClientModel.LEFT, 4.5);
             pusher.encode(ServerToClientModel.END, null);
 
             stats = WebSocketPusher.stopRecordingStats();
@@ -308,5 +479,13 @@ public class WebSocketPusherSendTest {
         assertTrue(texts.containsKey("ref:0"), "then its reference: " + texts);
         assertNotNull(stats.getStats().get(ServerToClientModel.PADDON_ARGUMENTS));
         assertNull(WebSocketPusher.stopRecordingStats(), "nothing left to stop");
+        assertNotNull(stats.getStats().get(ServerToClientModel.LEFT));
+    }
+
+    @Test
+    public void aRecordingWithoutAListenerStopsQuietly() {
+        assertTrue(WebSocketPusher.startRecordingStats(1, TimeUnit.HOURS, null, null));
+        assertNotNull(WebSocketPusher.stopRecordingStats());
+        assertFalse(WebSocketPusher.isRecordingStats());
     }
 }

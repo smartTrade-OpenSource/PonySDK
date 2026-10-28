@@ -44,11 +44,13 @@ import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -84,8 +86,11 @@ public class WebSocketConnectionTest {
     }
 
     /** Opens a socket on {@code session}; the context it creates, or null when it creates none. */
-    private UIContext open(final Session session, final PonySDKMetrics metrics) {
+    {
         configuration.setHeartBeatPeriod(0, TimeUnit.SECONDS);
+    }
+
+    private UIContext open(final Session session, final PonySDKMetrics metrics) {
         Mockito.when(applicationManager.getConfiguration()).thenReturn(configuration);
         webSocket = new WebSocket();
         Mockito.when(txnContext.getWriter()).thenReturn(new ModelWriter(webSocket));
@@ -340,5 +345,263 @@ public class WebSocketConnectionTest {
         assertTrue(created.getRoundtripLatency() >= 5_000, "roundtrip " + created.getRoundtripLatency());
         assertEquals(2_000, created.getTerminalLatency());
         assertTrue(created.getNetworkLatency() >= 3_000);
+    }
+
+    // ---- Reconnection races, opens and closes without a context ----
+
+    private static final int RECONNECTED_ID = 7;
+
+    /** A socket reconnecting to {@code old}, found in the caller's session. */
+    private void reconnect(final UIContext old, final Session session) {
+        final Application application = Mockito.mock(Application.class);
+        Mockito.when(application.getUIContext(RECONNECTED_ID)).thenReturn(old);
+        Mockito.when(txnContext.getApplication()).thenReturn(application);
+        webSocket = new WebSocket();
+        webSocket.setContext(txnContext);
+        webSocket.setReconnectContextId(RECONNECTED_ID);
+        webSocket.onWebSocketOpen(session);
+    }
+
+    private static UIContext suspendable() {
+        final UIContext old = Mockito.mock(UIContext.class);
+        Mockito.when(old.isAlive()).thenReturn(true);
+        return old;
+    }
+
+    /** The client reconnects before the server has seen the close of its old socket: the suspension lands meanwhile. */
+    @Test
+    public void aReconnectionWaitsForTheSuspensionStillInProgress() {
+        final UIContext old = suspendable();
+        Mockito.when(old.isSuspended()).thenReturn(false, false, true);
+
+        reconnect(old, session(Mockito.mock(Session.class)));
+
+        Mockito.verify(old).resume(webSocket);
+    }
+
+    @Test
+    public void aContextDyingWhileItsReconnectionWaitsIsLost() {
+        final UIContext old = suspendable();
+        Mockito.when(old.isAlive()).thenReturn(true, true, false);
+        final Session session = session(Mockito.mock(Session.class));
+
+        reconnect(old, session);
+
+        Mockito.verify(old, Mockito.never()).resume(Mockito.any());
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.eq("context lost"), Mockito.any());
+        assertEquals(1, sent.size(), "the CREATE_CONTEXT that makes the page reload");
+    }
+
+    @Test
+    public void aDestroyedContextIsLostWithoutWaiting() {
+        final UIContext old = Mockito.mock(UIContext.class);
+        final Session session = session(Mockito.mock(Session.class));
+
+        reconnect(old, session);
+
+        Mockito.verify(old, Mockito.never()).resume(Mockito.any());
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.eq("context lost"), Mockito.any());
+    }
+
+    @Test
+    public void anInterruptedReconnectionWaitGivesUpAndKeepsTheInterrupt() {
+        final UIContext old = suspendable();
+        final Session session = session(Mockito.mock(Session.class));
+
+        Thread.currentThread().interrupt();
+        reconnect(old, session);
+
+        assertTrue(Thread.interrupted(), "the interrupt status is kept");
+        Mockito.verify(old, Mockito.never()).resume(Mockito.any());
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.eq("context lost"), Mockito.any());
+    }
+
+    @Test
+    public void aSocketWithoutContextIsClosedDroppedAndDisconnectedAsAnother() {
+        final UIContext old = suspendable();
+        Mockito.when(old.isReconnectionHeld()).thenReturn(true);
+        final Session session = session(Mockito.mock(Session.class));
+        reconnect(old, session);
+        Mockito.verify(session).close(Mockito.eq(WebSocket.CLOSE_RECONNECTION_HELD), Mockito.anyString(), Mockito.any());
+
+        webSocket.close();
+        webSocket.drop();
+        webSocket.disconnect();
+
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.anyString(), Mockito.any());
+        Mockito.verify(session).close(Mockito.eq(WebSocket.CLOSE_DROPPED), Mockito.anyString(), Mockito.any());
+        Mockito.verify(session).disconnect();
+    }
+
+    @Test
+    public void aDroppedSocketClosesAsANetworkFailure() {
+        final Session session = session(Mockito.mock(Session.class));
+        open(session, null);
+
+        webSocket.drop();
+
+        Mockito.verify(session).close(Mockito.eq(WebSocket.CLOSE_DROPPED), Mockito.anyString(), Mockito.any());
+    }
+
+    @Test
+    public void aSocketNeverOpenedIgnoresCloseAndDeath() {
+        final WebSocket notOpened = new WebSocket();
+        notOpened.close();
+        notOpened.connectionDead();
+        notOpened.onWebSocketClose(StatusCode.NORMAL, null, Callback.NOOP);
+        assertEquals(0, notOpened.getProtocolBytesSent());
+    }
+
+    @Test
+    public void aPingAsksTheOpenSessionForAPong() {
+        final Session session = session(Mockito.mock(Session.class));
+        open(session, null);
+
+        webSocket.ping();
+
+        Mockito.verify(session).sendPing(Mockito.any(ByteBuffer.class), Mockito.any());
+    }
+
+    @Test
+    public void closeCodesOutsideTheKnownAndApplicationRangesStillDestroy() {
+        final UIContext created = open();
+        webSocket.onWebSocketClose(1234, "odd", Callback.NOOP);
+        assertFalse(created.isAlive());
+        assertEquals(1234, created.getCloseStatusCode());
+    }
+
+    @Test
+    public void aCloseCodeAboveTheApplicationRangeStillDestroys() {
+        final UIContext created = open();
+        webSocket.onWebSocketClose(5000, null, Callback.NOOP);
+        assertEquals(5000, created.getCloseStatusCode());
+    }
+
+    // ---- Context creation options ----
+
+    @Test
+    public void theHeartbeatPeriodIsAnnouncedInSecondsWhenEnabled() {
+        configuration.setEnableClientToServerHeartBeat(true);
+        configuration.setHeartBeatPeriod(2, TimeUnit.MINUTES);
+        configuration.setWsSendTimeoutMs(0); // the default timeout
+
+        open();
+
+        final ByteBuffer first = ByteBuffer.wrap(sent.get(0));
+        first.position(1 + 2 + 1 + 1); // CREATE_CONTEXT id, OPTION_FORMFIELD_TABULATION
+        assertEquals(ServerToClientModel.HEARTBEAT_PERIOD.getValue(), first.get() & 0xFF);
+        assertEquals(120, first.getInt());
+    }
+
+    @Test
+    public void aDisabledHeartbeatIsAnnouncedAsZero() {
+        configuration.setEnableClientToServerHeartBeat(false);
+        configuration.setHeartBeatPeriod(2, TimeUnit.MINUTES);
+
+        open();
+
+        final ByteBuffer first = ByteBuffer.wrap(sent.get(0));
+        first.position(1 + 2 + 1 + 1 + 1);
+        assertEquals(0, first.getInt());
+    }
+
+    /** The application is destroyed (its HTTP session expires) while a socket opens one of its contexts. */
+    @Test
+    public void aContextDestroyedWhileItOpensIsNeitherStartedNorCounted() {
+        Mockito.doAnswer(inv -> {
+            inv.getArgument(0, UIContext.class).destroy();
+            return null;
+        }).when(txnContext).registerUIContext(Mockito.any());
+        final PonySDKMetrics metrics = new PonySDKMetrics("destroyed-at-open-test");
+
+        final UIContext created = open(session(Mockito.mock(Session.class)), metrics);
+
+        assertFalse(created.isAlive());
+        Mockito.verify(applicationManager, Mockito.never()).startApplication(Mockito.any());
+        assertEquals(0, metrics.getActiveContexts(), "no context left counted");
+    }
+    @Test
+    public void theWireBytesOfTheJettyConnectionGoToTheMetrics() {
+        final WebSocketConnection connection = Mockito.mock(WebSocketConnection.class);
+        final WebSocketCoreSession core = Mockito.mock(WebSocketCoreSession.class);
+        Mockito.when(core.getConnection()).thenReturn(connection);
+        final WebSocketSession session = session(Mockito.mock(WebSocketSession.class));
+        Mockito.when(session.getCoreSession()).thenReturn(core);
+        Mockito.when(connection.getBytesOut()).thenReturn(10L, 40L);
+        final PonySDKMetrics metrics = new PonySDKMetrics("wire-test");
+
+        final UIContext created = open(session, metrics);
+        created.execute(() -> {
+            webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+            webSocket.flush();
+        });
+
+        assertEquals(sent.get(sent.size() - 1).length, metrics.getTotalBytesSent(), "counted once the listener is set");
+    }
+
+    // ---- Messages from the terminal ----
+
+    @Test
+    public void aLatencyWithALetterIsNoFastPathLatency() {
+        assertEquals(WebSocket.NOT_A_LATENCY_MESSAGE, WebSocket.parseLatencyMessage("{\"h\":12a}"));
+    }
+
+    @Test
+    public void aJsonLatencyWithoutTerminalTimeIsAllTheNetworksAndGoesToTheMetrics() {
+        final PonySDKMetrics metrics = Mockito.spy(new PonySDKMetrics("latency-test"));
+        final UIContext created = open(session(Mockito.mock(Session.class)), metrics);
+
+        webSocket.onWebSocketText("{ \"" + ClientToServerModel.TERMINAL_LATENCY.toStringValue() + "\" : " + System.nanoTime() + " }");
+
+        assertEquals(0, created.getTerminalLatency());
+        Mockito.verify(metrics).recordRoundtrip(Mockito.anyLong());
+    }
+
+    @Test
+    public void aTerminalLogNamesTheObjectItConcerns() {
+        final UIContext created = open();
+        final PObject object = Mockito.mock(PObject.class);
+        Mockito.when(object.getID()).thenReturn(42);
+        created.registerObject(object);
+        final WebsocketMonitor monitor = Mockito.mock(WebsocketMonitor.class);
+        webSocket.setMonitor(monitor);
+        final String objectKey = ClientToServerModel.OBJECT_ID.toStringValue();
+        final List<String> messages = new ArrayList<>();
+        for (final ClientToServerModel level : List.of(ClientToServerModel.ERROR_MSG, ClientToServerModel.WARN_MSG,
+            ClientToServerModel.INFO_MSG)) {
+            messages.add("{\"" + level.toStringValue() + "\":\"known\",\"" + objectKey + "\":42}");
+            messages.add("{\"" + level.toStringValue() + "\":\"unknown\",\"" + objectKey + "\":43}");
+            messages.add("{\"" + level.toStringValue() + "\":\"none\"}");
+        }
+
+        messages.forEach(webSocket::onWebSocketText);
+
+        for (final String message : messages) Mockito.verify(monitor).onMessageProcessed(webSocket, message);
+    }
+
+    @Test
+    public void aRoundTripAlreadyWaitingForTheNextFlushIsSentAlone() {
+        final UIContext created = open();
+        final int before = sent.size();
+
+        created.execute(() -> {
+            webSocket.sendRoundTrip(); // the context just sent: it waits for the next flush
+            webSocket.sendRoundTrip(); // still nothing flushed: sent now
+        });
+
+        assertEquals(before + 1, sent.size());
+        assertEquals(ServerToClientModel.ROUNDTRIP_LATENCY.getValue(), sent.get(before)[0] & 0xFF);
+    }
+
+    @Test
+    public void incomingTextWithoutJettyConnectionCountsNoWireBytes() {
+        open();
+        final WebSocket.Listener listener = Mockito.mock(WebSocket.Listener.class);
+        webSocket.setListener(listener);
+
+        webSocket.onWebSocketText("{\"v\":0}");
+
+        Mockito.verify(listener).onIncomingText("{\"v\":0}");
+        Mockito.verify(listener, Mockito.never()).onIncomingWebSocketFrame(Mockito.anyInt(), Mockito.anyInt());
     }
 }

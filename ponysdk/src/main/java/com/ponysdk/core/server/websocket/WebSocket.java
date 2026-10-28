@@ -233,7 +233,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 uiContext.release();
             }
 
-            if (!initFlushOk) return;
+            // Destroyed meanwhile (its application went): nothing to start, and no destroy left to uncount it
+            if (!initFlushOk || !uiContext.isAlive()) return;
 
             applicationManager.startApplication(uiContext);
             if (metrics != null) {

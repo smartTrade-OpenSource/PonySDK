@@ -1970,6 +1970,76 @@ public class RecordingEncoderTest {
         assertEquals(List.of("before", "after"), values(cap, ServerToClientModel.HTML));
     }
 
+    private static void recordPair(final RecordingEncoder rec, final int objectId, final ServerToClientModel key, final String name,
+                                   final ServerToClientModel value, final String v) {
+        rec.encode(ServerToClientModel.WINDOW_ID, 0);
+        rec.encode(ServerToClientModel.TYPE_UPDATE, objectId);
+        rec.encode(key, name);
+        rec.encode(value, v);
+        rec.endObject();
+    }
+
+    @Test
+    public void testCompactMergesAttributesAndPropertiesByName() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordPair(rec, 7, ServerToClientModel.PUT_ATTRIBUTE_KEY, "title", ServerToClientModel.ATTRIBUTE_VALUE, "a");
+        recordPair(rec, 7, ServerToClientModel.PUT_PROPERTY_KEY, "value", ServerToClientModel.PROPERTY_VALUE, "x");
+        recordPair(rec, 7, ServerToClientModel.PUT_ATTRIBUTE_KEY, "title", ServerToClientModel.ATTRIBUTE_VALUE, "b");
+        recordPair(rec, 7, ServerToClientModel.PUT_PROPERTY_KEY, "value", ServerToClientModel.PROPERTY_VALUE, "y");
+        recordPair(rec, 7, ServerToClientModel.PUT_ATTRIBUTE_KEY, "alt", ServerToClientModel.ATTRIBUTE_VALUE, "c");
+        recordUpdateBlock(rec, 7, ServerToClientModel.REMOVE_ATTRIBUTE_KEY, "alt");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("b"), values(cap, ServerToClientModel.ATTRIBUTE_VALUE));
+        assertEquals(List.of("y"), values(cap, ServerToClientModel.PROPERTY_VALUE));
+        assertEquals(List.of("alt"), values(cap, ServerToClientModel.REMOVE_ATTRIBUTE_KEY));
+    }
+
+    /** A key whose value does not follow is no keyed write: kept as written, in place, with the frame of its block. */
+    @Test
+    public void testCompactKeepsAKeyWithoutItsValueInPlace() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordStyle(rec, 7, "color", "red");
+        rec.encode(ServerToClientModel.WINDOW_ID, 0);
+        rec.encode(ServerToClientModel.FRAME_ID, 3);
+        rec.encode(ServerToClientModel.TYPE_UPDATE, 7);
+        rec.encode(ServerToClientModel.PUT_STYLE_KEY, "width");
+        rec.encode(ServerToClientModel.HTML, "not a style value");
+        rec.encode(ServerToClientModel.PUT_ATTRIBUTE_KEY, "lonely");
+        rec.endObject();
+        recordUpdateBlock(rec, 7, ServerToClientModel.PUT_PROPERTY_KEY, "last of its block");
+        recordStyle(rec, 7, "color", "green");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("color", "width", "color"), values(cap, ServerToClientModel.PUT_STYLE_KEY), "not merged across");
+        assertEquals(List.of("lonely"), values(cap, ServerToClientModel.PUT_ATTRIBUTE_KEY));
+        assertEquals(List.of("last of its block"), values(cap, ServerToClientModel.PUT_PROPERTY_KEY));
+        assertEquals(List.of(3), values(cap, ServerToClientModel.FRAME_ID));
+    }
+
+    @Test
+    public void testCompactDropsTheUpdatesOfACancelledObjectInsideARun() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordCreateBlock(rec, 5, 1);
+        recordUpdateBlock(rec, 1, ServerToClientModel.HTML, "kept");
+        recordUpdateBlock(rec, 5, ServerToClientModel.HTML, "dropped");
+        recordRemoveBlock(rec, 5);
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("kept"), values(cap, ServerToClientModel.HTML));
+        assertTrue(values(cap, ServerToClientModel.TYPE_CREATE).isEmpty());
+    }
+
+    @Test
+    public void testAnOverflowWithoutHandlerIsLoggedOnce() {
+        final RecordingEncoder rec = new RecordingEncoder(2, null);
+        for (int i = 0; i < 5; i++) rec.encode(ServerToClientModel.HTML, "v" + i);
+        assertTrue(rec.isOverflowed());
+    }
+
     @Test
     public void testPushingApplicationDoesNotOverflowWhileSuspended() {
         final AtomicInteger overflows = new AtomicInteger();

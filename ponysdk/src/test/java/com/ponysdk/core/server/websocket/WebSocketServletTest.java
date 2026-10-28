@@ -270,6 +270,34 @@ public class WebSocketServletTest {
     }
 
     @Test
+    public void aSingleForwardedHostAndAnOriginWithAPathAreSameOrigin() {
+        final Fixture f = new Fixture();
+        when(f.config.isWsOriginCheckEnabled()).thenReturn(true);
+        when(f.request.getHeader("Origin")).thenReturn("https://front.example.com/app");
+        when(f.request.getHeader("X-Forwarded-Host")).thenReturn("front.example.com");
+
+        assertNotNull(f.servlet.createWebsocket(f.request, f.response));
+        verify(f.response, never()).setStatusCode(anyInt());
+    }
+
+    @Test
+    public void withoutConfigurationAndReconnectionTheSocketIsAPlainOne() {
+        final Fixture f = new Fixture();
+        when(f.appManager.getConfiguration()).thenReturn(null);
+        f.servlet.setWebsocketMonitor(mock(WebsocketMonitor.class));
+        f.servlet.setMetrics(new com.ponysdk.core.server.metrics.PonySDKMetrics("servlet-test"));
+
+        final WebSocket ws = f.servlet.createWebsocket(f.request, f.response);
+
+        assertEquals(com.ponysdk.core.model.ProtocolVersion.V1, ws.protocolVersion());
+        verify(f.response, never()).setExtensions(any());
+
+        final Fixture g = new Fixture(); // reconnection disabled: the id asked for is ignored
+        when(g.httpRequest.getParameter(ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue())).thenReturn("42");
+        assertNotNull(g.servlet.createWebsocket(g.request, g.response));
+    }
+
+    @Test
     public void anEmbeddedTerminalGetsThePonysdkSubprotocol() {
         final Fixture f = new Fixture();
         when(f.request.getHeader(Subprotocols.HEADER)).thenReturn("other, " + Subprotocols.PONYSDK);

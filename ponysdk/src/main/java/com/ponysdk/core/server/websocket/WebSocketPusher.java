@@ -411,6 +411,7 @@ public class WebSocketPusher implements Closeable {
 
         protocolBytesSent += bytes;
         if (!sender.send(toSend)) {
+            checkState(); // a send failed while this flush waited: that error, not a timeout
             close();
             throw new IOException("Timeout waiting for previous WebSocket send to complete");
         }
@@ -930,7 +931,7 @@ public class WebSocketPusher implements Closeable {
         /** The buffer Jetty is sending (back to the pool on completion), null when idle. Guarded by lock. */
         private ByteBuffer inFlight;
 
-        /** @return false if the queue stayed full for the send timeout */
+        /** @return false, the buffer back to the pool, if the queue stayed full for the send timeout or a send failed meanwhile */
         boolean send(final ByteBuffer buffer) throws IOException {
             lock.lock();
             try {
@@ -945,16 +946,25 @@ public class WebSocketPusher implements Closeable {
                     }
                     long nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
                     while (inFlight != null && queue.size() >= QUEUE_LIMIT) {
-                        if (nanos <= 0) return false;
+                        if (nanos <= 0) {
+                            bufferPool.release(buffer);
+                            return false;
+                        }
                         nanos = room.awaitNanos(nanos);
                     }
                     if (inFlight != null) {
                         queue.addLast(buffer);
                         return true;
                     }
+                    if (asyncError != null) { // a send failed while this one waited: the connection is gone
+                        bufferPool.release(buffer);
+                        return false;
+                    }
+                    // else the client caught up and the queue drained: this buffer goes out now
                 }
                 inFlight = buffer;
             } catch (final InterruptedException e) {
+                bufferPool.release(buffer);
                 Thread.currentThread().interrupt();
                 throw new IOException("Interrupted waiting for WebSocket send", e);
             } finally {

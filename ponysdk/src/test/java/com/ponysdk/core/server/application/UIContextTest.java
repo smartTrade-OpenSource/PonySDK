@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.json.Json;
@@ -30,11 +31,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ProtocolVersion;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.Subprotocols;
 import com.ponysdk.core.server.websocket.UpgradeRequestData;
 import com.ponysdk.core.server.websocket.WebSocket;
+import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 
 public class UIContextTest {
@@ -65,7 +73,10 @@ public class UIContextTest {
 
     /** A live context of a registered application, on a mocked socket. */
     private UIContext liveContext() {
-        final ApplicationConfiguration config = new ApplicationConfiguration();
+        return liveContext(new ApplicationConfiguration());
+    }
+
+    private UIContext liveContext(final ApplicationConfiguration config) {
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
         config.setStringDictionaryEnabled(false);
         application = new Application("ui-context-test", Mockito.mock(HttpSession.class), config);
@@ -181,5 +192,205 @@ public class UIContextTest {
         assertEquals(3L, uiContext.getWireBytesReceived());
         assertNotNull(uiContext.getUserAgent());
         assertNull(uiContext.getCookie("absent"));
+    }
+
+    // ---- Suspension and resumption racing ----
+
+    /**
+     * The reconnection of a client waits until its context is suspended (WebSocket#onWebSocketOpen), on the thread
+     * that closes the old socket: the context must not look suspended before its recorder is in place.
+     */
+    @Test
+    public void testAContextIsNotSuspendedBeforeItsRecorderIsInPlace() throws Exception {
+        final ApplicationConfiguration config = Mockito.spy(new ApplicationConfiguration());
+        final CountDownLatch inSuspend = new CountDownLatch(1);
+        final CountDownLatch goOn = new CountDownLatch(1);
+        Mockito.doAnswer(inv -> {
+            inSuspend.countDown();
+            assertTrue(goOn.await(5, TimeUnit.SECONDS));
+            return inv.callRealMethod();
+        }).when(config).getMaxRecordingEntries();
+        final UIContext uiContext = liveContext(config);
+        final Thread closing = Thread.ofPlatform().start(() -> uiContext.suspend(60_000));
+        assertTrue(inSuspend.await(5, TimeUnit.SECONDS));
+
+        final boolean resumable = uiContext.isSuspended();
+        goOn.countDown();
+        closing.join(5_000);
+
+        assertFalse(resumable, "resumed now, it would find no recorder and keep recording on the new socket");
+        assertTrue(uiContext.isSuspended());
+        final WebSocket newSocket = Mockito.mock(WebSocket.class);
+        uiContext.resume(newSocket);
+        uiContext.execute(() -> uiContext.getWriter().write(ServerToClientModel.HTML, "after"));
+        Mockito.verify(newSocket).encode(ServerToClientModel.HTML, "after");
+        uiContext.destroy();
+    }
+
+    /** The recorder overflowed: the context goes, and the terminal reconnecting must be told, not left waiting. */
+    @Test
+    public void testAResumptionOfAnOverflowedContextClosesTheNewSocket() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setMaxRecordingEntries(2);
+        final UIContext uiContext = liveContext(config);
+        uiContext.suspend(60_000);
+        final WebSocket newSocket = Mockito.mock(WebSocket.class);
+
+        uiContext.acquire(); // the destroy the overflow starts waits for this lock
+        try {
+            for (int i = 0; i < 5; i++) uiContext.getWriter().write(ServerToClientModel.HTML, "flood" + i);
+            uiContext.resume(newSocket);
+        } finally {
+            uiContext.release();
+        }
+
+        Mockito.verify(newSocket).close();
+        Mockito.verify(newSocket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.RECONNECT_CONTEXT), Mockito.any());
+    }
+
+    @Test
+    public void testAnAdministratorDestroyOfASuspendedContextSendsNothing() throws Exception {
+        final UIContext uiContext = liveContext();
+        final CountDownLatch destroyed = new CountDownLatch(1);
+        uiContext.addContextDestroyListener(context -> destroyed.countDown());
+        uiContext.suspend(60_000);
+
+        uiContext.destroyByAdministrator();
+
+        assertTrue(destroyed.await(5, TimeUnit.SECONDS));
+        Mockito.verify(socket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.DESTROY_CONTEXT), Mockito.any());
+        assertEquals(SessionInfo.State.DESTROYED, uiContext.snapshot().state());
+    }
+
+    // ---- A destroyed context, a context without socket ----
+
+    @Test
+    public void testADestroyedContextIgnoresWhatComesAfter() {
+        final UIContext uiContext = liveContext();
+        uiContext.destroy();
+        Mockito.clearInvocations(socket);
+
+        uiContext.flush();
+        uiContext.destroy();
+        uiContext.destroyFromApplication();
+        uiContext.disconnect();
+        uiContext.addContextDestroyListener(context -> fail("destroyed already"));
+        assertFalse(uiContext.pushToClient(List.<Object> of("late")));
+
+        Mockito.verifyNoInteractions(socket);
+    }
+
+    @Test
+    public void testAContextWithoutSocketAnswersWithDefaults() {
+        final TxnContext txnContext = Mockito.mock(TxnContext.class);
+        final UIContext uiContext = new UIContext(null, txnContext, new ApplicationConfiguration());
+
+        uiContext.ping();
+        uiContext.connectionDead();
+        assertEquals(0, uiContext.getProtocolBytesSent());
+        assertEquals(-1, uiContext.getWireBytesSent());
+        assertEquals(-1, uiContext.getWireBytesReceived());
+        assertEquals(ProtocolVersion.V1, uiContext.getProtocolVersion());
+        assertNull(uiContext.getWriter());
+        assertNull(uiContext.removeStreamListener(0));
+    }
+
+    // ---- Execution, client data, streams ----
+
+    @Test
+    public void testAFailingTaskIsTimedForTheMetrics() {
+        final UIContext uiContext = liveContext();
+        final PonySDKMetrics metrics = Mockito.mock(PonySDKMetrics.class);
+        uiContext.setMetrics(metrics);
+
+        assertFalse(uiContext.execute(() -> {
+            throw new IllegalStateException("a bug");
+        }));
+
+        Mockito.verify(metrics).recordExecute(Mockito.anyLong());
+        assertFalse(uiContext.isHeldByCurrentThread());
+    }
+
+    @Test
+    public void testAHistoryChangeFromTheClientReachesTheHistory() {
+        final UIContext uiContext = liveContext();
+        final List<String> tokens = new ArrayList<>();
+        uiContext.getHistory().addValueChangeHandler(event -> tokens.add(event.getData()));
+
+        uiContext.execute(() -> uiContext.fireClientData(Json.createObjectBuilder()
+            .add(ClientToServerModel.TYPE_HISTORY.toStringValue(), "page2").build()));
+
+        assertEquals(List.of("page2"), tokens);
+    }
+
+    @Test
+    public void testStreamRequestsAreKeptByTheirId() {
+        final UIContext uiContext = liveContext();
+        final StreamHandler first = Mockito.mock(StreamHandler.class);
+        final StreamHandler second = Mockito.mock(StreamHandler.class);
+        final StreamHandler embedded = Mockito.mock(StreamHandler.class);
+        final PObject object = registered(uiContext, 5);
+        final PFrame frame = Mockito.mock(PFrame.class);
+        Mockito.when(object.getFrame()).thenReturn(frame);
+        Mockito.when(object.getWindow()).thenReturn(Mockito.mock(PWindow.class));
+
+        uiContext.execute(() -> {
+            uiContext.stackStreamRequest(first);
+            uiContext.stackStreamRequest(second);
+            uiContext.stackEmbeddedStreamRequest(embedded, object);
+        });
+
+        assertSame(second, uiContext.removeStreamListener(1));
+        assertSame(embedded, uiContext.removeStreamListener(2));
+        assertSame(first, uiContext.removeStreamListener(0));
+        assertNull(uiContext.removeStreamListener(0));
+    }
+
+    @Test
+    public void testAnEmbeddedContextSetsItsCookiesByStreamRequests() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setStringDictionaryEnabled(false);
+        final UpgradeRequestData handshake = new UpgradeRequestData(
+            Map.of(ClientToServerModel.HOST_ATTRIBUTES.toStringValue(), List.of("{}")),
+            Map.of(Subprotocols.HEADER, List.of(Subprotocols.PONYSDK)), null, null, false, null, null, null);
+        final UIContext uiContext = new UIContext(socket, new TxnContext(socket), config, handshake);
+        assertTrue(uiContext.isEmbedded());
+
+        uiContext.execute(() -> {
+            uiContext.getCookies().setCookie("a", "1");
+            uiContext.getCookies().setCookie("b", "2");
+        });
+
+        assertNotNull(uiContext.removeStreamListener(0));
+        assertNotNull(uiContext.removeStreamListener(1));
+    }
+
+    // ---- Small accessors ----
+
+    @Test
+    public void testTheHistoryTokenIsTheFirstValueOfItsParameter() {
+        final String key = ClientToServerModel.TYPE_HISTORY.toStringValue();
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setStringDictionaryEnabled(false);
+        assertNull(new UIContext(socket, new TxnContext(socket), config, new UpgradeRequestData(Map.of(key, List.of()), null, null))
+            .getHistoryToken());
+        assertEquals("home", new UIContext(socket, new TxnContext(socket), config,
+            new UpgradeRequestData(Map.of(key, List.of("home", "other")), null, null)).getHistoryToken());
+    }
+
+    @Test
+    public void testAContextEqualsOnlyItself() {
+        final UIContext uiContext = liveContext();
+        assertEquals(uiContext, uiContext);
+        assertNotEquals(uiContext, null);
+        assertNotEquals(uiContext, "a string");
+        assertEquals(uiContext.getID(), uiContext.hashCode());
+    }
+
+    @Test
+    public void testLatenciesAverageTheLastTenValues() {
+        final UIContext uiContext = liveContext();
+        for (int i = 1; i <= 12; i++) uiContext.addRoundtripLatencyValue(i);
+        assertEquals((3 + 12) / 2.0, uiContext.getRoundtripLatency()); // 3..12
     }
 }

@@ -938,7 +938,6 @@ public class UIContext {
         final int generation = ++suspension; // single writer: the socket's close path
         suspendedAt = System.currentTimeMillis();
         suspensionTimeoutMs = timeoutMs;
-        suspended = true;
         final int maxEntries = configuration.getMaxRecordingEntries();
         recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
             log.warn("UIContext #{} recording buffer overflow ({}/{}) — destroying session to prevent unbounded memory growth",
@@ -947,6 +946,8 @@ public class UIContext {
         });
         // Swap to RecordingEncoder — all protocol writes are buffered
         context.getWriter().setEncoder(recordingEncoder);
+        // Last: a reconnection resumes the context as soon as it reads it suspended (WebSocket#onWebSocketOpen)
+        suspended = true;
         log.info("UIContext #{} suspended, waiting for reconnection (timeout={}ms)", ID, timeoutMs);
         Thread.ofVirtual().start(() -> {
             try {
@@ -975,9 +976,11 @@ public class UIContext {
         final RecordingEncoder recorder = this.recordingEncoder;
         this.recordingEncoder = null;
 
-        // If the recorder overflowed, the UIContext is already being destroyed — abort
+        // If the recorder overflowed, the UIContext is already being destroyed — abort. A normal close of the socket
+        // that would resume it makes the terminal reload its page (terminal.ts socketListener)
         if (recorder == null || recorder.isOverflowed()) {
             log.warn("UIContext #{} resume aborted — recorder overflowed or null", ID);
+            newSocket.close();
             return;
         }
 
