@@ -35,6 +35,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -50,7 +51,7 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
         final List<String> files = new ArrayList<>();
 
         final String clientConfigFile = configuration.getClientConfigFile();
-        if (StringUtils.isEmpty(clientConfigFile))
+        if (!StringUtils.hasLength(clientConfigFile))
             files.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
         else files.add(clientConfigFile);
 
@@ -59,8 +60,13 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
 
     @Override
     protected EntryPoint initializeEntryPoint() {
-        try (GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext()) {
-            applicationContext.getEnvironment().setActiveProfiles(serverApplicationContext.getEnvironment().getActiveProfiles());
+        final GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
+        // The session's beans live as long as its UI: closed with the UIContext, or at once without one
+        final UIContext uiContext = UIContext.get();
+        boolean closedWithTheUI = false;
+        try {
+            if (serverApplicationContext != null)
+                applicationContext.getEnvironment().setActiveProfiles(serverApplicationContext.getEnvironment().getActiveProfiles());
             applicationContext.load(configurations);
             applicationContext.refresh();
 
@@ -69,7 +75,13 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
             final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
             initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
 
+            if (uiContext != null) {
+                uiContext.addContextDestroyListener(context -> applicationContext.close());
+                closedWithTheUI = true;
+            }
             return entryPoint;
+        } finally {
+            if (!closedWithTheUI) applicationContext.close();
         }
     }
 
