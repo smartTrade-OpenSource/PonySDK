@@ -162,10 +162,11 @@ test('mask: a character that does not fit is refused, the mask\'s own is typed o
     await expect(box).toHaveValue('12/0_/____');
     await expect(page.getByText('Mask: 12/0_/____')).toBeVisible();
 
-    await box.press('End');
+    // the cursor placed by script: End and Home do not move it in a field on macOS but in Chromium
+    await box.evaluate(field => field.setSelectionRange(10, 10));
     await box.press('3'); // past the mask: refused
     await expect(box).toHaveValue('12/0_/____');
-    await box.press('Home');
+    await box.evaluate(field => field.setSelectionRange(0, 0));
     await box.press('Delete'); // the next characters move back, the mask's own stay
     await expect(box).toHaveValue('20/__/____');
     await box.press('Backspace'); // nothing before the cursor

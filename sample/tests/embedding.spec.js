@@ -314,7 +314,7 @@ test('a ticket popped out in a window of its own talks to its element by postMes
   await expect(first.locator('.pony-ticket-pop-out')).toHaveText(/^Popped out/);
   await first.locator('.pony-ticket-pop-out').click(); // brings it to the front
   await expect(popup.locator('html')).toHaveAttribute('data-focused', 'yes');
-  await popup.close({ runBeforeUnload: true }); // the page tells its parent: the server is told, popping out again opens another window
+  await popup.close(); // the server is told: popping out again opens another window
   await expect(first.locator('.pony-ticket-pop-out')).toHaveText('Pop out');
   const again = context.waitForEvent('page');
   await first.locator('.pony-ticket-pop-out').click();
