@@ -1,7 +1,7 @@
 // @ts-check
 // Web Components E2E against the showcase (ShowcaseMain: transparent reconnection + string dictionary on).
 //   ./gradlew :sample:runShowcase    then    BASE_URL=http://localhost:8081/sample/ npx playwright test webcomponents
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 

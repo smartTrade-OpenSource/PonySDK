@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 /*
  * The legacy layer (docs/decisions/0002-javascript-terminal.md, section 10): GWT's class names on the terminal's DOM.

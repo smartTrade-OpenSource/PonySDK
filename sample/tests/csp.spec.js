@@ -2,7 +2,7 @@
 // The showcase under the Content-Security-Policy PonySDK builds (ADR-0015): no inline script but the hashed one, no
 // eval, and nothing the page does is blocked. The smoke test visits every tab; a violation is a console error there.
 //   ./gradlew :sample:runShowcase    then    BASE_URL=http://localhost:8081/sample/ npx playwright test csp
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 

@@ -2,7 +2,7 @@
 // FDC3 (docs/decisions/0014-fdc3.md): the showcase's FDC3 page and the monitor, a plain JavaScript application, talk
 // through the sample's demonstration desktop agent, as two applications of a desktop do through theirs.
 //   ./gradlew :sample:runShowcase    then    BASE_URL='http://[::1]:8081/sample/' npx playwright test fdc3
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 

@@ -1,7 +1,7 @@
 // @ts-check
 // Reconnection of the showcase (ShowcaseMain: transparent reconnection, 10 s window).
 //   ./gradlew :sample:runShowcase    then    BASE_URL=http://localhost:8081/sample/ npx playwright test reconnection
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 

@@ -2,7 +2,7 @@
 // The gallery of the ways to integrate PonySDK (sample/src/main/resources/portal/index.html, ADR-0008 and ADR-0009):
 // each of its pages works. The portal of U4, U6 and U7 is embedding.spec.js's.
 //   ./gradlew :sample:runShowcase    then    BASE_URL='http://[::1]:8081/sample/' npx playwright test integration-gallery
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 /** The gallery: the portal server of ShowcaseMain, another origin of the same host. */

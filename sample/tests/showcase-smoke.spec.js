@@ -2,7 +2,7 @@
 // Smoke test of the whole showcase: every tab renders and the terminal raises no error.
 // Exercises the protocol reader on real traffic (short/long ASCII, UTF-8, dictionary, arrays, grids).
 //   ./gradlew :sample:runShowcase    then    BASE_URL=http://localhost:8081/sample/ npx playwright test showcase-smoke
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 

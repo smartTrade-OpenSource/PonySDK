@@ -3,7 +3,7 @@
 // a plain page of another origin that ShowcaseMain serves on port 8082, and the showcase's Embedding page.
 //   ./gradlew :sample:runShowcase    then    BASE_URL='http://[::1]:8081/sample/' npx playwright test embedding
 const fs = require('node:fs');
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 /** The portal: same host as the showcase, so the same site (ADR-0008, decision 9). */
