@@ -5,9 +5,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { ServerToClientModel as K, ServerToClientModelTypeModel, ValueTypeModel as V } from '#model';
-import { INCOMPLETE, Reader } from '../src/protocol/reader.ts';
+import { ArrayValueModel as A, ServerToClientModel as K, ServerToClientModelTypeModel, ValueTypeModel as V } from '#model';
+import { INCOMPLETE, ProtocolError, Reader } from '../src/protocol/reader.ts';
 import { fixture } from './fixtures.ts';
+import { encode } from './frames.ts';
 
 interface Model {
     key: string;
@@ -133,4 +134,23 @@ test('slice() hands bytes over and keeps their dictionary entries', () => {
         return count === blocks;
     }));
     assert.deepEqual(rest, wanted);
+});
+
+const ARRAY_KEY = ServerToClientModelTypeModel.indexOf(V.ARRAY);
+
+test('an array string of UTF-8 with a 16-bit length reads back', () => {
+    const text = new TextEncoder().encode('\u00e9t\u00e9');
+    const reader = new Reader();
+    reader.feed(encode([ARRAY_KEY, Uint8Array.of(1, A.STRING_UTF8_UINT16_LENGTH, 0, text.length, ...text)], [K.END]));
+    reader.read();
+    assert.deepEqual(reader.array, ['été']);
+});
+
+test('an unknown model key or array element type is a protocol error', () => {
+    const reader = new Reader();
+    reader.feed(Uint8Array.of(255));
+    assert.throws(() => reader.read(), (e: unknown) => e instanceof ProtocolError && e.name === 'ProtocolError'
+        && e.message === 'Unknown model key 255 at byte 0');
+    reader.feed(encode([ARRAY_KEY, Uint8Array.of(1, 99)]));
+    assert.throws(() => reader.read(), { name: 'ProtocolError', message: 'Unknown array element type 99' });
 });

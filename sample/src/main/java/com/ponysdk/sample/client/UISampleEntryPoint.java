@@ -68,6 +68,10 @@ public class UISampleEntryPoint implements EntryPoint {
             OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
             return;
         }
+        if (token != null && token.startsWith(TerminalPages.TOKEN)) {
+            TerminalPages.build(token); // a page of the terminal's features (sample/tests/terminal-pages.spec.js)
+            return;
+        }
         // region embedded: in a <pony-app> element of another page (docs/decisions/0008-embedded-application.md)
         final PHost host = PHost.get();
         if (host != null && EmbeddedTicket.VIEW.equals(host.getAttribute("view"))) {

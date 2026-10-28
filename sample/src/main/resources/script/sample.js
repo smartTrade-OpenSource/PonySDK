@@ -223,3 +223,8 @@ function oracleProduct(a, b) {
 function oracleCookies() {
   return document.cookie;
 }
+
+/** The native binding of the terminal pages' widget (TerminalPages.widget): writes what the server sends. */
+function terminalBinding(id, element) {
+  return { update: function (data) { element.textContent = 'Native: ' + data.text; } };
+}
