@@ -44,6 +44,7 @@ import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
@@ -143,7 +144,8 @@ public class WebSocketConnectionTest {
             webSocket.flush();
         });
 
-        assertEquals(sent.get(sent.size() - 1).length, metrics.getTotalBytesSent());
+        assertEquals(2, sent.size(), "CREATE_CONTEXT, then the heartbeat");
+        assertEquals(sent.get(0).length + sent.get(1).length, metrics.getTotalBytesSent());
         created.destroy();
         assertEquals(0, metrics.getActiveContexts());
     }
@@ -278,6 +280,24 @@ public class WebSocketConnectionTest {
     }
 
     @Test
+    public void theMetricsKeepCountingTheBytesSentOnceAListenerIsSet() {
+        final PonySDKMetrics metrics = new PonySDKMetrics("listened-test");
+        final UIContext created = open(session(Mockito.mock(Session.class)), metrics);
+        final long beforeListener = metrics.getTotalBytesSent();
+        final WebSocket.Listener listener = Mockito.mock(WebSocket.Listener.class);
+        created.setWebSocketListener(listener);
+
+        created.execute(() -> {
+            webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+            webSocket.flush();
+        });
+
+        final int flushed = sent.get(sent.size() - 1).length;
+        assertEquals(beforeListener + flushed, metrics.getTotalBytesSent());
+        Mockito.verify(listener).onOutgoingPonyFramesBytes(flushed);
+    }
+
+    @Test
     public void withoutConnectionNoByteIsCounted() {
         final WebSocket notOpened = new WebSocket();
         assertEquals(0, notOpened.getProtocolBytesSent());
@@ -353,11 +373,16 @@ public class WebSocketConnectionTest {
 
     /** A socket reconnecting to {@code old}, found in the caller's session. */
     private void reconnect(final UIContext old, final Session session) {
+        reconnect(old, session, null);
+    }
+
+    private void reconnect(final UIContext old, final Session session, final PonySDKMetrics metrics) {
         final Application application = Mockito.mock(Application.class);
         Mockito.when(application.getUIContext(RECONNECTED_ID)).thenReturn(old);
         Mockito.when(txnContext.getApplication()).thenReturn(application);
         webSocket = new WebSocket();
         webSocket.setContext(txnContext);
+        if (metrics != null) webSocket.setMetrics(metrics);
         webSocket.setReconnectContextId(RECONNECTED_ID);
         webSocket.onWebSocketOpen(session);
     }
@@ -377,6 +402,21 @@ public class WebSocketConnectionTest {
         reconnect(old, session(Mockito.mock(Session.class)));
 
         Mockito.verify(old).resume(webSocket);
+    }
+
+    @Test
+    public void theMetricsCountTheBytesSentOnTheSocketOfAResumedContext() {
+        final UIContext old = suspendable();
+        Mockito.when(old.isSuspended()).thenReturn(true);
+        Mockito.when(old.isHeldByCurrentThread()).thenReturn(true);
+        final PonySDKMetrics metrics = new PonySDKMetrics("resumed-test");
+        reconnect(old, session(Mockito.mock(Session.class)), metrics);
+        Mockito.verify(old).resume(webSocket);
+
+        webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        webSocket.flush();
+
+        assertEquals(sent.get(sent.size() - 1).length, metrics.getTotalBytesSent());
     }
 
     @Test
@@ -401,6 +441,20 @@ public class WebSocketConnectionTest {
 
         Mockito.verify(old, Mockito.never()).resume(Mockito.any());
         Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.eq("context lost"), Mockito.any());
+    }
+
+    @Test
+    public void aLostContextStillReloadsItsPageWhileTheStatsAreRecorded() {
+        final Session session = session(Mockito.mock(Session.class));
+        assertTrue(WebSocketPusher.startRecordingStats(1, TimeUnit.MINUTES, null, null));
+        try {
+            reconnect(Mockito.mock(UIContext.class), session);
+        } finally {
+            WebSocketPusher.stopRecordingStats();
+        }
+
+        Mockito.verify(session).close(Mockito.eq(StatusCode.NORMAL), Mockito.eq("context lost"), Mockito.any());
+        assertEquals(1, sent.size(), "the CREATE_CONTEXT that makes the page reload");
     }
 
     @Test
@@ -471,6 +525,48 @@ public class WebSocketConnectionTest {
     }
 
     @Test
+    public void aCloseAndTheTerminalLogsAreHandledWithTheLoggerOff() {
+        final UIContext created = open();
+        final WebsocketMonitor monitor = Mockito.mock(WebsocketMonitor.class);
+        webSocket.setMonitor(monitor);
+        final List<String> messages = new ArrayList<>();
+        for (final ClientToServerModel level : List.of(ClientToServerModel.ERROR_MSG, ClientToServerModel.WARN_MSG,
+            ClientToServerModel.INFO_MSG)) {
+            messages.add("{\"" + level.toStringValue() + "\":\"unheard\"}");
+        }
+
+        try (LogLevel off = LogLevel.set(WebSocket.class, "OFF")) {
+            messages.forEach(webSocket::onWebSocketText);
+            webSocket.onWebSocketClose(StatusCode.NORMAL, null, Callback.NOOP);
+        }
+
+        for (final String message : messages) Mockito.verify(monitor).onMessageProcessed(webSocket, message);
+        assertFalse(created.isAlive());
+    }
+
+    @Test
+    public void aTracedSocketSendsTheSameBytes() {
+        final UIContext created = open();
+        created.execute(() -> {
+            webSocket.encodeInt(ServerToClientModel.TYPE_UPDATE, 3);
+            webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+            webSocket.flush();
+        });
+        final byte[] untraced = sent.get(sent.size() - 1);
+
+        try (LogLevel trace = LogLevel.set("WebSocket-OUT", "TRACE")) {
+            created.execute(() -> {
+                webSocket.flush(); // reads the trace level for the next writes
+                webSocket.encodeInt(ServerToClientModel.TYPE_UPDATE, 3);
+                webSocket.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+                webSocket.flush();
+            });
+        }
+
+        assertArrayEquals(untraced, sent.get(sent.size() - 1));
+    }
+
+    @Test
     public void aCloseCodeAboveTheApplicationRangeStillDestroys() {
         final UIContext created = open();
         webSocket.onWebSocketClose(5000, null, Callback.NOOP);
@@ -536,7 +632,8 @@ public class WebSocketConnectionTest {
             webSocket.flush();
         });
 
-        assertEquals(sent.get(sent.size() - 1).length, metrics.getTotalBytesSent(), "counted once the listener is set");
+        assertEquals(sent.stream().mapToLong(bytes -> bytes.length).sum(), metrics.getTotalBytesSent(),
+            "CREATE_CONTEXT included");
     }
 
     // ---- Messages from the terminal ----

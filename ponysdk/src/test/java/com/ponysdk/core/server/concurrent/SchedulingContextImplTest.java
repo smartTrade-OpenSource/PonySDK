@@ -38,7 +38,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -274,6 +279,78 @@ public class SchedulingContextImplTest {
         verify(scheduler, times(2)).executeContext(ctx, false);
         ctx.run();
         assertEquals(List.of("first", "second"), ran);
+    }
+
+    @Test
+    public void testRun_aContextBusyOnAnotherThreadIsNotRunTwice() throws InterruptedException {
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch release = new CountDownLatch(1);
+        final List<String> ran = new CopyOnWriteArrayList<>();
+        ctx.execute(() -> {
+            started.countDown();
+            await(release);
+            ran.add("first");
+        });
+        ctx.execute(() -> ran.add("second"));
+        final Thread busy = new Thread(ctx::run);
+        busy.start();
+        assertTrue(started.await(5, TimeUnit.SECONDS));
+
+        ctx.run(); // the context is being run: this one only leaves it a token
+
+        assertEquals(List.of(), ran);
+        release.countDown();
+        busy.join(5_000);
+        assertEquals(List.of("first"), ran, "the extra token serves realtime tasks only");
+        verify(scheduler, times(2)).executeContext(ctx, false);
+        ctx.run();
+        assertEquals(List.of("first", "second"), ran);
+    }
+
+    @Test
+    public void testExecuteAndWait_keepsWaitingPastItsOneSecondPoll() throws InterruptedException {
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        try {
+            // The context runs after the first one-second poll of the waiting caller timed out
+            doAnswer(inv -> executor.schedule(ctx::run, 1_200, TimeUnit.MILLISECONDS)).when(scheduler)
+                .executeContext(eq(ctx), anyBoolean());
+            final AtomicBoolean ran = new AtomicBoolean(false);
+
+            ctx.executeAndWait(() -> ran.set(true));
+
+            assertTrue(ran.get());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testAwaitDestruction_anInterruptedWaitThrows() {
+        Thread.currentThread().interrupt();
+
+        assertThrows(InterruptedException.class, () -> ctx.awaitDestruction(5_000));
+        assertFalse(Thread.currentThread().isInterrupted(), "the interrupt is reported by the exception");
+    }
+
+    @Test
+    public void testAShutdownSchedulerReleasesTheWaitersAndDestroysTheContext() throws InterruptedException {
+        when(scheduler.isShutdown()).thenReturn(true);
+        when(scheduler.awaitTermination(anyLong())).thenReturn(true);
+        final AtomicBoolean ran = new AtomicBoolean(false);
+
+        ctx.executeAndWait(() -> ran.set(true));
+        assertFalse(ran.get(), "nothing runs the context any more");
+
+        assertTrue(ctx.awaitDestruction(1_000));
+        assertFalse(ctx.isAlive());
+    }
+
+    private static void await(final CountDownLatch latch) {
+        try {
+            assertTrue(latch.await(5, TimeUnit.SECONDS));
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private Runnable schedulePeriodic(final Runnable task, final ScheduledFuture<?> future) {

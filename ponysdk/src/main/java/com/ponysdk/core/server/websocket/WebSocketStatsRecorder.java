@@ -98,6 +98,7 @@ class WebSocketStatsRecorder {
 
     private AtomicReferenceArray<Map<Object, VolatileRecord>> getLocalStats() {
         final UIContext context = UIContext.get();
+        if (context == null) return null; // a write of no context (the reload order of a lost one): not counted
         AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
         if (stats == null) {
             stats = new AtomicReferenceArray<>(MODELS.length + 1);
@@ -173,7 +174,7 @@ class WebSocketStatsRecorder {
                         final Object value = recordEntry.getKey() == NULL_KEY ? null : recordEntry.getKey();
                         final VolatileRecord record = recordEntry.getValue();
                         aggStats.computeIfAbsent(model, m -> new HashMap<>()).computeIfAbsent(value,
-                            o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.count;
+                            o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.getCount();
                     }
                 }
             }

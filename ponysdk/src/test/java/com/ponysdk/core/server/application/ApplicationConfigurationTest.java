@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.ui.main.EntryPoint;
@@ -346,5 +347,23 @@ public class ApplicationConfigurationTest {
         assertSame(SessionAccessPolicy.SAME_HTTP_SESSION, config.getSessionAccessPolicy());
         assertThrows(NullPointerException.class, () -> config.setSessionAccessPolicy(null));
         assertSame(SessionAccessPolicy.SAME_HTTP_SESSION, config.getSessionAccessPolicy());
+    }
+
+    @Test
+    public void testSameHttpSessionAllowsItselfAndTheTabsOfItsApplicationOnly() {
+        final Application application = Mockito.mock(Application.class);
+        final UIContext caller = Mockito.mock(UIContext.class);
+        final UIContext sibling = Mockito.mock(UIContext.class);
+        final UIContext stranger = Mockito.mock(UIContext.class);
+        final UIContext orphan = Mockito.mock(UIContext.class);
+        Mockito.when(caller.getApplication()).thenReturn(application);
+        Mockito.when(sibling.getApplication()).thenReturn(application);
+        Mockito.when(stranger.getApplication()).thenReturn(Mockito.mock(Application.class));
+        final SessionAccessPolicy policy = SessionAccessPolicy.SAME_HTTP_SESSION;
+
+        assertTrue(policy.allows(orphan, orphan, null));
+        assertTrue(policy.allows(caller, sibling, null));
+        assertFalse(policy.allows(caller, stranger, null));
+        assertFalse(policy.allows(orphan, sibling, null), "no application: only itself");
     }
 }

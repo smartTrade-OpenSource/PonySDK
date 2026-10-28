@@ -37,6 +37,9 @@ public class PonyServiceRegistry {
 
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
+    private PonyServiceRegistry() {
+    }
+
     public static void registerPonyService(final PonyService service) {
         final Set<Class<?>> classes = new HashSet<>();
 

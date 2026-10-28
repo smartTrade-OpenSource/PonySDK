@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
 
@@ -98,6 +99,23 @@ public class CommunicationSanityCheckerTest {
         now[0] += 4_500;
         checker.checkCommunicationState();
         Mockito.verify(uiContext, Mockito.never()).connectionDead();
+    }
+
+    @Test
+    public void theSuspicionIsTheSameWithTheDebugLogOn() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final long[] now = { 100_000 };
+        final long[] received = { 100_000 };
+        final CommunicationSanityChecker checker = checker(uiContext, now, received);
+
+        try (LogLevel debug = LogLevel.set(CommunicationSanityChecker.class, "DEBUG")) {
+            now[0] += 5_000; // suspect
+            checker.checkCommunicationState();
+            now[0] += 5_000; // dead
+            checker.checkCommunicationState();
+        }
+
+        Mockito.verify(uiContext).connectionDead();
     }
 
     @Test

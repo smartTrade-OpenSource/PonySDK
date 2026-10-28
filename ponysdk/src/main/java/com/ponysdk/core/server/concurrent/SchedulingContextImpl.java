@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -115,8 +114,6 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 			}
 		} catch (final ExecutionException e) {
 			rethrowUnchecked(e.getCause());
-		} catch (final CancellationException e) {
-			// the context or scheduler is destroyed ....
 		}
 	}
 
@@ -285,12 +282,9 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 		}
 	}
 
-	static void rethrowUnchecked(final Throwable t) {
-		SchedulingContextImpl.<RuntimeException>rethrow(t);
-	}
-
+	/** Throws {@code t} as is: T, only in the throws clause, is inferred as RuntimeException at the call sites. */
 	@SuppressWarnings("unchecked")
-	private static <T extends Throwable> void rethrow(final Throwable t) throws T {
+	static <T extends Throwable> void rethrowUnchecked(final Throwable t) throws T {
 		throw (T) t;
 	}
 

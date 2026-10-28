@@ -144,12 +144,8 @@ public class SharedDictionaryProvider {
      * Should be called on application shutdown.
      */
     public void shutdown() {
-        if (autoPersistTask != null) {
-            autoPersistTask.cancel(false);
-        }
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
+        autoPersistTask.cancel(false);
+        scheduler.shutdown();
         persist();
     }
 
@@ -273,16 +269,14 @@ public class SharedDictionaryProvider {
             final List<String> loaded = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
                 final int tab = line.indexOf('\t');
-                if (tab <= 0 || tab >= line.length() - 1) continue;
+                if (tab <= 0 || tab >= line.length() - 1) continue; // a frequency and a value, neither empty
 
                 try {
                     final long freq = Long.parseLong(line.substring(0, tab));
                     final String value = line.substring(tab + 1);
-                    if (!value.isEmpty()) {
-                        globalFrequency.computeIfAbsent(value, k -> new LongAdder()).add(freq);
-                        if (loaded.size() < preSeedSize) {
-                            loaded.add(value);
-                        }
+                    globalFrequency.computeIfAbsent(value, k -> new LongAdder()).add(freq);
+                    if (loaded.size() < preSeedSize) {
+                        loaded.add(value);
                     }
                 } catch (final NumberFormatException e) {
                     // Skip malformed lines

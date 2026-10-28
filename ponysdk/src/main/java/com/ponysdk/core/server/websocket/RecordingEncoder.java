@@ -330,8 +330,8 @@ public final class RecordingEncoder implements WebsocketEncoder {
         final var pending = new java.util.LinkedHashMap<Integer, ObjectWrites>();
         for (int bi = fromIdx; bi < toIdx; bi++) {
             final Block b = blocks.get(bi);
-            final int objId = b.objectId();
-            if (objId >= 0 && cancelledIds.contains(objId)) continue;
+            final int objId = b.objectId(); // an UPDATE block's id is the int of its TYPE_UPDATE (UINT31)
+            if (cancelledIds.contains(objId)) continue;
             Entry window = null, frame = null;
             final List<Write> writes = new ArrayList<>();
             boolean pure = true;
@@ -361,12 +361,6 @@ public final class RecordingEncoder implements WebsocketEncoder {
                     writes.add(new Write(new Object(), e, null)); // unique: never merged, kept in order
                     pure = false;
                 }
-            }
-            if (objId < 0) { // no object: write out as is, keeping order
-                pending.values().forEach(o -> o.emit(target));
-                pending.clear();
-                copyBlock(b, target);
-                continue;
             }
             if (!pure) {
                 // a barrier: what came before is written out first, then this block, unchanged in its order

@@ -370,4 +370,122 @@ public class StringDictionaryTest {
         for (int i = 0; i < 300; i++) if (d.getId("price " + i) != StringDictionary.NOT_INTERNED) admitted++;
         assertTrue(admitted > 250, "repeated values admitted: " + admitted);
     }
+
+    @Test
+    public void theLimitsAreCheckedAndReadBack() {
+        assertThrows(IllegalArgumentException.class, () -> new StringDictionary(0, 4, 1));
+        assertThrows(IllegalArgumentException.class, () -> new StringDictionary(8, -1, 1));
+        assertThrows(IllegalArgumentException.class, () -> new StringDictionary(8, 4, -1));
+
+        final StringDictionary dict = new StringDictionary(8, 3);
+        assertEquals(8, dict.getMaxSize());
+        assertEquals(3, dict.getMinStringLength());
+        assertEquals(StringDictionary.NOT_INTERNED, dict.getId(null));
+        assertFalse(dict.isPreSeeded(-1));
+    }
+
+    @Test
+    public void internOfADictionaryFullOfPreSeededEntriesInternsNothing() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("alpha", "beta"));
+        final StringDictionary dict = new StringDictionary(2, 1, 32);
+        dict.initFromSharedProvider(provider);
+
+        assertEquals(StringDictionary.NOT_INTERNED, dict.intern("gamma"));
+        assertEquals(2, dict.size());
+    }
+
+    @Test
+    public void internReusesTheSlotOfTheEntryItEvicts() {
+        final StringDictionary dict = new StringDictionary(2, 1, 32);
+        final int cold = dict.intern("cold");
+        dict.intern("hot");
+        dict.intern("hot");
+
+        final int id = dict.intern("new");
+
+        assertEquals(cold, id);
+        assertEquals("new", dict.getString(id));
+        assertEquals(2, dict.size());
+        assertEquals(Map.of("hot", 2L, "new", 1L), dict.getSessionFrequency());
+    }
+
+    @Test
+    public void preSeedingSkipsEmptyAndRepeatedStringsAndStopsAtTheMaximumSize() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(java.util.Arrays.asList("dup", null, "", "dup", "x", "y"));
+        final StringDictionary dict = new StringDictionary(2, 1, 32);
+
+        dict.initFromSharedProvider(provider);
+
+        assertEquals(2, dict.getPreSeedCount());
+        assertEquals("dup", dict.getString(0));
+        assertEquals("x", dict.getString(1));
+    }
+
+    @Test
+    public void withoutProviderNothingIsPreSeededNorFlushed() {
+        final StringDictionary dict = new StringDictionary(8, 1, 32);
+        dict.initFromSharedProvider(null);
+        dict.intern("value");
+
+        dict.flushToSharedProvider();
+
+        assertEquals(0, dict.getPreSeedCount());
+        assertEquals(0, dict.intern("value"));
+    }
+
+    @Test
+    public void everyUseOfAPreSeededEntryIsAReference() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("seed", "idle"));
+        final StringDictionary dict = new StringDictionary(8, 1, 32);
+        dict.initFromSharedProvider(provider);
+        dict.intern("seed");
+        dict.intern("seed");
+        dict.intern("fresh");
+
+        assertEquals(66, dict.getSessionHitRate(), "2 references out of 3 uses");
+        assertEquals(Map.of("seed", 2L, "fresh", 1L), dict.getSessionFrequency(), "an unused entry is left out");
+    }
+
+    @Test
+    public void anEntryTakingTheSlotOfAFlushedOneIsFlushedWithItsOwnUses() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of());
+        final StringDictionary dict = new StringDictionary(2, 1, 32);
+        dict.initFromSharedProvider(provider);
+        dict.intern("first");
+        dict.intern("second");
+        dict.flushToSharedProvider();
+
+        dict.intern("third"); // evicts "first"
+        dict.flushToSharedProvider();
+
+        @SuppressWarnings("unchecked")
+        final ArgumentCaptor<Map<String, Long>> captor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(provider, Mockito.times(2)).recordBulkUsage(captor.capture());
+        assertEquals(Map.of("third", 1L), captor.getAllValues().get(1));
+    }
+
+    @Test
+    public void entriesAddedAfterAFlushAreFlushedNextTime() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of());
+        final StringDictionary dict = new StringDictionary(1024, 1, 32);
+        dict.initFromSharedProvider(provider);
+        dict.intern("first");
+        dict.flushToSharedProvider();
+        for (int i = 0; i < 100; i++) dict.intern("later " + i); // beyond the arrays sized at the first flush
+
+        dict.flushToSharedProvider();
+        dict.flushToSharedProvider(); // nothing new
+
+        @SuppressWarnings("unchecked")
+        final ArgumentCaptor<Map<String, Long>> captor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(provider, Mockito.times(2)).recordBulkUsage(captor.capture());
+        assertEquals(Map.of("first", 1L), captor.getAllValues().get(0));
+        assertEquals(100, captor.getAllValues().get(1).size());
+        assertEquals(Long.valueOf(1L), captor.getAllValues().get(1).get("later 99"));
+    }
 }

@@ -110,17 +110,10 @@ public class WebSocketStats {
                 .flatMap(e -> e.getValue().entrySet().stream().map(ee -> new Pair<>(e.getKey(), ee)));
             if (valueFilter != null) s2 = s2.filter(p -> valueFilter.test(p.getSecond().getKey()));
 
-            s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).forEach(p -> {
-                try {
-                    writeCsvLine(separator, writer, p);
-                } catch (final IOException e) {
-                    throw new IllegalStateException(e);
-                }
-            });
-        } catch (final IllegalArgumentException e) {
-            final Throwable t = e.getCause();
-            if (t instanceof IOException) throw (IOException) t;
-            throw e;
+            // A loop, not forEach: a write failure leaves as the IOException it is
+            for (final var p : s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).toList()) {
+                writeCsvLine(separator, writer, p);
+            }
         }
     }
 

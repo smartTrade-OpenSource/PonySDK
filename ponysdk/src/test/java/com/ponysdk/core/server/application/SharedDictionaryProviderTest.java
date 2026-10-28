@@ -145,6 +145,33 @@ public class SharedDictionaryProviderTest {
     }
 
     @Test
+    public void emptyAndUncountedUsagesAreIgnored() {
+        final SharedDictionaryProvider p = newProvider(0); // the default size
+        final Map<String, Long> usages = new java.util.HashMap<>();
+        usages.put(null, 4L);
+        usages.put("never", 0L);
+        usages.put("kept", 4L);
+
+        p.recordUsage(null);
+        p.recordUsage("");
+        p.recordBulkUsage(null);
+        p.recordBulkUsage(usages);
+
+        assertEquals(1, p.globalSize());
+    }
+
+    @Test
+    public void loadPreSeedsTheMostFrequentUpToItsSize() throws IOException {
+        Files.write(tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME), List.of("9\tfirst", "8\tsecond"),
+            StandardCharsets.UTF_8);
+
+        final SharedDictionaryProvider p = newProvider(1);
+
+        assertEquals(List.of("first"), p.getPreSeedStrings());
+        assertEquals(2, p.globalSize());
+    }
+
+    @Test
     public void anUnreadableDictionaryStartsEmpty() throws IOException {
         // A directory where the file is expected: reading it fails
         Files.createDirectory(tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME));

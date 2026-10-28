@@ -147,6 +147,7 @@ public class WebSocketStatsTest {
         final Map<Object, Record> records = new HashMap<>();
         records.put(new Pair<Object, String>(null, "g"), rec(1, 1, 1));
         records.put(new Pair<Object, String>(Boolean.TRUE, "g"), rec(1, 2, 2));
+        records.put(new Pair<Object, String>(Boolean.FALSE, "g"), rec(1, 2, 3));
         records.put(new Pair<Object, String>((byte) 7, "g"), rec(1, 3, 3));
         records.put(new Pair<Object, String>((short) 9, "g"), rec(1, 4, 4));
         records.put(new Pair<Object, String>(123, "g"), rec(1, 5, 5));
@@ -187,6 +188,7 @@ public class WebSocketStatsTest {
 
         assertNotNull(ws.getBandwidthPerGroup());
         assertEquals(12, ws.getBandwidthPerGroup().get("alpha").getData()); // 3*4
+        assertEquals(12, ws.getBandwidthForPattern(Pattern.compile("^1$"), null).getData(), "the value, not its group");
         assertNotNull(ws.getBandwidthPerValueTypePerGroup());
         assertNotNull(ws.getBandwidthPerServerToClientModelPerGroup());
     }

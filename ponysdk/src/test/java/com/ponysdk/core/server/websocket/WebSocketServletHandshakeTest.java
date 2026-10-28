@@ -108,6 +108,17 @@ public class WebSocketServletHandshakeTest {
     }
 
     @Test
+    public void testASessionTheSnapshotCannotCreateIsTakenFromTheRequest() throws Exception {
+        failSessionCreation = true;
+
+        final UIContext uiContext = connect(true, "/", "X-Test", "value-1");
+
+        assertNull(uiContext.getSession(), "the snapshot holds no session");
+        assertEquals(1, sessionCreations.get(), "the request creates the one the Application is keyed on");
+        assertNotNull(SessionManager.get().getApplication(uiContext.getApplicationId()));
+    }
+
+    @Test
     public void testHandshakeWithoutSessionHandlerStillOpens() throws Exception {
         final UIContext uiContext = connect(false, "/?token=abc", "X-Test", "value-1");
 
@@ -202,6 +213,7 @@ public class WebSocketServletHandshakeTest {
     private ApplicationManager applicationManager;
     private ServerConnector connector;
     private final AtomicInteger sessionCreations = new AtomicInteger();
+    private volatile boolean failSessionCreation;
 
     private UIContext connect(final boolean withSessions, final String path, final String header,
                               final String headerValue) throws Exception {
@@ -225,6 +237,10 @@ public class WebSocketServletHandshakeTest {
                 @Override
                 public HttpSession getSession(final boolean create) {
                     sessionLookups.incrementAndGet();
+                    if (create && failSessionCreation) {
+                        failSessionCreation = false;
+                        throw new IllegalStateException("session store unavailable");
+                    }
                     final HttpSession session = super.getSession(create);
                     if (session != null && session.isNew()) sessionCreations.incrementAndGet();
                     return session;

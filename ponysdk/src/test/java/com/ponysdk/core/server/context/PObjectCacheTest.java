@@ -26,6 +26,7 @@ package com.ponysdk.core.server.context;
 import com.ponysdk.test.ModelWriterForTest;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.util.IntObjectHashMap;
 import com.ponysdk.core.ui.basic.Element;
@@ -116,6 +117,21 @@ public class PObjectCacheTest extends PSuite {
         written.clear();
 
         assertNull(cache.get(button.getID()));
+        assertEquals(List.of("begin " + PWindow.getMain().getID(), ServerToClientModel.TYPE_GC + " " + button.getID()), written);
+    }
+
+    @Test
+    public void testTheDebugLogChangesNothingToWhatTheClientIsTold() throws ReflectiveOperationException {
+        final PButton button = Element.newPButton();
+        PWindow.getMain().add(button);
+        try (LogLevel debug = LogLevel.set(PObjectCache.class, "DEBUG")) {
+            cache.add(button);
+            collect(button.getID());
+            written.clear();
+
+            assertNull(cache.get(button.getID()));
+        }
+
         assertEquals(List.of("begin " + PWindow.getMain().getID(), ServerToClientModel.TYPE_GC + " " + button.getID()), written);
     }
 

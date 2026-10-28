@@ -28,6 +28,7 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.StringDictionary;
+import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -76,9 +77,6 @@ public class WebSocketPusher implements Closeable {
     /** Initial size of the reusable string encoding buffer. */
     private static final int INITIAL_STRING_BUFFER_SIZE = 256;
 
-    /** Maximum buffer size to prevent runaway growth. */
-    private static final int MAX_BUFFER_SIZE = 1 << 20; // 1 MB
-
     private final Session session;
     private final long timeoutMillis;
     private final int maxChunkSize;
@@ -109,6 +107,7 @@ public class WebSocketPusher implements Closeable {
     private int metaBytes;
 
     private WebSocket.Listener listener;
+    private PonySDKMetrics metrics;
     private StringDictionary stringDictionary;
 
     public WebSocketPusher(final Session session, final int maxChunkSize, final long timeoutMillis,
@@ -166,17 +165,12 @@ public class WebSocketPusher implements Closeable {
      * Preserves any data already in the write buffer.
      * Note: grown buffers won't be returned to the pool (wrong capacity).
      */
-    private void growBuffer(final int needed) throws IOException {
+    private void growBuffer(final int needed) {
         final int required = writeBuffer.position() + needed;
         int newSize = writeBuffer.capacity();
-        while (newSize < required) {
-            newSize = Math.min(newSize * 2, MAX_BUFFER_SIZE);
-            if (newSize < required) {
-                if (newSize >= MAX_BUFFER_SIZE) {
-                    throw new IOException("Write of " + needed + " bytes exceeds max buffer size " + MAX_BUFFER_SIZE);
-                }
-            }
-        }
+        // needed is at most 8 (put(byte[]) writes in chunks of the pool capacity): only a pool of buffers
+        // smaller than a long gets here, and the buffer never grows beyond a few bytes
+        while (newSize < required) newSize *= 2;
         if (log.isDebugEnabled()) log.debug("Growing WebSocket buffer from {} to {} bytes", writeBuffer.capacity(), newSize);
 
         final ByteBuffer newWrite = ByteBuffer.allocateDirect(newSize);
@@ -265,14 +259,11 @@ public class WebSocketPusher implements Closeable {
             return utf8.length;
         }
 
+        // Below JDK_ENCODER_MIN_LENGTH chars: the buffer (INITIAL_STRING_BUFFER_SIZE, only grows) holds them
         encodedBytes = stringEncodeBuffer;
         // Fast path for ASCII: copy each char in a single pass, bailing to the UTF-8 path on the
         // first non-ASCII char. A sampling heuristic is unsafe here — a missed non-ASCII char would
         // be silently truncated by the (byte) cast and corrupt the value on the wire.
-        if (len > stringEncodeBuffer.length) {
-            stringEncodeBuffer = new byte[Math.max(len, stringEncodeBuffer.length * 2)];
-            encodedBytes = stringEncodeBuffer;
-        }
         int i = 0;
         for (; i < len; i++) {
             final char c = value.charAt(i);
@@ -416,6 +407,7 @@ public class WebSocketPusher implements Closeable {
             throw new IOException("Timeout waiting for previous WebSocket send to complete");
         }
 
+        if (metrics != null) metrics.recordBytesSent(bytes);
         if (listener != null) {
             listener.onOutgoingPonyFramesBytes(bytes);
             sampleOutgoingWireBytes();
@@ -456,12 +448,10 @@ public class WebSocketPusher implements Closeable {
             case NULL -> write(model);
             case BOOLEAN -> write(model, (boolean) value);
             case BYTE -> write(model, (byte) value);
-            case SHORT -> write(model, (short) value);
             case UINT31 -> writeUint31(model, (int) value);
             case INTEGER -> write(model, (int) value);
             case LONG -> write(model, (long) value);
             case DOUBLE -> write(model, (double) value);
-            case FLOAT -> write(model, (float) value);
             case STRING -> writeStringOrRef(model, (String) value);
             case ARRAY -> write(model, (Object[]) value);
             default -> log.error("Unknown model type : {}", model.getTypeModel());
@@ -493,12 +483,6 @@ public class WebSocketPusher implements Closeable {
         if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
     }
 
-    private void write(final ServerToClientModel model, final short value) throws IOException {
-        putModelKey(model);
-        putShort(value);
-        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Short.BYTES);
-    }
-
     private void write(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         putInt(value);
@@ -515,12 +499,6 @@ public class WebSocketPusher implements Closeable {
         putModelKey(model);
         putDouble(doubleValue);
         if (statsRecorder != null) record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
-    }
-
-    private void write(final ServerToClientModel model, final float floatValue) throws IOException {
-        putModelKey(model);
-        putFloat(floatValue);
-        if (statsRecorder != null) record(model, floatValue, MODEL_KEY_SIZE, Float.BYTES);
     }
 
     private void write(final ServerToClientModel model, final Object[] value) throws IOException {
@@ -792,6 +770,10 @@ public class WebSocketPusher implements Closeable {
 
     void setWebSocketListener(final WebSocket.Listener listener) {
         this.listener = listener;
+    }
+
+    void setMetrics(final PonySDKMetrics metrics) {
+        this.metrics = metrics;
     }
 
     public void setStringDictionary(final StringDictionary stringDictionary) {

@@ -140,4 +140,23 @@ public class ClientBinaryReaderTest {
         r.skipValue(ClientBinaryReader.tagString());
         assertFalse(buf.hasRemaining());
     }
+
+    @Test
+    public void aMessageEndsOnItsMarkerOrWithTheBuffer() {
+        final ClientBinaryReader r = new ClientBinaryReader(ByteBuffer.wrap(new byte[] {0, (byte) ClientBinaryReader.END_MARKER}));
+
+        assertFalse(r.readBoolean());
+        assertFalse(r.hasNext(), "the end marker");
+        r.skipEnd();
+        assertFalse(r.hasNext(), "the end of the buffer");
+        assertFalse(r.hasMoreMessages());
+        r.skipEnd(); // nothing left to skip
+    }
+
+    @Test
+    public void anEndWithoutItsMarkerIsRejected() {
+        final ClientBinaryReader r = new ClientBinaryReader(ByteBuffer.wrap(new byte[] {7}));
+
+        assertThrows(IllegalStateException.class, r::skipEnd);
+    }
 }

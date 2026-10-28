@@ -94,6 +94,17 @@ public class ApplicationTest {
         assertTrue(application.getUIContexts().isEmpty());
     }
 
+    @Test
+    public void testDeregisteringAnUnknownContextKeepsTheOthers() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        Mockito.when(uiContext.getID()).thenReturn(1);
+        application.registerUIContext(uiContext);
+
+        application.deregisterUIContext(2);
+
+        assertEquals(1, application.countUIContexts());
+    }
+
     /**
      * Test method for {@link com.ponysdk.core.server.application.Application#destroy()}.
      */

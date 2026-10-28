@@ -58,7 +58,7 @@ class PeriodicTaskHolder {
 				LockSupport.parkNanos(1);
 			}
 			future.cancel(true);
-			SchedulingContextImpl.rethrowUnchecked(t);
+			throw t; // precise rethrow: run() throws nothing checked
 		}
 	}
 }

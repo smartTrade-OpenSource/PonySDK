@@ -407,14 +407,13 @@ public class StringDictionary {
         int victim = NOT_INTERNED;
         int victimCount = Integer.MAX_VALUE;
         int idx = evictionCursor >= preSeedCount && evictionCursor < size ? evictionCursor : preSeedCount;
+        // Every slot holds a string: an evicted one is refilled by the caller at once
         for (int n = 0; n < candidates; n++) {
-            if (idToString.get(idx) != null) {
-                final int count = usageCount[idx];
-                if (count < victimCount) {
-                    victim = idx;
-                    victimCount = count;
-                    if (count <= 1) break; // can't do better than a single use
-                }
+            final int count = usageCount[idx];
+            if (count < victimCount) {
+                victim = idx;
+                victimCount = count;
+                if (count <= 1) break; // can't do better than a single use
             }
             if (++idx == size) idx = preSeedCount;
         }
@@ -493,17 +492,13 @@ public class StringDictionary {
     public void flushToSharedProvider() {
         if (sharedProvider == null) return;
         final int size = Math.min(idToString.size(), usageCount.length);
-        if (lastFlushedCount == null || lastFlushedCount.length < usageCount.length) {
-            lastFlushedCount = lastFlushedCount == null ? new int[usageCount.length]
-                : java.util.Arrays.copyOf(lastFlushedCount, usageCount.length);
-        }
+        // Once allocated, ensureArrayCapacity grows it with usageCount
+        if (lastFlushedCount == null) lastFlushedCount = new int[usageCount.length];
         final Map<String, Long> deltas = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            final String s = idToString.get(i);
-            if (s == null) continue;
             final long delta = (long) usageCount[i] - lastFlushedCount[i];
             if (delta > 0) {
-                deltas.put(s, delta);
+                deltas.put(idToString.get(i), delta);
                 lastFlushedCount[i] = usageCount[i];
             }
         }
@@ -521,7 +516,7 @@ public class StringDictionary {
         long uses = 0, references = 0;
         for (int i = 0; i < size; i++) {
             final int count = usageCount[i]; // every use, the one that added the entry included
-            if (count == 0 || idToString.get(i) == null) continue;
+            if (count == 0) continue;
             uses += count;
             references += isPreSeeded(i) ? count : count - 1;
         }
@@ -536,10 +531,7 @@ public class StringDictionary {
         final int size = Math.min(idToString.size(), usageCount.length);
         final Map<String, Long> freq = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
-            final String s = idToString.get(i);
-            if (s != null && usageCount[i] > 0) {
-                freq.put(s, (long) usageCount[i]);
-            }
+            if (usageCount[i] > 0) freq.put(idToString.get(i), (long) usageCount[i]);
         }
         return java.util.Collections.unmodifiableMap(freq);
     }

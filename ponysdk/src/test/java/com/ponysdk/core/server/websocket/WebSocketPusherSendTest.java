@@ -46,6 +46,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.StringDictionary;
 import com.ponysdk.core.server.application.UIContext;
 
@@ -366,6 +367,24 @@ public class WebSocketPusherSendTest {
 
         assertEquals(2, client.sent.size(), "the key leaves first, the 8-byte value in a grown buffer");
         assertArrayEquals(longFrame(0x0102030405060708L), concat(client.sent.get(0), client.sent.get(1)));
+    }
+
+    @Test
+    public void theDebugLogsOfTheBuffersChangeNoByte() throws IOException {
+        final ManualSession client = new ManualSession();
+        final ByteBufferPool pool = new ByteBufferPool(4, 8);
+        try (LogLevel pusherLog = LogLevel.set(WebSocketPusher.class, "DEBUG");
+             LogLevel poolLog = LogLevel.set(ByteBufferPool.class, "DEBUG")) {
+            final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, pool);
+
+            pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 0x0102030405060708L);
+            pusher.flush();
+            client.complete(0);
+            client.complete(1);
+        }
+
+        assertArrayEquals(longFrame(0x0102030405060708L), concat(client.sent.get(0), client.sent.get(1)));
+        assertEquals(2, pool.availableCount(), "the two pooled buffers are back, the grown one is not pooled");
     }
 
     @Test

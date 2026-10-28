@@ -181,7 +181,8 @@ dependencies {
             libs.junit.jupiter,
             libs.selenium.java,
             libs.jakarta.websocket.client.api,
-            libs.jsoup
+            libs.jsoup,
+            libs.log4j.core // LogLevel sets a logger's level for a test
     )
 
     testRuntimeOnly(

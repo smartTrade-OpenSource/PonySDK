@@ -54,7 +54,9 @@ import jakarta.json.JsonValue.ValueType;
 import jakarta.json.spi.JsonProvider;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -176,9 +178,9 @@ public class UIContext {
         this.socket = socket;
         this.configuration = configuration;
         this.context = context;
-        if (context != null && context.getWriter() != null) {
+        if (context.getWriter() != null) {
             context.getWriter().bindTo(this);
-            context.getWriter().setCoalescing(configuration != null && configuration.isUpdateCoalescingEnabled());
+            context.getWriter().setCoalescing(configuration.isUpdateCoalescingEnabled());
         }
         this.modelWriter = context.getWriter();
         if (upgradeRequestData == null) {
@@ -949,13 +951,7 @@ public class UIContext {
         // Last: a reconnection resumes the context as soon as it reads it suspended (WebSocket#onWebSocketOpen)
         suspended = true;
         log.info("UIContext #{} suspended, waiting for reconnection (timeout={}ms)", ID, timeoutMs);
-        Thread.ofVirtual().start(() -> {
-            try {
-                Thread.sleep(timeoutMs);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
+        CompletableFuture.delayedExecutor(timeoutMs, TimeUnit.MILLISECONDS, task -> Thread.ofVirtual().start(task)).execute(() -> {
             if (suspended && suspension == generation) {
                 log.info("UIContext #{} reconnection timeout — destroying", ID); // the policy at work: a client that did not return
                 destroy();
@@ -1268,7 +1264,7 @@ public class UIContext {
         }
 
         public double getValue() {
-            return count == 0 ? 0 : (double) sum / count;
+            return (double) sum / count; // created on its first value
         }
     }
 

@@ -28,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 
 /**
@@ -540,6 +545,19 @@ public class BootstrapServletTest {
     }
 
     @Test
+    public void theDebugLogChangesNothingToTheResourceServed() throws IOException {
+        final String path = "/script/app.js";
+        final TestableBootstrapServlet servlet = servletServing(path, tempFile("logged"));
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+
+        try (LogLevel debug = LogLevel.set(BootstrapServlet.class, "DEBUG")) {
+            servlet.doGet(request("", path), response(body));
+        }
+
+        assertEquals("logged", body.toString());
+    }
+
+    @Test
     public void anUnsafePathIsNotFound() throws IOException {
         final TestableBootstrapServlet servlet = servletOnTheClasspath(new ApplicationConfiguration());
         final ByteArrayOutputStream body = new ByteArrayOutputStream();
@@ -601,6 +619,21 @@ public class BootstrapServletTest {
 
         Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
         assertEquals(-1, servlet.getLastModified(request("", path)), "no modification time for a missing file");
+    }
+
+    @Test
+    public void aResourceWhoseConnectionFailsHasNoModificationTime() throws IOException {
+        final String path = "/script/ponysdk.js";
+        final URL unreachable = URL.of(URI.create("pony://host" + path), new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(final URL url) throws IOException {
+                throw new IOException("unreachable");
+            }
+        });
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        Mockito.when(ctx.getResource(path)).thenReturn(unreachable);
+
+        assertEquals(-1, new TestableBootstrapServlet(ctx).getLastModified(request("", path)));
     }
 
     @Test
@@ -687,5 +720,15 @@ public class BootstrapServletTest {
             new java.io.StringReader(servletWith(config).buildManifest(request("", "/ponyapp.json")))).readObject();
 
         assertEquals("ponyterminal/legacy.js", manifest.getString("legacy"));
+    }
+
+    @Test
+    public void theManifestOfAConfigurationWithoutStylesScriptsOrSheetsLoadsPonysdkJsAlone() {
+        final jakarta.json.JsonObject manifest = jakarta.json.Json.createReader(new java.io.StringReader(
+            servletWith(new ApplicationConfiguration()).buildManifest(request("", "/ponyapp.json")))).readObject();
+
+        assertEquals("[]", manifest.getJsonArray("styles").toString());
+        assertEquals("[\"script/ponysdk.js\"]", manifest.getJsonArray("scripts").toString());
+        assertEquals("[]", manifest.getJsonArray("sharedSheets").toString());
     }
 }

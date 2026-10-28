@@ -64,6 +64,14 @@ public class UpgradeRequestDataTest {
     }
 
     @Test
+    public void aHeaderWithoutValueReadsAsAbsent() {
+        final Map<String, List<String>> headers = new HashMap<>();
+        headers.put("X-Empty", List.of());
+        final UpgradeRequestData d = new UpgradeRequestData(null, headers, null, null, false, null, null, null);
+        assertNull(d.getHeader("x-empty"));
+    }
+
+    @Test
     public void nullValueListBecomesEmpty_notNPE() {
         final Map<String, List<String>> params = new HashMap<>();
         params.put("k", null);

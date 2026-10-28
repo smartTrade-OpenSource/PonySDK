@@ -33,6 +33,8 @@ import org.mockito.Mockito;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -137,6 +139,29 @@ public class UIContextTest {
 
         Mockito.verify(object, Mockito.never()).onClientData(Mockito.any());
         assertTrue(uiContext.isAlive());
+    }
+
+    @Test
+    public void testTheLogLevelChangesNothingToADroppedReferenceOrAnAlreadyDestroyedListener() {
+        final UIContext uiContext = liveContext();
+        final PObject object = registered(uiContext, 12);
+        final JsonObject orphan = Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), 999)
+            .add(ClientToServerModel.PARENT_OBJECT_ID.toStringValue(), 12).build();
+        final List<UIContext> notified = new ArrayList<>();
+        uiContext.addContextDestroyListener(context -> {
+            throw new AlreadyDestroyedApplication("already gone");
+        });
+        uiContext.addContextDestroyListener(notified::add);
+
+        try (LogLevel errorsOnly = LogLevel.set(UIContext.class, "ERROR")) {
+            uiContext.execute(() -> uiContext.fireClientData(orphan));
+        }
+        try (LogLevel debug = LogLevel.set(UIContext.class, "DEBUG")) {
+            uiContext.destroy();
+        }
+
+        Mockito.verify(object, Mockito.never()).onClientData(Mockito.any());
+        assertEquals(List.of(uiContext), notified);
     }
 
     @Test

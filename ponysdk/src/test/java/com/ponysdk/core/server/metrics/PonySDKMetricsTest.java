@@ -26,12 +26,19 @@ package com.ponysdk.core.server.metrics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.ponysdk.core.server.websocket.WebsocketMonitor;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongGaugeBuilder;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 
 /**
  * Verifies {@link PonySDKMetrics#utf8Length(String)} matches the real UTF-8 wire size
@@ -89,6 +96,26 @@ public class PonySDKMetricsTest {
 
         assertEquals(5, metrics.getTotalBytesReceived());
         assertEquals(0, metrics.getTotalBytesSent());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void theActiveGaugeReportsTheOpenContexts() {
+        final Meter meter = Mockito.mock(Meter.class, Mockito.RETURNS_DEEP_STUBS);
+        final LongGaugeBuilder gauge = Mockito.mock(LongGaugeBuilder.class, Mockito.RETURNS_SELF);
+        Mockito.when(meter.gaugeBuilder("ponysdk.uicontext.active").ofLongs()).thenReturn(gauge);
+        final OpenTelemetry otel = Mockito.mock(OpenTelemetry.class);
+        Mockito.when(otel.getMeter(Mockito.anyString())).thenReturn(meter);
+        final PonySDKMetrics metrics = new PonySDKMetrics(otel, "app");
+        final ArgumentCaptor<Consumer<ObservableLongMeasurement>> callback = ArgumentCaptor.forClass(Consumer.class);
+        Mockito.verify(gauge).buildWithCallback(callback.capture());
+        metrics.onContextCreated();
+        metrics.onContextCreated();
+
+        final ObservableLongMeasurement measurement = Mockito.mock(ObservableLongMeasurement.class);
+        callback.getValue().accept(measurement);
+
+        Mockito.verify(measurement).record(Mockito.eq(2L), Mockito.any(Attributes.class));
     }
 
     private static void check(final String s) {

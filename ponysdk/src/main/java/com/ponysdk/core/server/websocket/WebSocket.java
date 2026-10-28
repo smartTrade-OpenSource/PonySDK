@@ -156,6 +156,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                     : TimeUnit.SECONDS.toMillis(60);
             this.websocketPusher = new WebSocketPusher(session, 1 << 15, sendTimeoutMs, BUFFER_POOL);
             this.websocketPusher.setConnection(connection);
+            // Every flush counts, whatever listener is set later and whether the context is new or resumed
+            this.websocketPusher.setMetrics(metrics);
 
             // Transparent reconnection: resume a suspended UIContext instead of creating a new one
             if (reconnectContextId >= 0) {
@@ -241,14 +243,6 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 metrics.onContextCreated();
                 uiContext.setMetrics(metrics);
                 uiContext.addContextDestroyListener(metrics.contextDestroyListener());
-                // Wire bytes-sent tracking via the pusher listener
-                websocketPusher.setWebSocketListener(new WebSocket.Listener() {
-                    @Override public void onOutgoingPonyFrame(final ServerToClientModel model, final Object value) {}
-                    @Override public void onOutgoingPonyFramesBytes(final int bytes) { metrics.recordBytesSent(bytes); }
-                    @Override public void onOutgoingWebSocketFrame(final int headerLength, final int payloadLength) {}
-                    @Override public void onIncomingText(final String text) {}
-                    @Override public void onIncomingWebSocketFrame(final int headerLength, final int payloadLength) {}
-                });
             }
             communicationSanityChecker.start();
         } catch (final Exception e) {
@@ -510,7 +504,6 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             case INFO_MSG -> { if (log.isInfoEnabled()) log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
             case WARN_MSG -> { if (log.isWarnEnabled()) log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
             case ERROR_MSG -> { if (log.isErrorEnabled()) log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message); }
-            default -> log.error("Unknown log level during terminal log processing : {}", level);
         }
     }
 
@@ -548,20 +541,20 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         final long total = connection.getBytesIn();
         final long delta = total - lastBytesIn;
         lastBytesIn = total;
-        reportWireBytes(delta, true);
+        reportIncomingWireBytes(delta);
     }
 
     /**
-     * Report a wire-byte delta to the listener, splitting it into Integer.MAX_VALUE-sized chunks so the
-     * int-typed onIncoming/OutgoingWebSocketFrame callbacks cannot overflow on long-lived connections.
+     * Report an incoming wire-byte delta to the listener, splitting it into Integer.MAX_VALUE-sized chunks so the
+     * int-typed onIncomingWebSocketFrame callback cannot overflow on long-lived connections (the outgoing side is
+     * WebSocketPusher#sampleOutgoingWireBytes).
      */
-    private void reportWireBytes(long delta, final boolean incoming) {
+    private void reportIncomingWireBytes(long delta) {
         final Listener l = this.listener;
         if (l == null) return;
         while (delta > 0) {
             final int chunk = (int) Math.min(delta, Integer.MAX_VALUE);
-            if (incoming) l.onIncomingWebSocketFrame(0, chunk);
-            else l.onOutgoingWebSocketFrame(0, chunk);
+            l.onIncomingWebSocketFrame(0, chunk);
             delta -= chunk;
         }
     }
