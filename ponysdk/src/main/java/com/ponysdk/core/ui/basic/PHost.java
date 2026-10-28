@@ -155,7 +155,7 @@ public final class PHost extends PObject {
     }
 
     private void removeAttributeListener(final String name, final Consumer<String> listener) {
-        if (attributeListeners == null) return;
+        // attributeListeners: created with the registration, never cleared
         final List<Consumer<String>> listeners = attributeListeners.get(name);
         if (listeners != null && listeners.remove(listener) && listeners.isEmpty()) attributeListeners.remove(name);
     }
@@ -177,7 +177,7 @@ public final class PHost extends PObject {
     }
 
     private void removeEventListener(final String type, final Consumer<JsonValue> listener) {
-        if (eventListeners == null) return;
+        // eventListeners: created with the registration, never cleared
         final List<Consumer<JsonValue>> listeners = eventListeners.get(type);
         if (listeners == null || !listeners.remove(listener) || !listeners.isEmpty()) return;
         eventListeners.remove(type);

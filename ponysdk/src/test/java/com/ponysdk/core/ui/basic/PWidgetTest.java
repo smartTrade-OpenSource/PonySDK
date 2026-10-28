@@ -92,6 +92,7 @@ import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PWidgetTest extends PSuite {
 

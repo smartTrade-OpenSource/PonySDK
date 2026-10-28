@@ -45,6 +45,7 @@ import com.ponysdk.testutil.CapturingModelWriter;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import static org.junit.jupiter.api.Assertions.*;
 
 /** {@link PTextBox} with its bases {@link PTextBoxBase} and {@link PValueBoxBase}, and {@link PPasswordTextBox}. */
 public class PTextBoxTest extends PSuite {
@@ -267,4 +268,44 @@ public class PTextBoxTest extends PSuite {
         assertTrue(writer.valuesOf(ServerToClientModel.WIDGET_TYPE).contains(WidgetType.PASSWORD_TEXTBOX.getValue()));
     }
 
+    @Test
+    public void everyValueChangeHandlerIsKept() {
+        final PTextBox box = Element.newPTextBox();
+        box.addValueChangeHandler(event -> {
+        });
+        box.addValueChangeHandler(event -> {
+        });
+        assertEquals(2, box.getValueChangeHandlers().size());
+    }
+
+    @Test
+    public void aDisabledBoxIgnoresAPaste() {
+        final PTextBox box = Element.newPTextBox();
+        PWindow.getMain().add(box);
+        final List<PPasteEvent> pasted = new ArrayList<>();
+        box.addPasteHandler(pasted::add);
+        box.setEnabled(false);
+        box.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_PASTE.toStringValue(), "x").build());
+        assertTrue(pasted.isEmpty());
+    }
+
+    @Test
+    public void aDisabledValueBoxIgnoresAPaste() {
+        final PValueBoxBase box = new PValueBoxBase() {
+
+            @Override
+            protected com.ponysdk.core.model.WidgetType getWidgetType() {
+                return com.ponysdk.core.model.WidgetType.TEXTBOX;
+            }
+        };
+        PWindow.getMain().add(box);
+        final List<PPasteEvent> pasted = new ArrayList<>();
+        box.addPasteHandler(pasted::add);
+        box.setEnabled(false);
+        box.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_PASTE.toStringValue(), "x").build());
+        assertTrue(pasted.isEmpty());
+        box.setEnabled(true);
+        box.onClientData(Json.createObjectBuilder().add(ClientToServerModel.HANDLER_PASTE.toStringValue(), "x").build());
+        assertEquals(1, pasted.size());
+    }
 }

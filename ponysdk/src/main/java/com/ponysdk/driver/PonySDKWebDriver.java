@@ -374,7 +374,7 @@ public class PonySDKWebDriver implements WebDriver {
                     stringLength = readUnsignedShort(b);
                     ascii = false;
                     break;
-                case ValueTypeModel.STRING_UTF8_INT32:
+                default: // STRING_UTF8_INT32, the last tag above STRING_ASCII_UINT8
                     length += 4;
                     stringLength = b.getInt();
                     ascii = false;

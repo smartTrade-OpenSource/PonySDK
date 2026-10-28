@@ -192,7 +192,7 @@ public enum Browser {
             // only check top level objects
             if (browser.parent == null) {
                 final Browser match = browser.checkUserAgent(agentString);
-                if (match != null && !Browser.UNKNOWN.equals(match)) return match; // either current operatingSystem or a child object
+                if (!Browser.UNKNOWN.equals(match)) return match; // never null: either current browser or a child object
             }
         }
         return Browser.UNKNOWN;
@@ -283,7 +283,7 @@ public enum Browser {
             if (!children.isEmpty()) {
                 for (final Browser childBrowser : children) {
                     final Browser match = childBrowser.checkUserAgent(agentString);
-                    if (match != null && !Browser.UNKNOWN.equals(match)) return match;
+                    if (!Browser.UNKNOWN.equals(match)) return match;
                 }
             }
 

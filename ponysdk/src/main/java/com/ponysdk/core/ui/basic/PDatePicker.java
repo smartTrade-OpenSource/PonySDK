@@ -98,21 +98,15 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
             final String rawDate = jsonObject.getString(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue());
 
             Date date = null;
-            if (rawDate != null) {
-                try {
-                    date = dateFormat.parse(rawDate);
+            try { // getString: never null, the terminal sends yyyy-MM-dd
+                date = dateFormat.parse(rawDate);
 
-                    final String[] values = rawDate.split("-");
-                    year = Integer.parseInt(values[0]);
-                    month = Integer.parseInt(values[1]);
-                    day = Integer.parseInt(values[2]);
-                } catch (final ParseException e) {
-                    log.error("Can't parse the date : " + rawDate, e);
-                }
-            } else {
-                year = -1;
-                month = -1;
-                day = -1;
+                final String[] values = rawDate.split("-");
+                year = Integer.parseInt(values[0]);
+                month = Integer.parseInt(values[1]);
+                day = Integer.parseInt(values[2]);
+            } catch (final ParseException e) {
+                log.error("Can't parse the date : " + rawDate, e);
             }
             onValueChange(new PValueChangeEvent<>(this, date));
         } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SHOW_RANGE.toStringValue())) {

@@ -256,4 +256,13 @@ public class SetPoolTest {
         final SetPool<Integer> sized = new SetPool<>(HashSet::new, 4);
         assertEquals(Set.of(3), sized.emptyImmutableSet().getAdd(3));
     }
+
+    @Test
+    public void aRemovalDoesNotAnswerASetWithAnElementTheOriginalLacks() {
+        final SetPool<String>.ImmutableSet fresh = new SetPool<String>().emptyImmutableSet();
+        final SetPool<String>.ImmutableSet bb = fresh.getAdd("BB");
+        final SetPool<String>.ImmutableSet aa = fresh.getAdd("x").getAdd("Aa").getRemove("x");
+        assertEquals(Set.of("Aa"), aa);
+        assertNotSame(bb, aa);
+    }
 }

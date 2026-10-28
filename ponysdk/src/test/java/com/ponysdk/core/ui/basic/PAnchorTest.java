@@ -174,4 +174,15 @@ public class PAnchorTest extends PSuite {
         }
     }
 
+    @Test
+    public void anAnchorWithoutTextDumpsItsHtmlOnly() {
+        final PAnchor anchor = Element.newPAnchor();
+        anchor.setHTML("<b>h</b>");
+        assertTrue(anchor.dumpDOM().endsWith("><b>h</b></a>"), anchor.dumpDOM());
+    }
+
+    @Test
+    public void aTextAnchorDumpsItsText() {
+        assertTrue(Element.newPAnchor("t").dumpDOM().endsWith(">t</a>"));
+    }
 }

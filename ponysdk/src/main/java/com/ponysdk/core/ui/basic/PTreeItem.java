@@ -80,16 +80,13 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         if (widget != null) {
             if (widget.getParent() != null) widget.removeFromParent();
 
-            if (tree != null) {
-                tree.orphan(widget);
-                widget.saveRemove(widget.getID(), tree.getID());
-            }
+            // An item is initialized in its tree: the root holds it, added items take it
+            tree.orphan(widget);
+            widget.saveRemove(widget.getID(), tree.getID());
 
-            if (tree != null) {
-                tree.adopt(widget, this);
-                widget.attach(window, getFrame());
-                saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
-            }
+            tree.adopt(widget, this);
+            widget.attach(window, getFrame());
+            saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
         }
     }
 

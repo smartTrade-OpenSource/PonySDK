@@ -69,15 +69,14 @@ public class DataGrid<T> implements IsPWidget {
     }
 
     public void addColumnDescriptor(final ColumnDescriptor<T> column) {
-        if (columns.add(column)) {
-            int r = 0;
-            final int c = columns.size() - 1;
+        columns.add(column);
+        int r = 0;
+        final int c = columns.size() - 1;
 
-            drawHeader(c, column);
+        drawHeader(c, column);
 
-            for (final T w : rows) {
-                drawCell(r++, c, column, w);
-            }
+        for (final T w : rows) {
+            drawCell(r++, c, column, w);
         }
     }
 

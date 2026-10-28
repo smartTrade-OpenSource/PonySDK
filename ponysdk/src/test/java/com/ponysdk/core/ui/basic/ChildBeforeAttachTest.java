@@ -30,6 +30,7 @@ import com.ponysdk.core.model.PUnit;
 
 import org.junit.jupiter.api.Test;
 import com.ponysdk.test.PSuite;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ChildBeforeAttachTest extends PSuite {
 
@@ -108,5 +109,12 @@ public class ChildBeforeAttachTest extends PSuite {
         leaf.setSelected(true);
 
         assertTrue(leaf.isSelected());
+    }
+
+    @Test
+    public void aCompositeWrapsOneWidget() {
+        final PComposite<PLabel> composite = composite();
+        composite.initWidget(Element.newPLabel("first"));
+        assertThrows(IllegalStateException.class, () -> composite.initWidget(Element.newPLabel("second")));
     }
 }

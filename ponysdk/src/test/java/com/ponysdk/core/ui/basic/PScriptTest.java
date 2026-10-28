@@ -46,6 +46,7 @@ import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
 import jakarta.json.Json;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PScriptTest extends PSuite {
 
@@ -181,4 +182,11 @@ public class PScriptTest extends PSuite {
         assertThrows(IllegalArgumentException.class, () -> PScript.call(null, "x"));
     }
 
+    @Test
+    public void attachingTheScriptAgainListensOnce() {
+        final PWindow window = openWindow();
+        PScript.call(window, "first");
+        final PScript script = scriptOf(window);
+        assertFalse(script.attach(window, null));
+    }
 }

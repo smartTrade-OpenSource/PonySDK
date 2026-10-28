@@ -172,4 +172,16 @@ public class PEventListenerTest extends PSuite {
         other.removeHandler();
         assertEquals(List.of("input", "keydown"), writer.valuesOf(ServerToClientModel.UNLISTEN_EVENT));
     }
+
+    @Test
+    public void aRegistrationRemovedTwiceLeavesTheOtherListeners() {
+        final PTextBox box = attachedBox();
+        final HandlerRegistration first = box.addEventListener("x", PEventOptions.NONE, e -> {
+        });
+        box.addEventListener("x", PEventOptions.NONE, e -> {
+        });
+        first.removeHandler();
+        first.removeHandler();
+        assertEquals(0, writer.count(ServerToClientModel.UNLISTEN_EVENT));
+    }
 }

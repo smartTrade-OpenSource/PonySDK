@@ -209,4 +209,15 @@ public class PRichTextAreaTest extends PSuite {
         assertEquals(expected.size(), writer.count(ServerToClientModel.TYPE_UPDATE));
     }
 
+    @Test
+    public void everyValueChangeHandlerIsKeptAndNoneIsNeeded() {
+        final PRichTextArea area = Element.newPRichTextArea();
+        area.fireOnValueChange(new com.ponysdk.core.ui.basic.event.PValueChangeEvent<>(area, "<b>x</b>"));
+        assertEquals("<b>x</b>", area.getHTML());
+        area.addValueChangeHandler(event -> {
+        });
+        area.addValueChangeHandler(event -> {
+        });
+        assertEquals(2, area.getValueChangeHandlers().size());
+    }
 }

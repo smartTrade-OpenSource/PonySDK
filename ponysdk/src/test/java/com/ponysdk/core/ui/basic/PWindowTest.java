@@ -473,4 +473,27 @@ public class PWindowTest extends PSuite {
         assertFalse(PWindow.getMain().getSubWindows().contains(window));
         assertTrue(window.getSubWindows().isEmpty());
     }
+
+    @Test
+    public void aWindowWithoutParentAndItsHandlers() {
+        final PWindow window = Element.newPWindow((PWindow) null, "n", "f");
+        assertFalse(window.removeCloseHandler(e -> {
+        }));
+        final PWindow parent = Element.newPWindow(null, null);
+        final PWindow child = Element.newPWindow(parent, "c", "f");
+        assertTrue(parent.getSubWindows().contains(child));
+        child.onDestroy();
+        assertFalse(parent.getSubWindows().contains(child));
+    }
+
+    @Test
+    public void removingAnotherCloseHandlerKeepsTheRegisteredOne() {
+        final PWindow window = Element.newPWindow(null, null);
+        final PCloseHandler handler = e -> {
+        };
+        window.addCloseHandler(handler);
+        assertFalse(window.removeCloseHandler(e -> {
+        }));
+        assertTrue(window.removeCloseHandler(handler));
+    }
 }

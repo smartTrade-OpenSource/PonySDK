@@ -137,4 +137,26 @@ public class PFrameTest extends PSuite {
         assertTrue(dom.endsWith("<li pid=\"" + child.getID() + "\" separator></li></div></frame>"), dom);
     }
 
+    @Test
+    public void aZoneIsAttachedOnceTheFrameIsOpenAndReusedAfter() {
+        final PFrame frame = Element.newPFrame("url");
+        PWindow.getMain().add(frame);
+        frame.onClientData(opened("url"));
+        final PLabel first = Element.newPLabel("1");
+        final PLabel second = Element.newPLabel("2");
+        frame.add("zone", first);
+        frame.add("zone", second);
+        assertTrue(first.isInitialized());
+        assertTrue(second.isInitialized());
+        assertSame(first.getParent(), second.getParent());
+    }
+
+    @Test
+    public void aFrameOpenedBeforeItsCreationAttachesItsZonesLater() {
+        final PFrame frame = Element.newPFrame("url");
+        frame.onClientData(opened("url"));
+        final PLabel label = Element.newPLabel("1");
+        frame.add(label);
+        assertFalse(label.isInitialized());
+    }
 }

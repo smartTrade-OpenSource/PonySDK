@@ -44,6 +44,7 @@ import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
 
 import jakarta.json.Json;
+import static org.junit.jupiter.api.Assertions.*;
 
 /** {@link PCookies} of an application in its own page: the terminal writes document.cookie. */
 public class PCookiesTest extends PSuite {
@@ -205,5 +206,23 @@ public class PCookiesTest extends PSuite {
         final PCookies cookies = new PCookies(request -> {
         });
         assertThrows(NullPointerException.class, () -> cookies.addInitializedListener(null));
+    }
+
+    @Test
+    public void aCookieWithoutExpiryCanHaveAPath() {
+        final PCookies cookies = new PCookies(request -> {
+        });
+        writer.clear();
+        cookies.setCookie("g", "7", (Date) null, "/g");
+        assertEquals(0, writer.count(ServerToClientModel.COOKIE_EXPIRE));
+        assertEquals(List.of("/g"), writer.valuesOf(ServerToClientModel.COOKIE_PATH));
+    }
+
+    @Test
+    public void cookiesReceivedOutsideAContextAreKept() throws Exception {
+        final PCookies cookies = new PCookies(request -> {
+        });
+        Thread.ofVirtual().start(() -> initialize(cookies, "visits", "4")).join();
+        assertEquals("4", cookies.getCookie("visits"));
     }
 }

@@ -229,4 +229,18 @@ public class PCheckBoxTest extends PSuite {
         assertEquals(1, clicks.get());
         assertFalse(checkBox.getValue());
     }
+
+    @Test
+    public void aCheckBoxWithoutTextOrHandlerStillChanges() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        checkBox.setHTML("<b>h</b>");
+        assertTrue(checkBox.dumpDOM().endsWith("><b>h</b></input>"), checkBox.dumpDOM());
+        checkBox.onValueChange(new com.ponysdk.core.ui.basic.event.PValueChangeEvent<>(checkBox, true));
+        assertEquals(PCheckBoxState.CHECKED, checkBox.getState());
+    }
+
+    @Test
+    public void aTextCheckBoxDumpsItsText() {
+        assertTrue(Element.newPCheckBox("t").dumpDOM().endsWith(">t</input>"));
+    }
 }

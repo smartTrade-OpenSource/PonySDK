@@ -232,4 +232,19 @@ public class PonySDKServerTest {
         final byte[] compressed = out.toByteArray();
         assertEquals(compressed.length, receivedSize("gzip", compressed), "the body reaches the application as it was sent");
     }
+
+    @Test
+    public void startingWithHttpsWithoutAKeyStoreFails() {
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> new TestServer().start());
+        assertTrue(e.getMessage().startsWith("HTTPS is on (setUseSSL) and no key store is set"), e.getMessage());
+    }
+
+    @Test
+    public void startingWithHttpsAddsTheHttpsConnector() {
+        final TestServer server = new TestServer();
+        // Any classpath resource: the key store is only opened when the connector starts
+        server.setSslKeyStoreFile("/" + PonySDKServerTest.class.getName().replace('.', '/') + ".class");
+        assertThrows(NullPointerException.class, server::start, "no application manager: stops past the connectors");
+        assertEquals(2, server.server.getConnectors().length);
+    }
 }

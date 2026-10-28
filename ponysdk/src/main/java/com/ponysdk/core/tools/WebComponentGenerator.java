@@ -297,11 +297,11 @@ public final class WebComponentGenerator {
 
         private String method(final JsonObject documented, final String name, final List<String> types,
                               final String returns, final List<String> names, final String code, final Type type) {
-            String doc = documented == null ? null : text(documented).orElse(null);
+            String doc = text(documented).orElse(null);
             if (type != null && type.kind == Kind.JSON) {
                 doc = (doc == null ? "" : doc + "\n") + "As JSON text, of type {@code " + escape(type.text) + "}.";
             }
-            if (documented != null && "method".equals(documented.getString("kind", "")) && documented.containsKey("return")) {
+            if ("method".equals(documented.getString("kind", "")) && documented.containsKey("return")) {
                 final String returned = typeText(documented.getJsonObject("return"));
                 if (returned != null && !"void".equals(returned.trim()) && !returned.trim().startsWith("Promise<void")) {
                     doc = (doc == null ? "" : doc + "\n") + "Its result, of type {@code " + escape(returned) + "}, does not come back.";
@@ -327,7 +327,7 @@ public final class WebComponentGenerator {
             }
             body.append('\n');
             if (docText != null) javadoc(body, "    ", docText);
-            if (deprecation != null) deprecated(body, "    ", deprecation);
+            deprecated(body, "    ", deprecation);
             body.append("    public ").append(returns).append(' ').append(javaName).append('(');
             for (int i = 0; i < types.size(); i++) {
                 if (i > 0) body.append(", ");

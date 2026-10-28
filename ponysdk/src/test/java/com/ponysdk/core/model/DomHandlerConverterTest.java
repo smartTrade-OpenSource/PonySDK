@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DomHandlerConverterTest {
 
@@ -74,4 +75,8 @@ public class DomHandlerConverterTest {
         }
     }
 
+    @Test
+    public void noDomHandlerTypeHasNoModel() {
+        assertThrows(IllegalArgumentException.class, () -> DomHandlerConverter.convert((DomHandlerType) null));
+    }
 }

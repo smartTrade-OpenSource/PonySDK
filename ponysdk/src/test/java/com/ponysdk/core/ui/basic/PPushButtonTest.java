@@ -36,6 +36,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PPushButtonTest extends PSuite {
 
@@ -68,4 +69,12 @@ public class PPushButtonTest extends PSuite {
         assertTrue(writer.valuesOf(ServerToClientModel.PARENT_OBJECT_ID).contains(button.getID()));
     }
 
+    @Test
+    public void attachingTwiceAddsTheImageOnce() {
+        final PPushButton button = Element.newPPushButton(Element.newPImage("u"));
+        PWindow.getMain().add(button);
+        writer.clear();
+        assertFalse(button.attach(PWindow.getMain(), null));
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_ADD));
+    }
 }

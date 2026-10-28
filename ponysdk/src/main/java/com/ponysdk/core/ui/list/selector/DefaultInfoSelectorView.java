@@ -82,9 +82,6 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
                     add(selectNoneAnchor);
                 }
                 break;
-            case NONE:
-                if (isVisible()) setVisible(false);
-                break;
             case PAGE:
                 setVisible(true);
                 clear();
@@ -95,7 +92,7 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
                 selectAllAnchor.setText(PString.get("list.selector.selectitemleft", itemsLeft));
                 add(selectAllAnchor);
                 break;
-            case PARTIAL:
+            default: // NONE, PARTIAL
                 if (isVisible()) setVisible(false);
                 break;
         }

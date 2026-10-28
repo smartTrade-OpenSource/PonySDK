@@ -385,6 +385,36 @@ public class WebComponentGeneratorTest extends PSuite {
     }
 
     @Test
+    public void oddMembersAndTypesOfTheManifest() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[
+                 1,
+                 {"kind":"accessor","name":"skipped"},
+                 {"kind":"field","name":"blank","type":{"text":"  "}},
+                 {"kind":"field","name":"numbered","type":{"text":5}},
+                 {"kind":"field","name":"generic","description":"First.\\n\\nThird.","type":{"text":"T"}},
+                 {"kind":"field","name":"odd","type":{"text":"'a'b\\""}},
+                 {"kind":"field","name":"template","type":{"text":"`t-${string}` | 'b'"}},
+                 {"kind":"method","name":"fetch","description":"Fetches.","return":{"type":{"text":"string"}}},
+                 {"kind":"method","name":"untypedResult","return":{}}
+               ]}]}]}""";
+
+        final String source = sources(manifest).get("PA");
+
+        assertFalse(source.contains("skipped"), source);
+        assertTrue(source.contains("As JSON text, of type {@code unknown}.\n     */\n    public void setBlankJson("), source);
+        assertTrue(source.contains("public void setNumberedJson(final String value)"), source);
+        assertTrue(source.contains("     * First.\n     *\n     * Third.\n     * As JSON text, of type {@code T}."), source);
+        assertTrue(source.contains("public void setOddJson(final String value)"), source);
+        assertTrue(source.contains("public void setTemplateJson(final String value)"), source);
+        assertTrue(source.contains("     * Fetches.\n     * Its result, of type {@code string}, does not come back."), source);
+        assertTrue(source.contains("    public void untypedResult() {"), source);
+        assertFalse(source.contains("Its result, of type {@code null}"), source);
+    }
+
+    @Test
     public void oneEnumNameForTwoTypesFails() {
         final String manifest = """
             {"modules":[{"path":"a.js","declarations":[

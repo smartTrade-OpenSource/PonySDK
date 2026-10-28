@@ -92,6 +92,7 @@ public class PonySearchContextTest {
     public void missingElementReturnsNull() {
         assertNull(context().findElement(By.tagName("CHECKBOX")));
         assertNull(context().findElement(By.className("nope")));
+        assertNull(context().findElement(By.id("nope")));
     }
 
     private static void attach(final PonyWebElement parent, final PonyWebElement child) {

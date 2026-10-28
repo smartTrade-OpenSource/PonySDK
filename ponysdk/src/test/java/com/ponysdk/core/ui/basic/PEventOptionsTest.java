@@ -32,6 +32,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.ponysdk.test.PSuite;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PEventOptionsTest extends PSuite {
 
@@ -66,5 +67,10 @@ public class PEventOptionsTest extends PSuite {
         assertNotEquals(a, a.debounce(Duration.ofSeconds(1)));
         assertNotEquals(a, PEventOptions.fields("y").preventDefault());
         assertNotEquals(a, "x");
+    }
+
+    @Test
+    public void preventDefaultTakesPartInEquality() {
+        assertNotEquals(PEventOptions.fields("x").preventDefault(), PEventOptions.fields("x"));
     }
 }

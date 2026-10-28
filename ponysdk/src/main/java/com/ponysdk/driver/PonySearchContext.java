@@ -158,14 +158,14 @@ class PonySearchContext implements SearchContext {
         return elements;
     }
 
-    private void findElements(final FindBy findBy, final String using, final Predicate<PonyWebElement> consumer) {
-        switch (findBy) {
+    private boolean findElements(final FindBy findBy, final String using, final Predicate<PonyWebElement> consumer) {
+        return switch (findBy) {
             case CLASS_NAME -> findElementsByClassName(Arrays.asList(using.split(" ")), diveable, consumer);
             case NAME -> findElementsByAttribute("name", using, diveable, consumer);
             case ID -> findElementsByAttribute("id", using, diveable, consumer);
             case CSS_SELECTOR -> findElementsByCssSelector(using, 0, diveable, consumer);
             case TAG_NAME -> findElementsByTagName(WidgetType.valueOf(using), using, diveable, consumer);
-        }
+        };
     }
 
     private boolean findElementsByClassName(final List<String> styles, final boolean dive, final Predicate<PonyWebElement> consumer) {
@@ -261,12 +261,12 @@ class PonySearchContext implements SearchContext {
     }
 
     private boolean findElementByCssSelector(final String using, final int usingIndex, final Predicate<PonyWebElement> consumer) {
-        // A combinator: ' ' (descendant) or '>' (child), the latter possibly surrounded by spaces
+        // A combinator: ' ' (descendant) or '>' (child), the latter possibly surrounded by spaces. A word ends only
+        // at '.', ' ' or '>' and the class names are read up to the next ' ' or '>': one of them is at usingIndex.
+        // The selector is trimmed: spaces are followed by another character.
         int i = skipSpaces(using, usingIndex);
-        final boolean child = i < using.length() && using.charAt(i) == '>';
+        final boolean child = using.charAt(i) == '>';
         if (child) i = skipSpaces(using, i + 1);
-        if (!child && i == usingIndex) throw new IllegalArgumentException(
-                "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
         if (i == using.length()) throw new IllegalArgumentException(
                 "Invalid css selector '" + using + "' at " + i + ", a widget type or class name is expected");
         return findElementsByCssSelector(using, i, !child, consumer);
@@ -318,8 +318,7 @@ class PonySearchContext implements SearchContext {
      */
     private static String usingOf(final By by) {
         final String s = by.toString();
-        final int sep = s.indexOf(": ");
-        return sep < 0 ? s : s.substring(sep + 2);
+        return s.substring(s.indexOf(": ") + 2);
     }
 
 }

@@ -458,7 +458,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         if (!isOpen()) {
             return;
         }
-        if (isOpen() && isContainerFocusable()) {
+        if (isContainerFocusable()) {
             focusContainer();
         } else if (!configuration.isMultilevelEnabled()) {
             close();

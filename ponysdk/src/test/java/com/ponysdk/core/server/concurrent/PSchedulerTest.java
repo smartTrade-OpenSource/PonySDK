@@ -215,6 +215,31 @@ public class PSchedulerTest {
         Mockito.verify(context, Mockito.times(1)).execute(Mockito.any());
     }
 
+    /** A context alive when the task was scheduled but gone when it runs: its execute refuses, the task stops. */
+    @Test
+    public void aRepeatedTaskWhoseContextIsGoneWhenItRunsStops() throws Exception {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        final CountDownLatch ran = new CountDownLatch(1);
+        Mockito.when(context.execute(Mockito.any())).thenAnswer(invocation -> {
+            ran.countDown();
+            return false;
+        });
+        final int before = timerQueueSize();
+
+        PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
+        assertTrue(ran.await(5, TimeUnit.SECONDS));
+
+        await(() -> {
+            try {
+                return timerQueueSize() == before;
+            } catch (final ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
+        });
+        Mockito.verify(context, Mockito.times(1)).execute(Mockito.any());
+    }
+
     @Test
     public void aRepeatedTaskOfADeadContextNeverRuns() throws Exception {
         final UIContext context = Mockito.mock(UIContext.class);

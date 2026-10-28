@@ -45,6 +45,7 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PFocusWidgetTest extends PSuite {
 
@@ -161,5 +162,15 @@ public class PFocusWidgetTest extends PSuite {
         button.onClientData(domEvent(DomHandlerType.FOCUS));
         assertEquals(0, writer.count(ServerToClientModel.END_OF_PROCESSING));
         assertFalse(button.isEnabled());
+    }
+
+    @Test
+    public void onlyAClickEndsTheProcessing() {
+        final PButton button = attachedButton();
+        button.showLoadingOnRequest(true);
+        writer.clear();
+        button.onClientData(Json.createObjectBuilder()
+            .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.MOUSE_OVER.getValue()).build());
+        assertEquals(0, writer.count(ServerToClientModel.END_OF_PROCESSING));
     }
 }

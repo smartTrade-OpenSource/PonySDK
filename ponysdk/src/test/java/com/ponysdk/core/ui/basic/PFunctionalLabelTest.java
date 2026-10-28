@@ -39,6 +39,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PFunctionalLabelTest extends PSuite {
 
@@ -125,4 +126,17 @@ public class PFunctionalLabelTest extends PSuite {
         assertEquals(List.of(PWindow.getMain().getPFunction(UPPER).getID()), writer.valuesOf(ServerToClientModel.FUNCTION_ID));
     }
 
+    @Test
+    public void aFunctionChangedWhileWaitingForItsFrameIsSentWithTheCreation() {
+        final PFrame frame = Element.newPFrame("url"); // not created yet
+        final PFunctionalLabel label = Element.newPFunctionalLabel(SUM, 1, 2);
+        label.attach(PWindow.getMain(), frame);
+        assertFalse(label.isInitialized());
+        writer.clear();
+
+        label.setTextFunction(UPPER);
+
+        assertEquals(0, writer.count(ServerToClientModel.FUNCTION_ID));
+        assertSame(UPPER, label.getTextFunction());
+    }
 }

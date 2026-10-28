@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests the named configurations of {@link ConfigSelectorDataGridView}: selection, removal, and their binary encoding.
@@ -285,5 +286,25 @@ public class ConfigSelectorDataGridViewTest extends PSuite {
 
     private PButton selectButton(final int index) {
         return (PButton) ((PComplexPanel) layout().getWidget(index)).getWidget(0);
+    }
+
+    @Test
+    public void aDescendingSortSurvivesEncodeDecode() throws DecodeException {
+        final DataGridConfig<String> config = new DataGridConfigBuilder<String>().addSort(new ColumnSort<>("name", false)).build();
+
+        final String encoded = view.encodeConfigEntries(List.of(ConfigSelectorDataGridView.e("d", config)));
+
+        final ColumnSort<String> sort = (ColumnSort<String>) view.decodeConfigEntries(encoded).get(0).getConfig().getSorts().get(0);
+        Assertions.assertFalse(sort.isAsc());
+    }
+
+    @Test
+    public void aCustomValueAnotherViewEncodedIsSkipped() throws Exception {
+        final ConfigSelectorDataGridView<String, String> withFooter = newView(new ColumnFilterFooterDataGridView<>(base()));
+        final PTextBox footer = (PTextBox) withFooter.getAdapter().getColumnDefinitions().get(0).getFooter();
+        DomEvents.stringValueChange(footer, "b");
+        final String encoded = withFooter.encodeConfigEntries(List.of(ConfigSelectorDataGridView.e("f", withFooter.getConfig())));
+
+        Assertions.assertTrue(view.decodeConfigEntries(encoded).get(0).getConfig().getReadOnlyCustomValues().isEmpty());
     }
 }

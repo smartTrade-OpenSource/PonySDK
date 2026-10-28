@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link DataGridControllerWrapper} and, through it, {@link SpyDataGridController}: every call reaches the
@@ -234,6 +235,13 @@ public class DataGridControllerWrapperTest {
         Mockito.verify(wrapped).refreshOnNextDraw();
         Mockito.verify(wrapped).refresh();
         Mockito.verify(wrapped).updateCurrentRows();
+        Assertions.assertEquals(0, updates);
+    }
+
+    @Test
+    public void unbindingAnUnboundControllerDoesNotNotify() {
+        Mockito.when(wrapped.getBound()).thenReturn(false, false);
+        wrapper.setBound(false);
         Assertions.assertEquals(0, updates);
     }
 }

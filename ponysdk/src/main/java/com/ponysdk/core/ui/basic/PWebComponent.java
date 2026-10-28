@@ -164,11 +164,9 @@ public class PWebComponent extends PComplexPanel {
          * valid JSON. Behavior depends on the storage mode.
          */
         public void set(final String value) {
-            switch (mode) {
-                case STATELESS -> sendFull(name, value);
-                case ON_HEAP -> setOnHeap(name, value, patch);
-                case OFF_HEAP -> setOffHeap(name, value, patch);
-            }
+            if (mode == StorageMode.STATELESS) sendFull(name, value);
+            else if (mode == StorageMode.ON_HEAP) setOnHeap(name, value, patch);
+            else setOffHeap(name, value, patch);
         }
 
         /** Convenience: set an int value. */
@@ -191,12 +189,11 @@ public class PWebComponent extends PComplexPanel {
 
         /** Removes the property from the web component. */
         public void remove() {
-            boolean removed = false;
-            switch (mode) {
-                case ON_HEAP -> removed = onHeapValues != null && onHeapValues.remove(name) != null;
-                case OFF_HEAP -> removed = offHeapValues != null && offHeapValues.remove(name);
-                case STATELESS -> removed = false;
-            }
+            final boolean removed = switch (mode) {
+                case ON_HEAP -> onHeapValues != null && onHeapValues.remove(name) != null;
+                case OFF_HEAP -> offHeapValues != null && offHeapValues.remove(name);
+                case STATELESS -> false;
+            };
             if (removed && !notCreatedYet()) {
                 saveUpdate(writer -> writer.write(ServerToClientModel.WC_REMOVE_PROPERTY, name));
             }
@@ -421,11 +418,8 @@ public class PWebComponent extends PComplexPanel {
         // Replay off-heap properties
         if (offHeapValues != null && !offHeapValues.isEmpty()) {
             for (final String key : offHeapValues.keys()) {
-                final String value = offHeapValues.readValue(key);
-                if (value != null) {
-                    writer.write(ServerToClientModel.WC_SET_PROPERTY, key);
-                    writer.write(ServerToClientModel.WC_PROPERTY_VALUE, value);
-                }
+                writer.write(ServerToClientModel.WC_SET_PROPERTY, key);
+                writer.write(ServerToClientModel.WC_PROPERTY_VALUE, offHeapValues.readValue(key)); // a key holds a value
             }
         }
         // Replay event listeners

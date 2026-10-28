@@ -224,4 +224,32 @@ public class OffHeapJsonStoreTest {
         assertEquals(newValue, store.readValue("dataset"));
         assertEquals(1, store.size());
     }
+
+    @Test
+    public void aCompactionTooSmallForTheNewValueGrowsTheBuffer() {
+        final OffHeapJsonStore store = new OffHeapJsonStore(64);
+        store.put("a", "x".repeat(40));
+        store.put("b", "y".repeat(20));
+        store.put("a", "z".repeat(50));
+        assertEquals("z".repeat(50), store.readValue("a"));
+        assertEquals("y".repeat(20), store.readValue("b"));
+    }
+
+    /** Two values with the same FNV-1a 64 hash (found by a cycle search): the bytes decide. */
+    @Test
+    public void aValueWithTheSameHashAndLengthIsStillAChange() {
+        final OffHeapJsonStore store = new OffHeapJsonStore();
+        store.put("k", "7237fa2faf1882cb");
+        final long hash = store.put("k", "5d8a9de52bc33a57");
+        assertEquals("5d8a9de52bc33a57", store.readValue("k"));
+        assertEquals(hash, store.put("k", "5d8a9de52bc33a57"), "same hash");
+    }
+
+    @Test
+    public void aValueWithTheSameHashAndAnotherLengthIsAChange() {
+        final OffHeapJsonStore store = new OffHeapJsonStore();
+        store.put("k", "6a82cf2ee4ba2e6d");
+        store.put("k", "xfdd418ef1814f8b6");
+        assertEquals("xfdd418ef1814f8b6", store.readValue("k"));
+    }
 }

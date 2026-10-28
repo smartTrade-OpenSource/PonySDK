@@ -323,4 +323,43 @@ public class PWebComponentTest extends PSuite {
             return reader.readObject();
         }
     }
+
+    @Test
+    public void aRegistrationRemovedTwiceOrAfterTheDestroyIsHarmless() {
+        final PWebComponent component = new PWebComponent("my-chart");
+        final HandlerRegistration registration = component.addEventListener("changed", value -> {
+        });
+        registration.removeHandler();
+        registration.removeHandler();
+        final HandlerRegistration other = component.addEventListener("changed", value -> {
+        });
+        component.onDestroy();
+        other.removeHandler();
+        assertNull(component.property("x").get());
+    }
+
+    @Test
+    public void anOffHeapValueFixesTheStorage() {
+        final PropertyHandle h = new PWebComponent("my-chart").property("data").offHeap();
+        h.set("{\"a\":1}");
+        assertThrows(IllegalStateException.class, h::withPatch);
+    }
+
+    @Test
+    public void aSlotAttachedToNoWindowDoesNothing() {
+        final PWebComponent.SlotPanel slot = new PWebComponent("my-chart").slot("s");
+        assertFalse(slot.attach(null, null));
+    }
+
+    @Test
+    public void aRegistrationRemovedTwiceLeavesTheOtherListeners() {
+        final PWebComponent component = new PWebComponent("my-chart");
+        final List<JsonValue> received = new ArrayList<>();
+        final HandlerRegistration first = component.addEventListener("changed", received::add);
+        component.addEventListener("changed", received::add);
+        first.removeHandler();
+        first.removeHandler();
+        component.onClientData(customEvent("changed", "1"));
+        assertEquals(1, received.size());
+    }
 }

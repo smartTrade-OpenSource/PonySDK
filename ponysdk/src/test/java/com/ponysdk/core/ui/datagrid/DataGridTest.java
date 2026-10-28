@@ -37,6 +37,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -46,6 +47,7 @@ import com.ponysdk.core.ui.datagrid.impl.PHTMLCellRenderer;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.datagrid.impl.PLabelHeaderRenderer;
 import com.ponysdk.test.PSuite;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DataGridTest extends PSuite {
 
@@ -280,5 +282,36 @@ public class DataGridTest extends PSuite {
         final DataGrid<String> byLength = new DataGrid<>((Function<String, ?>) String::length);
         byLength.addData(List.of("a", "bb"));
         assertEquals(2, byLength.getData().size());
+    }
+
+    @Test
+    public void aColumnWithoutHeaderIsRemoved() {
+        final DefaultView view = new DefaultView();
+        final DataGrid<String> grid = new DataGrid<>(view, Function.identity());
+        final ColumnDescriptor<String> column = ColumnDescriptor.newDefault("Value", s -> s);
+        column.setHeaderRenderer(() -> null);
+        grid.addColumnDescriptor(column);
+        grid.addData("a");
+        assertNull(view.getHeader(0));
+
+        grid.removeColumn(column);
+
+        assertTrue(grid.getColumns().isEmpty());
+    }
+
+    @Test
+    public void theLastHeaderLeftByARemovedColumnIsRemoved() {
+        final DefaultView view = new DefaultView();
+        final DataGrid<String> grid = new DataGrid<>(view, Function.identity());
+        final ColumnDescriptor<String> first = ColumnDescriptor.newDefault("First", s -> s);
+        final ColumnDescriptor<String> second = ColumnDescriptor.newDefault("Second", s -> s);
+        second.setHeaderRenderer(() -> Element.newPLabel("Second")); // a new header at each drawing
+        grid.addColumnDescriptor(first);
+        grid.addColumnDescriptor(second);
+
+        grid.removeColumn(first);
+
+        assertEquals("Second", ((PLabel) view.getHeader(0)).getText());
+        assertNull(view.getHeader(1));
     }
 }

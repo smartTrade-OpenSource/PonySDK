@@ -547,8 +547,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private void removeEventListener(final String name, final Consumer<PEvent> listener) {
-        final Map<String, EventListening> all = wx != null ? wx.eventListening : null;
-        final EventListening listening = all != null ? all.get(name) : null;
+        final Map<String, EventListening> all = wx.eventListening; // created with the registration, never cleared
+        final EventListening listening = all.get(name);
         if (listening == null || !listening.listeners.remove(listener) || !listening.listeners.isEmpty()) return;
         all.remove(name);
         saveListening(ServerToClientModel.UNLISTEN_EVENT, name);

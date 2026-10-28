@@ -438,4 +438,58 @@ public class PHTMLTableTest extends PSuite {
         assertEquals("<table pid=\"" + table.getID() + "\"><tr row = \"1\"><td col = \"1\">" + label.dumpDOM() + "</td></tr></table>",
             table.dumpDOM());
     }
+
+    @Test
+    public void theCellCountIgnoresTheEmptyEndOfARow() {
+        put(0, 0);
+        put(0, 1);
+        final PLabel third = put(0, 2); // the row grows to 4 cells
+        assertEquals(3, table.getCellCount(0));
+        table.remove(third);
+        assertEquals(2, table.getCellCount(0));
+    }
+
+    @Test
+    public void aNullWidgetSetsNothing() {
+        table.setWidget(0, 0, (IsPWidget) null);
+        assertEquals(0, table.getRowCount());
+    }
+
+    @Test
+    public void aWidgetMovedBeforeTheTableIsCreatedIsNotRemovedFromIt() {
+        final PFlexTable detached = Element.newPFlexTable();
+        final PLabel label = Element.newPLabel("moved");
+        detached.setWidget(0, 0, label);
+        final PFlowPanel elsewhere = Element.newPFlowPanel();
+        elsewhere.add(label); // queued in the table: a remove; the label's add is the other panel's
+        writer.clear();
+
+        PWindow.getMain().add(detached);
+
+        assertFalse(label.isInitialized());
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE));
+    }
+
+    @Test
+    public void aWidgetGivenAsIsPWidgetIsSet() {
+        final PLabel label = Element.newPLabel("l");
+        table.setWidget(0, 0, (IsPWidget) label);
+        assertSame(label, table.getWidget(0, 0));
+    }
+
+    @Test
+    public void aWidgetPutBackBeforeTheTableIsCreatedIsAddedOnly() {
+        final PFlexTable detached = Element.newPFlexTable();
+        final PLabel label = Element.newPLabel("back");
+        detached.setWidget(0, 0, label);
+        detached.remove(label);
+        detached.setWidget(0, 0, label);
+        writer.clear();
+
+        PWindow.getMain().add(detached);
+
+        assertTrue(label.isInitialized());
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE));
+        assertSame(label, detached.getWidget(0, 0));
+    }
 }

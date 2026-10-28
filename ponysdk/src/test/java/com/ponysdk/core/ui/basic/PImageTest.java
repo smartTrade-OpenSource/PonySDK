@@ -42,6 +42,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PImageTest extends PSuite {
 
@@ -176,4 +177,15 @@ public class PImageTest extends PSuite {
             new PImage.ClassPathURL(RESOURCE).toUrl());
     }
 
+    @Test
+    public void aPartialClipIsNotSent() {
+        for (final PImage image : List.of(Element.newPImage("u", 1, -1, 3, 4), Element.newPImage("u", -1, 2, 3, 4),
+            Element.newPImage("u", 1, 2, 3, -1), Element.newPImage("u", 1, 2, -1, 4))) {
+            writer.clear();
+            PWindow.getMain().add(image);
+            assertEquals(List.of("u"), writer.valuesOf(ServerToClientModel.URL));
+            assertEquals(0, writer.count(ServerToClientModel.POSITION_LEFT));
+            assertEquals(0, writer.count(ServerToClientModel.IMAGE_WIDTH));
+        }
+    }
 }

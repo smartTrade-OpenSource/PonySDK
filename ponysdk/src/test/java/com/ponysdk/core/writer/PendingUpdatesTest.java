@@ -220,6 +220,24 @@ public class PendingUpdatesTest {
     }
 
     @Test
+    public void beyond255GroupsARunGoingBackwardsNamesTheNextId() {
+        final PendingUpdates pending = new PendingUpdates();
+        text(pending, new Target(10, WINDOW), "a");
+        text(pending, new Target(5, WINDOW), "b");
+        for (int g = 0; g < 255; g++) text(pending, new Target(100 + g, new Object()), "t");
+
+        final List<List<String>> blocks = drain(pending, ProtocolVersion.UPDATE_RUNS);
+
+        assertEquals(256, blocks.size());
+        assertEquals(List.of("TYPE_UPDATE=10", "TEXT=a", "UPDATE_NEXT_ID=5", "TEXT=b"), blocks.get(0));
+    }
+
+    @Test
+    public void anEmptyBufferDrainsNothingForARunTerminal() {
+        assertEquals(List.of(), drain(new PendingUpdates(), ProtocolVersion.UPDATE_RUNS));
+    }
+
+    @Test
     public void aLongRunIsSplitIntoBlocks() {
         final PendingUpdates pending = new PendingUpdates();
         final Target first = new Target(1, WINDOW);

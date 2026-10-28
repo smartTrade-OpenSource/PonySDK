@@ -830,11 +830,9 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 if (configuration.isGroupEnabled()) {
                     for (final ListBoxItem<D> item : items) {
                         if (ListBoxItemType.ITEM.equals(item.getType()) && filterPredicate.test(item, filter)) {
-                            if (configuration.isGroupEnabled()) {
-                                final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
-                                if (!this.visibleItems.contains(groupItem)) {
-                                    this.visibleItems.add(groupItem);
-                                }
+                            final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
+                            if (!this.visibleItems.contains(groupItem)) {
+                                this.visibleItems.add(groupItem);
                             }
                             this.visibleItems.add(item);
                         }
@@ -907,13 +905,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
         clearSelection();
-        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElse(null);
-        if (item != null) {
-            item.setSelected(true);
-            setClearTitleButtonVisible(true);
-        } else {
-            setClearTitleButtonVisible(false);
-        }
+        // selectedItem is one of the items: the first equal one is found
+        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElseThrow();
+        item.setSelected(true);
+        setClearTitleButtonVisible(true);
         updateTitle(List.of(selectedItem));
         updateVisibleItems();
     }
@@ -946,7 +941,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             case TRUE:
                 close();
                 break;
-            case FALSE:
+            default: // FALSE
                 if (!configuration.isMultiSelectionEnabled()) refresh();
                 break;
         }

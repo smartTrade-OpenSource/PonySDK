@@ -55,6 +55,7 @@ import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
 
 import jakarta.json.Json;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FormFieldTest extends PSuite {
 
@@ -447,5 +448,27 @@ public class FormFieldTest extends PSuite {
         plainField.addValueChangeHandler(event -> {});
         plainField.asWidget().onDestroy();
         assertEquals(1, plainField.getValueChangeHandlers().size());
+    }
+
+    @Test
+    public void aConverterAnsweringNullGivesNoValue() {
+        final DataConverter<String, String> toNull = new DataConverter<>() {
+
+            @Override
+            public String from(final String t) {
+                return t;
+            }
+
+            @Override
+            public String to(final String t) {
+                return null;
+            }
+        };
+        final StringTextBoxFormField text = new StringTextBoxFormField();
+        text.setDataProvider(toNull);
+        assertNull(text.getValue());
+        final StringPasswordTextBoxFormField password = new StringPasswordTextBoxFormField();
+        password.setDataProvider(toNull);
+        assertNull(password.getValue());
     }
 }

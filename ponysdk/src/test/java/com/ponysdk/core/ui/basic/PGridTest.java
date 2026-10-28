@@ -85,4 +85,11 @@ public class PGridTest extends PSuite {
         grid.getCellFormatter().addStyleName(1, 1, "cell");
         assertEquals(List.of("cell"), writer.valuesOf(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME));
     }
+
+    @Test
+    public void aGridWithoutColumnsSendsNoSize() {
+        PWindow.getMain().add(Element.newPGrid(2, 0));
+        assertEquals(0, writer.count(ServerToClientModel.ROW));
+        assertEquals(0, writer.count(ServerToClientModel.COLUMN));
+    }
 }

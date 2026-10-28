@@ -127,4 +127,10 @@ public class SmallUtilsTest {
         map.forEachValue(Runnable::run);
         assertEquals(List.of("one replaced", "added", "two", "added again"), runs);
     }
+
+    @Test
+    public void charactersOutsideTheAlphabetOnlyMatchThemselves() {
+        assertFalse(StringUtils.containsIgnoreCase("{", "}"));
+        assertTrue(StringUtils.containsIgnoreCase("{", "{"));
+    }
 }

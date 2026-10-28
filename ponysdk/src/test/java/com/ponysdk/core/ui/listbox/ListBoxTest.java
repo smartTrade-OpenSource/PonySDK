@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ListBoxTest extends PSuite {
 
@@ -1504,5 +1505,12 @@ public class ListBoxTest extends PSuite {
         public ListBoxItem<String> getItemFromData(final String selectedData) {
             return all.stream().filter(i -> i.getData().equals(selectedData)).findFirst().orElse(null);
         }
+    }
+
+    @Test
+    public void withoutFilterTheContainerIsNotFocused() {
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration(), items("a"));
+        assertFalse(box.isContainerFocusable());
+        box.focusContainer(); // nothing to focus
     }
 }

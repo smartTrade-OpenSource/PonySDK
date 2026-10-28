@@ -180,4 +180,14 @@ public class PSuggestBoxTest extends PSuite {
         assertTrue(box.removeValueChangeHandler(handler));
         assertTrue(box.getValueChangeHandlers().isEmpty());
     }
+
+    @Test
+    public void everySelectionHandlerIsKept() {
+        final PSuggestBox box = Element.newPSuggestBox();
+        final List<Object> selected = new ArrayList<>();
+        box.addSelectionHandler(selected::add);
+        box.addSelectionHandler(selected::add);
+        box.onSelection(new PSelectionEvent<>(box, new PSuggestBox.MultiWordSuggestion("r", "d")));
+        assertEquals(2, selected.size());
+    }
 }

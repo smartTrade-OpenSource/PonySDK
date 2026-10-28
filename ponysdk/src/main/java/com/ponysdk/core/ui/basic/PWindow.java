@@ -69,10 +69,9 @@ public class PWindow extends PObject {
      */
     private final UIContext ownerContext = UIContext.get();
 
-    /** Writer of the owning context, or null if unknown (then callers fall back to UIContext.get()). */
+    /** Writer of the owning context: never null, an object is only made in a context (its ID comes from it). */
     final ModelWriter contextWriter() {
-        final UIContext c = ownerContext;
-        return c != null ? c.getWriter() : null;
+        return ownerContext.getWriter();
     }
 
     PWindow() {
@@ -406,7 +405,7 @@ public class PWindow extends PObject {
     }
 
     private Object removeWindow(final PWindow window) {
-        return subWindows != null && subWindows.remove(window);
+        return subWindows.remove(window); // a sub window was added at its creation
     }
     
     public Set<PWindow> getSubWindows() {

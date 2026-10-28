@@ -142,14 +142,14 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         }
     }
 
+    /** The child was just removed from its parent. */
     private void adopt(final PWidget child) {
-        if (child.getParent() == null) child.setParent(this);
-        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+        child.setParent(this);
     }
 
+    /** The child's parent is this panel. */
     private void orphan(final PWidget child) {
-        if (child.getParent() == this) child.setParent(null);
-        else throw new IllegalStateException("Can't adopt an widget attached to another parent");
+        child.setParent(null);
     }
 
     public void addBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {

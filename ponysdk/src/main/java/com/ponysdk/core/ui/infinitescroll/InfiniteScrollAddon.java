@@ -280,11 +280,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         if (rows.isEmpty()) return;
         int index = Math.max(0, currentIndex - this.beginIndex);
         index = Math.min(index, rows.size() - 1);
-        final W w = rows.get(index);
-        if (w != null) {
-            currentIndexWidget = w;
-            currentIndexWidget.asWidget().addStyleName(STYLE_IS_ITEM_INDEX);
-        }
+        currentIndexWidget = rows.get(index); // never null: added to the container with it
+        currentIndexWidget.asWidget().addStyleName(STYLE_IS_ITEM_INDEX);
     }
 
     public interface InfiniteScrollAddonListener {

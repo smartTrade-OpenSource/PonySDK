@@ -225,4 +225,25 @@ public class PAddOnTest extends PSuite {
         final PWindow other = Element.newPWindow("other", null);
         assertThrows(IllegalAccessError.class, () -> addOn.attach(other, null));
     }
+
+    @Test
+    public void aCompositeAttachedToNoWindowDoesNothing() {
+        final PlainLabelAddOn addOn = new PlainLabelAddOn(Element.newPLabel("l"));
+        assertFalse(addOn.attach(null, null));
+        assertNull(addOn.getWindow());
+    }
+
+    @Test
+    public void destroyingAnAddOnOfADestroyedWindowWritesNothing() {
+        final PWindow window = Element.newPWindow(null, null);
+        window.open();
+        final NoArgAddOn addOn = new NoArgAddOn();
+        addOn.attach(window, null);
+        addOn.onDestroy(); // gone with its window: no window left
+        writer.clear();
+
+        addOn.destroy();
+
+        assertTrue(writer.isEmpty());
+    }
 }

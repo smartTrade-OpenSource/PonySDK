@@ -139,9 +139,7 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
         int columnConfigsNumber = buffer.getInt();
         while (columnConfigsNumber-- > 0) {
-            final ColumnConfig<V> columnConfig = decodeColumnConfig(buffer);
-            if (columnConfig == null) continue;
-            builder.addColumnConfig(columnConfig);
+            builder.addColumnConfig(decodeColumnConfig(buffer));
         }
         int customValuesNumber = buffer.getInt();
         while (customValuesNumber-- > 0) {
@@ -366,7 +364,7 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
 
         public void onRemove() {
-            if (current == null || key.equals(defaultKey)) return;
+            if (key.equals(defaultKey)) return; // current: set with the adapter, before any handler
             layout.remove(widget.asWidget());
             if (this == current) {
                 handlers.get(defaultKey).onSelect();
@@ -375,7 +373,7 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
 
         public void onSelect() {
-            if (current == null || this == current) return;
+            if (this == current) return;
             current.config = getView().getConfig();
             onUnselectConfigWidget(key, current.widget);
             current = this;

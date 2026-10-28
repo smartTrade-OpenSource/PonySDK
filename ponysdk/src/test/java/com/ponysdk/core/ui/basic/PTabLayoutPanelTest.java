@@ -274,4 +274,30 @@ public class PTabLayoutPanelTest extends PSuite {
         panel.setAnimationDuration(Duration.ofMillis(300));
         assertTrue(writer.isEmpty());
     }
+
+    @Test
+    public void aWidgetOfTheSameWindowMovesIntoATab() {
+        final PTabLayoutPanel panel = Element.newPTabLayoutPanel();
+        PWindow.getMain().add(panel);
+        final PLabel first = Element.newPLabel("1");
+        final PLabel second = Element.newPLabel("2");
+        PWindow.getMain().add(first);
+        PWindow.getMain().add(second);
+
+        panel.insert(first, Element.newPLabel("tab"), 0);
+        panel.insert(second, "text", 1);
+
+        assertSame(panel, first.getParent());
+        assertSame(panel, second.getParent());
+        assertTrue(panel.remove(second));
+    }
+
+    @Test
+    public void aTextTabIsRemovedWithoutTabWidgets() {
+        final PTabLayoutPanel panel = Element.newPTabLayoutPanel();
+        final PLabel label = Element.newPLabel("1");
+        panel.insert(label, "text", 0);
+        assertTrue(panel.remove(label));
+        assertNull(label.getParent());
+    }
 }

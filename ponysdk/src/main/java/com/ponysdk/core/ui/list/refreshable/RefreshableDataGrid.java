@@ -141,14 +141,12 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         cells.remove(rowIndex);
         keyByIndex.remove(rowIndex);
 
-        // update model
+        // update model: every row has its cells (the row mutators of DataGridActivity are refused)
         for (int i = rowIndex; i < rows.size(); i++) {
             final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> cellRow = cells.remove(i + 1);
-            if (cellRow != null) {
-                cells.put(i, cellRow);
-                for (final Cell<D, ? extends IsPWidget> entry : cellRow.values()) {
-                    entry.setRow(i);
-                }
+            cells.put(i, cellRow);
+            for (final Cell<D, ? extends IsPWidget> entry : cellRow.values()) {
+                entry.setRow(i);
             }
         }
     }

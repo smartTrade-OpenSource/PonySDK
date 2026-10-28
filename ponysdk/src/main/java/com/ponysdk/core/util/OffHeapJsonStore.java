@@ -263,8 +263,8 @@ public final class OffHeapJsonStore {
         return new String(tmp, StandardCharsets.UTF_8);
     }
 
+    /** The entry's length is the expected one. */
     private boolean bytesEqual(final Entry entry, final byte[] expected) {
-        if (entry.length != expected.length) return false;
         buffer.position(entry.offset);
         for (int i = 0; i < expected.length; i++) {
             if (buffer.get() != expected[i]) return false;

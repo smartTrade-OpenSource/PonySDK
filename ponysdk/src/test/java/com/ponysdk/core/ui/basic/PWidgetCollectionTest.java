@@ -179,4 +179,14 @@ public class PWidgetCollectionTest extends PSuite {
         });
     }
 
+    @Test
+    public void removingAnElementRemovedMeanwhileFails() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PLabel label = Element.newPLabel("a");
+        panel.add(label);
+        final Iterator<PWidget> it = panel.iterator();
+        it.next();
+        panel.remove(label);
+        assertThrows(IllegalStateException.class, it::remove);
+    }
 }

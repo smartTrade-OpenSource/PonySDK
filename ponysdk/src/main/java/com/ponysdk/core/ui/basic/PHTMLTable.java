@@ -61,7 +61,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         final PWidget[] cells = row < rows.size() ? rows.get(row) : null;
         if (cells == null) return 0;
         int last = cells.length - 1;
-        while (last >= 0 && cells[last] == null) last--;
+        while (cells[last] == null) last--; // a stored row holds a widget: an emptied row is set to null
         return last + 1;
     }
 
@@ -184,14 +184,13 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             orphan(widget);
         } finally {
             // Logical detach.
-            if (removeWidgetFromMap(widget) != null) {
-                // Physical detach.
-                if (physicalDetach) {
-                    if (isInitialized()) widget.saveRemove(widget.getID(), ID);
-                    else safeStackedInstructions().append(() -> { // in order with the adds (setWidget)
-                        if (widget.isInitialized() && widget.getParent() != this) widget.saveRemove(widget.getID(), ID);
-                    });
-                }
+            removeWidgetFromMap(widget);
+            // Physical detach.
+            if (physicalDetach) {
+                if (isInitialized()) widget.saveRemove(widget.getID(), ID);
+                else safeStackedInstructions().append(() -> { // in order with the adds (setWidget)
+                    if (widget.isInitialized() && widget.getParent() != this) widget.saveRemove(widget.getID(), ID);
+                });
             }
         }
         return true;
@@ -235,18 +234,16 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return cells != null && column >= 0 && column < cells.length ? cells[column] : null;
     }
 
-    private PWidget removeWidgetFromMap(final PWidget widget) {
+    /** A child of this table: setWidget recorded its cell, kept up to date when rows shift. */
+    private void removeWidgetFromMap(final PWidget widget) {
         final Cell cell = cellByWidget.remove(widget);
-        if (cell == null) return null; // already removed
-        final PWidget[] cells = cell.row < rows.size() ? rows.get(cell.row) : null;
-        if (cells == null || cells[cell.column] != widget) return null;
+        final PWidget[] cells = rows.get(cell.row);
         cells[cell.column] = null;
         for (final PWidget w : cells) {
-            if (w != null) return widget;
+            if (w != null) return;
         }
         rows.set(cell.row, null); // its last widget
         trimTrailingEmptyRows();
-        return widget;
     }
 
     private void addWidgetToMap(final int row, final int column, final PWidget widget) {

@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests data insertion, update, removal, sorting and filtering of {@link DefaultCacheDataSource}.
@@ -586,5 +587,34 @@ public class DefaultCacheDataSourceTest {
         public boolean isSelectionEnabled() {
             return true;
         }
+    }
+
+    @Test
+    public void withoutFilterControllerEveryRowIsAccepted() {
+        final DefaultCacheDataSource<String, Item> plain = new DefaultCacheDataSource<>();
+        plain.setRenderingHelpersCache(renderingHelpers);
+        plain.setAdapter(new ItemAdapter(true));
+        plain.setData(new Item("a", 1));
+        Assertions.assertEquals(1, plain.getRowCount());
+    }
+
+    @Test
+    public void aReplacedSelectedValueStaysSelected() {
+        source.setData(new Item("a", 1));
+        source.setData(new Item("b", 2));
+        source.select("a");
+        source.setData(new Item("a", 5));
+        source.setData(new Item("b", 6));
+        Assertions.assertTrue(source.isSelected("a"));
+        Assertions.assertFalse(source.isSelected("b"));
+    }
+
+    @Test
+    public void aReinforcedFilterIsAppliedToEveryRow() {
+        source.setData(new Item("a", 1));
+        source.setData(new Item("b", 2));
+        source.setFilter("f", null, false, filter(item -> item.qty > 0, true));
+        source.setFilter("f", null, true, filter(item -> item.qty > 1, true));
+        Assertions.assertEquals(List.of("b"), ids(source.getFilteredData().getData()));
     }
 }

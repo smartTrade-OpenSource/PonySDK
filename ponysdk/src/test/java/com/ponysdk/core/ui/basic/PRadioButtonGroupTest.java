@@ -40,6 +40,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.test.PEmulator;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PRadioButtonGroupTest extends PSuite {
 
@@ -157,4 +158,15 @@ public class PRadioButtonGroupTest extends PSuite {
         assertTrue(Stream.of(a, b, c).filter(PCheckBox::getValue).count() <= 1, "a radio group has at most one checked button");
     }
 
+    @Test
+    public void everyHandlerIsKept() {
+        final PRadioButtonGroup group = Element.newPRadioButtonGroup("g");
+        final List<Boolean> values = new ArrayList<>();
+        group.addValueChangeHandler(event -> values.add(event.getData()));
+        group.addValueChangeHandler(event -> values.add(event.getData()));
+        final PRadioButton button = Element.newPRadioButton("b");
+        group.addRadioButton(button);
+        button.onValueChange(new com.ponysdk.core.ui.basic.event.PValueChangeEvent<>(button, true));
+        assertEquals(List.of(true, true), values);
+    }
 }

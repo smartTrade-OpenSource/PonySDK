@@ -204,4 +204,10 @@ public class PHeaderPanelTest extends PSuite {
         assertTrue(writer.valuesOf(ServerToClientModel.TYPE_UPDATE).contains(panel.getID()));
         assertEquals(1, writer.count(ServerToClientModel.RESIZE));
     }
+
+    @Test
+    public void aStrangerIsNotRemoved() {
+        final PHeaderPanel panel = Element.newPHeaderPanel();
+        assertFalse(panel.remove(Element.newPLabel("stranger")));
+    }
 }

@@ -45,6 +45,7 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.testutil.CapturingModelWriter;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GridWidgetTest extends PSuite {
 
@@ -297,5 +298,15 @@ public class GridWidgetTest extends PSuite {
         assertThrows(IllegalAccessError.class, () -> grid.setColumns(2));
         assertThrows(IllegalAccessError.class, () -> grid.selectRow(0));
         assertThrows(IllegalAccessError.class, () -> grid.unSelectRow(0));
+    }
+
+    @Test
+    public void testMoveTheHeadRowOntoItself() {
+        for (final Supplier<AbstractGridWidget> factory : FACTORIES) {
+            final AbstractGridWidget grid = newFilledGrid(factory);
+            final List<String> head = rowTexts(grid.getRow(0));
+            grid.moveRow(0, 0);
+            assertEquals(head, rowTexts(grid.getRow(0)));
+        }
     }
 }

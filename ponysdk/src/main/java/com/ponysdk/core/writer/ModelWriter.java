@@ -134,10 +134,8 @@ public class ModelWriter {
         return p;
     }
 
-    /** Gives the (empty) buffer back to the current thread's spare slot; an oversized one is left to the GC. */
-    private void releasePending() {
-        final PendingUpdates p = pending;
-        if (p == null || !p.isEmpty()) return;
+    /** Gives the drained (empty) buffer back to the current thread's spare slot; an oversized one is left to the GC. */
+    private void releasePending(final PendingUpdates p) {
         // a virtual thread is short-lived: its ThreadLocal would never be reused, keep the buffer instead
         if (Thread.currentThread().isVirtual()) return;
         pending = null;
@@ -197,7 +195,7 @@ public class ModelWriter {
         closeOpenCreate();
         if (blockOpen) endObject(); // interrupted by an exception
         final PendingUpdates p = pending;
-        if (p == null || p.isEmpty() || draining) return;
+        if (p == null || p.isEmpty()) return; // a drain empties it before writing: a re-entrant call ends here
         draining = true;
         try {
             // Liveness / lock ownership checked once for the whole drain instead of once per field
@@ -205,7 +203,7 @@ public class ModelWriter {
             else p.discard();
         } finally {
             draining = false;
-            releasePending();
+            releasePending(p);
         }
     }
 
@@ -249,7 +247,7 @@ public class ModelWriter {
     public void beginObject(final PWindow window) {
         if (createOpen) closeOpenCreate();
         if (blockOpen) endObject(); // interrupted by an exception
-        if (pending != null && !draining && !pending.isEmpty()) drainPendingUpdates(); // keep write order
+        if (pending != null && !pending.isEmpty()) drainPendingUpdates(); // keep write order
         encoder.beginObject();
         blockOpen = true;
 
@@ -267,7 +265,7 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        assert accepts(model, value);
+        assert accepts(model, value) : rejection(model, value);
         if (canWrite()) {
             encoder.encode(model, value);
         }
@@ -275,7 +273,7 @@ public class ModelWriter {
 
     /** Drain-internal writes: the caller already checked {@link #canWrite()} for the whole drain. */
     void writeUnchecked(final ServerToClientModel model, final Object value) {
-        assert accepts(model, value);
+        assert accepts(model, value) : rejection(model, value);
         encoder.encode(model, value);
     }
 
@@ -290,7 +288,7 @@ public class ModelWriter {
 
     /** Primitive variant of {@link #write(ServerToClientModel, Object)} for int values (no boxing). */
     public void writeInt(final ServerToClientModel model, final int value) {
-        assert accepts(model, value);
+        assert accepts(model, value) : rejection(model, value);
         if (canWrite()) {
             encoder.encodeInt(model, value);
         }
@@ -308,9 +306,13 @@ public class ModelWriter {
      * block, only once a terminal is connected.
      */
     protected static boolean accepts(final ServerToClientModel model, final Object value) {
-        if (model == null || model.getTypeModel().accepts(value)) return true;
-        throw new AssertionError(model + " takes " + model.getTypeModel() + ", given "
-            + (value == null ? "null" : value.getClass().getSimpleName() + " " + value));
+        return model == null || model.getTypeModel().accepts(value);
+    }
+
+    /** The message of a value {@link #accepts} refuses. */
+    protected static String rejection(final ServerToClientModel model, final Object value) {
+        return model + " takes " + model.getTypeModel() + ", given "
+                + (value == null ? "null" : value.getClass().getSimpleName() + " " + value);
     }
 
     public PWindow getCurrentWindow() {

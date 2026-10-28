@@ -102,21 +102,12 @@ public class PHeaderPanel extends PPanel {
 
         orphan(child);
 
-        if (child == content) {
-            content = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else if (child == header) {
-            header = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else if (child == footer) {
-            footer = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else {
-            return false;
-        }
+        // A child is the content, the header or the footer: their setters adopt it
+        if (child == content) content = null;
+        else if (child == header) header = null;
+        else footer = null;
+        child.saveRemove(child.getID(), ID);
+        return true;
     }
 
     @Override

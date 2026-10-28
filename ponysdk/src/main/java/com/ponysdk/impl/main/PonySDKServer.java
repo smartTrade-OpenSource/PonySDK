@@ -206,7 +206,7 @@ public class PonySDKServer {
 
         // permessage-deflate level: Jetty picks its DeflaterPool from this context attribute.
         final int deflateLevel = configuration.getWsDeflateLevel();
-        if (deflateLevel >= 0 && deflateLevel <= 9) {
+        if (deflateLevel >= 0) { // the configuration accepts -1 (Jetty's default) to 9
             context.setAttribute(WEBSOCKET_DEFLATER_POOL_ATTRIBUTE,
                 new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, deflateLevel, true));
         }

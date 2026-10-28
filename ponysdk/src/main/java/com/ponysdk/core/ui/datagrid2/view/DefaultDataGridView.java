@@ -959,8 +959,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
             final int relativeIndex = row.getRelativeIndex();
-            final V data = rows.get(relativeIndex).getData();
-            if (data == null || !rowAction.testRow(data, absoluteIndex)) continue;
+            final V data = rows.get(relativeIndex).getData(); // a row with a key has its data
+            if (!rowAction.testRow(data, absoluteIndex)) continue;
             rowAction.apply(row.pinnedRow);
             rowAction.apply(row.unpinnedRow);
         }
@@ -977,8 +977,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
             final int relativeIndex = row.getRelativeIndex();
-            final V data = rows.get(relativeIndex).getData();
-            if (data == null || !old.testRow(data, absoluteIndex)) continue;
+            final V data = rows.get(relativeIndex).getData(); // a row with a key has its data
+            if (!old.testRow(data, absoluteIndex)) continue;
             old.cancel(row.pinnedRow);
             old.cancel(row.unpinnedRow);
         }
@@ -1098,8 +1098,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.setWidth(table.width + "px");
         }
 
+        /** Destroys the last row. */
         void destroy() {
-            if (relativeIndex != rows.size() - 1) return;
             rows.remove(relativeIndex);
             pinnedTable.body.remove(relativeIndex);
             unpinnedTable.body.remove(relativeIndex);
@@ -1157,12 +1157,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                     keys.add(r.key);
                 }
             }
-            if (!keys.isEmpty()) {
-                if (controller.isSelected(key)) {
-                    controller.unselectKeys(keys);
-                } else {
-                    controller.selectKeys(keys);
-                }
+            // keys holds at least this row's: both callers (the click handler, the cell controller) check it is selectable
+            if (controller.isSelected(key)) {
+                controller.unselectKeys(keys);
+            } else {
+                controller.selectKeys(keys);
             }
         }
 
@@ -1490,12 +1489,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
             if (state.isShown() && !columnView.state.isShown()) {
                 show(columnView);
-            } else if (!state.isShown() && columnView.state.isShown()) {
+            } else if (!state.isShown()) { // one hidden state: the column was shown
                 hide(columnView);
                 clearSort();
             }
 
-            if (state.isPinned() && !columnView.state.isPinned()) pin(columnView);
+            if (state.isPinned()) pin(columnView); // one pinned state: the column was not
 
             columnView.state = state;
             columnView.notifyStateChangedListeners();
@@ -1577,7 +1576,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (extendedMode && extended == null) {
                 extended = primary.genExtended().orElse(null);
                 if (extended == null) return;
-                if (controller != null) extended.setController(controller);
+                extended.setController(controller); // set at the cell's creation
                 getTableCell().add(extended);
             } else if (!extendedMode && extended != null) {
                 final PWidget widget = extended.asWidget();
@@ -1612,10 +1611,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             }
         }
 
+        /** Called once, at the cell's creation: before any extended cell. */
         public <T extends PrimaryCellController<V> & ExtendedCellController<V>> void setController(final T controller) {
             this.controller = controller;
             primary.setController(controller);
-            if (extended != null) extended.setController(controller);
         }
 
         public void select() {

@@ -78,13 +78,14 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.96
+                minimum = 0.99
             }
         }
-        // Every package: at least 97% of its lines (checked package by package).
+        // Every package: at least 99% of its lines and branches (checked package by package).
         rule {
             element = 'PACKAGE'
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.97 }
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.99 }
+            limit { counter = 'BRANCH'; value = 'COVEREDRATIO'; minimum = 0.99 }
         }
     }
 }

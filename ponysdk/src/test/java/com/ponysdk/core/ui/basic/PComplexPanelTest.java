@@ -288,4 +288,34 @@ public class PComplexPanelTest extends PSuite {
         assertEquals("<div pid=\"" + panel.getID() + "\"></div>", panel.dumpDOM());
     }
 
+    @Test
+    public void attachingToNoWindowDoesNothing() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        assertFalse(panel.attach(null, null));
+        assertNull(panel.getWindow());
+        assertFalse(panel.remove(null));
+    }
+
+    @Test
+    public void anEmptyAttributeIsDumpedWithoutValue() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.setAttribute("hidden", "");
+        panel.setAttribute("title", "t");
+        assertTrue(panel.dumpDOM().contains(" hidden title = t"), panel.dumpDOM());
+    }
+
+    @Test
+    public void removingNothingFromAPanelWithChildren() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(Element.newPLabel("a"));
+        assertFalse(panel.remove(null));
+        assertEquals(1, panel.getWidgetCount());
+    }
+
+    @Test
+    public void anAttributeWithoutValueIsDumpedByName() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.setAttribute("nil", null);
+        assertTrue(panel.dumpDOM().contains(" nil>"), panel.dumpDOM());
+    }
 }

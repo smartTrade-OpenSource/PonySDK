@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link DefaultDataGridController} on top of a real {@link DefaultCacheDataSource}, with a listener recording
@@ -805,5 +806,82 @@ public class DefaultDataGridControllerTest extends PSuite {
         public boolean isSelectionEnabled() {
             return selectionEnabled;
         }
+    }
+
+    @Test
+    public void columnControllerSortsOfTwoColumnsDiffer() {
+        final DefaultDataGridController<String, Item>.ColumnControllerSort first = controller.new ColumnControllerSort(
+            new Column<>(0, qtyColumn), true);
+        final DefaultDataGridController<String, Item>.ColumnControllerSort second = controller.new ColumnControllerSort(
+            new Column<>(1, qtyColumn), true);
+        Assertions.assertNotEquals(first, second);
+    }
+
+    @Test
+    public void anAsynchronousAnswerOvertakenByALaterOneIsDropped() throws Exception {
+        for (final boolean sameWindow : new boolean[] { true, false }) {
+            final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+            final AtomicInteger calls = new AtomicInteger();
+            final DefaultCacheDataSource<String, Item> slowFirst = new DefaultCacheDataSource<>() {
+
+                @Override
+                public boolean shouldBeCalledAsynchronously() {
+                    return true;
+                }
+
+                @Override
+                public LiveDataView<Item> getRows(final int dataSrcRowIndex, final int dataSize) {
+                    if (calls.incrementAndGet() == 1) {
+                        try {
+                            release.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return super.getRows(dataSrcRowIndex, dataSize);
+                }
+            };
+            slowFirst.setFilterController(new FilterController<>());
+            final DefaultDataGridController<String, Item> async = new DefaultDataGridController<>(slowFirst);
+            async.setAdapter(new TestAdapter(List.of(qtyColumn)));
+            async.setData(List.of(new Item("a", 1), new Item("b", 2)));
+            final List<Object> first = java.util.Collections.synchronizedList(new ArrayList<>());
+            final CompletableFuture<Pair<DefaultDataGridController<String, Item>.DataSrcResult, Throwable>> second = new CompletableFuture<>();
+
+            async.prepareLiveDataOnScreen(0, 2, snapshot(0, 2, 0), first::add);
+            while (calls.get() < 1) Thread.onSpinWait();
+            async.prepareLiveDataOnScreen(0, 2, sameWindow ? snapshot(0, 2, 0) : snapshot(0, 1, 0), second::complete);
+            Assertions.assertNull(second.get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getSecond());
+            release.countDown();
+            java.util.concurrent.ForkJoinPool.commonPool().awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+            Assertions.assertEquals(List.of(), first, "the first answer is older than the one shown");
+        }
+    }
+
+    @Test
+    public void anAnswerOvertakenWhileReadingTheSourceIsDropped() throws Exception {
+        final List<Object> first = java.util.Collections.synchronizedList(new ArrayList<>());
+        final CompletableFuture<Pair<DefaultDataGridController<String, Item>.DataSrcResult, Throwable>> second = new CompletableFuture<>();
+        final AtomicInteger reads = new AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<DefaultDataGridController<String, Item>> holder = new java.util.concurrent.atomic.AtomicReference<>();
+        final DefaultCacheDataSource<String, Item> source = new DefaultCacheDataSource<>() {
+
+            @Override
+            public LiveDataView<Item> getRows(final int dataSrcRowIndex, final int dataSize) {
+                // the first read asks for the window again: its own answer is then outdated
+                if (reads.incrementAndGet() == 1) holder.get().prepareLiveDataOnScreen(0, 2, snapshot(0, 2, 0), second::complete);
+                return super.getRows(dataSrcRowIndex, dataSize);
+            }
+        };
+        source.setFilterController(new FilterController<>());
+        holder.set(new DefaultDataGridController<>(source));
+        holder.get().setAdapter(new TestAdapter(List.of(qtyColumn)));
+        holder.get().setData(List.of(new Item("a", 1), new Item("b", 2)));
+
+        holder.get().prepareLiveDataOnScreen(0, 2, snapshot(0, 2, 0), first::add);
+
+        Assertions.assertNull(second.get(TIMEOUT_SECONDS, TimeUnit.SECONDS).getSecond());
+        Assertions.assertEquals(List.of(), first);
     }
 }

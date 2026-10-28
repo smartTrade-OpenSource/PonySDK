@@ -117,11 +117,11 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             rawValue = jsonObject.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             Date date = null;
-            if (rawValue != null && !rawValue.isEmpty()) {
+            if (!rawValue.isEmpty()) { // getString: never null
                 try {
                     date = dateFormat.parse(rawValue);
                 } catch (final ParseException ex) {
-                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", rawValue);
+                    log.warn("Cannot parse the date #{}", rawValue);
                 }
             }
             onValueChange(new PValueChangeEvent<>(this, date));

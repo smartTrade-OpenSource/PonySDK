@@ -193,4 +193,10 @@ public class PStackLayoutPanelTest extends PSuite {
         panel.add(child, "c", false, 10);
         assertEquals("<div pid=\"" + panel.getID() + "\">" + child.dumpDOM() + "</div>", panel.dumpDOM());
     }
+
+    @Test
+    public void aWidgetNeedsAHeader() {
+        final PStackLayoutPanel panel = Element.newPStackLayoutPanel(PUnit.PX);
+        assertThrows(UnsupportedOperationException.class, () -> panel.add((IsPWidget) Element.newPLabel("l")));
+    }
 }

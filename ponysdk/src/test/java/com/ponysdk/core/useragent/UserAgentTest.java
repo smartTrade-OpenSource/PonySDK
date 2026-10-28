@@ -151,6 +151,7 @@ public class UserAgentTest {
         assertOs("Mozilla/5.0 (PLAYSTATION 3; 3.55)", OperatingSystem.PLAYSTATION_3, DeviceType.GAME_CONSOLE);
         assertOs("Mozilla/5.0 (webOS/1.4.0; U; en-US)", OperatingSystem.WEBOS, DeviceType.MOBILE);
         assertOs("Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; PalmSource/hspr-H102)", OperatingSystem.PALM, DeviceType.MOBILE);
+        assertOs("Mozilla/4.0 (compatible; MSIE 5.5; Windows 98; Win 9x 4.90)", OperatingSystem.WINDOWS_98, DeviceType.COMPUTER);
         assertOs("BlackBerry9700/5.0.0.351 Profile/MIDP-2.1", OperatingSystem.BLACKBERRY, DeviceType.MOBILE);
         assertOs("Roku/DVP-4.1 (024.01E01250A)", OperatingSystem.ROKU, DeviceType.DMR);
         assertOs("nothing known", OperatingSystem.UNKNOWN, DeviceType.UNKNOWN);
@@ -181,6 +182,7 @@ public class UserAgentTest {
         assertEquals(OperatingSystem.UNKNOWN, userAgent.getOperatingSystem());
         assertNull(userAgent.getUserAgentString());
         assertNull(userAgent.getBrowserVersion());
+        assertNull(Browser.FIREFOX.getVersion("Firefox without version"));
     }
 
     @Test

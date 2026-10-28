@@ -148,4 +148,16 @@ public class PButtonTest extends PSuite {
             writer.uninstall();
         }
     }
+
+    @Test
+    public void aButtonWithoutTextDumpsItsHtmlOnly() {
+        final PButton button = Element.newPButton();
+        button.setHTML("<b>h</b>");
+        assertTrue(button.dumpDOM().endsWith("><b>h</b></button>"), button.dumpDOM());
+    }
+
+    @Test
+    public void aTextButtonDumpsItsText() {
+        assertTrue(Element.newPButton("t").dumpDOM().endsWith(">t</button>"));
+    }
 }
