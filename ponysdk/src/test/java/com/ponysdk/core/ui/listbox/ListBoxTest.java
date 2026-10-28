@@ -907,6 +907,41 @@ public class ListBoxTest extends PSuite {
         assertEquals(List.of("Fruits", "apple", "Vegetables", "leek"), renderedLabels(box));
     }
 
+    /** The two buttons of the bulk selection act on the enabled items the filter shows, and redraw an open list. */
+    @Test
+    public void theBulkButtonsSelectAndUnselectTheFilteredItems() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBoxConfiguration bulk = new ListBoxConfiguration().enableMultiSelection()
+            .enableMultiSelectionBulk("Select all", "Unselect all");
+        final List<ListBoxItem<String>> items = new ArrayList<>(items("apple", "apricot", "pear"));
+        final ListBoxItem<String> disabled = ListBoxItem.of("avocado", "avocado");
+        disabled.setEnabled(false);
+        items.add(disabled);
+        final ListBox<String> box = new ListBox<>(bulk, items);
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        box.open();
+        final PComplexPanel defaultContainer = (PComplexPanel) ((PComplexPanel) box.getContainer().asWidget()).getWidget(0);
+        final PComplexPanel buttons = (PComplexPanel) defaultContainer.getWidget(1);
+        final PButton selectAll = (PButton) buttons.getWidget(0);
+        final PButton unselectAll = (PButton) buttons.getWidget(1);
+        assertEquals("Select all", selectAll.getText());
+        assertEquals("Unselect all", unselectAll.getText());
+
+        PEmulator.click(selectAll);
+        assertEquals(Set.of("apple", "apricot", "pear"), Set.copyOf(box.getSelectedDataList()), "a disabled item stays out");
+        assertTrue(unselectAll.isEnabled());
+
+        filter.setFilter("ap");
+        PEmulator.click(unselectAll);
+        assertEquals(List.of("pear"), List.copyOf(box.getSelectedDataList()));
+
+        filter.setFilter("");
+        PEmulator.click(unselectAll);
+        assertTrue(box.getSelectedDataList().isEmpty());
+        assertFalse(unselectAll.isEnabled());
+    }
+
     @Test
     public void theSearchIsNotFocusedOnOpenWhenAutoFocusIsDisabled() {
         final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
