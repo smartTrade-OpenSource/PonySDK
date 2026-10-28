@@ -1,7 +1,7 @@
 name: Browser Test (optional)
 
-# Real-browser runtime check for the binary PAddOn protocol: the terminal's reader is unit-tested on Node,
-# this checks the whole path in Chrome.
+# Real-browser checks: the binary PAddOn protocol end to end in Chrome, and the terminal under the Playwright suites,
+# whose coverage (with the Node tests') must stay at 99% of lines and branches.
 #
 # This is a SEPARATE, NON-REQUIRED workflow on purpose: a failure here is visible but does not block
 # the main "CI" build or PR merges (unless a maintainer explicitly marks it as a required check).
@@ -44,6 +44,67 @@ jobs:
           --tests "com.ponysdk.driver.BinaryAddonBrowserIT"
           -Dponysdk.browserTest=true
           --stacktrace
+
+      - name: Showcase server log
+        if: always()
+        run: cat showcase.log || true
+
+  terminal:
+    name: Terminal in Chromium — coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Playwright
+        working-directory: sample
+        run: |
+          npm ci
+          npx playwright install chromium --with-deps
+
+      # The Node tests' coverage, merged by the report with the browsers' (sample/tests/coverage-report.js)
+      - name: Terminal unit tests with coverage
+        run: |
+          ./gradlew :ponysdk:terminalTest --stacktrace
+          cd ponysdk/terminal && NODE_V8_COVERAGE="$GITHUB_WORKSPACE/terminal-coverage/node" npm test
+
+      - name: Start the showcase server (background)
+        run: |
+          nohup ./gradlew :sample:runShowcase > showcase.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -sf http://localhost:8081/sample/ >/dev/null 2>&1 && { echo "server up after ${i}s"; break; }
+            sleep 1
+          done
+
+      - name: Browser tests with coverage
+        working-directory: sample
+        env:
+          PW_COVERAGE: ${{ github.workspace }}/terminal-coverage
+          BASE_URL: http://localhost:8081/sample/
+        run: >-
+          npx playwright test showcase-smoke webcomponents reconnection oracle typescript-terminal legacy fdc3
+          terminal-pages csp embedding integration-gallery --reporter=line --workers=1
+
+      - name: Terminal coverage, 99% of lines and branches
+        working-directory: sample
+        env:
+          COVERAGE_MIN: '99'
+          COVERAGE_BRANCH_MIN: '99'
+        run: node tests/coverage-report.js "$GITHUB_WORKSPACE/terminal-coverage"
 
       - name: Showcase server log
         if: always()
