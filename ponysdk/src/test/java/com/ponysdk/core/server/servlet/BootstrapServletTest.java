@@ -76,6 +76,17 @@ public class BootstrapServletTest {
         assertFalse(BootstrapServlet.isSafeResourcePath("/a\u0000.js"), "nul byte");
     }
 
+    /** getResourceURL is protected: a subclass may call it without the request's check, so it checks itself. */
+    @Test
+    public void theResourceURLOfATraversalIsNull() throws IOException {
+        final File f = File.createTempFile("pony", ".js");
+        f.deleteOnExit();
+        final String path = "/script/../secret.js";
+
+        assertNull(servletServing(path, f).getResourceURL(path));
+        assertNull(servletServing("/a\\b.js", f).getResourceURL("/a\\b.js"));
+    }
+
     @Test
     public void getPathStripsContextPathAsLiteralPrefix() {
         final BootstrapServlet servlet = new BootstrapServlet();

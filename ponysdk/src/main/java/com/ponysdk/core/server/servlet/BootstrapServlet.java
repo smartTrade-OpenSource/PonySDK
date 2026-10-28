@@ -145,11 +145,8 @@ public class BootstrapServlet extends HttpServlet {
      */
     protected static boolean isSafeResourcePath(final String path) {
         if (path == null || path.isEmpty()) return false;
-        if (path.indexOf('\\') >= 0 || path.indexOf('\0') >= 0) return false;
-        for (final String segment : path.split("/")) {
-            if ("..".equals(segment)) return false;
-        }
-        return true;
+        // No ".." anywhere, not only as a segment: no web file needs one, and the check stays one test
+        return !path.contains("..") && path.indexOf('\\') < 0 && path.indexOf('\0') < 0;
     }
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
@@ -216,6 +213,7 @@ public class BootstrapServlet extends HttpServlet {
      * files by default: never a class, a configuration or a key store). Null when there is none.
      */
     protected URL getResourceURL(final String path) {
+        if (!isSafeResourcePath(path)) return null;
         try {
             final URL url = getServletContext().getResource(path);
             if (url != null) return url;
