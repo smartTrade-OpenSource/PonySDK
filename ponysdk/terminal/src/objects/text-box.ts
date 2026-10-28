@@ -3,7 +3,7 @@
  */
 
 import { ClientToServerModel as C, DomHandlerType as D, HandlerModel as H, ServerToClientModel as K } from '#model';
-import { about, FLAG } from '../protocol/messages.ts';
+import { about } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { apply, type Context, type Setters } from '../runtime/object.ts';
 import { FocusWidget } from './focus-widget.ts';
@@ -81,13 +81,7 @@ export class TextBoxBase extends FocusWidget {
     }
 
     override addHandler(reader: Reader, handler: number): void {
-        if (handler === H.HANDLER_CHANGE) {
-            this.listen('change', () => {
-                const message = about(this.id);
-                message[C.HANDLER_CHANGE] = FLAG;
-                this.context.send(message);
-            });
-        } else if (handler === H.HANDLER_PASTE) {
+        if (handler === H.HANDLER_PASTE) {
             this.sendsPaste = true;
             if (this.pasteHandled) return;
             this.pasteHandled = true;

@@ -7,6 +7,8 @@ import type { ChildTerminal } from './object.ts';
 
 /** A window opened by the server. */
 export interface ChildWindow extends ChildTerminal {
+    /** Its page said it is ready: the blocks for it are forwarded, not skipped. */
+    readonly ready: boolean;
     close(): void;
 }
 
@@ -15,7 +17,7 @@ export class Windows {
     mainWindowId = 0;
     private readonly windows = new Map<number, ChildWindow>();
 
-    get(id: number): ChildTerminal | undefined {
+    get(id: number): ChildWindow | undefined {
         return this.windows.get(id);
     }
 

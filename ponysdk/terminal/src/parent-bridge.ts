@@ -77,7 +77,7 @@ export class ParentBridge implements ChildBridge {
                     terminal.sendDataToServerFromWindow(message.message);
                     break;
                 case 'closing':
-                    child.closing();
+                    child.closing?.();
                     break;
             }
         });

@@ -202,10 +202,6 @@ export class DatePicker extends Widget {
         }
     }
 
-    get currentValue(): Date | null {
-        return this.value;
-    }
-
     /** The value, without telling the server; it does not change the month shown. */
     setValue(date: Date | null): void {
         this.value = date;
@@ -580,7 +576,6 @@ export class DateBox extends Widget {
                 if (this.showingPicker) this.picker.focusDay();
                 else this.show();
                 break;
-            default:
         }
     }
 

@@ -4,8 +4,9 @@ const { test, expect } = require('./coverage');
 /*
  * The legacy layer (docs/decisions/0002-javascript-terminal.md, section 10): GWT's class names on the terminal's DOM.
  * With ApplicationConfiguration.setLegacyClassNames(true), BootstrapServlet loads legacy.js just before terminal.js
- * (BootstrapServletTest); here the served legacy.js runs when the terminal starts, on the showcase's own page: a page
- * the test would write itself counts as outside the local network, and Chrome blocks its WebSocket to it.
+ * (BootstrapServletTest); here the served ponysdk.js gets a first line that writes that script element, so that the
+ * showcase's own page loads legacy.js from its URL before terminal.js: a page the test would write itself counts as
+ * outside the local network, and Chrome blocks its WebSocket to it.
  *
  *   ./gradlew :sample:runShowcase    then    BASE_URL=... npx playwright test legacy
  */
@@ -13,19 +14,11 @@ const { test, expect } = require('./coverage');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 
 async function open(page, oraclePage) {
-    const legacy = await (await page.request.get(BASE_URL + 'ponyterminal/legacy.js')).text();
-    // ponysdk.js sets pony to the terminal (its var keeps this property), then starts it: the legacy layer goes first.
-    // Its source is part of the init script, which the page's policy allows, where new Function would be eval
-    await page.addInitScript({ content: `
-        let terminal;
-        Object.defineProperty(window, 'pony', {
-            configurable: true,
-            get: () => terminal,
-            set: value => {
-                if (terminal === undefined) (function () {\n${legacy}\n})();
-                terminal = value;
-            },
-        });` });
+    await page.route(url => url.href === BASE_URL + 'script/ponysdk.js', async route => {
+        const response = await route.fetch();
+        const legacy = 'document.write(\'<script type="text/javascript" src="ponyterminal/legacy.js"></script>\');\n';
+        await route.fulfill({ response, body: legacy + await response.text() });
+    });
     await page.goto(BASE_URL + '#oracle-' + oraclePage);
     await expect(page.locator('html')).toHaveAttribute('data-pony-legacy', '');
 }

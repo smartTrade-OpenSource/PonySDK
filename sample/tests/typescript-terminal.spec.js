@@ -161,6 +161,19 @@ test('mask: a character that does not fit is refused, the mask\'s own is typed o
     await box.pressSequentially('1x2/0', { delay: 30 });
     await expect(box).toHaveValue('12/0_/____');
     await expect(page.getByText('Mask: 12/0_/____')).toBeVisible();
+
+    await box.press('End');
+    await box.press('3'); // past the mask: refused
+    await expect(box).toHaveValue('12/0_/____');
+    await box.press('Home');
+    await box.press('Delete'); // the next characters move back, the mask's own stay
+    await expect(box).toHaveValue('20/__/____');
+    await box.press('Backspace'); // nothing before the cursor
+    await expect(box).toHaveValue('20/__/____');
+    await box.press('ControlOrMeta+a');
+    await box.press('Backspace'); // the selection cut
+    await expect(box).toHaveValue('__/__/____');
+    await expect(page.getByText('Mask: __/__/____')).toBeVisible();
 });
 
 test('protocol 4: a DOM event by name, debounced in the browser, with its fields', async ({ page }) => {

@@ -214,11 +214,6 @@ export class MenuItem extends Widget {
         else super.addHandler(reader, handler);
     }
 
-    override removeHandler(reader: Reader, handler: number): void {
-        if (handler === H.HANDLER_COMMAND) this.command = false;
-        else super.removeHandler(reader, handler);
-    }
-
     /** A click, Enter or Space: the submenu opens or closes, or the command runs. */
     activate(byKeyboard: boolean): void {
         const bar = this.bar;

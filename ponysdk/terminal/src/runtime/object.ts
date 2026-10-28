@@ -48,7 +48,6 @@ export const CONTEXT_KEY_HEADER = 'CONTEXT_KEY';
 
 /** A window opened by the server, or a frame: a terminal of its own, fed by this one. */
 export interface ChildTerminal {
-    readonly ready: boolean;
     postMessage(bytes: Uint8Array): void;
     setReady(): void;
 }

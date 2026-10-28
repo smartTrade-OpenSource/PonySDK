@@ -19,6 +19,7 @@ async function routeSockets(page) {
   });
   return {
     cut: () => sockets[sockets.length - 1].close({ code: 4000, reason: 'simulated network drop' }),
+    get offline() { return offline; },
     set offline(value) { offline = value; },
   };
 }
@@ -214,3 +215,54 @@ test('the Reconnection page drives its frame session through SessionAdmin, up to
   await expect(log).toContainText('New session', { timeout: 15000 });
   await expect(state).toHaveText('Connected');
 });
+
+/**
+ * Init script: the page without transparent reconnection (its meta goes before the connection can be lost), with
+ * the hooks ponysdk.js lets a page define; reload, which the page would do, is recorded instead (doReload).
+ */
+function withoutTransparentReconnection({ hook }) {
+  const mark = (name, value) => document.documentElement.setAttribute(`data-${name}`, value);
+  document.addEventListener('DOMContentLoaded', () => document.querySelector('meta[name="pony-reconnection"]')?.remove());
+  Object.defineProperty(document, 'doReload', { configurable: false, get: () => () => mark('reload', 'asked'), set() {} });
+  window.showReconnectionInformation = () => mark('notice', 'shown');
+  if (hook) window.onPonyReconnected = () => mark('back', 'told');
+}
+
+/** Pings while offline fail: the terminal tries again until one answers. */
+async function routePings(page, sockets) {
+  let failed = 0;
+  await page.route(/[?&]ping=/, route => {
+    if (!sockets.offline) return route.continue();
+    failed++;
+    return route.fulfill({ status: 503 });
+  });
+  return () => failed;
+}
+
+for (const hook of [true, false]) {
+  test(`without transparent reconnection: the page's listeners and notice, then ${hook ? 'its hook' : 'a reload'} once the server answers`, async ({ page }) => {
+    const errors = [];
+    page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.addInitScript(withoutTransparentReconnection, { hook });
+    const sockets = await routeSockets(page);
+    const failedPings = await routePings(page, sockets);
+    await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('button', { name: 'Click me' })).toBeVisible({ timeout: 10000 });
+    await page.evaluate(() => {
+      const listeners = /** @type {any} */ (document).onConnectionLostListeners;
+      listeners.push(() => { throw new Error('a listener that fails'); });
+      listeners.push(() => document.documentElement.setAttribute('data-lost', 'heard'));
+    });
+
+    sockets.offline = true;
+    await sockets.cut();
+    const html = page.locator('html');
+    await expect(html).toHaveAttribute('data-lost', 'heard'); // after the one that failed
+    await expect(html).toHaveAttribute('data-notice', 'shown');
+    expect(errors.some(e => e.includes('A connection-lost listener failed'))).toBe(true);
+    await expect.poll(failedPings, { timeout: 10000 }).toBeGreaterThan(0);
+    sockets.offline = false;
+    if (hook) await expect(html).toHaveAttribute('data-back', 'told', { timeout: 10000 });
+    else await expect(html).toHaveAttribute('data-reload', 'asked', { timeout: 10000 });
+  });
+}

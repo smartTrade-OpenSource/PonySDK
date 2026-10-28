@@ -28,8 +28,8 @@ export interface BridgedChild {
     readonly title: string | null;
     /** Where its messages come from and go to; null once closed. */
     readonly target: Window | null;
-    /** The child page goes. */
-    closing(): void;
+    /** The child page goes: a window closes; a frame's page goes with the frame, or reloads and says it is ready again. */
+    closing?(): void;
 }
 
 /** What an embedded terminal's children are told by postMessage, besides their blocks (child-bridge.ts). */

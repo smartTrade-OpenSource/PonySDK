@@ -228,3 +228,8 @@ function oracleCookies() {
 function terminalBinding(id, element) {
   return { update: function (data) { element.textContent = 'Native: ' + data.text; } };
 }
+
+/** The function the terminal pages call on a widget's element (TerminalPages.generic). */
+function terminalMark(element, text, times) {
+  element.setAttribute('data-mark', text === undefined ? 'marked' : text + ' x' + times);
+}

@@ -28,12 +28,23 @@ function sent(page) {
 test('window: the server opens a window, then titles, sizes, moves, prints, focuses and closes it', async ({ page, context }) => {
     await context.addInitScript(() => {
         window.print = () => document.documentElement.setAttribute('data-printed', 'yes');
+        // What the terminal asks of the window: WebKit headless does not resize or move one
+        const calls = [];
+        for (const name of ['resizeTo', 'resizeBy', 'moveTo', 'moveBy']) {
+            const native = window[name].bind(window);
+            window[name] = (x, y) => {
+                calls.push(`${name} ${x} ${y}`);
+                document.documentElement.setAttribute('data-calls', calls.join(', '));
+                native(x, y);
+            };
+        }
     });
     await open(page, 'window');
     await expect(page).toHaveTitle('Terminal window page');
     const [child] = await Promise.all([page.waitForEvent('popup'), button(page, 'Open window').click()]);
     await expect(status(page)).toHaveText('Status: opened');
     await expect(child.getByText('Child content')).toBeVisible();
+    await expect(child.getByText('Terminal window page')).toBeVisible(); // its dictionary entry, from its opener
     await expect(child).toHaveTitle('terminal-child'); // the window's name until the server titles it
 
     await button(page, 'Title').click();
@@ -41,10 +52,10 @@ test('window: the server opens a window, then titles, sizes, moves, prints, focu
     await button(page, 'Print').click();
     await expect(child.locator('html')).toHaveAttribute('data-printed', 'yes');
     await button(page, 'Resize to').click();
-    await expect.poll(() => child.evaluate(() => window.outerWidth)).toBe(420);
     await button(page, 'Resize by').click();
-    await expect.poll(() => child.evaluate(() => window.outerWidth)).toBe(440);
     await button(page, 'Move').click();
+    await expect(child.locator('html')).toHaveAttribute('data-calls',
+        'resizeTo 420 320, resizeBy 20 20, moveTo 10 10, moveBy 5 5');
     await button(page, 'Focus').click();
 
     await Promise.all([child.waitForEvent('close'), button(page, 'Close').click()]);
@@ -300,7 +311,8 @@ test('panels: scrolled by the server; cells aligned, sized and inserted; table r
     await expect(rows.nth(1).locator(':scope > td').nth(0)).toHaveCSS('vertical-align', 'top');
     const columns = table.locator(':scope > colgroup > col');
     await expect(columns.nth(0)).toHaveClass('first');
-    await expect(columns.nth(0)).toHaveCSS('width', '60px');
+    // the width the terminal set: WebKit computes none for a col of a table without table-layout: fixed
+    expect(await columns.nth(0).evaluate(e => e.style.width)).toBe('60px');
     await expect(columns.nth(1)).toHaveClass('second');
 });
 
@@ -478,13 +490,248 @@ test('collect: the objects the server collected release their listeners', async 
     const events = () => messages.filter(m => m.includes('"W":"count-changed"')).length;
     await counter?.evaluate(e => e.dispatchEvent(new CustomEvent('count-changed', { detail: 1 })));
     await expect.poll(events).toBe(1);
-    // the server collects once the JVM has: an event of the collected component goes nowhere
+    // the server collects once the JVM has
+    let clicks = 0;
     await expect(async () => {
         await button(page, 'Collect').click();
-        await expect(page.getByLabel('Status')).toHaveText('Collected');
-        const before = events();
-        await counter?.evaluate(e => e.dispatchEvent(new CustomEvent('count-changed', { detail: 1 })));
-        await page.waitForTimeout(300);
-        expect(events()).toBe(before);
+        await expect(page.getByLabel('Status')).toHaveText(`Collected ${++clicks}`, { timeout: 1000 });
     }).toPass({ timeout: 20000 });
+    // The next message the server handles tells the terminal (PObjectCache): then an event of the collected
+    // component goes nowhere. Sent before, it would reach a server that no longer has the component.
+    await button(page, 'Collect').click();
+    await expect(page.getByLabel('Status')).toHaveText(`Collected ${++clicks}`);
+    const before = events();
+    await counter?.evaluate(e => e.dispatchEvent(new CustomEvent('count-changed', { detail: 1 })));
+    await page.waitForTimeout(300);
+    expect(events()).toBe(before);
+});
+
+/** The terminal's warnings that an object has no such property: none is expected from a page of the server. */
+function unknownProperties(page) {
+    const warnings = [];
+    page.on('console', m => {
+        if (/has no property/.test(m.text())) warnings.push(m.text());
+    });
+    return warnings;
+}
+
+test('generic: a widget\'s own properties and handlers on every widget type, children inserted and removed', async ({ page }) => {
+    const warnings = unknownProperties(page);
+    await open(page, 'generic');
+    for (const label of ['Upload', 'Generic stack', 'Generic tabs', 'Generic split', 'Generic scroll', 'Generic cells',
+        'Generic list', 'Generic grid']) {
+        await expect(page.getByLabel(label, { exact: true })).toHaveClass(/\bgeneric\b/);
+    }
+    await expect(page.getByRole('menubar')).toHaveClass(/\bgeneric\b/);
+    await expect(page.getByRole('menuitem', { name: 'Generic item' })).toHaveClass(/\bgeneric\b/);
+    await expect(page.locator('.pony-SuggestBox.generic')).toHaveCount(1);
+    await expect(page.getByText('2 ponies')).toHaveClass(/\bgeneric\b/);
+
+    const upload = page.getByLabel('Upload', { exact: true });
+    await expect(upload.locator('input[type=file]')).toHaveAttribute('tabindex', '3');
+    // focus and blur of a widget whose element holds its field: those of the field
+    await upload.locator('input[type=file]').focus();
+    await expect(status(page)).toContainText('upload focus');
+    await page.getByLabel('Generic check').focus();
+    await page.getByLabel('Generic check').blur();
+    await expect(status(page)).toContainText('check focus, check blur');
+    await page.getByRole('menuitem', { name: 'Generic item' }).hover();
+    await expect(status(page)).toContainText('item over');
+    await page.getByLabel('Generic suggest').hover();
+    await expect(status(page)).toContainText('suggest over');
+    await page.getByLabel('Generic stack', { exact: true }).hover();
+    await expect(status(page)).toContainText('stack over');
+    await page.getByLabel('Generic tabs', { exact: true }).hover();
+    await expect(status(page)).toContainText('tabs over');
+    await page.getByLabel('Pressed').press('a');
+    await expect(status(page)).toContainText('press 97');
+
+    await button(page, 'Mark').click();
+    await expect(page.getByText('Marked', { exact: true })).toHaveAttribute('data-mark', 'yes x2');
+    await expect(page.locator('[role=treeitem]', { hasText: 'Generic tree item' })).toHaveAttribute('data-mark', 'marked');
+
+    const cells = page.getByLabel('Generic cells', { exact: true });
+    const list = page.getByLabel('Generic list', { exact: true });
+    await button(page, 'Insert').click();
+    await expect(cells).toHaveText('First cellInserted cellLast cell');
+    await expect(list).toHaveText('Inserted entryLast entry');
+    await button(page, 'Remove').click();
+    await expect(cells).toHaveText('First cellInserted cell');
+    await expect(cells.locator('.pony-Cell')).toHaveCount(2); // the removed child's cell goes with it
+    await expect(list).toHaveText('Inserted entry');
+
+    await button(page, 'Show popup').click();
+    const popup = page.locator('.pony-PopupPanel.generic');
+    await expect(popup).toBeVisible();
+    await popup.hover();
+    await expect(status(page)).toContainText('popup over');
+
+    // A drag of the scroll bar sends the position once released
+    const scroll = page.getByLabel('Generic scroll', { exact: true });
+    await scroll.hover();
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect(status(page)).toContainText('scrolled');
+
+    await button(page, 'Unwatch').click();
+    await button(page, 'Animate').click();
+    await expect(status(page)).toContainText('unwatched, animated');
+    expect(warnings).toEqual([]);
+});
+
+test('web component: children at an index and at the end, a property as text then removed, a method, an event unlistened', async ({ page }) => {
+    const messages = sent(page);
+    await open(page, 'webcomponent');
+    const component = page.getByLabel('Component', { exact: true });
+    await expect(component).toHaveText('Second');
+    expect(await component.evaluate(e => /** @type {any} */ (e).note)).toBe('plain text'); // not JSON: as it came
+    await button(page, 'Insert first').click();
+    await button(page, 'Append').click();
+    await expect(component).toHaveText('FirstSecondThird');
+    await button(page, 'Remove note').click();
+    await expect.poll(() => component.evaluate(e => 'note' in e)).toBe(false);
+    await button(page, 'Call').click();
+    await expect(component).toHaveAttribute('data-called', 'yes');
+
+    // A detail that has no JSON goes as its text
+    await component.evaluate(e => {
+        const detail = { toString: () => 'circular' };
+        /** @type {any} */ (detail).self = detail;
+        e.dispatchEvent(new CustomEvent('ping', { detail }));
+    });
+    await expect(status(page)).toContainText('ping "circular"');
+    await button(page, 'Unlisten').click();
+    await expect(status(page)).toContainText('unlistened');
+    const pings = messages.filter(m => m.includes('"ping"')).length;
+    await component.evaluate(e => e.dispatchEvent(new CustomEvent('ping', { detail: 1 })));
+    await button(page, 'Call').click(); // a round trip after the event
+    expect(messages.filter(m => m.includes('"ping"')).length).toBe(pings);
+});
+
+test('date box: styled days, a format changed by the server, the keyboard in the picker, the time of the day kept', async ({ page }) => {
+    await open(page, 'datebox');
+    const box = page.getByLabel('Date', { exact: true });
+    await expect(box).toHaveValue('2024-05-15 09:30');
+    await button(page, 'Day first').click();
+    await expect(box).toHaveValue('15/05/2024 09:30');
+
+    await box.focus();
+    await box.press('ArrowDown'); // shows the picker: above the box, which is at the bottom of the window
+    const popup = page.locator('.pony-DateBoxPopup');
+    await expect(popup).toBeVisible();
+    const [boxTop, popupBottom] = [(await box.boundingBox())?.y ?? 0, await popup.evaluate(e => e.getBoundingClientRect().bottom)];
+    expect(popupBottom).toBeLessThanOrEqual(boxTop + 1);
+    const day = text => popup.locator('[role=gridcell]:not([data-filler])', { hasText: new RegExp(`^${text}$`) });
+    await expect(day('15')).toHaveClass(/\bmarked\b/);
+    await button(page, 'Unmark').click();
+    await expect(day('15')).not.toHaveClass(/\bmarked\b/);
+
+    await box.focus();
+    await box.press('ArrowDown');
+    await box.press('ArrowDown'); // into the days
+    const focused = () => page.evaluate(() => document.activeElement?.textContent);
+    await expect.poll(focused).toBe('15');
+    await page.keyboard.press('ArrowLeft');
+    await expect.poll(focused).toBe('14');
+    await page.keyboard.press('ArrowUp');
+    await expect.poll(focused).toBe('7');
+    await page.keyboard.press('End');
+    await expect.poll(focused).not.toBe('7');
+    await page.keyboard.press('PageUp');
+    await expect(popup.locator('.pony-DatePicker-month')).toContainText('April');
+    await page.keyboard.press('Home');
+    await page.keyboard.press('Enter');
+    await expect(status(page)).toContainText(/value \d\d\/04\/2024 09:30/); // the day picked, at the time it had
+
+    // A text the pattern does not read, but the browser does: read in the pattern
+    await box.fill('May 20, 2024');
+    await box.press('Enter');
+    await expect(box).not.toHaveAttribute('aria-invalid', 'true');
+    await box.press('ArrowDown');
+    await expect(day('20')).toHaveAttribute('aria-selected', 'true');
+});
+
+test('misc: a context the server ends asks the page to reload, through ponysdk.js', async ({ page }) => {
+    await page.addInitScript(() => {
+        const asked = () => document.documentElement.setAttribute('data-reload', 'asked');
+        Object.defineProperty(document, 'doReload', { configurable: false, get: () => asked, set() {} });
+    });
+    await open(page, 'misc');
+    await button(page, 'End session').click();
+    await expect(page.locator('html')).toHaveAttribute('data-reload', 'asked');
+});
+
+test('window.pony: the methods of the GWT terminal that pages and addons call', async ({ page }) => {
+    const sockets = [];
+    page.on('websocket', ws => sockets.push(ws));
+    await open(page, 'misc');
+    const pony = await page.evaluate(() => {
+        const terminal = /** @type {any} */ (window).pony;
+        const id = terminal.getContextId();
+        terminal.setContextId(id);
+        const tabindex = terminal.isTabindexOnlyFormField();
+        terminal.setTabindexOnlyFormField(!tabindex);
+        return { id, same: terminal.getContextId() === id, flipped: terminal.isTabindexOnlyFormField() === !tabindex };
+    });
+    expect(pony).toEqual({ id: expect.any(Number), same: true, flipped: true });
+    expect(pony.id).toBeGreaterThan(0);
+    await page.evaluate(() => /** @type {any} */ (window).pony.close());
+    await expect.poll(() => sockets.every(ws => ws.isClosed())).toBe(true);
+});
+
+test('without requestIdleCallback, the widgets loaded on demand load a second after the page', async ({ page }) => {
+    await page.addInitScript(() => { delete /** @type {any} */ (window).requestIdleCallback; });
+    const chunks = [];
+    page.on('request', request => { if (request.url().includes('/chunks/rich-text.js')) chunks.push(request.url()); });
+    await open(page, 'window'); // no rich text on it
+    await expect.poll(() => chunks.length, { timeout: 5000 }).toBe(1);
+});
+
+test('a window page opened by no terminal says so', async ({ page }) => {
+    const errors = [];
+    page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto(BASE_URL + '?1=1&2=1'); // UI_CONTEXT_ID and WINDOW_ID, without the opener that has them
+    await expect.poll(() => errors.some(e => e.includes('No terminal opened this page'))).toBe(true);
+});
+
+/** The terminal's console warnings. */
+function warnings(page) {
+    const warned = [];
+    page.on('console', m => { if (m.type() === 'warning') warned.push(m.text()); });
+    return warned;
+}
+
+test('a widget whose module does not load: reported, its block skipped, the page goes on', async ({ page }) => {
+    const warned = warnings(page);
+    await page.route(/\/chunks\/rich-text\.js/, route => route.abort());
+    await page.goto(BASE_URL + '#terminal-richtext');
+    await expect.poll(() => warned.some(w => /has no RICH_TEXT_AREA yet/.test(w))).toBe(true);
+    await expect(page.getByRole('button').first()).toBeVisible(); // the rest of the page
+});
+
+test('a block the server would not send: a property an object does not have, a type this terminal does not know', async ({ page }) => {
+    const warned = warnings(page);
+    let socket;
+    await page.routeWebSocket(/\/sample\/ws\b/, ws => {
+        ws.connectToServer();
+        socket = ws;
+    });
+    await open(page, 'misc');
+    // Keys of ServerToClientModel: TYPE_UPDATE 7 and TYPE_CREATE 6 (an id on 2 bytes), WIDGET_TYPE 194 (a byte),
+    // WIDGET_FULL_SIZE 201 (no value), END 4. The cookies are object #0.
+    socket.send(Buffer.from([7, 0, 0, 201, 4]));
+    socket.send(Buffer.from([6, 0x7f, 0, 194, 127, 4]));
+    await expect.poll(() => warned.filter(w => /object #0 has no property WIDGET_FULL_SIZE|has no type #127 yet/.test(w)).length)
+        .toBe(2);
+    await button(page, 'Later').click();
+    await expect(status(page)).toContainText('script 12'); // the page goes on
+});
+
+test('misc: a root panel in an element of the page, by its id; an id the page does not have is reported', async ({ page }) => {
+    const messages = sent(page);
+    await open(page, 'misc');
+    await button(page, 'Zone').click();
+    await expect(page.locator('#loading')).toContainText('In the zone');
+    await button(page, 'No zone').click();
+    await expect.poll(() => messages.some(m => m.includes('No element #nowhere'))).toBe(true); // the error, to the server
 });

@@ -19,7 +19,6 @@ export class Frame extends Widget implements ChildTerminal, BridgedChild {
     readonly title = null;
     /** An embedded terminal's frame: talked to by postMessage only (ADR-0009). */
     private readonly bridge: ChildBridge | null;
-    private isReady = false;
 
     static create(context: Context, id: number, type: number, reader: Reader): Frame {
         reader.read();
@@ -49,17 +48,9 @@ export class Frame extends Widget implements ChildTerminal, BridgedChild {
         return (this.element as HTMLIFrameElement).contentWindow;
     }
 
-    closing(): void {
-        // the frame's page goes with the frame, or reloads: its terminal says when it is ready again
-    }
-
     override destroy(): void {
         this.bridge?.unregister(this);
         super.destroy();
-    }
-
-    get ready(): boolean {
-        return this.isReady;
     }
 
     postMessage(bytes: Uint8Array): void {
@@ -70,7 +61,6 @@ export class Frame extends Widget implements ChildTerminal, BridgedChild {
     }
 
     setReady(): void {
-        this.isReady = true;
         const message = about(this.id);
         message[C.HANDLER_OPEN] = this.url;
         this.context.send(message);

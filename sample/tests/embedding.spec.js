@@ -296,6 +296,9 @@ test('another site: the credential reaches the application, its context key keep
 });
 
 test('a ticket popped out in a window of its own talks to its element by postMessage (ADR-0009)', async ({ page, context }) => {
+  await context.addInitScript(() => {
+    window.focus = () => document.documentElement.setAttribute('data-focused', 'yes'); // the server's focus, by its parent
+  });
   const { first } = await openPortal(page);
   const opened = context.waitForEvent('page');
   await first.locator('.pony-ticket-pop-out').click();
@@ -309,7 +312,9 @@ test('a ticket popped out in a window of its own talks to its element by postMes
   await expect(page.locator('#trades tr').first()).toContainText('BUY'); // from the window, to the portal's blotter
 
   await expect(first.locator('.pony-ticket-pop-out')).toHaveText(/^Popped out/);
-  await popup.close(); // the server is told: popping out again opens another window
+  await first.locator('.pony-ticket-pop-out').click(); // brings it to the front
+  await expect(popup.locator('html')).toHaveAttribute('data-focused', 'yes');
+  await popup.close({ runBeforeUnload: true }); // the page tells its parent: the server is told, popping out again opens another window
   await expect(first.locator('.pony-ticket-pop-out')).toHaveText('Pop out');
   const again = context.waitForEvent('page');
   await first.locator('.pony-ticket-pop-out').click();
@@ -326,6 +331,8 @@ test('another site: a popped out ticket proves its context with the element\'s k
   await expect(popup.locator('.pony-ticket-popped-prices')).toHaveText(/\d/, { timeout: 15000 });
   await popup.locator('.pony-ticket-popped-buy').click();
   await expect(page.locator('#trades tr').first()).toContainText('BUY');
+  await popup.close(); // without its page's pagehide: its parent sees it closed
+  await expect(first.locator('.pony-ticket-pop-out')).toHaveText('Pop out', { timeout: 5000 });
 });
 
 test('a frame of an embedded application runs a terminal of its own, fed by postMessage (ADR-0009)', async ({ page }) => {
@@ -469,4 +476,75 @@ test("the portal's pages load an application from this machine only, whatever th
   }
   await page.waitForTimeout(500);
   expect(elsewhere).toEqual([]);
+});
+
+test('an attribute taken off the element reaches the application as removed', async ({ page }) => {
+  const { second } = await openPortal(page);
+  await page.locator('#ticket-2').evaluate(e => e.removeAttribute('instrument'));
+  await expect(second.getByText('EUR / USD')).toBeVisible(); // the ticket's default instrument
+});
+
+test('an element whose credential function fails starts its application without one', async ({ page }) => {
+  const errors = trackErrors(page);
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = /** @type {any} */ (document.createElement('pony-app'));
+    app.id = 'no-credential';
+    app.setAttribute('src', document.getElementById('ticket-1').getAttribute('src'));
+    app.setAttribute('view', 'ticket');
+    app.credential = () => { throw new Error('no session'); };
+    document.querySelector('.portal-app').append(app);
+  });
+  await expect(page.locator('#no-credential .pony-ticket-origin')).toContainText('no credential', { timeout: 15000 });
+  expect(errors.some(e => e.includes('the credential function failed'))).toBe(true);
+});
+
+test('an element whose src is no application says it cannot start', async ({ page }) => {
+  const errors = trackErrors(page);
+  await openPortal(page);
+  await page.evaluate(() => {
+    const app = document.createElement('pony-app');
+    app.setAttribute('src', new URL('/nowhere/', document.getElementById('ticket-1').getAttribute('src')).href);
+    document.querySelector('.portal-app').append(app);
+  });
+  await expect.poll(() => errors.some(e => e.includes('cannot start'))).toBe(true);
+});
+
+test('the host page\'s window.pony is an addon registry: it sends nothing, the addons send through their terminal', async ({ page }) => {
+  const warned = [];
+  page.on('console', m => { if (m.type() === 'warning') warned.push(m.text()); });
+  await openPortal(page);
+  await page.evaluate(() => /** @type {any} */ (window).pony.sendDataToServer());
+  await expect.poll(() => warned.some(w => w.includes('window.pony is the page\'s addon registry'))).toBe(true);
+});
+
+test('the shared sheets of the application\'s manifest go to the shadow roots of the page\'s web components', async ({ page }) => {
+  await page.route('**/sample/ponyapp.json', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, json: { ...(await response.json()), sharedSheets: ['css/shared.css'] } });
+  });
+  await openPortal(page);
+  const sheets = await page.evaluate(() => {
+    const element = document.createElement('div');
+    const root = /** @type {any} */ (window).pony.wc.initShadow(element);
+    return [...root.querySelectorAll('link')].map(link => link.href);
+  });
+  expect(sheets).toContain(new URL('css/shared.css', BASE_URL).href);
+});
+
+test('another site: a stylesheet its server serves without CORS loads as it is, not adapted to the element', async ({ page }) => {
+  const warned = [];
+  page.on('console', m => { if (m.type() === 'warning') warned.push(m.text()); });
+  // The load with CORS fails as a refused one does: a network error (a route's own response would get CORS headers)
+  await page.route(url => url.href === new URL('css/showcase.css', BASE_URL).href, async route =>
+    (await route.request().headerValue('origin')) !== null ? route.abort() : route.continue());
+  await page.goto(OTHER_SITE_PORTAL);
+  const first = page.locator('#ticket-1');
+  await expect(first.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
+  await expect.poll(() => warned.some(w => /showcase\.css: refused with CORS, loaded as it is/.test(w))).toBe(true);
+  const link = await page.locator('#ticket-1').evaluate(e => {
+    const sheet = [...e.shadowRoot.querySelectorAll('link')].find(l => l.href.endsWith('css/showcase.css'));
+    return sheet && { crossOrigin: sheet.crossOrigin, loaded: sheet.sheet !== null };
+  });
+  expect(link).toEqual({ crossOrigin: null, loaded: true });
 });

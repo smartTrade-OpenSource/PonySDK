@@ -5,6 +5,10 @@
 package com.ponysdk.sample.client;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -19,6 +23,15 @@ import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.formatter.TextFunction;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PMenuItem;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PFunctionalLabel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
@@ -107,7 +120,10 @@ final class TerminalPages {
         Map.entry("popup", TerminalPages::popup),
         Map.entry("image", TerminalPages::image),
         Map.entry("misc", TerminalPages::misc),
-        Map.entry("collect", TerminalPages::collect));
+        Map.entry("collect", TerminalPages::collect),
+        Map.entry("generic", TerminalPages::generic),
+        Map.entry("webcomponent", TerminalPages::webComponent),
+        Map.entry("datebox", TerminalPages::dateBox));
 
     private TerminalPages() {
     }
@@ -152,6 +168,7 @@ final class TerminalPages {
             window.addOpenHandler(e -> status.add("opened"));
             window.addCloseHandler(e -> status.add("closed"));
             window.add(Element.newPLabel("Child content"));
+            window.add(Element.newPLabel("Terminal window page")); // a string the main window's dictionary has
             window.open();
             child[0] = window;
         });
@@ -623,6 +640,8 @@ final class TerminalPages {
             linked.setText("");
             menu.clearItems();
         });
+        button(panel, "Zone", () -> PWindow.getMain().getPRootPanel("loading").add(Element.newPLabel("In the zone")));
+        button(panel, "No zone", () -> PWindow.getMain().getPRootPanel("nowhere").add(Element.newPLabel("Nowhere")));
         button(panel, "End session", context::close);
         return panel;
     }
@@ -650,17 +669,175 @@ final class TerminalPages {
         final PMenuBar menu = Element.newPMenuBar();
         menu.addItem("Collected menu", () -> {
         });
-        held[0].add(counter, split, suggest, menu);
+        final PDateBox date = Element.newPDateBox();
+        held[0].add(counter, split, suggest, menu, date);
         panel.add(held[0]);
         final PLabel status = Element.newPLabel("Held");
         status.setAttribute("aria-label", "Status");
         panel.add(status);
+        final WeakReference<PWebComponent> collected = new WeakReference<>(counter);
+        final int[] clicks = { 0 };
         button(panel, "Collect", () -> {
             if (held[0] != null) panel.remove(held[0]);
             held[0] = null;
             System.gc();
-            status.setText("Collected");
+            status.setText((collected.get() == null ? "Collected " : "Still held ") + ++clicks[0]);
         });
         return panel;
     }
+
+    /**
+     * A widget's own properties and handlers on widgets of every type: a style name, a DOM handler, a visibility
+     * handler added then removed, a function of the page called on its element; children inserted and removed.
+     */
+    private static IsPWidget generic() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+
+        final PFileUpload upload = Element.newPFileUpload();
+        upload.setAttribute("aria-label", "Upload");
+        upload.setTabindex(3);
+        upload.addDomHandler((PFocusHandler) e -> status.add("upload focus"), PFocusEvent.TYPE);
+        final PCheckBox check = Element.newPCheckBox("Generic check");
+        check.addFocusHandler(e -> status.add("check focus"));
+        check.addBlurHandler(e -> status.add("check blur"));
+        final PMenuBar menu = Element.newPMenuBar();
+        final PMenuItem item = Element.newPMenuItem("Generic item", () -> status.add("command"));
+        menu.addItem(item);
+        item.addDomHandler((PMouseOverEvent.Handler) e -> status.add("item over"), PMouseOverEvent.TYPE);
+        final PSuggestBox suggest = Element.newPSuggestBox(new PMultiWordSuggestOracle());
+        suggest.getTextBox().setAttribute("aria-label", "Generic suggest");
+        suggest.addDomHandler((PMouseOverEvent.Handler) e -> status.add("suggest over"), PMouseOverEvent.TYPE);
+        final PTree tree = Element.newPTree();
+        final PTreeItem treeItem = tree.add("Generic tree item");
+        final PFunctionalLabel functional = Element.newPFunctionalLabel(TextFunction.named(args -> args[0] + " ponies", "ponies"), 2);
+        final PStackLayoutPanel stack = Element.newPStackLayoutPanel(PUnit.PX);
+        stack.setAttribute("aria-label", "Generic stack");
+        stack.setWidth("200px");
+        stack.setHeight("80px");
+        stack.add(Element.newPLabel("Stacked"), "Stack", false, 25);
+        stack.setAnimationDuration(Duration.ofMillis(10));
+        stack.addDomHandler((PMouseOverEvent.Handler) e -> status.add("stack over"), PMouseOverEvent.TYPE);
+        final PTabPanel tabs = Element.newPTabPanel();
+        tabs.setAttribute("aria-label", "Generic tabs");
+        tabs.add(Element.newPLabel("Tabbed"), "Tab");
+        tabs.addDomHandler((PMouseOverEvent.Handler) e -> status.add("tabs over"), PMouseOverEvent.TYPE);
+        final PSplitLayoutPanel split = Element.newPSplitLayoutPanel();
+        split.setAttribute("aria-label", "Generic split");
+        split.setWidth("200px");
+        split.setHeight("40px");
+        split.addWest(Element.newPLabel("West"), 50);
+        final PScrollPanel scroll = Element.newPScrollPanel();
+        scroll.setAttribute("aria-label", "Generic scroll");
+        scroll.setWidth("100px");
+        scroll.setHeight("40px");
+        final PLabel wide = Element.newPLabel("Wide content to scroll");
+        wide.setWidth("400px");
+        scroll.setWidget(wide);
+        scroll.addScrollHandler(e -> status.add("scrolled"));
+        final PTextBox keys = Element.newPTextBox();
+        keys.setAttribute("aria-label", "Pressed");
+        keys.addKeyPressHandler(e -> status.add("press " + e.getKeyCode()));
+        final PLabel marked = Element.newPLabel("Marked");
+        final PVerticalPanel cells = Element.newPVerticalPanel();
+        cells.setAttribute("aria-label", "Generic cells");
+        final PLabel last = Element.newPLabel("Last cell");
+        cells.add(Element.newPLabel("First cell"), last);
+        final PElement list = Element.newUl();
+        list.setAttribute("aria-label", "Generic list");
+        final PElement lastEntry = Element.newLi();
+        lastEntry.setInnerText("Last entry");
+        list.add(lastEntry);
+        final PGrid grid = Element.newPGrid();
+        grid.setAttribute("aria-label", "Generic grid");
+        final PPopupPanel popup = Element.newPPopupPanel(false);
+        popup.setWidget(Element.newPLabel("Generic popup"));
+        popup.addDomHandler((PMouseOverEvent.Handler) e -> status.add("popup over"), PMouseOverEvent.TYPE);
+
+        final List<PWidget> styled = List.of(upload, menu, item, suggest, functional, stack, tabs, split, scroll,
+            cells, list, grid, popup);
+        for (final PWidget widget : styled) widget.addStyleName("generic");
+        final PVisibilityEvent.PVisibilityHandler visibility = e -> {
+        };
+        final List<PWidget> watched = List.of(item, keys, split, scroll);
+        for (final PWidget widget : watched) widget.addVisibilityHandler(visibility);
+        panel.add(upload, check, menu, suggest, tree, functional, stack, tabs, split, scroll, keys, marked, cells, list, grid);
+
+        button(panel, "Unwatch", () -> {
+            for (final PWidget widget : watched) widget.removeVisibilityHandler(visibility);
+            status.add("unwatched");
+        });
+        button(panel, "Animate", () -> {
+            stack.animate(Duration.ofMillis(10));
+            status.add("animated");
+        });
+        button(panel, "Mark", () -> {
+            marked.callTerminalFunction("terminalMark", "yes", 2);
+            treeItem.callTerminalFunction("terminalMark");
+        });
+        button(panel, "Insert", () -> {
+            cells.insert(Element.newPLabel("Inserted cell"), 1);
+            final PElement entry = Element.newLi();
+            entry.setInnerText("Inserted entry");
+            list.insert(entry, 0);
+        });
+        button(panel, "Remove", () -> {
+            cells.remove(last);
+            list.remove(lastEntry);
+        });
+        button(panel, "Show popup", () -> {
+            panel.add(popup);
+            popup.setPopupPosition(300, 50);
+            popup.show();
+        });
+        return panel;
+    }
+
+    /** A web component's children at an index and at the end, a property set as text and removed, a method, events. */
+    private static IsPWidget webComponent() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+        final PWebComponent component = new PWebComponent("pony-test-element");
+        component.setAttribute("aria-label", "Component");
+        component.add(Element.newPLabel("Second"));
+        component.property("note").set("plain text");
+        final HandlerRegistration[] listened = new HandlerRegistration[1];
+        listened[0] = component.addEventListener("ping", detail -> status.add("ping " + detail));
+        panel.add(component);
+        button(panel, "Insert first", () -> component.insert(Element.newPLabel("First"), 0));
+        button(panel, "Append", () -> component.add(Element.newPLabel("Third")));
+        button(panel, "Remove note", () -> component.property("note").remove());
+        button(panel, "Call", () -> component.call("setAttribute", "data-called", "yes"));
+        button(panel, "Unlisten", () -> {
+            listened[0].removeHandler();
+            status.add("unlistened");
+        });
+        return panel;
+    }
+
+    /** A date box near the bottom of the window, whose format the server changes, keeping the time of its day; styled days. */
+    private static IsPWidget dateBox() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final Status status = new Status();
+        panel.add(status.label);
+        final PDatePicker picker = Element.newPDatePicker();
+        final PDateBox box = Element.newPDateBox(picker, new SimpleDateFormat("yyyy-MM-dd HH:mm"), true);
+        box.setAttribute("aria-label", "Date");
+        box.addValueChangeHandler(e -> status.add("value " + box.getDisplayedValue()));
+        final Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(2024, Calendar.MAY, 15, 9, 30);
+        box.setValue(calendar.getTime());
+        final List<Date> styled = List.of(calendar.getTime());
+        picker.addStyleToDates("marked", styled);
+        final PFlowPanel spacer = Element.newPFlowPanel();
+        spacer.setHeight("600px");
+        panel.add(spacer, box);
+        button(panel, "Unmark", () -> picker.removeStyleFromDates("marked", styled));
+        button(panel, "Day first", () -> box.setDateFormat(new SimpleDateFormat("dd/MM/yyyy HH:mm")));
+        return panel;
+    }
+
 }

@@ -263,7 +263,6 @@ export class DateFormat {
             case 'S':
                 fields.millis = Math.round(value * 10 ** (3 - digits.length));
                 break;
-            default:
         }
         return end;
     }

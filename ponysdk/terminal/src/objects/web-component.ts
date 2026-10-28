@@ -124,11 +124,6 @@ const WEB_COMPONENT: Setters<WebComponent> = new Map<number, (w: WebComponent, r
     [K.WC_REMOVE_PROPERTY, (w, r) => {
         delete (w.element as unknown as Record<string, unknown>)[r.str ?? ''];
     }],
-    [K.WC_SET_ATTRIBUTE, (w, r) => {
-        const name = r.str ?? '';
-        w.element.setAttribute(name, next(r).str ?? '');
-    }],
-    [K.WC_REMOVE_ATTRIBUTE, (w, r) => w.element.removeAttribute(r.str ?? '')],
     [K.WC_LISTEN_EVENT, (w, r) => w.listenTo(r.str ?? '')],
     [K.WC_UNLISTEN_EVENT, (w, r) => w.stopListening(r.str ?? '')],
     [K.WC_CALL_METHOD, (w, r) => {
