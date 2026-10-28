@@ -45,8 +45,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the text box filters that {@link ColumnFilterFooterDataGridView} adds in the footer of each column without one.
@@ -262,20 +260,7 @@ public class ColumnFilterFooterDataGridViewTest extends PSuite {
         return (PTextBox) view.getAdapter().getColumnDefinitions().get(0).getFooter();
     }
 
-    private void drawAfter(final ThrowingRunnable action) throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final DataGridView.DrawListener listener = count -> latch.countDown();
-        base.addDrawListener(listener);
-        try {
-            action.run();
-            Assertions.assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS), "Timed out waiting for grid draw");
-        } finally {
-            base.removeDrawListener(listener);
-        }
-    }
-
-    private interface ThrowingRunnable {
-
-        void run() throws Exception;
+    private void drawAfter(final Runnable action) throws InterruptedException {
+        GridDraws.drawAfter(base, action);
     }
 }

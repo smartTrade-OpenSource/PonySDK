@@ -42,8 +42,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the check box column that {@link RowSelectorColumnDataGridView} pins first: its header selects or unselects
@@ -52,7 +50,6 @@ import java.util.concurrent.TimeUnit;
 public class RowSelectorColumnDataGridViewTest extends PSuite {
 
     private static final String COLUMN_ID = RowSelectorColumnDataGridView.RowSelectorColumnDefinition.class.getName();
-    private static final long TIMEOUT_MS = 3_000;
 
     private DefaultDataGridView<String, String> base;
     private RowSelectorColumnDataGridView<String, String> view;
@@ -258,14 +255,6 @@ public class RowSelectorColumnDataGridViewTest extends PSuite {
     }
 
     private void drawAfter(final Runnable action) throws InterruptedException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final DataGridView.DrawListener listener = count -> latch.countDown();
-        base.addDrawListener(listener);
-        try {
-            action.run();
-            Assertions.assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS), "Timed out waiting for grid draw");
-        } finally {
-            base.removeDrawListener(listener);
-        }
+        GridDraws.drawAfter(base, action);
     }
 }

@@ -1409,15 +1409,7 @@ public class DefaultDataGridViewTest extends PSuite {
         }
 
         void drawAfter(final Runnable action) throws InterruptedException {
-            final CountDownLatch latch = new CountDownLatch(1);
-            final DataGridView.DrawListener listener = count -> latch.countDown();
-            grid.addDrawListener(listener);
-            try {
-                action.run();
-                Assertions.assertTrue(latch.await(DRAW_TIMEOUT_MS, TimeUnit.MILLISECONDS), "Timed out waiting for grid draw");
-            } finally {
-                grid.removeDrawListener(listener);
-            }
+            GridDraws.drawAfter(grid, action);
         }
 
         void terminal(final JsonObjectBuilder data) {
