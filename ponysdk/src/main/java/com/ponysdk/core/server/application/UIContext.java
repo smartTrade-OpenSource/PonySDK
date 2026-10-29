@@ -951,16 +951,17 @@ public class UIContext {
      */
     public void resume(final WebSocket newSocket) {
         if (!suspended) throw new IllegalStateException("UIContext #" + ID + " is not suspended");
+        // Read before alive: doDestroy clears the recorder after it clears alive, so a recorder destroyed meanwhile
+        // is seen as a destroyed context here, never as a null recorder below
+        final RecordingEncoder recorder = this.recordingEncoder;
         if (!alive) throw new IllegalStateException("UIContext #" + ID + " is already destroyed");
         suspended = false;
-
-        final RecordingEncoder recorder = this.recordingEncoder;
         this.recordingEncoder = null;
 
         // If the recorder overflowed, the UIContext is already being destroyed — abort. A normal close of the socket
         // that would resume it makes the terminal reload its page (terminal.ts socketListener)
-        if (recorder == null || recorder.isOverflowed()) {
-            log.warn("UIContext #{} resume aborted — recorder overflowed or null", ID);
+        if (recorder.isOverflowed()) {
+            log.warn("UIContext #{} resume aborted — recorder overflowed", ID);
             newSocket.close();
             return;
         }

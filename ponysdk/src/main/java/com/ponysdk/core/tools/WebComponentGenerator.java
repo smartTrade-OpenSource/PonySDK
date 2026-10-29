@@ -72,9 +72,9 @@ public final class WebComponentGenerator {
     private WebComponentGenerator() {
     }
 
+    /** A usage error is printed, then thrown: the process ends with a failure (status 1) without exiting the JVM itself. */
     public static void main(final String[] args) throws IOException {
-        final int status = run(args, System.err);
-        if (status != 0) System.exit(status);
+        if (run(args, System.err) != 0) throw new IllegalArgumentException("WebComponentGenerator: wrong arguments");
     }
 
     /** @return the process status: 0, or 2 for a usage error, printed on {@code err} */
@@ -322,15 +322,15 @@ public final class WebComponentGenerator {
                               final List<String> names, final String code, final String doc, final JsonObject deprecation) {
             String javaName = name;
             String docText = doc;
-            if (INHERITED.contains(signature(javaName, types))) {
-                javaName = name + "Property";
+            while (INHERITED.contains(signature(javaName, types))) javaName += "Property"; // until no inherited one
+            if (!javaName.equals(name)) {
                 System.err.println("WebComponentGenerator: <" + tag + "> " + className + "." + signature(name, types)
                     + " is PWebComponent's: generated as " + javaName);
                 docText = (doc == null ? "" : doc + "\n") + "Named {@code " + javaName + "}: {@code " + name
                     + "} is PWebComponent's.";
             }
             final String signature = signature(javaName, types);
-            if (INHERITED.contains(signature) || !signatures.add(signature)) {
+            if (!signatures.add(signature)) {
                 throw new IllegalArgumentException("<" + tag + ">: two members give " + className + "." + signature);
             }
             body.append('\n');

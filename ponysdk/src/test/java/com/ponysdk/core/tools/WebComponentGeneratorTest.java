@@ -113,6 +113,17 @@ public class WebComponentGeneratorTest extends PSuite {
     }
 
     @Test
+    public void mainFailsOnAUsageError() {
+        final java.io.PrintStream stderr = System.err;
+        System.setErr(new java.io.PrintStream(java.io.OutputStream.nullOutputStream()));
+        try {
+            assertThrows(IllegalArgumentException.class, () -> WebComponentGenerator.main(new String[] { "only-one" }));
+        } finally {
+            System.setErr(stderr);
+        }
+    }
+
+    @Test
     public void mainWritesTheClassesOfTheManifest() throws Exception {
         final Path manifest = Path.of(WebComponentGeneratorTest.class.getResource("/webcomponents/custom-elements.json").toURI());
         final Path target = output.resolve("main");
@@ -283,6 +294,16 @@ public class WebComponentGeneratorTest extends PSuite {
     }
 
     // ---- Failures ----
+
+    @Test
+    public void aRenamedMemberKeepsItsDescriptionBeforeTheRenaming() {
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"title","type":{"text":"string"},"description":"The heading."}]}]}]}""";
+        final String source = String.join("\n", sources(manifest).values());
+        assertTrue(source.contains("The heading.\n     * Named {@code setTitleProperty}: {@code setTitle} is PWebComponent's."), source);
+    }
 
     @Test
     public void twoDeclarationsOfOneTagFail() {

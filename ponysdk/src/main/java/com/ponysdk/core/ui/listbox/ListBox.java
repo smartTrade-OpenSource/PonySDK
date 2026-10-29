@@ -638,8 +638,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
-                final ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
-                if (currentItemIndex == null || !visibleItems.contains(currentItemIndex.item)) {
+                // the rows show visible items only: the index row, when it is shown, holds one
+                if (itemContainer.getCurrentItemIndex() == null) {
                     initIndex();
                     if (index < visibleItems.size()) itemContainer.showIndex(index);
                 }

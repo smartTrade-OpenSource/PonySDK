@@ -211,4 +211,17 @@ public class SharedDictionaryProviderTest {
         assertTrue(p.getPreSeedStrings().isEmpty());
         assertEquals(1, p.globalSize());
     }
+
+    @Test
+    public void theFrequenciesAreWrittenAtTheirPeriod() throws Exception {
+        final SharedDictionaryProvider p = new SharedDictionaryProvider(tmpDir, 512, java.time.Duration.ofMillis(20));
+        providers.add(p);
+        p.recordBulkUsage(Map.of("periodic", 10L));
+        final Path file = tmpDir.resolve(SharedDictionaryProvider.DEFAULT_FILE_NAME);
+        final long deadline = System.currentTimeMillis() + 5_000;
+        while (!(Files.exists(file) && Files.readString(file).contains("periodic")) && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10); // written in place: wait for the whole entry
+        }
+        assertTrue(Files.readString(file).contains("periodic"), "written without a call");
+    }
 }

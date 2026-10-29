@@ -443,17 +443,19 @@ public class WebSocketPusher implements Closeable {
      */
     public void encode(final ServerToClientModel model, final Object value) throws IOException {
         checkState();
-        switch (model.getTypeModel()) {
-            case NULL -> write(model);
-            case BOOLEAN -> write(model, (boolean) value);
-            case BYTE -> write(model, (byte) value);
-            case UINT31 -> writeUint31(model, (int) value);
-            case INTEGER -> write(model, (int) value);
-            case LONG -> write(model, (long) value);
-            case DOUBLE -> write(model, (double) value);
-            case STRING -> writeStringOrRef(model, (String) value);
-            case ARRAY -> write(model, (Object[]) value);
-        }
+        // An expression, so that the compiler checks every value type has its case: a statement would accept a
+        // missing one and do nothing
+        final ValueTypeModel written = switch (model.getTypeModel()) {
+            case NULL -> { write(model); yield ValueTypeModel.NULL; }
+            case BOOLEAN -> { write(model, (boolean) value); yield ValueTypeModel.BOOLEAN; }
+            case BYTE -> { write(model, (byte) value); yield ValueTypeModel.BYTE; }
+            case UINT31 -> { writeUint31(model, (int) value); yield ValueTypeModel.UINT31; }
+            case INTEGER -> { write(model, (int) value); yield ValueTypeModel.INTEGER; }
+            case LONG -> { write(model, (long) value); yield ValueTypeModel.LONG; }
+            case DOUBLE -> { write(model, (double) value); yield ValueTypeModel.DOUBLE; }
+            case STRING -> { writeStringOrRef(model, (String) value); yield ValueTypeModel.STRING; }
+            case ARRAY -> { write(model, (Object[]) value); yield ValueTypeModel.ARRAY; }
+        };
     }
 
     /** Primitive int variant of {@link #encode}: no boxing for ids and other int values. */

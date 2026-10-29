@@ -290,4 +290,9 @@ public class PendingUpdatesTest {
         text(pending, t, "c");
         assertEquals(List.of(List.of("TYPE_UPDATE=1", "TEXT=c")), drain(pending, ProtocolVersion.V1));
     }
+
+    @Test
+    public void sixteenMillionSlotsOrMoreKeepTheSlotOrder() {
+        assertNull(PendingUpdates.comparisonOrder(new UpdateTarget[0], 1 << 24), "the slot takes 24 bits of the sort key");
+    }
 }

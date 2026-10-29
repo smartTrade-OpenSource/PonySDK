@@ -260,7 +260,11 @@ final class PendingUpdates {
         return o;
     }
 
-    private static int[] comparisonOrder(final UpdateTarget[] t, final int n) {
+    /**
+     * Slow path: live slots sorted by a key of group, id and slot; null for 16M slots or more (the slot takes 24 bits
+     * of the key) or more than 255 groups, which keep the slot order.
+     */
+    static int[] comparisonOrder(final UpdateTarget[] t, final int n) {
         if (n >= 1 << 24) return null;
         Object[] groups = new Object[4];
         int groupCount = 0;

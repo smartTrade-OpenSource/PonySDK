@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -116,6 +117,17 @@ public class SharedDictionaryProvider {
      * @param preSeedSize      Maximum number of strings to pre-seed into new sessions
      */
     public SharedDictionaryProvider(final Path persistDirectory, final int preSeedSize) {
+        this(persistDirectory, preSeedSize, Duration.ofMinutes(DEFAULT_AUTO_PERSIST_MINUTES));
+    }
+
+    /**
+     * Creates a provider that persists to the given directory at this period, and at {@link #shutdown()}.
+     *
+     * @param persistDirectory  Directory where the dictionary file will be stored
+     * @param preSeedSize       Maximum number of strings to pre-seed into new sessions
+     * @param autoPersistPeriod How often the frequencies are written
+     */
+    public SharedDictionaryProvider(final Path persistDirectory, final int preSeedSize, final Duration autoPersistPeriod) {
         // Absolute: the file of an empty (working) directory has a parent to create
         this.persistPath = persistDirectory.toAbsolutePath().resolve(DEFAULT_FILE_NAME);
         this.preSeedSize = preSeedSize > 0 ? preSeedSize : DEFAULT_PRESEED_SIZE;
@@ -123,12 +135,9 @@ public class SharedDictionaryProvider {
 
         // Start auto-persist daemon thread
         this.scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("ponysdk-dict-persist").factory());
-        this.autoPersistTask = scheduler.scheduleAtFixedRate(
-            this::persistQuietly,
-            DEFAULT_AUTO_PERSIST_MINUTES,
-            DEFAULT_AUTO_PERSIST_MINUTES,
-            TimeUnit.MINUTES
-        );
+        final long period = autoPersistPeriod.toMillis();
+        // persist() logs what fails: a task that threw would never run again
+        this.autoPersistTask = scheduler.scheduleAtFixedRate(this::persist, period, period, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -189,17 +198,6 @@ public class SharedDictionaryProvider {
     }
 
     /**
-     * Wrapper for scheduled auto-persist that catches exceptions.
-     */
-    private void persistQuietly() {
-        try {
-            persist();
-        } catch (final Exception e) {
-            log.warn("Auto-persist failed", e);
-        }
-    }
-
-    /**
      * Persists the current frequency data to disk and refreshes the pre-seed list.
      * Applies a decay factor to all frequencies so that strings which are no longer
      * used gradually lose their position, keeping the dictionary fresh.
@@ -251,7 +249,7 @@ public class SharedDictionaryProvider {
 
             log.info("Persisted string dictionary: {} entries ({} pre-seeded, {} sessions flushed) to {}",
                     entries.size(), preSeedStrings.size(), sessionFlushCount.get(), persistPath);
-        } catch (final IOException e) {
+        } catch (final IOException | RuntimeException e) {
             log.warn("Failed to persist string dictionary to {}", persistPath, e);
         }
     }
