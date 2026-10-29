@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 
 public class RouteParametersTest {
 
-    private final RouteParameters parameters = new RouteParameters("orders/42?page=3&big=9000000000&flag=False&word=x",
+    private final RouteParameters parameters = new RouteParameters(null, "orders/42?page=3&big=9000000000&flag=False&word=x",
         Map.of("id", "42"), Tokens.query("page=3&big=9000000000&flag=False&word=x&id=7"));
 
     @Test
@@ -72,7 +72,7 @@ public class RouteParametersTest {
     @Test
     public void aBooleanIsTrueOrFalseInAnyCaseOrTheFallback() {
         assertFalse(parameters.getBoolean("flag", true));
-        assertTrue(new RouteParameters("t", Map.of("on", "TRUE"), Map.of()).getBoolean("on", false));
+        assertTrue(new RouteParameters(null, "t", Map.of("on", "TRUE"), Map.of()).getBoolean("on", false));
         assertTrue(parameters.getBoolean("word", true));
         assertTrue(parameters.getBoolean("absent", true));
         assertFalse(parameters.getBoolean("absent", false));

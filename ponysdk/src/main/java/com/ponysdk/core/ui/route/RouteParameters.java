@@ -31,14 +31,21 @@ import java.util.Map;
  */
 public final class RouteParameters {
 
+    private final Router router;
     private final String token;
     private final Map<String, String> path;
     private final Map<String, String> query;
 
-    RouteParameters(final String token, final Map<String, String> path, final Map<String, String> query) {
+    RouteParameters(final Router router, final String token, final Map<String, String> path, final Map<String, String> query) {
+        this.router = router;
         this.token = token;
         this.path = path;
         this.query = query;
+    }
+
+    /** The router that builds the view, for the view to navigate from. */
+    public Router router() {
+        return router;
     }
 
     /** The history token these parameters were read from. */

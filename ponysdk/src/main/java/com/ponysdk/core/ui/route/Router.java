@@ -86,14 +86,17 @@ public final class Router {
         final Set<String> shapes = new HashSet<>();
         for (final Class<?> view : builder.views) {
             final Route route = view.getAnnotation(Route.class);
-            if (route == null) throw new IllegalArgumentException(view.getName() + " has no @Route");
-            final Template template = Template.parse(route.value());
-            if (!shapes.add(template.shape())) {
-                throw new IllegalArgumentException(view.getName() + " has the path of another view: " + route.value());
+            if (route == null || route.value().length == 0) throw new IllegalArgumentException(view.getName() + " has no @Route path");
+            final ViewFactory factory = new ViewFactory(view);
+            for (final String path : route.value()) {
+                final Template template = Template.parse(path);
+                if (!shapes.add(template.shape())) {
+                    throw new IllegalArgumentException(view.getName() + " has the path of another view: " + path);
+                }
+                final Entry entry = new Entry(view, template, factory);
+                entries.add(entry);
+                byView.putIfAbsent(view, entry); // the first path is the one navigate(View.class) writes
             }
-            final Entry entry = new Entry(view, template, new ViewFactory(view));
-            entries.add(entry);
-            byView.put(view, entry);
         }
         for (final Class<?> view : access.keySet()) {
             if (!byView.containsKey(view)) throw new IllegalArgumentException("Access to " + view.getName() + ", not a view of this router");
@@ -184,7 +187,7 @@ public final class Router {
                 break;
             }
         }
-        final RouteParameters parameters = new RouteParameters(token, values, query);
+        final RouteParameters parameters = new RouteParameters(this, token, values, query);
 
         if (leave && shown.view instanceof BeforeLeave guard) { // a started router always shows a view
             final Navigation navigation = new Navigation(this, false, token, matched == null ? null : matched.view, parameters);

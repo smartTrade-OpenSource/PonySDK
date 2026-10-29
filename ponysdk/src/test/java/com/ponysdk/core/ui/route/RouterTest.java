@@ -189,6 +189,34 @@ public class RouterTest extends PSuite {
         }
     }
 
+    @Route({"twice", "twice/again", ""})
+    static class Twice extends Page {
+
+        Twice() {
+            super("twice", "twice");
+        }
+    }
+
+    @Route({})
+    static class NoPath extends Page {
+
+        NoPath() {
+            super("nopath", "nopath");
+        }
+    }
+
+    /** The router a view found in its parameters. */
+    private static Router seenRouter;
+
+    @Route("self")
+    static class SelfAware extends Page {
+
+        SelfAware(final RouteParameters parameters) {
+            super("self", "self");
+            seenRouter = parameters.router();
+        }
+    }
+
     @Route("broken")
     static class Broken extends Page {
 
@@ -291,6 +319,19 @@ public class RouterTest extends PSuite {
         assertEquals("edit 42", text());
         history.fireHistoryChanged("orders/42/print");
         assertEquals("thing print", text());
+    }
+
+    @Test
+    public void aViewWithSeveralPathsIsReachedByEachAndWritesTheFirst() {
+        history.newItem("twice/again", false);
+        final Router router = Router.builder(container).views(Twice.class, Order.class).start();
+        assertEquals("twice", text());
+        history.fireHistoryChanged("");
+        assertEquals("twice", text(), "its root path");
+        router.navigate("orders/1");
+        router.navigate(Twice.class);
+        assertEquals("twice", history.getToken());
+        assertEquals("twice", text());
     }
 
     @Test
@@ -484,6 +525,13 @@ public class RouterTest extends PSuite {
         assertThrows(IllegalStateException.class, () -> Router.builder(container).views(Home.class, Broken.class).start());
         history.fireHistoryChanged("");
         assertEquals(List.of("build broken"), log());
+    }
+
+    @Test
+    public void aViewFindsTheRouterThatBuiltItInItsParameters() {
+        final Router router = Router.builder(container).views(Home.class, SelfAware.class).start();
+        router.navigate("self");
+        assertSame(router, seenRouter);
     }
 
     // ── back and forward ──
@@ -932,6 +980,7 @@ public class RouterTest extends PSuite {
     @Test
     public void aViewNeedsItsRoute() {
         assertThrows(IllegalArgumentException.class, () -> Router.builder(container).views(Missing.class).start());
+        assertThrows(IllegalArgumentException.class, () -> Router.builder(container).views(NoPath.class).start());
     }
 
     @Test

@@ -42,6 +42,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Route {
 
-    /** The path template, relative to the router's base. */
-    String value();
+    /**
+     * The path templates, relative to the router's base. A view with several is reached by each; the first is the one
+     * {@link Router#navigate(Class, java.util.Map)} writes ({@code @Route({"orders", ""})}: the list is also the root).
+     */
+    String[] value();
 }

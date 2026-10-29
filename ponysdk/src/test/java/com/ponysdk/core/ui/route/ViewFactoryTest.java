@@ -36,7 +36,7 @@ import com.ponysdk.core.ui.basic.PWidget;
 
 public class ViewFactoryTest {
 
-    private static final RouteParameters NONE = new RouteParameters("", Map.of(), Map.of());
+    private static final RouteParameters NONE = new RouteParameters(null, "", Map.of(), Map.of());
 
     static class Plain implements IsPWidget {
 
