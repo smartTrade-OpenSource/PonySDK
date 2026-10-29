@@ -22,6 +22,7 @@ import com.ponysdk.core.server.application.SessionInfo;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -103,6 +104,11 @@ final class ReconnectionPage {
             + "server does that to the frame's session. What the page's address keeps comes back: click a price in the "
             + "frame, then Move server."));
         p.add(codeSnippet("The drain on SIGTERM: ShowcaseMain.java", "java", Source.code(ShowcaseMain.class, "drain")));
+        p.add(el("ov-note", "The balancer's health check is the application's path followed by /health: 200 UP while the "
+            + "server takes pages, 503 DRAINING from the start of a drain. No session, not cached."));
+        final PAnchor health = Element.newPAnchor("Open this server's health check", "health");
+        health.setAttribute("target", "_blank");
+        p.add(health);
         p.add(codeSnippet("The watched price, in the page's address: ReconnectionPage.java", "java",
             Source.code(ReconnectionPage.class, "watch")));
 

@@ -244,6 +244,17 @@ test('Move server: the frame reloads into a new session, its watched price back 
   await expect(frame.locator('.rc-cell').nth(6)).toHaveClass(/rc-watched/);
 });
 
+test("the health check the Reconnection page links to answers UP, not cached", async ({ page }) => {
+  await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
+  const link = page.getByRole('link', { name: "Open this server's health check" });
+  const href = await link.evaluate(a => /** @type {HTMLAnchorElement} */ (a).href);
+  expect(new URL(href).pathname).toBe(new URL(BASE_URL).pathname + 'health');
+  const response = await page.request.get(href);
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toBe('UP');
+  expect(response.headers()['cache-control']).toBe('no-store');
+});
+
 test('the Reconnection page drives its frame session through SessionAdmin, up to the cap', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });

@@ -72,7 +72,7 @@ held in the JVM does not.
 | Cookies: preferences of the browser, written with `uiContext.getCookies().setCookie`, read at the start from `uiContext.getRequestCookies()` (those of the WebSocket handshake) | The objects of the screen, its subscriptions |
 
 The Reconnection page of the showcase shows it: click a price in its frame, then Move server; the new session
-restores the price from its address.
+restores the price from its address. The same page links to the showcase's own health check.
 
 A server that crashes has no time to drain: its pages reconnect, the balancer sends them to another server, which
 does not know their context, and they reload as after a move.
