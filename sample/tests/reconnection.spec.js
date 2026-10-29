@@ -166,6 +166,31 @@ test('a short drop: a banner while the connection is lost, then the same context
   await expect(page.getByText('server handled click #2')).toBeVisible(); // same server state: resumed, not reloaded
 });
 
+test('a click lost with the connection: the button it disabled is enabled again once the context resumes', async ({ page }) => {
+  const sockets = await routeSockets(page);
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  const clickMe = page.getByRole('button', { name: 'Click me' });
+  await expect(clickMe).toBeVisible({ timeout: 10000 });
+  await clickMe.click();
+  await expect(page.getByText('server handled click #1')).toBeVisible();
+  await expect(clickMe).toBeEnabled();
+
+  const banner = page.locator('#reconnecting');
+  sockets.offline = true;
+  await sockets.cut();
+  await expect(banner).toBeVisible();
+  // The page's overlay takes the pointer, not the keyboard: Enter on the focused button still clicks it.
+  // That click never reaches the server, so no END_OF_PROCESSING comes for it
+  await clickMe.press('Enter');
+  await expect(clickMe).toBeDisabled();
+
+  sockets.offline = false;
+  await expect(banner).toBeHidden({ timeout: 10000 });
+  await expect(clickMe).toBeEnabled();
+  await clickMe.click();
+  await expect(page.getByText('server handled click #2')).toBeVisible();
+});
+
 // On a page made of terminal objects only (OraclePages#reconnect): it runs on both terminals
 test.describe('a page of terminal objects', () => {
   test('a short drop: the same context resumes', async ({ page }) => {

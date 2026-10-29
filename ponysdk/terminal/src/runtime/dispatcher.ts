@@ -138,6 +138,7 @@ export class Dispatcher implements Context {
             }
             if (!this.host.contextCreated(id, tabindexOnlyFormField, heartbeatSeconds, keys)) return false;
         } else if (key === K.RECONNECT_CONTEXT) {
+            for (const object of this.objects.values()) object.contextResumed?.();
             this.host.contextResumed();
             r.read(); // END
         } else if (key === K.DESTROY_CONTEXT) {

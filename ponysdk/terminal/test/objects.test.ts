@@ -10,7 +10,7 @@ import { AddOnObject } from '../src/objects/addon.ts';
 import { Script } from '../src/objects/script.ts';
 import type { Message } from '../src/protocol/messages.ts';
 import { Dispatcher, registerAddOnFactory, type HistoryPort, type Host } from '../src/runtime/dispatcher.ts';
-import type { AddOn, Session } from '../src/runtime/object.ts';
+import { BaseObject, type AddOn, type Session } from '../src/runtime/object.ts';
 import { encode, type Model } from './frames.ts';
 
 // The objects that need no document, driven by the server's blocks: what they do with a malformed or unexpected one
@@ -130,4 +130,29 @@ test('an addon that fails to start, to answer a call, or is called once destroye
         'warn ADDON #6 is destroyed: late is discarded',
         'warn ADDON #6 has no property TEXT: the rest of its block is skipped',
     ]);
+});
+
+test('a resumed context tells each object, before its host: what was sent while the connection was lost may be lost', t => {
+    const calls: string[] = [];
+    class Resumable extends BaseObject {
+        contextResumed(): void {
+            calls.push(`resumed #${this.id}`);
+        }
+    }
+    const host: Host = {
+        send: () => undefined,
+        contextCreated: () => true,
+        contextResumed: () => calls.push('host'),
+        contextDestroyed: () => undefined,
+        streamRequested: () => undefined,
+        cookieRequested: () => undefined,
+    };
+    const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
+    const dispatcher = new Dispatcher(host, (type, context, id) =>
+        type === W.SCRIPT ? new Script(context, id, type) : new Resumable(context, id, type), SESSION, history);
+    terminal(t); // the console mocks
+    dispatcher.receive(create(5, W.LABEL));
+    dispatcher.receive(create(6, W.SCRIPT));
+    dispatcher.receive(encode([K.RECONNECT_CONTEXT, 1], [K.END]));
+    assert.deepEqual(calls, ['resumed #5', 'host']);
 });

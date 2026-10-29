@@ -11,12 +11,15 @@ import { Widget } from '../runtime/widget.ts';
 /**
  * A widget the user acts on. A disabled one sends no event. By default a click
  * disables it until the server has processed the click (END_OF_PROCESSING), so that a double click is not processed
- * twice; ENABLED_ON_REQUEST keeps it enabled, LOADING_ON_REQUEST marks it busy meanwhile.
+ * twice; ENABLED_ON_REQUEST keeps it enabled, LOADING_ON_REQUEST marks it busy meanwhile. A click sent while the
+ * connection was lost never reaches the server: the context resumed, the widget waits no more.
  */
 export class FocusWidget extends Widget {
     protected enabled = true;
     private loadingOnRequest = false;
     private enabledOnRequest = false;
+    /** Disabled or busy for a click the server has not answered yet. */
+    private waiting = false;
 
     constructor(context: Context, id: number, type: number, element: HTMLElement, typeClass: string) {
         super(context, id, type, element, typeClass);
@@ -43,7 +46,18 @@ export class FocusWidget extends Widget {
         if (!this.enabled) return;
         if (!this.enabledOnRequest) this.setEnabled(false);
         if (this.loadingOnRequest) this.element.setAttribute('aria-busy', 'true');
+        this.waiting = !this.enabledOnRequest || this.loadingOnRequest;
         this.sendMouseEvent(type, event);
+    }
+
+    contextResumed(): void {
+        if (this.waiting) this.endOfProcessing();
+    }
+
+    private endOfProcessing(): void {
+        this.waiting = false;
+        if (this.loadingOnRequest) this.element.removeAttribute('aria-busy');
+        if (!this.enabledOnRequest) this.setEnabled(this.enabled);
     }
 
     protected override onKey(type: number, event: KeyboardEvent, filter: number[] | null): void {
@@ -61,9 +75,6 @@ export class FocusWidget extends Widget {
         [K.ENABLED_ON_REQUEST, (w, r) => {
             w.enabledOnRequest = r.bool;
         }],
-        [K.END_OF_PROCESSING, w => {
-            if (w.loadingOnRequest) w.element.removeAttribute('aria-busy');
-            if (!w.enabledOnRequest) w.setEnabled(w.enabled);
-        }],
+        [K.END_OF_PROCESSING, w => w.endOfProcessing()],
     ]);
 }

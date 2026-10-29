@@ -82,6 +82,8 @@ export interface TerminalObject {
     removeHandler(reader: Reader, handler: number): void;
     /** Collected by the server: releases what it holds. */
     destroy(): void;
+    /** RECONNECT_CONTEXT: what this object sent while the connection was lost may never have reached the server. */
+    contextResumed?(): void;
 }
 
 /** Creates the object of a TYPE_CREATE block, reading what the block carries before the properties. */
