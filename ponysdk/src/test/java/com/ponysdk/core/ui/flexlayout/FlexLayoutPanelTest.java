@@ -123,16 +123,6 @@ public class FlexLayoutPanelTest extends PSuite {
         assertArrayEquals(new Object[] { null, null, null }, recorder.creationArgs(addon));
     }
 
-    @Test
-    @SuppressWarnings("deprecation")
-    public void deprecatedStringConstructors() {
-        final FlexLayoutPanel a = attach(new FlexLayoutPanel("{\"type\":\"row\"}", "th"));
-        assertArrayEquals(new Object[] { "{\"type\":\"row\"}", "th", null }, recorder.creationArgs(a.getAddon()));
-
-        final FlexLayoutPanel b = attach(new FlexLayoutPanel(null, null, "[{\"location\":\"bottom\"}]"));
-        assertArrayEquals(new Object[] { null, null, "[{\"location\":\"bottom\"}]" }, recorder.creationArgs(b.getAddon()));
-    }
-
     // ─── Tabs ────────────────────────────────────────────────────
 
     @Test
@@ -296,7 +286,6 @@ public class FlexLayoutPanelTest extends PSuite {
     // ─── Persistence and events ──────────────────────────────────
 
     @Test
-    @SuppressWarnings("deprecation")
     public void persistenceAndEvents() {
         final List<String> received = new ArrayList<>();
 
@@ -336,11 +325,9 @@ public class FlexLayoutPanelTest extends PSuite {
 
         panel.getLayoutSummary(s -> received.add("summary:" + s));
         fire(addon, Json.createObjectBuilder().add("type", "layoutSummary").add("data", "S"));
-        panel.getOpenTabsRaw(s -> received.add("raw:" + s));
-        fire(addon, Json.createObjectBuilder().add("type", "openTabs").add("data", "[]"));
 
         assertEquals(List.of("saved:m", "changed:m2", "action:close", "closed:t9", "selected:t9", "visible:t9",
-            "hidden:t9", "action:move", "broadcast:move", "config:{}", "summary:S", "raw:[]"), received);
+            "hidden:t9", "action:move", "broadcast:move", "config:{}", "summary:S"), received);
     }
 
     @Test
@@ -383,7 +370,6 @@ public class FlexLayoutPanelTest extends PSuite {
     // ─── Appearance and features ─────────────────────────────────
 
     @Test
-    @SuppressWarnings("deprecation")
     public void appearanceAndFeatures() {
         panel.setTheme(FlexTheme.MONOKAI);
         recorder.assertLast(addon, "setTheme", "fl-theme-monokai");
@@ -394,13 +380,9 @@ public class FlexLayoutPanelTest extends PSuite {
         final JsonObject keymap = read((String) recorder.last(addon).args[0]);
         assertTrue(keymap.isNull("undo"));
         assertTrue(keymap.getJsonObject("redo").getBoolean("ctrl"));
-        panel.setKeymap("{}");
-        recorder.assertLast(addon, "setKeymap", "{}");
 
         panel.setBlockedActions(FlexAction.RENAME_TAB, FlexAction.COMMAND_PALETTE);
         recorder.assertLast(addon, "setBlockedActions", "[\"renameTab\",\"commandPalette\"]");
-        panel.setBlockedActions("a", "b");
-        recorder.assertLast(addon, "setBlockedActions", "[\"a\",\"b\"]");
         panel.setBlockedTabs("t1");
         recorder.assertLast(addon, "setBlockedTabs", "[\"t1\"]");
 

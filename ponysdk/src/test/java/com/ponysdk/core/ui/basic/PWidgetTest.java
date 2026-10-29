@@ -369,12 +369,9 @@ public class PWidgetTest extends PSuite {
         final PLabel label = attachedLabel();
         writer.clear();
         label.focus();
-        assertTrue(label.isFocused());
         label.blur();
-        assertFalse(label.isFocused());
         assertEquals(List.of(true, false), writer.valuesOf(ServerToClientModel.FOCUS));
         label.focusPreventScroll();
-        assertTrue(label.isFocused());
         assertEquals(1, writer.count(ServerToClientModel.FOCUS_PREVENT_SCROLL));
 
         label.setTabindex(PWidget.TabindexMode.TABULABLE);

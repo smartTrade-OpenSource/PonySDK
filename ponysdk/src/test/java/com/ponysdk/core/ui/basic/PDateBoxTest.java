@@ -208,14 +208,13 @@ public class PDateBoxTest extends PSuite {
         assertEquals(List.of(false), writer.valuesOf(ServerToClientModel.ENABLED));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testFocus() {
         final PDateBox dateBox = Element.newPDateBox();
         PWindow.getMain().add(dateBox);
         writer.clear();
-        dateBox.setFocus(true);
-        dateBox.setFocus(false);
+        dateBox.focus();
+        dateBox.blur();
         assertEquals(List.of(true, false), writer.valuesOf(ServerToClientModel.FOCUS));
     }
 

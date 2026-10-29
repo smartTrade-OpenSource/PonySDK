@@ -47,7 +47,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable {
+public abstract class PFocusWidget extends PWidget {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -67,17 +67,6 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
         saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
-    }
-
-    /**
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     * @since v2.7.16
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {

@@ -8,7 +8,10 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.flexlayout.FlexLayoutModel;
 import com.ponysdk.core.ui.flexlayout.FlexLayoutPanel;
+import com.ponysdk.core.ui.flexlayout.FlexTab;
+import com.ponysdk.core.ui.flexlayout.FlexTabset;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
@@ -118,14 +121,9 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         root.add(toolbar);
 
         // FlexLayout panel
-        final String initialModel = "{\"type\":\"row\",\"children\":["
-            + "{\"type\":\"tabset\",\"weight\":60,\"children\":["
-            + "{\"type\":\"tab\",\"name\":\"Welcome\",\"component\":\"welcome\"}"
-            + "]},"
-            + "{\"type\":\"tabset\",\"weight\":40,\"children\":["
-            + "{\"type\":\"tab\",\"name\":\"Info\",\"component\":\"info\"}"
-            + "]}"
-            + "]}";
+        final FlexLayoutModel initialModel = FlexLayoutModel.row()
+            .tabset(FlexTabset.create().weight(60).tab(FlexTab.create("Welcome").component("welcome")))
+            .tabset(FlexTabset.create().weight(40).tab(FlexTab.create("Info").component("info")));
 
         final FlexLayoutPanel flexLayout = new FlexLayoutPanel(initialModel, null);
 

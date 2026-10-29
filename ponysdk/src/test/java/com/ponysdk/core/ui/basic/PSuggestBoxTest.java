@@ -152,16 +152,13 @@ public class PSuggestBoxTest extends PSuite {
         assertTrue(box.isShown());
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void focusGoesToTheTextBox() {
         final PSuggestBox box = attachedBox();
         writer.clear();
         box.focus();
         box.blur();
-        box.setFocus(true);
-        box.setFocus(false);
-        assertEquals(List.of(true, false, true, false), writer.valuesOf(ServerToClientModel.FOCUS));
+        assertEquals(List.of(true, false), writer.valuesOf(ServerToClientModel.FOCUS));
         assertEquals(List.of(box.getTextBox().getID()), writer.valuesOf(ServerToClientModel.TYPE_UPDATE).stream().distinct().toList());
     }
 

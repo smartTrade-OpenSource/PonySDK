@@ -110,12 +110,11 @@ public class PFocusWidgetTest extends PSuite {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void focusOnlyWhenVisibleAndEnabled() {
         final PButton button = attachedButton();
         writer.clear();
-        button.setFocus(true);
-        button.setFocus(false);
+        button.focus();
+        button.blur();
         assertEquals(List.of(true, false), writer.valuesOf(ServerToClientModel.FOCUS));
 
         writer.clear();

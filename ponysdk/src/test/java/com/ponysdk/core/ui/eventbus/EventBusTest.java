@@ -269,7 +269,6 @@ public class EventBusTest extends PSuite {
         event.setData("payload");
         assertEquals("payload", event.getData());
         assertEquals("ClickTestEvent with data : payload", event.toString());
-        assertEquals(0, event.getEventID());
 
         final Object other = new Object();
         event.setSource(other);

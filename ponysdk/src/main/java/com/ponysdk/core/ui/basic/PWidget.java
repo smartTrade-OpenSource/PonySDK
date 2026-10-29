@@ -127,7 +127,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String[] styleProperties;
     private String[] elementAttributes;
     private String title;
-    private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
     private EventSource eventSource;
 
@@ -752,12 +751,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void focusPreventScroll() {
-        this.focused = true;
         saveUpdate(ServerToClientModel.FOCUS_PREVENT_SCROLL, null);
     }
 
     private void focus(final boolean focused) {
-        this.focused = focused;
         saveUpdate(ServerToClientModel.FOCUS, focused);
     }
 
@@ -794,14 +791,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public Stream<String> getStyleNames() {
         return styleNames.stream();
-    }
-
-    /**
-     * @deprecated Add a FocusHandler if you want to know the focused state
-     */
-    @Deprecated
-    public boolean isFocused() {
-        return focused;
     }
 
     public abstract String dumpDOM();

@@ -48,7 +48,7 @@ import java.util.*;
  * <dd>the popup of its date picker</dd>
  * </dl>
  */
-public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PValueChangeHandler<Date> {
+public class PDateBox extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
@@ -187,17 +187,6 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
 
     public String getRawValue() {
         return rawValue;
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {

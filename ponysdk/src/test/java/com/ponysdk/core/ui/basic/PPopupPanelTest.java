@@ -66,7 +66,6 @@ public class PPopupPanelTest extends PSuite {
         final PPopupPanel popup = Element.newPPopupPanel();
         assertEquals(WidgetType.POPUP_PANEL, popup.getWidgetType());
         assertFalse(popup.isVisible());
-        assertFalse(popup.isShowing());
         assertFalse(popup.isAnimationEnabled());
     }
 

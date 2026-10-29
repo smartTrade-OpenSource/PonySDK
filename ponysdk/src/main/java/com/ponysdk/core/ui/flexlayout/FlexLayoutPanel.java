@@ -39,20 +39,8 @@ public final class FlexLayoutPanel implements IsPWidget {
         this.addon = new FlexLayoutAddon(modelJson, themeStr, bordersJson);
     }
 
-    // ─── Backward-compatible constructors (deprecated) ───────────
-
     public FlexLayoutPanel() {
-        this(null, null, (String) null);
-    }
-
-    @Deprecated
-    public FlexLayoutPanel(final String modelJson, final String theme) {
-        this(modelJson, theme, null);
-    }
-
-    @Deprecated
-    public FlexLayoutPanel(final String modelJson, final String theme, final String bordersJson) {
-        this.addon = new FlexLayoutAddon(modelJson, theme, bordersJson);
+        this(null, null);
     }
 
     @Override
@@ -226,20 +214,10 @@ public final class FlexLayoutPanel implements IsPWidget {
         addon.setKeymap(keymap.toJson());
     }
 
-    @Deprecated
-    public void setKeymap(final String keymapJson) {
-        addon.setKeymap(keymapJson);
-    }
-
     // ─── Typed getOpenTabs ───────────────────────────────────────
 
     public void getOpenTabs(final Consumer<List<FlexTabInfo>> callback) {
         addon.getOpenTabs(json -> callback.accept(FlexTabInfo.fromJson(json)));
-    }
-
-    @Deprecated
-    public void getOpenTabsRaw(final Consumer<String> callback) {
-        addon.getOpenTabs(callback);
     }
 
     public void getLayoutSummary(final Consumer<String> callback) {
@@ -252,11 +230,6 @@ public final class FlexLayoutPanel implements IsPWidget {
         final String[] keys = new String[actions.length];
         for (int i = 0; i < actions.length; i++) keys[i] = actions[i].getKey();
         addon.setBlockedActions(keys);
-    }
-
-    @Deprecated
-    public void setBlockedActions(final String... actions) {
-        addon.setBlockedActions(actions);
     }
 
     public void setBlockedTabs(final String... tabIds) {
