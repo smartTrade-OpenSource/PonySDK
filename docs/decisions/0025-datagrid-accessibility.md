@@ -31,7 +31,8 @@ left this grid out: its structure is the difficulty.
    the containers and the rows; `aria-rowcount`, `aria-colcount` (shown columns, at each state change),
    `aria-rowindex` (set when the first row of the window moved, not at each draw), `aria-selected` (set with the
    selection the row already got), `aria-sort` (with the column's sort, on its header cell), `aria-multiselectable`.
-4. **The terminal lays what comes from the page** (`ponysdk.js`, the grid's add-on): the role and `aria-colindex` of
+4. **The terminal lays what comes from the page** (`script/datagrid-a11y.js`, installed on the grid's add-on in
+   `ponysdk.js`, see the amendment below): the role and `aria-colindex` of
    each cell, the ids of the scrolled cells and the `aria-owns` of the pinned row, the roving `tabindex`. The server
    asks for it with one add-on call, `updateAria`, when the columns or the rows changed (a column pinned, shown,
    hidden or moved, rows added or removed, a configuration), coalesced to one run per batch of instructions. No new
@@ -102,3 +103,32 @@ Limits:
 - The widgets in the cells are not tab stops (`F2` goes to one); one the application adds later is.
 - A decorator that moves the focus itself keeps doing so: the filter footer disables its box while the grid is
   filtered and gives it the focus back after the draw.
+
+## Amendment: the terminal's part is a script of its own
+
+Decisions 4 and 5 first went into `ponysdk.js`, which every page loads: 52,817 -> 66,618 B for a feature most pages
+do not use. The code is now `script/datagrid-a11y.js`, which the grid's add-on fetches (`ponyLoadPart` in
+`ponysdk.js`: a `<script src>` element, once per page) when it is created.
+
+- **Same origin, same policy.** The URL is resolved against the URL of `ponysdk.js` itself (`document.currentScript`),
+  so it is `'self'` for the Content-Security-Policy (ADR-0015, no `script-src` change) and, for a `<pony-app>` element,
+  beside the `ponysdk.js` the page has (ADR-0008, ADR-0009): the application's own origin. The servlet serves it as it
+  does `ponysdk.js`.
+- **A grid created before the script arrives works.** It draws and selects as it did; `updateAria` and the window
+  hook are empty until then. When the script has run, the add-on gets its methods (`installAria`) and lays the page
+  as it is, so calls received meanwhile are not lost: the layout reads the DOM, not a queue. A script that does not
+  load is logged (`console.error`) and the grid goes on without roles on its cells and without the keyboard; the next
+  grid created tries again.
+- **Cost.** The fetch starts when the add-on is created, before its rows arrive (the server sends them after the
+  create): 1.6-3.8 ms on localhost, done before the first row is in the page in each of 5 runs. The cells are laid
+  34-40 ms after the first row appears (the layout of 63 x 53 cells, as before: the script adds no wait when
+  the round trip is shorter than the server's answer; on a slow link the cells are named a round trip later and a
+  grid with rows but no roles is read as a plain table meanwhile). One more request on a page with a grid
+  (3,745 B gzip, `Cache-Control: no-cache` revalidation as for the other scripts).
+- **ponysdk.js**: 66,624 -> 55,119 B (14,183 -> 11,665 B gzip), -11,505 B (-17.3 %) on every page; the new script is
+  13,770 B (3,745 B gzip). The 2.3 KB left over the 52,817 B of 3.0 are the loader, the two hooks and the comments.
+- Rejected: a terminal chunk (ADR-0004, `ADDONS` in `factory.ts`). A chunk is an add-on factory the dispatcher
+  waits for before it creates the add-on; the grid's add-on stays in `ponysdk.js` and draws at once, only its
+  accessibility is late, and a wait would delay the first rows.
+- Rejected: a dynamic `import()`. The add-on's file is a classic script (its globals are the add-ons' API,
+  ADR-0009), and the `<script>` element is what `<pony-app>` already uses for the application's scripts.

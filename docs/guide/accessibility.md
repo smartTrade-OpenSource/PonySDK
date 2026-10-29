@@ -36,6 +36,11 @@ that a screen reader hears one row, whatever the columns are pinned ([ADR-0025](
 A test or a style that looks for the cells of a row under its element finds the pinned ones only: the cells of the
 scrolled part are in the element next to it, which has the same index in its part.
 
+The terminal's part (roles and indexes of the cells, the keyboard) is `script/datagrid-a11y.js`, which `ponysdk.js`
+fetches from its own directory when the first grid is created: a page without a grid does not load it, and a page
+with a Content-Security-Policy needs nothing more than `'self'` (an embedded application's origin is listed as
+[embedding](embedding.md) says). A grid is usable before the script arrives and gets its roles when it has.
+
 ### Keyboard
 
 The grid is one tab stop: `Tab` enters it on one cell (the first at the start), `Tab` again leaves it. In it:
