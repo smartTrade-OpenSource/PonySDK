@@ -165,3 +165,8 @@ test('what the page sends to a window it opened is counted', async ({ page }) =>
   const panel = page.locator('pony-inspector').getByRole('region', { name: 'Pony inspector' });
   await expect(panel).toContainText('WINDOW');
 });
+
+test('the Component costs page says its bytes are those of debug mode', async ({ page }) => {
+  await page.evaluate(() => { location.hash = '#component-costs'; });
+  await expect(page.getByText('This server runs in debug mode', { exact: false })).toBeVisible({ timeout: 10000 });
+});

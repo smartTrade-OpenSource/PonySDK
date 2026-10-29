@@ -152,6 +152,7 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `debugMode` is a development mode: each widget's creation carries its Java class and the line that created it,
   found by walking the stack, and the terminal loads its inspector ([development tools](docs/guide/development.md)).
   Leave it off in production. It used to only send `ensureDebugId`'s ids, which it still does.
+- `WebComponentGenerator` ends a usage error with status 1 (it was 2): it throws instead of exiting the JVM.
 - A path the server does not have is logged at DEBUG ("Resource not found"), and a send that fails because the
   connection is closing too; they were ERRORs. A send that fails on an open connection stays an ERROR.
 - Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others

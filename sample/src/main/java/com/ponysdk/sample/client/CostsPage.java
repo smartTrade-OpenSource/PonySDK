@@ -48,6 +48,11 @@ final class CostsPage {
         pageTitle(p, "Component costs",
             "What each component really costs, measured live on this server: memory kept on the server per "
                 + "instance, and bytes per instance to create it and to update it.");
+        if (UIContext.get().getConfiguration().isDebugMode()) {
+            p.add(el("ov-note", "This server runs in debug mode: each widget's creation also carries its Java class and "
+                + "line for the inspector, so the bytes measured here are more than in production. Restart it without "
+                + "-Pdebug for the real figures."));
+        }
 
         final PFlowPanel controls = Element.newPFlowPanel();
         controls.addStyleName("ov-controls");
