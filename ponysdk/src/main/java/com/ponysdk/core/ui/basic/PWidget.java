@@ -789,18 +789,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
         final Extras x = wx();
-        if (x.visibilityHandlers == null) {
-            x.visibilityHandlers = new ArrayList<>(1);
-            saveAddHandler(HandlerModel.HANDLER_VISIBILITY);
-        }
+        if (x.visibilityHandlers == null) x.visibilityHandlers = new ArrayList<>(1);
+        if (x.visibilityHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_VISIBILITY); // the first, or the first again
         x.visibilityHandlers.add(visibilityHandler);
     }
 
     public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
         final List<PVisibilityHandler> visibilityHandlers = wx != null ? wx.visibilityHandlers : null;
-        if (visibilityHandlers != null) {
-            visibilityHandlers.remove(visibilityHandler);
-            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        if (visibilityHandlers != null && visibilityHandlers.remove(visibilityHandler) && visibilityHandlers.isEmpty()) {
+            saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
         }
     }
 

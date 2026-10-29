@@ -93,17 +93,14 @@ public abstract class PValueBoxBase extends PFocusWidget {
     }
 
     public void addPasteHandler(final PPasteHandler pasteHandler) {
-        if (pasteHandlers == null) {
-            pasteHandlers = new ArrayList<>();
-            saveAddHandler(HandlerModel.HANDLER_PASTE);
-        }
+        if (pasteHandlers == null) pasteHandlers = new ArrayList<>();
+        if (pasteHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_PASTE); // the first, or the first again
         pasteHandlers.add(pasteHandler);
     }
 
     public void removePasteHandler(final PPasteHandler pasteHandler) {
-        if (pasteHandlers != null) {
-            pasteHandlers.remove(pasteHandler);
-            if (pasteHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_PASTE);
+        if (pasteHandlers != null && pasteHandlers.remove(pasteHandler) && pasteHandlers.isEmpty()) {
+            saveRemoveHandler(HandlerModel.HANDLER_PASTE);
         }
     }
 

@@ -129,6 +129,22 @@ public class PScrollPanelTest extends PSuite {
     }
 
     @Test
+    public void aScrollHandlerAddedAfterTheLastWentRemovedTellsTheTerminalAgain() {
+        final PScrollPanel panel = attached();
+        final PScrollHandler first = event -> {
+        };
+        panel.addScrollHandler(first);
+        panel.removeScrollHandler(first);
+        panel.removeScrollHandler(first); // gone already: the terminal is not told twice
+        writer.clear();
+
+        panel.addScrollHandler(event -> {
+        });
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_ADD_HANDLER), "listening again, or no scroll comes");
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+    }
+
+    @Test
     public void testRemoveHandlerWithoutAnyHandler() {
         final PScrollPanel panel = attached();
         writer.clear();

@@ -331,6 +331,7 @@ final class TerminalPages {
             box.select(1, 3);
         });
         button(panel, "Stop paste", () -> box.removePasteHandler(paste));
+        button(panel, "Paste again", () -> box.addPasteHandler(paste));
         return panel;
     }
 

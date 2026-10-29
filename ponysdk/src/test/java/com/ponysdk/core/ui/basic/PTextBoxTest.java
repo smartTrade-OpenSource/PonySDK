@@ -232,6 +232,23 @@ public class PTextBoxTest extends PSuite {
     }
 
     @Test
+    public void aPasteHandlerAddedAfterTheLastWentRemovedTellsTheTerminalAgain() {
+        final PTextBox textBox = attached("");
+        final PPasteEvent.PPasteHandler first = e -> {
+        };
+        textBox.addPasteHandler(first);
+        textBox.removePasteHandler(first); // the terminal stops listening
+        textBox.removePasteHandler(first); // gone already: the terminal is not told twice
+        writer.clear();
+
+        textBox.addPasteHandler(e -> {
+        });
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_ADD_HANDLER), "listening again, or no paste comes");
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+        assertEquals(List.of(HandlerModel.HANDLER_PASTE.getValue()), writer.valuesOf(ServerToClientModel.HANDLER_TYPE));
+    }
+
+    @Test
     public void pasteWithoutHandlerAndRemoveWithoutAddAreNoOps() {
         final PTextBox textBox = attached("t");
         writer.clear();

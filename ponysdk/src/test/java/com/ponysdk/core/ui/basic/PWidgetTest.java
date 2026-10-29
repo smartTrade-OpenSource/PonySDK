@@ -784,4 +784,20 @@ public class PWidgetTest extends PSuite {
         label.onClientData(domEvent(DomHandlerType.CLICK));
         assertEquals(0, clicks.get());
     }
+
+    @Test
+    public void aVisibilityHandlerAddedAfterTheLastWentRemovedTellsTheTerminalAgain() {
+        final PLabel label = attachedLabel();
+        final PVisibilityEvent.PVisibilityHandler first = e -> {
+        };
+        label.addVisibilityHandler(first);
+        label.removeVisibilityHandler(first);
+        label.removeVisibilityHandler(first); // gone already: the terminal is not told twice
+        writer.clear();
+
+        label.addVisibilityHandler(e -> {
+        });
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_ADD_HANDLER), "listening again, or no visibility comes");
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+    }
 }

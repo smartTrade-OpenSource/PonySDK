@@ -212,6 +212,11 @@ test('text box: paste, filter, selection, sizes', async ({ page }) => {
     await box.dispatchEvent('paste');
     await button(page, 'Select').click(); // a round trip after the paste
     await expect(status(page)).toHaveText('Status: paste pasted');
+    await button(page, 'Paste again').click(); // listened to again: the terminal keeps its one DOM listener
+    await button(page, 'Select').click(); // a round trip: the terminal listens again before the paste
+    await expect.poll(() => box.evaluate(e => [e.selectionStart, e.selectionEnd])).toEqual([1, 4]);
+    await box.dispatchEvent('paste');
+    await expect(status(page)).toHaveText('Status: paste pasted, paste abcdef');
 
     const digits = page.getByLabel('Digits');
     await digits.pressSequentially('a1.b2');
