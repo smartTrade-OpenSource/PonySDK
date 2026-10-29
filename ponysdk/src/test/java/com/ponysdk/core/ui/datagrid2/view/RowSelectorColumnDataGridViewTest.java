@@ -23,9 +23,11 @@
 package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.datagrid2.DomEvents;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -38,6 +40,7 @@ import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridViewTest.RecordingAdapter;
 import com.ponysdk.test.PSuite;
+import com.ponysdk.testutil.CapturingModelWriter;
 import jakarta.json.Json;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -93,6 +96,42 @@ public class RowSelectorColumnDataGridViewTest extends PSuite {
         final PrimaryCell<String> cell = selector.createCell();
         Assertions.assertTrue(cell.asWidget() instanceof PCheckBox);
         Assertions.assertNotNull(cell.asPendingWidget());
+    }
+
+    /** A check box has no text here: a screen reader hears what the input is named, in the application's language. */
+    @Test
+    public void theCheckBoxesAreNamedForAScreenReader() throws Exception {
+        final CapturingModelWriter writer = CapturingModelWriter.install();
+        try {
+            newView(false);
+            PWindow.getMain().add(base.asWidget());
+            final List<Object> names = writer.valuesAfter(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY, "aria-label");
+            Assertions.assertEquals("Select all rows", names.get(0));
+            Assertions.assertTrue(names.size() > 3, "one per row drawn: " + names.size());
+            Assertions.assertTrue(names.stream().skip(1).allMatch("Select row"::equals), names.toString());
+
+            writer.clear();
+            final RowSelectorColumnDataGridView<String, String> french = new RowSelectorColumnDataGridView<>(
+                new DefaultDataGridView<>(new DefaultCacheDataSource<>())) {
+                @Override
+                protected String selectAllLabel() {
+                    return "Tout s\u00e9lectionner";
+                }
+
+                @Override
+                protected String selectRowLabel() {
+                    return "S\u00e9lectionner la ligne";
+                }
+            };
+            french.setAdapter(new RecordingAdapter(List.of(), true));
+            final ColumnDefinition<String> selector = french.getAdapter().getColumnDefinitions().get(0);
+            PWindow.getMain().add(selector.getHeader().asWidget());
+            PWindow.getMain().add(selector.createCell().asWidget());
+            Assertions.assertEquals(List.of("Tout s\u00e9lectionner", "S\u00e9lectionner la ligne"),
+                writer.valuesAfter(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY, "aria-label"));
+        } finally {
+            writer.uninstall();
+        }
     }
 
     @Test

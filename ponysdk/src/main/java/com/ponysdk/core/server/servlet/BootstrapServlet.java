@@ -287,10 +287,11 @@ public class BootstrapServlet extends HttpServlet {
      * the context's, from the same cookie and header.
      */
     protected String htmlTag(final HttpServletRequest request) {
-        // The theme's stylesheet applies where the class pony-theme is: on the page's root, to the whole page
+        // The language is the page's (WCAG 3.1.1); the theme's stylesheet applies where the class pony-theme is: on
+        // the page's root, to the whole page
         final String theme = configuration.getTheme() == null ? "" : " class=\"pony-theme\"";
         final List<Locale> supported = configuration.getSupportedLocales();
-        if (supported.isEmpty()) return "<html" + theme + ">";
+        if (supported.isEmpty()) return "<html lang=\"" + configuration.getLanguage() + "\"" + theme + ">";
         String cookie = null;
         if (request.getCookies() != null) {
             for (final jakarta.servlet.http.Cookie c : request.getCookies()) {
@@ -298,7 +299,7 @@ public class BootstrapServlet extends HttpServlet {
             }
         }
         final Locale locale = Locales.negotiate(supported, cookie, request.getHeader("Accept-Language"));
-        return "<html" + theme + " lang=\"" + locale.toLanguageTag() + "\" dir=\"" + (Locales.isRightToLeft(locale) ? "rtl" : "ltr") + "\">";
+        return "<html lang=\"" + locale.toLanguageTag() + "\" dir=\"" + (Locales.isRightToLeft(locale) ? "rtl" : "ltr") + "\"" + theme + ">";
     }
 
     /**

@@ -392,14 +392,28 @@ public class BootstrapServletTest {
         config.setTheme("pony");
         final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
         assertTrue(html.contains("href=\"style/pony-theme.css\""), html);
-        assertTrue(html.contains("<html class=\"pony-theme\">"), "the theme applies to the whole page: the class is on its root");
+        assertTrue(html.contains("<html lang=\"en\" class=\"pony-theme\">"), "the theme applies to the whole page: the class is on its root");
+    }
+
+    // ---- the language of the page (WCAG 3.1.1, docs/guide/accessibility.md) ----
+
+    @Test
+    public void thePageHasALanguageEnglishUnlessTheApplicationSaysOtherwise() {
+        String html = servletWith(new ApplicationConfiguration()).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("<html lang=\"en\">"), html);
+
+        final ApplicationConfiguration french = new ApplicationConfiguration();
+        french.setLanguage("fr-CA");
+        french.setTheme("pony");
+        html = servletWith(french).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("<html lang=\"fr-CA\" class=\"pony-theme\">"), html);
     }
 
     @Test
     public void withoutAThemeNoStylesheetIsAdded() {
         final String html = servletWith(new ApplicationConfiguration()).buildIndexHTML(request("", "/index.html"));
         assertFalse(html.contains("pony-theme"), html);
-        assertTrue(html.contains("<html>"), html);
+        assertTrue(html.contains("<html lang=\"en\">"), html);
     }
 
     @Test
@@ -857,11 +871,11 @@ public class BootstrapServletTest {
     }
 
     @Test
-    public void theRootOfAPageWithoutSupportedLocalesIsLeftAlone() {
+    public void theRootOfAPageWithoutSupportedLocalesHasTheConfiguredLanguageNotTheVisitors() {
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setApplicationName("App");
 
-        assertTrue(servletWith(config).buildIndexHTML(requestFrom("fr", null)).contains("\n<html>\n"));
+        assertTrue(servletWith(config).buildIndexHTML(requestFrom("fr", null)).contains("\n<html lang=\"en\">\n"));
     }
 
     @Test

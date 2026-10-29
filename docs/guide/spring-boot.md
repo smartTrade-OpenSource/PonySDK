@@ -80,6 +80,7 @@ of [`ApplicationConfiguration`](configuration.md). Your IDE completes them from 
 | `ponysdk.state-transfer-key` | Base64 of 32 bytes, the same on every server: a moved page carries the state its application declares ([deployment](deployment.md#carrying-the-screens-state)). From a secret store, never in a repository | off |
 | `ponysdk.debug-mode` | Each element names its Java class and creation line, and the inspector shows ([development tools](development.md)). Not for production | false |
 | `ponysdk.legacy-class-names` | Adds the GWT class names the 2.x CSS used | false |
+| `ponysdk.language` | The `lang` of the bootstrap page, a BCP 47 tag: a screen reader reads with its voice ([accessibility](accessibility.md)) | en |
 | `ponysdk.meta` | `<meta>` attributes of the bootstrap page | none |
 | `ponysdk.javascript` | Scripts of the bootstrap page, in load order | none |
 | `ponysdk.style.<id>` | Stylesheets of the bootstrap page, in order: the id, then the path | none |

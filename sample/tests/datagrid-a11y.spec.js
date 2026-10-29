@@ -332,3 +332,78 @@ test('the focus is seen, and F2 on a filter\'s cell goes to the filter, Escape b
   await expect(cell).toBeFocused();
   expect((await focused(page)).role).toBe('gridcell');
 });
+
+// ---- The grid's accessibility is a script of its own (docs/decisions/0025-datagrid-accessibility.md, amendment) ----
+// ponysdk.js loads on every page, the grid is on few: script/datagrid-a11y.js is fetched when the first grid is created
+
+const A11Y_SCRIPT = '**/script/datagrid-a11y.js';
+
+test('a page without a grid does not fetch the accessibility script', async ({ page }) => {
+  const requests = [];
+  page.on('request', request => requests.push(request.url()));
+  await page.goto(BASE_URL + '#misc');
+  await expect(page.getByRole('button', { name: 'Run JS alert' })).toBeVisible({ timeout: 20000 });
+  expect(requests.filter(url => url.includes('datagrid-a11y'))).toEqual([]);
+  expect(await page.evaluate(() => typeof AbstractAddon.dataGridAria)).toBe('undefined');
+});
+
+test('the grid fetches the script once, from where ponysdk.js is', async ({ page }) => {
+  const requests = [];
+  page.on('request', request => requests.push(request.url()));
+  await openGrid(page);
+  const urls = requests.filter(url => url.includes('datagrid-a11y'));
+  expect(urls).toHaveLength(1);
+  const ponysdk = requests.find(url => url.includes('script/ponysdk.js'));
+  expect(urls[0]).toBe(ponysdk.replace('ponysdk.js', 'datagrid-a11y.js'));
+});
+
+test('a grid created before the script arrives works, and gets its cells laid once it has', async ({ page }) => {
+  let release;
+  const held = new Promise(resolve => { release = resolve; });
+  await page.route(A11Y_SCRIPT, async route => {
+    await held;
+    await route.continue();
+  });
+  // WebKit holds the load event for a script added to the page: not waited for, the script is
+  await page.goto(BASE_URL + '#datagrid', { waitUntil: 'commit' });
+  const grid = page.getByRole('grid', { name: 'Sample data' });
+  // The server's part is there, the cells not yet named by column: the grid shows its rows and a click selects
+  await expect(grid.locator('.pony-grid-pinned-body .pony-grid-row').first()).toBeVisible({ timeout: 20000 });
+  await expect(grid).toHaveAttribute('aria-rowcount', String(ROWS + 2));
+  expect(await grid.locator('[aria-colindex]').count()).toBe(0);
+  await grid.locator('.pony-grid-unpinned-body .pony-grid-row').first().locator('div').first().click();
+  await expect(grid.getByRole('row', { selected: true })).toHaveCount(1);
+
+  release();
+  await expect(grid.getByRole('columnheader')).toHaveCount(COLUMNS);
+  await expect(grid.getByRole('gridcell', { name: 'a000000199' })).toBeVisible();
+  // and the keyboard is there
+  await grid.getByRole('gridcell', { name: 'a000000199' }).focus();
+  await page.keyboard.press('ArrowRight');
+  expect((await focused(page)).col).toBe('3');
+});
+
+test('a script that does not load leaves a grid that works, and says so', async ({ page }) => {
+  const errors = [];
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.route(A11Y_SCRIPT, route => route.fulfill({ status: 404, body: '' }));
+  await page.goto(BASE_URL + '#datagrid');
+  const grid = page.getByRole('grid', { name: 'Sample data' });
+  await expect(grid.locator('.pony-grid-pinned-body .pony-grid-row').first()).toBeVisible({ timeout: 20000 });
+  await expect.poll(() => errors.some(text => text.includes('accessibility of the DataGrid'))).toBe(true);
+  await grid.locator('.pony-grid-unpinned-body .pony-grid-row').first().locator('div').first().click();
+  await expect(grid.getByRole('row', { selected: true })).toHaveCount(1);
+});
+
+// ---- A widget with no text of its own is named: the check boxes of the selection, the filters of the footer ----
+
+test('the check boxes of the selection and the filters are named, for a screen reader', async ({ page }) => {
+  const grid = await openGrid(page);
+
+  // the check boxes have no text: the server names them (RowSelectorColumnDataGridView.selectRowLabel)
+  await expect(grid.getByRole('checkbox', { name: 'Select all rows' })).toHaveCount(1);
+  expect(await grid.getByRole('checkbox', { name: 'Select row' }).count()).toBeGreaterThan(10);
+  // a filter is named by the name of its column in the header, laid by the terminal
+  await expect(grid.getByRole('textbox', { name: 'b', exact: true })).toHaveCount(1);
+  await expect(grid.getByRole('textbox', { name: 'c', exact: true })).toHaveCount(1);
+});

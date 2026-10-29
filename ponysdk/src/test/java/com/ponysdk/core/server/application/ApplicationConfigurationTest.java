@@ -178,6 +178,21 @@ public class ApplicationConfigurationTest {
         assertNull(config.getTheme(), "a refused name leaves the setting as it was");
     }
 
+    /** The page is in English unless the application says another language; a value that is no language tag is refused. */
+    @Test
+    public void testLanguage() {
+        assertEquals("en", config.getLanguage());
+        config.setLanguage("fr");
+        assertEquals("fr", config.getLanguage());
+        config.setLanguage("zh-Hant-TW");
+        assertEquals("zh-Hant-TW", config.getLanguage());
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage("fr\" onload=\"x"));
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage(""));
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage(null));
+        assertEquals("zh-Hant-TW", config.getLanguage(), "a refused value leaves the setting as it was");
+        assertEquals("de", ApplicationConfiguration.builder().language("de").build().getLanguage());
+    }
+
     /**
      * Test method for {@link com.ponysdk.core.server.application.ApplicationConfiguration#getMeta()}.
      */

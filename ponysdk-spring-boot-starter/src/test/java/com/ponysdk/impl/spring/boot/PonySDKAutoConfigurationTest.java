@@ -93,6 +93,7 @@ class PonySDKAutoConfigurationTest {
             assertEquals(defaults.isStringDictionaryPersistenceEnabled(), actual.isStringDictionaryPersistenceEnabled());
             assertEquals(defaults.getStringDictionaryPersistPath(), actual.getStringDictionaryPersistPath());
             assertEquals(defaults.isLegacyClassNames(), actual.isLegacyClassNames());
+            assertEquals(defaults.getLanguage(), actual.getLanguage());
             assertEquals(defaults.getJavascript(), actual.getJavascript());
             assertEquals(defaults.getStyle(), actual.getStyle());
         });
@@ -108,6 +109,7 @@ class PonySDKAutoConfigurationTest {
             "ponysdk.reconnection-timeout=30s",
             "ponysdk.debug-mode=true",
             "ponysdk.legacy-class-names=true",
+            "ponysdk.language=fr",
             "ponysdk.meta=name=\"viewport\" content=\"width=device-width\"",
             "ponysdk.javascript[0]=script/b.js",
             "ponysdk.javascript[1]=script/a.js",
@@ -136,6 +138,7 @@ class PonySDKAutoConfigurationTest {
                 assertEquals(30_000, configuration.getReconnectionTimeoutMs());
                 assertTrue(configuration.isDebugMode());
                 assertTrue(configuration.isLegacyClassNames());
+                assertEquals("fr", configuration.getLanguage());
                 assertEquals(Set.of("name=\"viewport\" content=\"width=device-width\""), configuration.getMeta());
                 assertEquals(List.of("script/b.js", "script/a.js"), List.copyOf(configuration.getJavascript()), "load order kept");
                 final Map<String, String> styles = new LinkedHashMap<>();

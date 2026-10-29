@@ -37,6 +37,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -87,6 +88,7 @@ final class OverviewPage {
         heroCodeHead.add(el("code-title", "LivePrice.java — the whole application"), el("code-lang", "JAVA"));
         final PElement heroCodeBody = Element.newDiv();
         heroCodeBody.addStyleName("code-body");
+        heroCodeBody.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         heroCodeBody.setInnerHTML(Source.code(LivePrice.class, "app")); // sample/.../quickstart/LivePrice.java, as it runs
         heroCode.add(heroCodeHead, heroCodeBody);
         hero.add(heroCode);
@@ -203,6 +205,7 @@ final class OverviewPage {
         controls.addStyleName("ov-controls");
         final PFlowPanel grid = Element.newPFlowPanel();
         grid.addStyleName("ov-ticker");
+        grid.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
 
         final java.util.Random rnd = new java.util.Random();
         final List<PLabel> cells = new ArrayList<>();

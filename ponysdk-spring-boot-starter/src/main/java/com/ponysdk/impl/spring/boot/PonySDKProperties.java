@@ -65,6 +65,9 @@ public class PonySDKProperties {
     /** Adds the GWT class names the 2.x stylesheets used. */
     private Boolean legacyClassNames;
 
+    /** The language of the bootstrap page, a BCP 47 tag: a screen reader reads with its voice. English by default. */
+    private String language;
+
     /** {@code <meta>} attributes of the bootstrap page, e.g. {@code name="viewport" content="width=device-width"}. */
     private Set<String> meta;
 
@@ -153,6 +156,14 @@ public class PonySDKProperties {
 
     public void setLegacyClassNames(final Boolean legacyClassNames) {
         this.legacyClassNames = legacyClassNames;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(final String language) {
+        this.language = language;
     }
 
     public Set<String> getMeta() {

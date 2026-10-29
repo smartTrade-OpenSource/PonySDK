@@ -358,6 +358,18 @@ public class RichWidgetsTest extends PSuite {
         assertNull(noCaption.getWidget(0, 2));
     }
 
+    /** The captions are the names of the lists, for a screen reader: a caption is not a label of the select. */
+    @Test
+    public void testTwinListBoxCaptionsNameItsLists() {
+        final PTwinListBox<String> twin = new PTwinListBox<>("Left", "Right");
+        assertEquals("Left", twin.getLeftListBox().getAttribute("aria-label"));
+        assertEquals("Right", twin.getRightListBox().getAttribute("aria-label"));
+
+        final PTwinListBox<String> noCaption = new PTwinListBox<>();
+        assertNull(noCaption.getLeftListBox().getAttribute("aria-label"));
+        assertNull(noCaption.getRightListBox().getAttribute("aria-label"));
+    }
+
     @Test
     public void testTwinListBoxMovesOnlySelectedItems() {
         final PTwinListBox<String> twin = new PTwinListBox<>();

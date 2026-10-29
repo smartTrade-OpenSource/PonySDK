@@ -133,6 +133,7 @@ final class MiscPage {
         final PFlowPanel panel = Element.newPFlowPanel();
         final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("file");
+        fileUpload.setLabel("Upload a file"); // the text a screen reader names the input by
         panel.add(fileUpload);
         final PLabel received = Element.newPLabel("server: no file yet");
         received.addStyleName("pony-ex-echo");

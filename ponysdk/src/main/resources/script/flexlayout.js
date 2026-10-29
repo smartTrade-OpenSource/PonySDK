@@ -1025,8 +1025,9 @@
         btn.appendChild(bdg);
       }
       if (tab.isEnableClose()) {
-        const x = document.createElement('button');
-        x.type = 'button'; x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×';
+        // Not a button: a tab holds no control (nested-interactive), the keyboard closes it with Delete
+        const x = document.createElement('span');
+        x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×'; x.setAttribute('aria-hidden', 'true');
         x.addEventListener('click', ev => {
           ev.stopPropagation();
           this._act(Actions.closeBorderTab(side, tab.id));
@@ -1044,6 +1045,7 @@
         if (ev.key === 'ArrowDown' || ev.key === 'ArrowRight') { ev.preventDefault(); const next = btn.nextElementSibling; if (next) { next.focus(); } }
         else if (ev.key === 'ArrowUp' || ev.key === 'ArrowLeft') { ev.preventDefault(); const prev = btn.previousElementSibling; if (prev) { prev.focus(); } }
         else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); this._act(Actions.selectBorderTab(side, tab.id)); }
+        else if (ev.key === 'Delete' && tab.isEnableClose() && !this._locked) { ev.preventDefault(); this._act(Actions.closeBorderTab(side, tab.id)); }
       });
       btn.style.touchAction = 'none';
       btn.addEventListener('pointerdown', ev => {
