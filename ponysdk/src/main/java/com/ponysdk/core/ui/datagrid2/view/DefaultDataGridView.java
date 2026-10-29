@@ -99,6 +99,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private static final String ADDON_COLUMN_WIDTH = "cw";
     private static final String ADDON_COLUMN_VISIBILITY = "cv";
     private static final String ADDON_COLUMN_TO = "to";
+    private static final String ADDON_COLUMN_SORT = "sort";
 
     // HTML Attributes
     /**
@@ -119,6 +120,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public static final String EXTENDED_ATTRIBUTE = "pony-extended";
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDataGridView.class);
+    private static final String ARIA_ROLE = "role";
+    private static final String ARIA_PRESENTATION = "presentation";
+    private static final String ARIA_ROWINDEX = "aria-rowindex";
     // State
     private static final int MIN_RELATIVE_ROW_COUNT = 30;
     private int columnViewSequence = 0;
@@ -149,6 +153,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private Row lastClickedRow;
     private boolean drawOnResume;
     private boolean forceExtended;
+    /** The data rows last announced as aria-rowcount, -1 before the first. */
+    private int ariaDataRows = -1;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
@@ -165,6 +171,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             this::onDataRemoved);
 
         root.addStyleName("pony-grid");
+        root.setAttribute(ARIA_ROLE, "grid");
         root.setStyleProperty("display", "flex");
         root.setStyleProperty("flex-direction", "column");
         root.setStyleProperty("position", "relative");
@@ -213,6 +220,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         bodyDiv.setStyleProperty("flex", "auto");
         bodyDiv.setStyleProperty("overflow-x", "hidden");
         bodyDiv.addStyleName("pony-grid-body");
+        bodyDiv.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
         bodyDiv.add(subBodyDiv);
         bodyDiv.add(loadingDataDiv);
         bodyDiv.add(errorMsgDiv);
@@ -223,6 +231,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         final PComplexPanel subBodyDiv = Element.newDiv();
         subBodyDiv.setStyleProperty("display", "flex");
         subBodyDiv.addStyleName("pony-grid-sub-body");
+        subBodyDiv.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
         subBodyDiv.add(bodyPinnedDiv);
         subBodyDiv.add(bodyUnpinnedDiv);
         return subBodyDiv;
@@ -231,6 +240,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private static PComplexPanel prepareFooterDiv(final PComplexPanel footerPinnedDiv, final PComplexPanel footerUnpinnedDiv) {
         final PComplexPanel footerDiv = Element.newDiv();
         footerDiv.addStyleName("pony-grid-footer");
+        footerDiv.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
         footerDiv.setStyleProperty("flex", "initial");
         footerDiv.setStyleProperty("display", "flex");
         footerDiv.add(footerPinnedDiv);
@@ -243,6 +253,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         headerDiv.setStyleProperty("flex", "initial");
         headerDiv.setStyleProperty("display", "flex");
         headerDiv.addStyleName("pony-grid-header");
+        headerDiv.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
         headerDiv.add(headerPinnedDiv);
         headerDiv.add(headerUnpinnedDiv);
         return headerDiv;
@@ -310,6 +321,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
         refresh();
         addon.checkPosition();
+        addon.updateAria();
     }
 
     private void onColumnVisibilityChanged(final JsonArray columns, final JsonArray visiblity) {
@@ -362,6 +374,13 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         columnView.notifyResizedListeners();
     }
 
+    /** The Enter or Space key on the header of a column: the next sort of the column, as a click on its name does. */
+    private void onColumnSort(final int column) {
+        final ColumnDefinition<V> c = adapter.getColumnDefinitions().get(column);
+        final ColumnView columnView = getColumnView(c);
+        c.getController().sort(columnView.sortedAsc == null || !columnView.sortedAsc);
+    }
+
     private void onColumnMoved(final int from, final int to) {
         if (from == to) return;
         final ColumnDefinition<V> fromCol = adapter.getColumnDefinitions().get(from);
@@ -388,6 +407,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.unpinnedRow.remove(fromIndex);
             row.unpinnedRow.insert(widget, toIndex);
         }
+        addon.updateAria();
         fromColumnView.notifyMovedListeners();
     }
 
@@ -454,6 +474,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 for (int i = result.getFirst().start; i < rows.size(); i++) {
                     updateRow(rows.get(i), resultLiveData);
                 }
+                updateAriaRowCount(resultLiveData.getAbsoluteRowCount());
                 addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
             } catch (final Exception e) {
                 log.error("Problem occured while updating the view for result {}, row nb {}", result.getFirst(), rows.size(), e);
@@ -510,8 +531,37 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             adapter.onUnselectRow(row.pinnedRow);
             row.pinnedRow.removeAttribute(SELECTED_ATTRIBUTE);
         }
+        updateRowAria(row, selected);
 
         applyRowActions(row, rowData);
+    }
+
+    /**
+     * What a screen reader hears of a row, on its pinned half: its place, which moves with the scrolling only (the
+     * index is sent again when the first row of the window changed), and whether it is selected, sent when it changes.
+     */
+    private void updateRowAria(final Row row, final boolean selected) {
+        if (row.ariaIndexedAt != firstRowIndex) {
+            row.ariaIndexedAt = firstRowIndex;
+            row.pinnedRow.setAttribute(ARIA_ROWINDEX, Integer.toString(row.getAbsoluteIndex() + (adapter.hasHeader() ? 2 : 1)));
+        }
+        if (controller.isSelectable(row.key)) row.pinnedRow.setAttribute("aria-selected", selected ? "true" : "false");
+        else row.pinnedRow.removeAttribute("aria-selected");
+    }
+
+    /** The rows of the grid: the live data, with its header and its footer when there are. */
+    private void updateAriaRowCount(final int dataRows) {
+        if (dataRows == ariaDataRows) return;
+        ariaDataRows = dataRows;
+        final int header = adapter.hasHeader() ? 1 : 0;
+        root.setAttribute("aria-rowcount", Integer.toString(dataRows + header + (adapter.hasFooter() ? 1 : 0)));
+        // the footer comes after the rows the grid holds, not after the ones it draws
+        if (adapter.hasFooter()) pinnedTable.footer.setAttribute(ARIA_ROWINDEX, Integer.toString(dataRows + header + 1));
+    }
+
+    /** The columns the grid holds, the hidden ones not counted: they are not in the page. */
+    private void updateAriaColCount() {
+        root.setAttribute("aria-colcount", Integer.toString(pinnedTable.columns.size() + unpinnedTable.columns.size()));
     }
 
     private void updateRow(final Row row, final LiveDataView<V> result) {
@@ -569,6 +619,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         if (adapter.hasHeader()) {
             adapter.onCreateHeaderRow(pinnedTable.header);
             adapter.onCreateHeaderRow(unpinnedTable.header);
+            pinnedTable.header.setAttribute(ARIA_ROLE, "row");
+            pinnedTable.header.setAttribute(ARIA_ROWINDEX, "1");
         } else {
             pinnedTable.header.setHeight("0px");
             unpinnedTable.header.setHeight("0px");
@@ -576,7 +628,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         if (adapter.hasFooter()) {
             adapter.onCreateFooterRow(pinnedTable.footer);
             adapter.onCreateFooterRow(unpinnedTable.footer);
+            pinnedTable.footer.setAttribute(ARIA_ROLE, "row");
         }
+        if (adapter.isSelectionEnabled()) root.setAttribute("aria-multiselectable", "true");
         loadingDataDiv.add(adapter.createLoadingDataWidget());
         for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
             final ColumnView columnView = columnViews.computeIfAbsent(column, ColumnView::new);
@@ -598,6 +652,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
                 columnView.state.isPinned());
         }
+        updateAriaColCount();
+        updateAriaRowCount(0);
+        addon.updateAria();
     }
 
     private void pin(final ColumnView columnView) {
@@ -631,6 +688,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.unpinnedRow.setWidth(unpinnedRowWidth);
             widget.setAttribute(PINNED_ATTRIBUTE);
         }
+        addon.updateAria();
     }
 
     private void unpin(final ColumnView columnView) {
@@ -664,6 +722,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.unpinnedRow.setWidth(unpinnedRowWidth);
             widget.removeAttribute(PINNED_ATTRIBUTE);
         }
+        addon.updateAria();
     }
 
     private void show(final ColumnView columnView) {
@@ -674,6 +733,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.addCell(row.unpinnedRow, row.unpinnedCells, columnView);
             row.unpinnedRow.setWidth(unpinnedRowWidth);
         }
+        updateAriaColCount();
+        addon.updateAria();
         onUpdateRows(0, controller.getRowCount());
     }
 
@@ -687,6 +748,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.unpinnedRow.remove(index);
             row.unpinnedRow.setWidth(unpinnedRowWidth);
         }
+        updateAriaColCount();
+        addon.updateAria();
     }
 
     @Override
@@ -757,6 +820,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public void clearSorts(final boolean notify) {
         hideErrorMessage();
         controller.clearSorts();
+        for (final ColumnView columnView : columnViews.values()) columnView.setAriaSort(null);
         if (notify) {
             for (final ColumnView columnView : columnViews.values()) {
                 for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -871,6 +935,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         for (int i = 0; i < relativeRowCount; i++) {
             rows.add(new Row(i));
         }
+        updateAriaColCount();
+        addon.updateAria();
         refresh();
         addon.scrollToTop();
 
@@ -897,6 +963,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private void notifyListeners(final DataGridConfig<V> config, final Map<String, ColumnDefinition<V>> columnById) {
         for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
             final ColumnView columnView = getColumnView(column);
+            columnView.setAriaSort(null);
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onClearSort();
                 listener.onClearFilters();
@@ -909,6 +976,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             final ColumnDefinition<V> column = columnById.get(columnSort.getColumnId());
             if (column == null) continue;
             final ColumnView columnView = getColumnView(column);
+            columnView.setAriaSort(columnSort.isAsc());
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onSort(columnSort.isAsc());
             }
@@ -1053,6 +1121,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         private final List<CellManager<V>> unpinnedCells = new ArrayList<>(unpinnedTable.columns.size());
         private final List<CellManager<V>> pinnedCells = new ArrayList<>(pinnedTable.columns.size());
         private boolean extended = false;
+        /** The first row of the window when the row's aria-rowindex was sent, -1 before. */
+        private int ariaIndexedAt = -1;
 
         Row(final int index) {
             this.relativeIndex = index;
@@ -1075,6 +1145,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         void init(final Table table, final PComplexPanel row, final List<CellManager<V>> cells, final boolean pinned) {
             row.addStyleName("pony-grid-row");
+            row.setAttribute(ARIA_ROLE, pinned ? "row" : ARIA_PRESENTATION);
             row.setStyleProperty("white-space", "nowrap");
             for (final ColumnView column : table.columns) {
                 final PComplexPanel div = addCell(row, cells, column);
@@ -1178,6 +1249,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         PinnedTable(final PComplexPanel header, final PComplexPanel body, final PComplexPanel footer) {
             super(header, body, footer);
+            // a row when the grid has a header or a footer: setAdapter says
+            header.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
+            footer.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
             header.setStyleProperty("flex", "initial");
             header.addStyleName("pony-grid-pinned-header");
             body.setStyleProperty("flex", "initial");
@@ -1207,6 +1281,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         UnpinnedTable(final PComplexPanel header, final PComplexPanel body, final PComplexPanel footer) {
             super(header, body, footer);
+            header.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
+            footer.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
             header.setStyleProperty("flex", "auto");
             header.addStyleName("pony-grid-hidden-scrollbar");
             header.addStyleName("pony-grid-unpinned-header");
@@ -1244,6 +1320,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             this.header = header;
             this.body = body;
             this.footer = footer;
+            body.setAttribute(ARIA_ROLE, ARIA_PRESENTATION);
             header.setStyleProperty("display", "flex");
             footer.setStyleProperty("display", "flex");
             header.setStyleProperty("white-space", "nowrap");
@@ -1289,6 +1366,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             headerCell.setStyleProperty("width", columnView.getWidthAsString());
             headerCell.setStyleProperty("vertical-align", "top");
             headerCell.setAttribute("data-column-id", Integer.toString(columnView.id));
+            columnView.headerCell = headerCell;
             header.add(headerCell);
             if (adapter.hasHeader()) {
                 headerCell.add(columnView.column.getHeader());
@@ -1320,12 +1398,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         void removeColumn(final int index) {
             final ColumnView columnView = columns.remove(index);
+            columnView.headerCell = null;
             width -= columnView.width;
             header.remove(index);
             footer.remove(index);
         }
 
         void clear() {
+            for (final ColumnView columnView : columns) columnView.headerCell = null;
             columns.clear();
             header.clear();
             footer.clear();
@@ -1418,6 +1498,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             controller.addSort(columnView.column, asc);
             addon.scrollToTop();
             controller.setBound(true);
+            columnView.setAriaSort(asc);
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onSort(asc);
             }
@@ -1429,6 +1510,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             hideErrorMessage();
             sorts.clear();
             controller.clearSort(columnView.column);
+            columnView.setAriaSort(null);
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onClearSort();
             }
@@ -1505,6 +1587,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         private State state;
         private boolean visible = true;
         private final Set<ColumnActionListener<V>> listeners = new HashSet<>();
+        /** The header cell while the column is shown. */
+        private PComplexPanel headerCell;
+        /** The direction the column is sorted in, null when it is not. */
+        private Boolean sortedAsc;
 
         public ColumnView(final ColumnDefinition<V> column) {
             super();
@@ -1523,6 +1609,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 widthOfString = width;
             }
             return widthAsString;
+        }
+
+        /** The column's sort, for a screen reader: null when the column is not sorted. */
+        void setAriaSort(final Boolean asc) {
+            sortedAsc = asc;
+            if (headerCell == null || !adapter.hasHeader()) return;
+            if (asc == null) headerCell.removeAttribute("aria-sort");
+            else headerCell.setAttribute("aria-sort", asc ? "ascending" : "descending");
         }
 
         void notifyStateChangedListeners() {
@@ -1644,6 +1738,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                         json.getInt(ADDON_COLUMN_WIDTH));
                 } else if (json.containsKey(ADDON_COLUMN_TO)) {
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
+                } else if (json.containsKey(ADDON_COLUMN_SORT)) {
+                    onColumnSort(json.getInt(ADDON_COLUMN_ID));
                 }
             });
         }
@@ -1666,6 +1762,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         public void onColumnAdded(final int id, final int colMinWidth, final int colMaxWidth, final boolean pinned) {
             callTerminalMethod("onColumnAdded", id, colMinWidth, colMaxWidth, pinned);
+        }
+
+        /** The columns or the rows changed: the terminal lays the roles and the links of the cells again. */
+        public void updateAria() {
+            callTerminalMethod("updateAria");
         }
 
         public void scrollToTop() {
