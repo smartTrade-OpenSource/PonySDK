@@ -6,6 +6,9 @@
 - JSON-P: `javax.json` becomes `jakarta.json` (API 2.1, Eclipse Parsson). Imports in application code change;
   `PEmulator.addonData` takes a `jakarta.json.JsonObject`.
 - Jetty 12.1 (EE 11), Jakarta Servlet 6.1 and Spring 7, as in 2.10.
+- `ponysdk` no longer brings `jakarta.validation-api`: it is optional, for the [Binder](docs/guide/forms.md), which applies
+  the constraints of a bean when Bean Validation is on the classpath. An application that used the API through `ponysdk`
+  declares it.
 - `ponysdk` no longer brings `jetty-client`, and `ponysdk-spring` no longer brings `spring-web`: an application that
   uses them declares them.
 - Browsers: current Chrome, Edge, Firefox, and Safari 17 or later. The terminal uses `<dialog>`, the popover API,
