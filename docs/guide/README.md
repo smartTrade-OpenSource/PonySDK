@@ -16,6 +16,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
 | [FDC3](fdc3.md) | Talking to the other applications of a trader's desktop |
 | [Reconnection](reconnection.md) | Keeping a session through a network cut |
+| [Spring Boot](spring-boot.md) | The starter: one dependency, the `ponysdk.*` properties, the entry point as a bean, Boot's graceful shutdown |
 | [Deployment](deployment.md) | Behind a load balancer, on AWS for the examples; a server that stops moves its pages |
 | [Security](security.md) | What is protected by default, and the settings |
 | [Observability](observability.md) | OpenTelemetry metrics, latency |

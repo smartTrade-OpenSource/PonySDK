@@ -1,0 +1,107 @@
+plugins {
+    id 'java-library' // the starter's API (the entry point's types, the auto-configuration) reaches the application's compile classpath
+    id 'jacoco'
+}
+
+def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
+group = 'com.ponysdk'
+version = '3.0.0' + versionSuffix
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'ponysdk-spring-boot-starter'
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/smartTrade-OpenSource/PonySDK")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':ponysdk')
+    // PonySDK's WebSocket servlet is Jetty's own: the starter brings Boot's Jetty (docs/decisions/0023-spring-boot-starter.md)
+    api libs.spring.boot.starter.jetty
+    implementation libs.slf4j.api
+    implementation libs.jakarta.json.api
+    runtimeOnly libs.parsson // the implementation of jakarta.json that the bootstrap page and the manifest write with
+
+    // The health indicator: present when the application has the actuator, not required
+    compileOnly libs.spring.boot.health
+    compileOnly libs.spring.boot.actuator.autoconfigure
+    annotationProcessor libs.spring.boot.configuration.processor
+
+    testImplementation(
+            libs.junit.jupiter,
+            libs.spring.boot.starter.test,
+            libs.spring.boot.starter.actuator,
+            libs.spring.boot.starter.security, // BootSecurityTest: what the guide says of Spring Security
+            libs.selenium.api,
+            libs.jakarta.websocket.client.api,
+            libs.jakarta.json.api
+    )
+
+    testRuntimeOnly(
+            libs.junit.platform.launcher,
+            libs.tyrus.container.grizzly.client
+    )
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
+    }
+}
+
+// Coverage gate, as ponysdk-spring's and ponysdk's: 99 % of the module's instructions, lines and branches, and of every
+// package's lines and branches.
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+        rule {
+            element = 'PACKAGE'
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.99 }
+            limit { counter = 'BRANCH'; value = 'COVEREDRATIO'; minimum = 0.99 }
+        }
+    }
+}
+
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
