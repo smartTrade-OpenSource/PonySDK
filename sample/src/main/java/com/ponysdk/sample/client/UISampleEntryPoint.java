@@ -161,7 +161,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
             {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
-            {"⧉", "Embedding"}, {"⇄", "FDC3"}
+            {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
         final int[] groupStarts = {0, 2, 9};
@@ -176,7 +176,7 @@ public class UISampleEntryPoint implements EntryPoint {
         // Deep links: each tab has its URL token (#component-costs); a reload or a shared link opens that tab
         final String[] slugs = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) slugs[i] = tabs[i][1].toLowerCase(java.util.Locale.ROOT).replace(' ', '-');
-        final int first = Math.max(0, java.util.Arrays.asList(slugs).indexOf(uiContext.getHistory().getToken()));
+        final int first = Math.max(0, java.util.Arrays.asList(slugs).indexOf(slugOf(uiContext.getHistory().getToken())));
 
         // Only the opened tab is built eagerly: the others are built (and their schedulers started) on activation
         final PFlowPanel[] tabPanels = new PFlowPanel[tabs.length];
@@ -230,7 +230,7 @@ public class UISampleEntryPoint implements EntryPoint {
         };
         // back / forward buttons of the browser
         uiContext.getHistory().addValueChangeHandler(e -> {
-            final int idx = java.util.Arrays.asList(slugs).indexOf(e.getData());
+            final int idx = java.util.Arrays.asList(slugs).indexOf(slugOf(e.getData()));
             navigate.accept(idx >= 0 ? idx : 0);
         });
 
@@ -249,6 +249,11 @@ public class UISampleEntryPoint implements EntryPoint {
         shell.add(nav);
         shell.add(content);
         PWindow.getMain().add(shell);
+    }
+
+    /** A tab's slug is the first segment of the token: a page with routes of its own keeps the rest (#routing/orders/42). */
+    private static String slugOf(final String token) {
+        return token == null ? null : token.split("[/?]", 2)[0];
     }
 
     @SuppressWarnings("unchecked")
@@ -271,6 +276,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);
             case "Embedding" -> EmbeddingPage.build(uiContext, schedulers);
             case "FDC3" -> Fdc3Page.build();
+            case "Routing" -> RoutingPage.build(uiContext);
             default -> throw new IllegalArgumentException("No page " + tabNames[idx]);
         };
     }
