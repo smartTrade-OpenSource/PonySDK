@@ -78,19 +78,8 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.eclipse.parsson.JsonProviderImpl";
-
-    /** Shared JsonProvider instance — Parsson is thread-safe, no need to create one per session. */
-    private static final JsonProvider SHARED_JSON_PROVIDER;
-    static {
-        JsonProvider p;
-        try {
-            p = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (final Throwable t) {
-            p = JsonProvider.provider();
-        }
-        SHARED_JSON_PROVIDER = p;
-    }
+    /** Shared JsonProvider instance: Parsson, a dependency of PonySDK, is thread-safe, no need to create one per session. */
+    private static final JsonProvider SHARED_JSON_PROVIDER = new org.eclipse.parsson.JsonProviderImpl();
 
     // Cached JSON keys to avoid repeated toStringValue() calls
     private static final String KEY_TYPE_HISTORY = ClientToServerModel.TYPE_HISTORY.toStringValue();

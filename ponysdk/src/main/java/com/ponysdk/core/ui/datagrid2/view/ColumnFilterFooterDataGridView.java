@@ -221,8 +221,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
             final String newFilter = f.trim();
             final boolean reinforcing = newFilter.contains(filter);
             filter = newFilter;
-            final ColumnController<V> grip = getController();
-            if (grip == null) return;
+            final ColumnController<V> grip = getController(); // set on every column by the grid's setAdapter
             if (filter.isEmpty()) grip.clearFilter(FilterFooterColumn.this);
             else grip.filter(FilterFooterColumn.this,
                     (data, helper) -> StringUtils.containsIgnoreCase(helper.get().toString(), newFilter), true, reinforcing);

@@ -74,23 +74,17 @@ public class PonyWebElement implements WebElement {
     }
 
     public void printTree(final Writer writer) throws IOException {
-        printTree(0, writer);
+        final StringBuilder tree = new StringBuilder();
+        printTree(0, tree);
+        writer.write(tree.toString());
     }
 
-    void printTree(final int level, final Writer writer) throws IOException {
-        for (int i = 0; i < level; i++) {
-            writer.write('\t');
-        }
-        writer.write(this.toString());
-        writer.write('\n');
+    void printTree(final int level, final StringBuilder out) {
+        out.append("\t".repeat(level)).append(this).append('\n');
         for (final PonyWebElement e : children) {
-            e.printTree(level + 1, writer);
+            e.printTree(level + 1, out);
         }
-        for (int i = 0; i < level; i++) {
-            writer.write('\t');
-        }
-        writer.write("</" + widgetType.name() + '>');
-        writer.write('\n');
+        out.append("\t".repeat(level)).append("</").append(widgetType.name()).append(">\n");
     }
 
     @Override

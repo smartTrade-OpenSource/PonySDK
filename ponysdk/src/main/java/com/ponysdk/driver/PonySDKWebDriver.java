@@ -37,7 +37,6 @@ import jakarta.websocket.CloseReason;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
@@ -282,13 +281,11 @@ public class PonySDKWebDriver implements WebDriver {
 
     @Override
     public String getPageSource() {
-        final StringWriter writer = new StringWriter();
-        try {
-            printAsXml(writer);
-        } catch (final IOException e) {
-            //unreachable
+        final StringBuilder page = new StringBuilder("<WEB>\n");
+        for (final PonyWebElement e : elements.values()) {
+            if (e.parent == null) e.printTree(1, page);
         }
-        return writer.toString();
+        return page.append("</WEB>").toString();
     }
 
     @Override
@@ -690,12 +687,7 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     public void printAsXml(final Writer writer) throws IOException {
-        writer.write("<WEB>");
-        writer.write('\n');
-        for (final PonyWebElement e : elements.values()) {
-            if (e.parent == null) e.printTree(1, writer);
-        }
-        writer.write("</WEB>");
+        writer.write(getPageSource());
     }
 
     public void clear() {

@@ -24,6 +24,7 @@
 package com.ponysdk.core.tools;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -72,11 +73,18 @@ public final class WebComponentGenerator {
     }
 
     public static void main(final String[] args) throws IOException {
+        final int status = run(args, System.err);
+        if (status != 0) System.exit(status);
+    }
+
+    /** @return the process status: 0, or 2 for a usage error, printed on {@code err} */
+    static int run(final String[] args, final PrintStream err) throws IOException {
         if (args.length != 3) {
-            System.err.println("Usage: WebComponentGenerator <custom-elements.json> <java package> <output directory>");
-            System.exit(2);
+            err.println("Usage: WebComponentGenerator <custom-elements.json> <java package> <output directory>");
+            return 2;
         }
         generate(Path.of(args[0]), args[1], Path.of(args[2]));
+        return 0;
     }
 
     /**

@@ -25,11 +25,13 @@ package com.ponysdk.core.tools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -100,6 +102,14 @@ public class WebComponentGeneratorTest extends PSuite {
     @AfterEach
     public void restoreWriter() {
         writer.uninstall();
+    }
+
+    @Test
+    public void aUsageErrorIsPrintedWithStatusTwo() throws IOException {
+        final java.io.ByteArrayOutputStream err = new java.io.ByteArrayOutputStream();
+
+        assertEquals(2, WebComponentGenerator.run(new String[] { "only-one" }, new java.io.PrintStream(err, true, StandardCharsets.UTF_8)));
+        assertTrue(err.toString(StandardCharsets.UTF_8).startsWith("Usage: WebComponentGenerator"));
     }
 
     @Test

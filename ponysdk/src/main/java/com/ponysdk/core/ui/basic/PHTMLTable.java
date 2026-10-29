@@ -272,25 +272,16 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return rowFormatter;
     }
 
-    protected static class Cell {
+    /** Where a widget sits; the table moves it when rows are inserted or removed. */
+    private static final class Cell {
 
         private int row;
+        private final int column;
 
-        private int column;
-
-        protected Cell(final int rowIndex, final int cellIndex) {
+        private Cell(final int rowIndex, final int cellIndex) {
             this.column = cellIndex;
             this.row = rowIndex;
         }
-
-        public void setRow(final int row) {
-            this.row = row;
-        }
-
-        public void setColumn(final int column) {
-            this.column = column;
-        }
-
     }
 
     public class PRowFormatter {

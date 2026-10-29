@@ -113,8 +113,7 @@ public class ColumnVisibilitySelectorDataGridView<K, V> extends WidgetDecoratorD
             for (final ColumnHandler<V> handler : handlers) {
                 if (!handler.valueChanged) continue;
                 try {
-                    final ColumnController<V> grip = handler.column.getController();
-                    if (grip == null) continue;
+                    final ColumnController<V> grip = handler.column.getController(); // set by the grid's setAdapter
                     if (handler.checkBox.getValue()) {
                         grip.setState(handler.state.onShow());
                     } else {
