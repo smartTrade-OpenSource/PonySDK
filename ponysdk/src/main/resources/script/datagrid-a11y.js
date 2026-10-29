@@ -53,7 +53,10 @@
             if (this.hasHeader) this.layoutRow(this.pinnedHeader, this.unpinnedHeader, 'h', 'columnheader');
             var rows = this.pinnedBody.children, others = this.unpinnedBody.children;
             for (var i = 0; i < rows.length; i++) this.layoutRow(rows[i], others[i], 'r' + i, 'gridcell');
-            if (this.hasFooter) this.layoutRow(this.pinnedFooter, this.unpinnedFooter, 'f', 'gridcell');
+            if (this.hasFooter) {
+                this.layoutRow(this.pinnedFooter, this.unpinnedFooter, 'f', 'gridcell');
+                this.nameFooterWidgets();
+            }
             this.placeTabStop(this.tabStopCell());
         },
 
@@ -75,6 +78,29 @@
             var owns = owned.join(' ');
             if (owns === '') pinnedRow.removeAttribute('aria-owns');
             else if (pinnedRow.getAttribute('aria-owns') !== owns) pinnedRow.setAttribute('aria-owns', owns);
+        },
+
+        // A widget in the footer (a filter) has no label: the name of its column, in the header, names it
+        nameFooterWidgets: function () {
+            var col = 0, ours = this.widgetID + 'h';
+            [this.pinnedFooter, this.unpinnedFooter].forEach(function (part) {
+                for (var i = 0; i < part.children.length; i++, col++) {
+                    var header = this.hasHeader ? this.cellAt(0, col) : null;
+                    // the caption the column is dragged by, else the whole header cell
+                    var name = header && (header.querySelector('.pony-grid-draggable-col') || header);
+                    // the header cell has its id already when it is in the scrolled part, the caption never does
+                    if (name && name !== header) name.id = this.widgetID + 'hn' + col;
+                    else if (name && name.id === '') name.id = this.widgetID + 'hn' + col;
+                    var widgets = part.children[i].querySelectorAll('input,select,textarea');
+                    for (var j = 0; j < widgets.length; j++) {
+                        var labelled = widgets[j].getAttribute('aria-labelledby');
+                        // one named by the application, or by a label around it, is left as it is
+                        if (!name || widgets[j].hasAttribute('aria-label') || widgets[j].labels.length > 0
+                            || (labelled !== null && labelled.indexOf(ours) !== 0)) continue;
+                        widgets[j].setAttribute('aria-labelledby', name.id);
+                    }
+                }
+            }, this);
         },
 
         layoutCell: function (cell, role, index) {

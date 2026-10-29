@@ -394,3 +394,16 @@ test('a script that does not load leaves a grid that works, and says so', async 
   await grid.locator('.pony-grid-unpinned-body .pony-grid-row').first().locator('div').first().click();
   await expect(grid.getByRole('row', { selected: true })).toHaveCount(1);
 });
+
+// ---- A widget with no text of its own is named: the check boxes of the selection, the filters of the footer ----
+
+test('the check boxes of the selection and the filters are named, for a screen reader', async ({ page }) => {
+  const grid = await openGrid(page);
+
+  // the check boxes have no text: the server names them (RowSelectorColumnDataGridView.selectRowLabel)
+  await expect(grid.getByRole('checkbox', { name: 'Select all rows' })).toHaveCount(1);
+  expect(await grid.getByRole('checkbox', { name: 'Select row' }).count()).toBeGreaterThan(10);
+  // a filter is named by the name of its column in the header, laid by the terminal
+  await expect(grid.getByRole('textbox', { name: 'b', exact: true })).toHaveCount(1);
+  await expect(grid.getByRole('textbox', { name: 'c', exact: true })).toHaveCount(1);
+});
