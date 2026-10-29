@@ -20,7 +20,7 @@ const RULES = `
 :where(.pony-MenuItem){cursor:default;white-space:nowrap}
 :where(.pony-MenuItem[aria-disabled=true]){opacity:.5}
 :where(.pony-Tree ul){list-style:none;margin:0;padding:0}
-:where(.pony-Tree [role=group]){padding-left:1.25em}
+:where(.pony-Tree [role=group]){padding-inline-start:1.25em}
 :where(.pony-TreeItem-toggle){display:inline-block;width:1em;text-align:center;cursor:pointer}
 :where(.pony-TreeItem-toggle[data-state=closed])::before{content:"▸"}
 :where(.pony-TreeItem-toggle[data-state=open])::before{content:"▾"}
@@ -40,6 +40,7 @@ const RULES = `
 :where(.pony-DateBoxPopup,.pony-SuggestPopup){background:Canvas;border:1px solid GrayText}
 :where(.pony-DatePicker-header){display:flex;align-items:center}
 :where(.pony-DatePicker-month){flex:1;text-align:center}
+:where(.pony-DatePicker-header button):dir(rtl){transform:scaleX(-1)}
 :where(.pony-DatePicker-days){border-collapse:collapse}
 :where(.pony-DatePicker-day){text-align:center;cursor:pointer}
 :where(.pony-DatePicker-day[data-filler]){opacity:.5}

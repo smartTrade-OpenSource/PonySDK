@@ -2,10 +2,7 @@
  * Copyright (c) 2026 PonySDK — Licensed under the Apache License, Version 2.0
  */
 
-export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
-    'November', 'December'];
-/** Sunday first, as Date.getDay(). */
-export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+import { type Names, namesOf } from './locale.ts';
 
 const NUMERIC = new Set(['y', 'Y', 'd', 'h', 'H', 'k', 'K', 'm', 's', 'S']);
 
@@ -67,16 +64,20 @@ function zone(date: Date, count: number, gmt: boolean): string {
 
 /**
  * A date pattern of Java's SimpleDateFormat (MM/dd/yyyy...), formatted and parsed as GWT's DateTimeFormat does in its
- * default locale: English names, the browser's time zone. Parsing is lenient, as DateTimeFormat.parse: a day out of
+ * default locale: English names, the browser's time zone. With a locale (the page's `lang`), the names of its months,
+ * days and day periods are the browser's for that language (docs/decisions/0022-locale.md); the numbers stay digits
+ * of 0-9, as the pattern writes them. Parsing is lenient, as DateTimeFormat.parse: a day out of
  * range rolls over, a field the pattern lacks is today's (the time is midnight).
  */
 export class DateFormat {
     readonly pattern: string;
     private readonly parts: Part[];
+    private readonly names: Names;
 
-    constructor(pattern: string) {
+    constructor(pattern: string, locale: string | null = null) {
         this.pattern = pattern;
         this.parts = compile(pattern);
+        this.names = namesOf(locale);
     }
 
     format(date: Date): string {
@@ -100,21 +101,21 @@ export class DateFormat {
             case 'M':
             case 'L': {
                 const month = date.getMonth();
-                if (count >= 5) return MONTHS[month]!.charAt(0);
-                if (count === 4) return MONTHS[month]!;
-                if (count === 3) return MONTHS[month]!.substring(0, 3);
+                if (count >= 5) return this.names.months[month]!.charAt(0);
+                if (count === 4) return this.names.months[month]!;
+                if (count === 3) return this.names.monthsShort[month]!;
                 return pad(month + 1, count);
             }
             case 'd':
                 return pad(date.getDate(), count);
             case 'E':
             case 'c': {
-                const day = WEEKDAYS[date.getDay()]!;
-                if (count >= 5) return day.charAt(0);
-                return count === 4 ? day : day.substring(0, 3);
+                const day = date.getDay();
+                if (count >= 5) return this.names.weekdaysNarrow[day]!;
+                return count === 4 ? this.names.weekdays[day]! : this.names.weekdaysShort[day]!;
             }
             case 'a':
-                return date.getHours() < 12 ? 'AM' : 'PM';
+                return date.getHours() < 12 ? this.names.am : this.names.pm;
             case 'h':
                 return pad(date.getHours() % 12 || 12, count);
             case 'H':
@@ -143,7 +144,8 @@ export class DateFormat {
     }
 
     /** The date the text holds, or null when the text does not fit the pattern. */
-    parse(text: string): Date | null {
+    parse(input: string): Date | null {
+        const text = latinDigits(input);
         const today = new Date();
         const fields = {
             year: today.getFullYear(), month: today.getMonth(), day: today.getDate(), hours: 0, minutes: 0, seconds: 0,
@@ -182,24 +184,24 @@ export class DateFormat {
             switch (field) {
                 case 'M':
                 case 'L': {
-                    const found = matchName(text, position, MONTHS);
+                    const found = matchName(text, position, this.names.months, this.names.monthsShort);
                     if (found === null) return -1;
                     fields.month = found[0];
                     return found[1];
                 }
                 case 'E':
                 case 'c': {
-                    const found = matchName(text, position, WEEKDAYS);
+                    const found = matchName(text, position, this.names.weekdays, this.names.weekdaysShort);
                     return found === null ? -1 : found[1]; // the day of the week does not make the date
                 }
                 case 'a': {
-                    const found = matchName(text, position, ['AM', 'PM']);
+                    const found = matchName(text, position, [this.names.am, this.names.pm], []);
                     if (found === null) return -1;
                     fields.pm = found[0] === 1;
                     return found[1];
                 }
                 case 'G': {
-                    const found = matchName(text, position, ['AD', 'BC', 'Anno Domini', 'Before Christ']);
+                    const found = matchName(text, position, ['AD', 'BC', 'Anno Domini', 'Before Christ'], []);
                     if (found === null) return -1;
                     fields.bc = found[0] % 2 === 1;
                     return found[1];
@@ -268,6 +270,11 @@ export class DateFormat {
     }
 }
 
+/** The digits of Arabic (٠-٩) and Persian (۰-۹) as 0-9: what a user types in a language that has its own. */
+function latinDigits(text: string): string {
+    return text.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, digit => String(digit.charCodeAt(0) & 15));
+}
+
 /** A two-digit year, within the 80 years before and the 20 after today: as GWT and Java. */
 function twoDigitYear(value: number): number {
     const start = new Date().getFullYear() - 80;
@@ -291,12 +298,13 @@ function matchLiteral(text: string, position: number, literal: string): number {
     return p;
 }
 
-/** The longest name (or its first three letters) the text has at the position, case aside: its index and end. */
-function matchName(text: string, position: number, names: string[]): [number, number] | null {
+/** The longest name (or its short form) the text has at the position, case aside: its index and end. */
+function matchName(text: string, position: number, names: string[], shorts: string[]): [number, number] | null {
     const rest = text.substring(position).toLowerCase();
     let best: [number, number] | null = null;
     names.forEach((name, index) => {
-        for (const candidate of [name, name.substring(0, 3)]) {
+        // English: the first three letters; a locale's short names are its own, 'janv.'
+        for (const candidate of shorts.length === 0 ? [name] : [name, shorts[index]!]) {
             const lower = candidate.toLowerCase();
             if (rest.startsWith(lower) && (best === null || position + lower.length > best[1])) best = [index, position + lower.length];
         }

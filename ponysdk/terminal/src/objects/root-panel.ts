@@ -12,6 +12,9 @@ import { Widget } from '../runtime/widget.ts';
  * PRootPanel: the body, or the element of ROOT_ID; the widgets of a window are added to it. It is in the document
  * from the start, and reports whether the document is visible. In a <pony-app> element, the body is the element's
  * container and ROOT_ID is looked up in its shadow root (ADR-0008).
+ *
+ * The server writes the page's `lang` and `dir` on it (docs/decisions/0022-locale.md): the body's are the page's, so the
+ * document element, where the browser reads the direction of its scrollbars and of the page, follows them.
  */
 export class RootPanel extends Widget {
     static create(context: Context, id: number, type: number, reader: Reader): RootPanel {
@@ -29,8 +32,21 @@ export class RootPanel extends Widget {
     constructor(context: Context, id: number, type: number, element: HTMLElement) {
         super(context, id, type, element);
         this.attach();
+        if (element === document.body) this.mirrorToDocument(element);
         this.listen('visibilitychange', () => this.sendVisibility(), document);
         this.sendVisibility();
+    }
+
+    private mirrorToDocument(body: HTMLElement): void {
+        // The body is as long-lived as the page: nothing to disconnect
+        new MutationObserver(records => {
+            for (const record of records) {
+                const name = record.attributeName!;
+                const value = body.getAttribute(name);
+                if (value === null) document.documentElement.removeAttribute(name);
+                else document.documentElement.setAttribute(name, value);
+            }
+        }).observe(body, { attributeFilter: ['lang', 'dir'] });
     }
 
     private sendVisibility(): void {
