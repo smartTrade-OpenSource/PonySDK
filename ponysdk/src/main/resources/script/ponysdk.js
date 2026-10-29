@@ -721,7 +721,7 @@ else window['AbstractAddon'] = AbstractAddon;
             this.observer = new ResizeObserver(e => {
                 window.requestAnimationFrame(() => {
                     if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
-                    this.resizeTimeout = setTimeout(this.updateView(), 150);
+                    this.resizeTimeout = setTimeout(() => this.updateView(), 150);
                 });
             });
             this.observer.observe(this.element);
