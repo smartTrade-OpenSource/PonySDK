@@ -70,10 +70,6 @@ export function encode(...models: Model[]): Uint8Array {
                 view.setInt8(0, value as number);
                 put(1);
                 break;
-            case V.SHORT:
-                view.setInt16(0, value as number);
-                put(2);
-                break;
             case V.INTEGER:
                 view.setInt32(0, value as number);
                 put(4);
@@ -88,10 +84,6 @@ export function encode(...models: Model[]): Uint8Array {
             case V.DOUBLE:
                 view.setFloat64(0, value as number);
                 put(8);
-                break;
-            case V.FLOAT:
-                view.setFloat32(0, value as number);
-                put(4);
                 break;
             case V.STRING:
                 string(value as string | null);

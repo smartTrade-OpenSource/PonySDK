@@ -444,11 +444,9 @@ public class PonySDKWebDriver implements WebDriver {
             case NULL -> null;
             case BOOLEAN -> readValue(b, 1, buff -> buff.get() == BooleanModel.TRUE.getValue());
             case BYTE -> readValue(b, 1, ByteBuffer::get);
-            case SHORT -> readValue(b, 2, ByteBuffer::getShort);
             case INTEGER -> readValue(b, 4, ByteBuffer::getInt);
             case LONG -> readValue(b, 8, ByteBuffer::getLong);
             case DOUBLE -> readValue(b, 8, ByteBuffer::getDouble);
-            case FLOAT -> readValue(b, 4, ByteBuffer::getFloat);
             case STRING -> readValue(b, 1, this::getString);
             case ARRAY -> readValue(b, 1, this::getArray);
             case UINT31 -> readValue(b, 2, this::getUint31);

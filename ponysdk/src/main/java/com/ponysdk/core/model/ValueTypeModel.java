@@ -28,11 +28,9 @@ public enum ValueTypeModel {
     NULL(ValueTypeModel.NULL_SIZE),
     BOOLEAN(ValueTypeModel.BOOLEAN_SIZE),
     BYTE(ValueTypeModel.BYTE_SIZE),
-    SHORT(ValueTypeModel.SHORT_SIZE),
     INTEGER(ValueTypeModel.INTEGER_SIZE),
     LONG(ValueTypeModel.LONG_SIZE),
     DOUBLE(ValueTypeModel.DOUBLE_SIZE),
-    FLOAT(ValueTypeModel.FLOAT_SIZE),
     STRING(ValueTypeModel.STRING_SIZE),
     ARRAY(ValueTypeModel.ARRAY_SIZE),
     UINT31(ValueTypeModel.UINT31_SIZE);
@@ -87,11 +85,9 @@ public enum ValueTypeModel {
             case NULL -> true;
             case BOOLEAN -> value instanceof Boolean;
             case BYTE -> value instanceof Byte;
-            case SHORT -> value instanceof Short;
             case INTEGER, UINT31 -> value instanceof Integer;
             case LONG -> value instanceof Long;
             case DOUBLE -> value instanceof Double;
-            case FLOAT -> value instanceof Float;
             case STRING -> value == null || value instanceof String;
             case ARRAY -> value instanceof Object[];
         };

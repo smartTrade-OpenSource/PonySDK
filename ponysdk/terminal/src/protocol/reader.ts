@@ -40,7 +40,7 @@ const ASCII_FROM_CHAR_CODE_MAX_LENGTH = 16;
  * key's ValueTypeModel says; a block is a run of models closed by END.
  *
  * {@link read} leaves the key and its value in fields, typed by the value's type, instead of allocating a model per
- * value: {@link int} for BYTE, SHORT, INTEGER and UINT31, {@link num} for LONG, DOUBLE and FLOAT, {@link bool},
+ * value: {@link int} for BYTE, INTEGER and UINT31, {@link num} for LONG and DOUBLE, {@link bool},
  * {@link str} and {@link array}.
  */
 export class Reader {
@@ -86,7 +86,7 @@ export class Reader {
     /** The last value read as a number, whichever field its type uses. */
     get number(): number {
         const type = ServerToClientModelTypeModel[this.key];
-        return type === V.LONG || type === V.DOUBLE || type === V.FLOAT ? this.num : this.int;
+        return type === V.LONG || type === V.DOUBLE ? this.num : this.int;
     }
 
     get offset(): number {
@@ -115,9 +115,6 @@ export class Reader {
             case V.BYTE:
                 this.int = this.int8();
                 break;
-            case V.SHORT:
-                this.int = this.int16();
-                break;
             case V.INTEGER:
                 this.int = this.int32();
                 break;
@@ -129,9 +126,6 @@ export class Reader {
                 break;
             case V.DOUBLE:
                 this.num = this.need(8).getFloat64(this.advance(8));
-                break;
-            case V.FLOAT:
-                this.num = this.need(4).getFloat32(this.advance(4));
                 break;
             case V.STRING:
                 this.str = this.string();
@@ -358,11 +352,7 @@ export class Reader {
             case V.BYTE:
                 this.advance(1);
                 break;
-            case V.SHORT:
-                this.advance(2);
-                break;
             case V.INTEGER:
-            case V.FLOAT:
                 this.advance(4);
                 break;
             case V.LONG:

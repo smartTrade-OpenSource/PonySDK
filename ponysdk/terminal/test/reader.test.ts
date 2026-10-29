@@ -21,13 +21,11 @@ function value(reader: Reader): unknown {
         case V.BOOLEAN:
             return reader.bool;
         case V.BYTE:
-        case V.SHORT:
         case V.INTEGER:
         case V.UINT31:
             return reader.int;
         case V.LONG:
         case V.DOUBLE:
-        case V.FLOAT:
             return reader.num;
         case V.STRING:
             return reader.str === '' ? null : reader.str; // the fixtures write "" as the server does: as null
