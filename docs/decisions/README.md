@@ -23,3 +23,4 @@ what was measured once it was built. They are written for the people who change 
 | [0015](0015-content-security-policy.md) | A Content Security Policy built by PonySDK, and JavaScript called by name | Accepted |
 | [0016](0016-development-tools.md) | The inspector and hot reload, for development | Accepted |
 | [0017](0017-drain.md) | A server that stops moves its pages to the others | Accepted |
+| [0024](0024-default-theme.md) | A default theme for the widgets: tokens, light and dark, scoped by a class | Accepted |

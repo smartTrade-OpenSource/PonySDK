@@ -43,6 +43,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -60,6 +61,8 @@ public class BootstrapServlet extends HttpServlet {
     /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
     private static final String REVALIDATE = "no-cache";
     protected static final String NEW_LINE = "\n";
+    /** The id of the theme's link (ApplicationConfiguration.setTheme). */
+    private static final String THEME_ID = "pony-theme";
 
     protected static final String TITLE_PATTERN = "<title>%s</title>";
     protected static final String META_PATTERN = "<meta %s>";
@@ -263,7 +266,8 @@ public class BootstrapServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("<!doctype html>").append(NEW_LINE);
-        sb.append("<html>").append(NEW_LINE);
+        // The theme's stylesheet applies where the class pony-theme is: on the page's root, to the whole page
+        sb.append(configuration.getTheme() == null ? "<html>" : "<html class=\"pony-theme\">").append(NEW_LINE);
         sb.append("<head>").append(NEW_LINE);
         sb.append(addHeader(request));
         sb.append("</head>").append(NEW_LINE);
@@ -282,10 +286,7 @@ public class BootstrapServlet extends HttpServlet {
      */
     protected String buildManifest(final HttpServletRequest request) {
         final JsonArrayBuilder styles = Json.createArrayBuilder();
-        final Map<String, String> configuredStyles = configuration.getStyle();
-        if (configuredStyles != null) {
-            configuredStyles.forEach((id, href) -> styles.add(Json.createObjectBuilder().add("id", id).add("href", href)));
-        }
+        stylesheets().forEach((id, href) -> styles.add(Json.createObjectBuilder().add("id", id).add("href", href)));
         final JsonArrayBuilder scripts = Json.createArrayBuilder().add(rootPath + "script/ponysdk.js");
         final Set<String> configuredScripts = configuration.getJavascript();
         if (configuredScripts != null) configuredScripts.forEach(scripts::add);
@@ -415,17 +416,24 @@ public class BootstrapServlet extends HttpServlet {
     protected String addStyle(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        final Map<String, String> styles = configuration.getStyle();
-        if (styles != null && !styles.isEmpty()) {
-            for (final Entry<String, String> style : styles.entrySet()) {
-                final String id = style.getKey();
-                final String url = style.getValue();
-                final String contentType = getServletContext().getMimeType(url);
-                sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
-            }
+        for (final Entry<String, String> style : stylesheets().entrySet()) {
+            final String id = style.getKey();
+            final String url = style.getValue();
+            final String contentType = getServletContext().getMimeType(url);
+            sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
         }
 
         return sb.toString();
+    }
+
+    /** The stylesheets of the page: the theme when asked for, then the application's, which win over it. */
+    private Map<String, String> stylesheets() {
+        final Map<String, String> configured = configuration.getStyle();
+        if (configuration.getTheme() == null) return configured == null ? Map.of() : configured;
+        final Map<String, String> all = new LinkedHashMap<>();
+        all.put(THEME_ID, rootPath + "style/pony-theme.css");
+        if (configured != null) all.putAll(configured);
+        return all;
     }
 
     /**

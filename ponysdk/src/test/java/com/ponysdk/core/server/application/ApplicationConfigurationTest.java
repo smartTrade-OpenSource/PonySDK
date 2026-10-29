@@ -166,6 +166,18 @@ public class ApplicationConfigurationTest {
         assertEquals(expected, config.getStyle());
     }
 
+    /** The default theme is off, "pony" turns it on, null off again, and a name that is no theme is refused. */
+    @Test
+    public void testTheme() {
+        assertNull(config.getTheme());
+        config.setTheme("pony");
+        assertEquals("pony", config.getTheme());
+        config.setTheme(null);
+        assertNull(config.getTheme());
+        assertThrows(IllegalArgumentException.class, () -> config.setTheme("lumo"));
+        assertNull(config.getTheme(), "a refused name leaves the setting as it was");
+    }
+
     /**
      * Test method for {@link com.ponysdk.core.server.application.ApplicationConfiguration#getMeta()}.
      */
@@ -242,6 +254,7 @@ public class ApplicationConfigurationTest {
             .hotReload(true)
             .tabindexOnlyFormField(true)
             .legacyClassNames(true)
+            .theme("pony")
             .stringDictionaryEnabled(false)
             .stringDictionaryMaxSize(128)
             .stringDictionaryMinLength(2)
@@ -285,6 +298,7 @@ public class ApplicationConfigurationTest {
         assertTrue(built.isHotReload());
         assertTrue(built.isTabindexOnlyFormField());
         assertTrue(built.isLegacyClassNames());
+        assertEquals("pony", built.getTheme());
         assertFalse(built.isStringDictionaryEnabled());
         assertEquals(128, built.getStringDictionaryMaxSize());
         assertEquals(2, built.getStringDictionaryMinLength());
