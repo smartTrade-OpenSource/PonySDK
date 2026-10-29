@@ -244,7 +244,7 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal, Bridge
 export function watchWindows(windows: Windows, signal?: AbortSignal): void {
     const timer = setInterval(() => {
         for (const window of windows.all()) {
-            if (window instanceof PopupWindow && window.closed) window.onClose();
+            if (window.closed) window.onClose();
         }
     }, 1000);
     signal?.addEventListener('abort', () => clearInterval(timer));

@@ -277,7 +277,7 @@ test('the windows registry closes every window, the last opened first, past one 
     const windows = new Windows();
     const closed: number[] = [];
     const window = (id: number) => ({
-        ready: true, postMessage: () => undefined, setReady: () => undefined,
+        ready: true, closed: false, onClose: () => undefined, postMessage: () => undefined, setReady: () => undefined,
         close: () => {
             if (id === 2) throw new Error('blocked');
             closed.push(id);

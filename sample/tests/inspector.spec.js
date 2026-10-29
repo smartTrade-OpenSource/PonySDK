@@ -93,10 +93,11 @@ test('picking stops on Escape; over the inspector, or after a reset, it names wh
 });
 
 test('an object that is no widget is counted by its type; outside any widget, picking names nothing', async ({ page }) => {
-  await page.evaluate(() => { location.hash = '#fdc3'; }); // its FDC3 addon: an object of the terminal, no element
   await page.keyboard.press('Alt+Shift+KeyI');
   const inspector = page.locator('pony-inspector');
   const panel = inspector.getByRole('region', { name: 'Pony inspector' });
+  await panel.getByRole('button', { name: 'Reset' }).click(); // the FDC3 page's objects alone: its addon in the top ten
+  await page.evaluate(() => { location.hash = '#fdc3'; }); // its FDC3 addon: an object of the terminal, no element
   await expect(panel.locator('table').first()).toContainText('ADDON', { timeout: 10000 });
 
   await panel.getByRole('button', { name: 'Pick' }).click();

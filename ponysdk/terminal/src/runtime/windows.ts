@@ -9,7 +9,11 @@ import type { ChildTerminal } from './object.ts';
 export interface ChildWindow extends ChildTerminal {
     /** Its page said it is ready: the blocks for it are forwarded, not skipped. */
     readonly ready: boolean;
+    /** Closed by its user, or never opened. */
+    readonly closed: boolean;
     close(): void;
+    /** Closed without an unload event: the server is told. */
+    onClose(): void;
 }
 
 /** The windows opened by the server; the main window is the PBrowser object. */

@@ -120,7 +120,8 @@ function menuItemSelected(e: Element): boolean {
 }
 
 function siblingItems(e: Element): Element[] {
-    return [...(e.parentElement?.children ?? [])].filter(item => item.classList.contains('pony-MenuItem'));
+    // an item of the document, focused or under the pointer: in its menu bar
+    return [...e.parentElement!.children].filter(item => item.classList.contains('pony-MenuItem'));
 }
 
 function when(condition: boolean, name: string): string[] {
