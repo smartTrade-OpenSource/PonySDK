@@ -110,7 +110,7 @@ test('sizes read as people write them', () => {
     assert.deepEqual([size(12), size(2048), size(3 * 1024 * 1024)], ['12 B', '2.0 KB', '3.0 MB']);
 });
 
-test('debug mode found in the middle of a message: that message counts', t => {
+test('debug mode found in the middle of a message: that message counts', async t => {
     const { dispatcher } = watched();
     dispatcher.watcher = null;
     t.mock.method(console, 'error', () => undefined); // no document here: the inspector does not start
@@ -121,6 +121,23 @@ test('debug mode found in the middle of a message: that message counts', t => {
     assert.deepEqual(recording.events[0], [-1, 0, frame.byteLength]);
     dispatcher.debugging(); // once
     assert.equal(dispatcher.watcher, recording);
+    await new Promise(resolve => setTimeout(resolve, 200)); // its failure to start logged within this test
+});
+
+test('an inspector that does not start leaves nothing recording', async t => {
+    const { dispatcher } = watched();
+    dispatcher.watcher = null;
+    const errors: string[] = [];
+    t.mock.method(console, 'error', (_format: string, message: string) => errors.push(message)); // no document here
+    dispatcher.debugging();
+    const recording = dispatcher.watcher as unknown as Recording;
+    await new Promise(resolve => setTimeout(resolve, 200)); // the chunk imported, its start failed
+    assert.deepEqual(errors, ['The inspector did not start']);
+    const before = recording.events.length;
+    dispatcher.receive(encode([K.TYPE_CREATE, 6], [K.WIDGET_TYPE, W.LABEL], [K.END]));
+    assert.equal(recording.events.length, before, 'no recording kept growing for an inspector that will never read it');
+    dispatcher.debugging();
+    assert.deepEqual(errors, ['The inspector did not start'], 'not tried again at each DEBUG_INFO');
 });
 
 test('until the inspector is loaded, the dispatcher records what happens', () => {

@@ -67,6 +67,9 @@ export interface Watcher {
     sent(message: Message): void;
 }
 
+/** The watcher of an inspector that did not start: nothing recorded, and DEBUG_INFO loads nothing again. */
+const IDLE: Watcher = { frame: () => undefined, block: () => undefined, sent: () => undefined };
+
 /** What happens from the first DEBUG_INFO until the inspector is loaded: it replays it. */
 export class Recording implements Watcher {
     readonly events: (readonly [number, number, number] | Message)[] = [];
@@ -577,8 +580,10 @@ export class Dispatcher implements Context {
         const recording = new Recording();
         recording.frame(this.frameBytes); // the message being read, whose first blocks went uncounted
         this.watcher = recording;
-        import('../inspector.ts').then(m => m.install(this, recording))
-            .catch((e: unknown) => log.error('The inspector did not start', e));
+        import('../inspector.ts').then(m => m.install(this, recording)).catch((e: unknown) => {
+            log.error('The inspector did not start', e);
+            this.watcher = IDLE; // the recording would grow for nobody
+        });
     }
 
     warn(message: string, objectId?: number): void {
