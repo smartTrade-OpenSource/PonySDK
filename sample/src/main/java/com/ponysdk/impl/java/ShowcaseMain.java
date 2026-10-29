@@ -91,6 +91,11 @@ public class ShowcaseMain {
         server.setHost("0.0.0.0");
         server.setUseSSL(false);
         server.setSessionCookieSecure(false); // plain-http dev server (see PonySDKServer)
+        // region drain
+        // SIGTERM (a deployment, a scale-in): the live pages move to the other servers over 5 s, then the server stops.
+        // Behind an AWS load balancer: less than the target group's deregistration delay and the task's stopTimeout
+        server.setDrainMillis(5_000);
+        // endregion
         server.start();
         startPortal();
     }

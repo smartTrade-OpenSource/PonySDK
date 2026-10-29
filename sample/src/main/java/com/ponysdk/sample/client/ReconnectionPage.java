@@ -27,6 +27,9 @@ import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.impl.java.ShowcaseMain;
 
 /**
  * Reconnection: a second session of the showcase runs in a frame, in the same HTTP session, and the page reads it and
@@ -59,7 +62,7 @@ final class ReconnectionPage {
         final PFlowPanel p = section();
         pageTitle(p, "Reconnection", "The frame runs a second session of this showcase. The server panel shows that "
             + "session as the server sees it, read and driven through SessionAdmin: cut its socket, keep it away, watch "
-            + "what the server holds for it, let it back.");
+            + "what the server holds for it, let it back; or move it, as a server that stops moves its pages to the others.");
         final Application application = uiContext.getApplication();
         if (application == null) {
             p.add(el("rc-note", "This page needs an HTTP session."));
@@ -93,6 +96,16 @@ final class ReconnectionPage {
             + "frame, never another visitor. ApplicationConfiguration.setSessionAccessPolicy opens more, for an operator "
             + "console. Every action is logged on com.ponysdk.audit.SessionAdmin."));
 
+        p.add(sectionTitle("When a server stops"));
+        p.add(el("ov-note", "Behind a load balancer, a server asked to stop (a deployment, a scale-in, a spot "
+            + "interruption) moves its pages to the other servers before it stops: each session is destroyed, its page "
+            + "reloads, and the balancer, which no longer sends anything to that server, sends it to another one. Move "
+            + "server does that to the frame's session. What the page's address keeps comes back: click a price in the "
+            + "frame, then Move server."));
+        p.add(codeSnippet("The drain on SIGTERM: ShowcaseMain.java", "java", Source.code(ShowcaseMain.class, "drain")));
+        p.add(codeSnippet("The watched price, in the page's address: ReconnectionPage.java", "java",
+            Source.code(ReconnectionPage.class, "watch")));
+
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
             view.refresh();
@@ -118,11 +131,13 @@ final class ReconnectionPage {
         private final PButton disconnect = Element.newPButton("Disconnect");
         private final PButton reconnect = Element.newPButton("Reconnect");
         private final PButton push = Element.newPButton("Push 1 000 rows");
+        private final PButton move = Element.newPButton("Move server");
         private final PButton end = Element.newPButton("End session");
 
         private int shownId = -1;
         private SessionInfo last;
         private boolean ending;
+        private boolean moving;
 
         ServerView(final SessionAdmin admin, final Client client) {
             this.admin = admin;
@@ -137,7 +152,7 @@ final class ReconnectionPage {
             final PFlowPanel buttons = Element.newPFlowPanel();
             buttons.addStyleName("rc-buttons");
             disconnect.addStyleName("primary");
-            buttons.add(disconnect, reconnect, push, end);
+            buttons.add(disconnect, reconnect, push, move, end);
             card.add(buttons);
             card.add(gauge("Instructions held for the client", heldFill, heldValue, heldNote));
             card.add(gauge("Reconnection window", windowFill, windowValue, windowNote));
@@ -158,6 +173,12 @@ final class ReconnectionPage {
                 client.rowsToAdd.addAndGet(ROWS_PER_PUSH);
                 event("The frame's application adds " + count(ROWS_PER_PUSH) + " rows: new widgets, which compaction cannot merge");
             });
+            move.addClickHandler(e -> act(id -> {
+                moving = true;
+                admin.destroy(id); // what Drain does to each page of a server that stops
+                event("Move server: destroyed as a draining server destroys its pages; the frame reloads, and gets its "
+                    + "watched price back from its address");
+            }));
             end.addClickHandler(e -> act(id -> {
                 ending = true;
                 admin.destroy(id);
@@ -197,15 +218,13 @@ final class ReconnectionPage {
             final Optional<SessionInfo> now = id < 0 ? Optional.empty() : admin.session(id);
             // endregion
             if (now.isEmpty()) {
-                if (last != null) {
-                    event("Session #" + last.id() + " destroyed: " + endReason() + ". The frame reloads into a new session.");
-                    last = null;
-                    ending = false;
-                }
+                if (last != null) ended();
                 render(null);
                 return;
             }
             final SessionInfo info = now.get();
+            // the frame may already be in its next session when the panel reads again: the previous one ended first
+            if (last != null && last.id() != info.id()) ended();
             if (info.id() != shownId) {
                 event(shownId < 0 ? "Session #" + info.id() + " is up in the frame" : "New session #" + info.id() + " in the frame");
                 shownId = info.id();
@@ -222,7 +241,15 @@ final class ReconnectionPage {
             render(info);
         }
 
+        private void ended() {
+            event("Session #" + last.id() + " destroyed: " + endReason() + ". The frame reloads into a new session.");
+            last = null;
+            ending = false;
+            moving = false;
+        }
+
         private String endReason() {
+            if (moving) return "moved, as a server being drained moves each of its pages";
             if (ending) return "ended from this page";
             final SessionInfo.Suspension s = last.suspension();
             if (s == null) return "it ended";
@@ -243,6 +270,7 @@ final class ReconnectionPage {
             disconnect.setEnabled(alive && !held);
             reconnect.setEnabled(held);
             push.setEnabled(alive);
+            move.setEnabled(alive);
             end.setEnabled(alive);
 
             final SessionInfo.Suspension s = away ? info.suspension() : null;
@@ -296,9 +324,13 @@ final class ReconnectionPage {
 
     /** The frame's session: a price grid ticking every 100 ms, and rows added on the page's order. */
     static void buildClient(final UIContext uiContext, final String token) {
+        // #reconnection-client-<page id>[/<watched cell>]: what the address keeps survives a move to another server
+        final String[] parts = token.substring(CLIENT_TOKEN.length()).split("/");
         int pageId = -1;
+        int restored = -1;
         try {
-            pageId = Integer.parseInt(token.substring(CLIENT_TOKEN.length()));
+            pageId = Integer.parseInt(parts[0]);
+            if (parts.length > 1) restored = Integer.parseInt(parts[1]);
         } catch (final NumberFormatException e) {
             // not opened by the page: says so below
         }
@@ -314,7 +346,8 @@ final class ReconnectionPage {
         client.id = uiContext.getID();
 
         root.add(el("rc-client-title", "Session #" + uiContext.getID()),
-            el("rc-note", "Prices tick every 100 ms, whether the client is there or not."));
+            el("rc-note", "Prices tick every 100 ms, whether the client is there or not. Click a price to watch it."));
+        final PElement watching = el("rc-watching", "Watching nothing");
         final PFlowPanel grid = Element.newPFlowPanel();
         grid.addStyleName("rc-grid");
         final PLabel[] cells = new PLabel[CELLS];
@@ -325,6 +358,29 @@ final class ReconnectionPage {
             cells[i].addStyleName("rc-cell");
             grid.add(cells[i]);
         }
+        // region watch: the watched price kept in the page's address, which a reload keeps
+        final int page = pageId;
+        final int[] watched = { -1 };
+        final java.util.function.IntConsumer watch = i -> {
+            if (watched[0] >= 0) cells[watched[0]].removeStyleName("rc-watched");
+            watched[0] = i;
+            cells[i].addStyleName("rc-watched");
+            uiContext.getHistory().newItem(CLIENT_TOKEN + page + "/" + i, false);
+        };
+        for (int i = 0; i < CELLS; i++) {
+            final int cell = i;
+            cells[i].addDomHandler((PClickHandler) e -> {
+                watch.accept(cell);
+                watching.setInnerText("Watching price " + (cell + 1) + ": kept in the page's address");
+            }, PClickEvent.TYPE);
+        }
+        if (restored >= 0 && restored < CELLS) {
+            watch.accept(restored);
+            watching.setInnerText("Watching price " + (restored + 1) + ": restored from the page's address by session #"
+                + uiContext.getID());
+        }
+        // endregion
+        root.add(watching);
         final PFlowPanel rowsHead = Element.newPFlowPanel();
         rowsHead.addStyleName("rc-rows-head");
         final PLabel rowCount = Element.newPLabel("0 rows");

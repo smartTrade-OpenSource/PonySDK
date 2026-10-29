@@ -46,6 +46,10 @@ class SourceTest {
 
     private static final Path SOURCES = Path.of("src/main/java/com/ponysdk/sample/client");
     private static final Path QUICKSTART = Path.of("src/main/java/com/ponysdk/sample/quickstart");
+    private static final Path MAIN = Path.of("src/main/java/com/ponysdk/impl/java");
+    /** The directories whose sources the build copies for the panels (sample/build.gradle), and their packages. */
+    private static final Map<Path, String> PACKAGES = Map.of(SOURCES, "com.ponysdk.sample.client.", QUICKSTART,
+        "com.ponysdk.sample.quickstart.", MAIN, "com.ponysdk.impl.java.");
     private static final Pattern USE = Pattern.compile("Source\\.code\\((\\w+)\\.class, \"([^\"]+)\"\\)");
     private static final Pattern MARKER = Pattern.compile("^\\s*// region (\\w+)\\b");
 
@@ -62,8 +66,7 @@ class SourceTest {
         for (final String use : uses) {
             final String[] parts = use.split("#");
             assertEquals(1, markers(parts[0]).getOrDefault(parts[1], 0), use + ": one region of that name");
-            final Class<?> page = Class.forName((Files.exists(SOURCES.resolve(parts[0] + ".java")) ? "com.ponysdk.sample.client."
-                : "com.ponysdk.sample.quickstart.") + parts[0]);
+            final Class<?> page = Class.forName(PACKAGES.get(directoryOf(parts[0])) + parts[0]);
             final List<String> lines = Source.lines(page, parts[1]);
             assertFalse(lines.stream().allMatch(String::isBlank), use + " is empty");
             assertTrue(lines.stream().noneMatch(l -> l.contains("// region") || l.contains("// endregion")), use);
@@ -89,11 +92,15 @@ class SourceTest {
 
     private static Map<String, Integer> markers(final String page) throws IOException {
         final Map<String, Integer> count = new HashMap<>();
-        final Path file = Files.exists(SOURCES.resolve(page + ".java")) ? SOURCES.resolve(page + ".java") : QUICKSTART.resolve(page + ".java");
+        final Path file = directoryOf(page).resolve(page + ".java");
         for (final String line : Files.readAllLines(file)) {
             final Matcher m = MARKER.matcher(line);
             if (m.find()) count.merge(m.group(1), 1, Integer::sum);
         }
         return count;
+    }
+
+    private static Path directoryOf(final String page) {
+        return PACKAGES.keySet().stream().filter(dir -> Files.exists(dir.resolve(page + ".java"))).findFirst().orElseThrow();
     }
 }

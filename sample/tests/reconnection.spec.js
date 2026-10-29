@@ -227,6 +227,23 @@ test.describe('a page of terminal objects', () => {
   });
 });
 
+test('Move server: the frame reloads into a new session, its watched price back from its address', async ({ page }) => {
+  await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
+  const log = page.locator('.rc-log');
+  const frame = page.frameLocator('.rc-frame');
+  await expect(log).toContainText('is up in the frame', { timeout: 15000 });
+  const first = (await frame.locator('.rc-client-title').innerText()).replace('Session #', '');
+
+  await frame.locator('.rc-cell').nth(6).click();
+  await expect(frame.locator('.rc-watching')).toHaveText("Watching price 7: kept in the page's address");
+  await page.getByRole('button', { name: 'Move server', exact: true }).click();
+  await expect(log).toContainText('moved, as a server being drained moves each of its pages', { timeout: 10000 });
+  await expect(frame.locator('.rc-watching')).toHaveText(/^Watching price 7: restored from the page's address by session #\d+$/,
+    { timeout: 15000 });
+  await expect(frame.locator('.rc-client-title')).not.toHaveText(`Session #${first}`);
+  await expect(frame.locator('.rc-cell').nth(6)).toHaveClass(/rc-watched/);
+});
+
 test('the Reconnection page drives its frame session through SessionAdmin, up to the cap', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });

@@ -51,6 +51,10 @@ processResources {
         include '*.java'
         into 'source'
     }
+    from('src/main/java/com/ponysdk/impl/java') {
+        include 'ShowcaseMain.java' // its drain, shown by the Reconnection page
+        into 'source'
+    }
     from('src/main/java/com/ponysdk/sample/client') {
         include 'EmbeddedTicket.java', 'UISampleEntryPoint.java'
         into 'portal/source' // served by the portal
