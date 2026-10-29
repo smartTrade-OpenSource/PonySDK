@@ -77,6 +77,7 @@ of [`ApplicationConfiguration`](configuration.md). Your IDE completes them from 
 | `ponysdk.application-context-name` | The path of the application | `sample` |
 | `ponysdk.application-id`, `.application-name`, `.application-description` | Identity; the name is the page's title | none |
 | `ponysdk.reconnection-timeout` | Transparent reconnection window ([reconnection](reconnection.md)); 0 disables it | 0 |
+| `ponysdk.state-transfer-key` | Base64 of 32 bytes, the same on every server: a moved page carries the state its application declares ([deployment](deployment.md#carrying-the-screens-state)). From a secret store, never in a repository | off |
 | `ponysdk.debug-mode` | Each element names its Java class and creation line, and the inspector shows ([development tools](development.md)). Not for production | false |
 | `ponysdk.legacy-class-names` | Adds the GWT class names the 2.x CSS used | false |
 | `ponysdk.meta` | `<meta>` attributes of the bootstrap page | none |

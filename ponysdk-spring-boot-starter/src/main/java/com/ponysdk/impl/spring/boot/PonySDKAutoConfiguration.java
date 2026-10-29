@@ -85,6 +85,7 @@ public class PonySDKAutoConfiguration {
         map.from(properties::getApplicationContextName).to(configuration::setApplicationContextName);
         map.from(properties::getReconnectionTimeout).as(Duration::toMillis).to(configuration::setReconnectionTimeoutMs);
         map.from(properties::getDebugMode).to(configuration::setDebugMode);
+        map.from(properties::getStateTransferKey).as(java.util.Base64.getDecoder()::decode).to(configuration::setStateTransferKey);
         map.from(properties::getLegacyClassNames).to(configuration::setLegacyClassNames);
         map.from(properties::getMeta).to(configuration::setMeta);
         map.from(properties::getJavascript).to(configuration::setJavascript);

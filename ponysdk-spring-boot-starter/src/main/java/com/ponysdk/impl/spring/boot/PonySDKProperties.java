@@ -56,6 +56,12 @@ public class PonySDKProperties {
     /** Each element names its Java class and creation line, and the inspector shows over the page: not for production. */
     private Boolean debugMode;
 
+    /**
+     * The key, Base64 of 32 bytes, that turns on the transfer of a moved page's declared state (ADR-0018): the same on
+     * every server, from a secret store (an environment variable, Spring Cloud Vault...), never in a repository.
+     */
+    private String stateTransferKey;
+
     /** Adds the GWT class names the 2.x stylesheets used. */
     private Boolean legacyClassNames;
 
@@ -123,6 +129,14 @@ public class PonySDKProperties {
 
     public void setReconnectionTimeout(final Duration reconnectionTimeout) {
         this.reconnectionTimeout = reconnectionTimeout;
+    }
+
+    public String getStateTransferKey() {
+        return stateTransferKey;
+    }
+
+    public void setStateTransferKey(final String stateTransferKey) {
+        this.stateTransferKey = stateTransferKey;
     }
 
     public Boolean getDebugMode() {

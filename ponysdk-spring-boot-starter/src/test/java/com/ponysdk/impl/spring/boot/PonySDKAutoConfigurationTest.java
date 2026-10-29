@@ -26,6 +26,7 @@ package com.ponysdk.impl.spring.boot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -185,6 +186,21 @@ class PonySDKAutoConfigurationTest {
             manager.start(); // nothing to prepare
             assertSame(context.getBean(EntryPoint.class), ((BootApplicationManager) manager).initializeEntryPoint());
         });
+    }
+
+    /** The key reaches the configuration: one of 32 bytes starts, one of another length is refused at start. */
+    @Test
+    void theStateTransferKeyIsDecodedFromBase64() {
+        runner.withPropertyValues("ponysdk.state-transfer-key=" + java.util.Base64.getEncoder().encodeToString(new byte[32]))
+            .run(context -> assertNull(context.getStartupFailure()));
+        runner.withPropertyValues("ponysdk.state-transfer-key=" + java.util.Base64.getEncoder().encodeToString(new byte[16]))
+            .run(context -> assertInstanceOf(IllegalArgumentException.class, rootCause(context.getStartupFailure())));
+    }
+
+    private static Throwable rootCause(final Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null) cause = cause.getCause();
+        return cause;
     }
 
     @Test
