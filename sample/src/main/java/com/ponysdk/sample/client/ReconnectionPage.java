@@ -102,7 +102,8 @@ final class ReconnectionPage {
             + "interruption) moves its pages to the other servers before it stops: each session is destroyed, its page "
             + "reloads, and the balancer, which no longer sends anything to that server, sends it to another one. Move "
             + "server does that to the frame's session. What the page's address keeps comes back: click a price in the "
-            + "frame, then Move server."));
+            + "frame, then Move server. Two servers behind a balancer on this machine: ./gradlew :sample:runTwoServers, "
+            + "then stop one (docs/guide/deployment.md)."));
         p.add(codeSnippet("The drain on SIGTERM: ShowcaseMain.java", "java", Source.code(ShowcaseMain.class, "drain")));
         p.add(el("ov-note", "The balancer's health check is the application's path followed by /health: 200 UP while the "
             + "server takes pages, 503 DRAINING from the start of a drain. No session, not cached."));

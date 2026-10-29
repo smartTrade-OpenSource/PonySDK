@@ -25,8 +25,10 @@ public class ShowcaseMain {
 
     /** Application attribute key to share metrics with UIContexts. */
     public static final String METRICS_KEY = "ponysdk.metrics";
+    /** The showcase's port: 8081, or -Dponysdk.port (runShowcase -Pport=8091) for a second server on this machine. */
+    public static final int PORT = Integer.getInteger("ponysdk.port", 8081);
     /** The portal of the embedding demo: a page of another origin with <pony-app> elements (ADR-0008). */
-    public static final int PORTAL_PORT = 8082;
+    public static final int PORTAL_PORT = PORT + 1;
 
     private static final Logger log = LoggerFactory.getLogger(ShowcaseMain.class);
 
@@ -87,7 +89,7 @@ public class ShowcaseMain {
             }
         };
         server.setApplicationManager(applicationManager);
-        server.setPort(8081);
+        server.setPort(PORT);
         server.setHost("0.0.0.0");
         server.setUseSSL(false);
         server.setSessionCookieSecure(false); // plain-http dev server (see PonySDKServer)
