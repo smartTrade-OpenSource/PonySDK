@@ -559,14 +559,27 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private void fireNamedEvent(final JsonObject instruction) {
-        final Map<String, EventListening> all = wx != null ? wx.eventListening : null;
-        final String name = instruction.getString(EVENT_KEY);
-        final EventListening listening = all != null ? all.get(name) : null;
+        final EventListening listening = listening(instruction.getString(EVENT_KEY));
         if (listening == null) return; // removed meanwhile
         final JsonObject fields = instruction.containsKey(EVENT_FIELDS_KEY) ? instruction.getJsonObject(EVENT_FIELDS_KEY)
                 : JsonValue.EMPTY_JSON_OBJECT;
-        final PEvent event = new PEvent(this, name, fields);
+        final PEvent event = new PEvent(this, instruction.getString(EVENT_KEY), fields);
         for (final Consumer<PEvent> listener : List.copyOf(listening.listeners)) listener.accept(event);
+    }
+
+    private EventListening listening(final String name) {
+        final Map<String, EventListening> all = wx != null ? wx.eventListening : null;
+        return all != null ? all.get(name) : null;
+    }
+
+    /** The lock the terminal took for a locked event goes, whether its listeners ran, were filtered out or threw. */
+    @Override
+    public void onClientDataProcessed(final JsonObject instruction) {
+        super.onClientDataProcessed(instruction);
+        if (!instruction.containsKey(EVENT_KEY)) return;
+        final String name = instruction.getString(EVENT_KEY);
+        final EventListening listening = listening(name); // removed: the terminal stopped listening, its lock with it
+        if (listening != null && listening.options.isLock()) saveUpdate(writer -> writer.write(ServerToClientModel.EVENT_HANDLED, name));
     }
 
     public HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type) {

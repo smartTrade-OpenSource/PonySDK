@@ -7,16 +7,16 @@ import { test } from 'node:test';
 
 import { ClientToServerModel as C } from '#model';
 import type { Message } from '../src/protocol/messages.ts';
-import { listenByName, readFields } from '../src/runtime/named-events.ts';
+import { listenByName, readFields, type NamedListener } from '../src/runtime/named-events.ts';
 import type { Context } from '../src/runtime/object.ts';
 
 /** The messages a listener sends, through a context that only sends. */
-function listening(json: string): { element: EventTarget; sent: Message[]; controller: AbortController } {
+function listening(json: string): { element: EventTarget; sent: Message[]; listener: NamedListener } {
     const sent: Message[] = [];
     const context = { send: (message: Message) => sent.push(message), guard: (action: () => void) => action() } as unknown as Context;
     const element = new EventTarget();
-    const [, controller] = listenByName(context, 7, element, json);
-    return { element, sent, controller };
+    const listener = listenByName(context, 7, element, json);
+    return { element, sent, listener };
 }
 
 function fire(element: EventTarget, detail: number): Event {
@@ -60,7 +60,7 @@ test('a stopped event goes no further than the listened element', () => {
 });
 
 test('sends each event with its fields, prevented when asked, until unlistened', () => {
-    const { element, sent, controller } = listening('{"name":"pick","fields":["detail"],"prevent":true}');
+    const { element, sent, listener } = listening('{"name":"pick","fields":["detail"],"prevent":true}');
     const event = fire(element, 1);
     assert.equal(event.defaultPrevented, true);
     fire(element, 2);
@@ -68,7 +68,7 @@ test('sends each event with its fields, prevented when asked, until unlistened',
         { [C.OBJECT_ID]: 7, [C.EVENT]: 'pick', [C.EVENT_FIELDS]: { detail: 1 } },
         { [C.OBJECT_ID]: 7, [C.EVENT]: 'pick', [C.EVENT_FIELDS]: { detail: 2 } },
     ]);
-    controller.abort();
+    listener.stop();
     fire(element, 3);
     assert.equal(sent.length, 2);
 });
@@ -93,7 +93,7 @@ test('debounce sends the last event once none came for the delay', t => {
 
 test('throttle sends the first event at once, then the last of each period at its end', t => {
     t.mock.timers.enable({ apis: ['setTimeout'] });
-    const { element, sent, controller } = listening('{"name":"pick","fields":["detail"],"throttle":100}');
+    const { element, sent, listener } = listening('{"name":"pick","fields":["detail"],"throttle":100}');
     fire(element, 1);
     fire(element, 2);
     fire(element, 3);
@@ -104,7 +104,41 @@ test('throttle sends the first event at once, then the last of each period at it
     fire(element, 4);
     assert.deepEqual(details(sent), [1, 3, 4]);
     fire(element, 5);
-    controller.abort(); // the pending event goes with the listener
+    listener.stop(); // the pending event goes with the listener
     t.mock.timers.tick(200);
     assert.deepEqual(details(sent), [1, 3, 4]);
+});
+
+test('a locked name sends one event until the server answers it: the element is busy meanwhile', () => {
+    const attributes = new Map<string, string>();
+    const sent: Message[] = [];
+    const context = { send: (message: Message) => sent.push(message), guard: (action: () => void) => action() } as unknown as Context;
+    const element = Object.assign(new EventTarget(), {
+        setAttribute: (name: string, value: string) => attributes.set(name, value),
+        removeAttribute: (name: string) => attributes.delete(name),
+    });
+    const listener = listenByName(context, 7, element, '{"name":"pick","fields":["detail"],"lock":true}');
+
+    fire(element, 1);
+    fire(element, 2); // before the answer: dropped
+    assert.deepEqual(details(sent), [1]);
+    assert.equal(attributes.get('aria-busy'), 'true');
+
+    listener.handled();
+    assert.equal(attributes.has('aria-busy'), false);
+    fire(element, 3);
+    assert.deepEqual(details(sent), [1, 3]);
+
+    listener.stop(); // listening stopped while locked: the element is not left busy
+    assert.equal(attributes.has('aria-busy'), false);
+    listener.handled(); // an answer after the stop changes nothing
+    assert.equal(attributes.has('aria-busy'), false);
+});
+
+test('an unlocked name is never busy, and an answer for it changes nothing', () => {
+    const { element, sent, listener } = listening('{"name":"pick","fields":["detail"]}');
+    fire(element, 1);
+    fire(element, 2);
+    listener.handled();
+    assert.deepEqual(details(sent), [1, 2]);
 });

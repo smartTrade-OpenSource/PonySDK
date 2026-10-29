@@ -15,6 +15,15 @@ interface Options {
     prevent?: boolean;
     stop?: boolean;
     capture?: boolean;
+    lock?: boolean;
+}
+
+/** A DOM event listened to by name: stop() is UNLISTEN_EVENT, handled() EVENT_HANDLED. */
+export interface NamedListener {
+    readonly name: string;
+    stop(): void;
+    /** The server ran the listeners of the event that locked it: the next one goes. */
+    handled(): void;
 }
 
 type Fields = Record<string, unknown>;
@@ -82,12 +91,30 @@ function rateLimited(send: (fields: Fields | null) => void, options: Options, si
     return send;
 }
 
-/** Listens to a DOM event by name for an object (LISTEN_EVENT); the returned controller stops it (UNLISTEN_EVENT). */
-export function listenByName(context: Context, objectId: number, element: EventTarget, json: string): [string, AbortController] {
+/**
+ * Listens to a DOM event by name for an object (LISTEN_EVENT). With lock, an event sent locks the name until the
+ * server answers it (EVENT_HANDLED): the element is busy, the events of the name meanwhile are not sent.
+ */
+export function listenByName(context: Context, objectId: number, element: EventTarget, json: string): NamedListener {
     const options = JSON.parse(json) as Options;
     const controller = new AbortController();
     const signal = controller.signal;
+    let locked = false;
+    const busy = (on: boolean): void => {
+        locked = on;
+        const target = element as Partial<Element>; // an element, or a mere event target (a test, the window)
+        if (on) target.setAttribute?.('aria-busy', 'true');
+        else target.removeAttribute?.('aria-busy');
+    };
+    const handled = (): void => {
+        if (locked) busy(false);
+    };
+    signal.addEventListener('abort', handled);
     const deliver = rateLimited(fields => {
+        if (options.lock) {
+            if (locked) return;
+            busy(true);
+        }
         const message = about(objectId);
         message[C.EVENT] = options.name;
         if (fields !== null) message[C.EVENT_FIELDS] = fields;
@@ -99,5 +126,5 @@ export function listenByName(context: Context, objectId: number, element: EventT
         if (options.stop) event.stopPropagation();
         deliver(paths.length > 0 ? readFields(event, paths) : null);
     }), { signal, capture: options.capture === true, passive: options.prevent !== true });
-    return [options.name, controller];
+    return { name: options.name, stop: () => controller.abort(), handled };
 }

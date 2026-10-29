@@ -179,6 +179,20 @@ test('widget: a removed visibility handler and event listener no longer report',
     await expect(status(page)).not.toContainText('listened, listened');
 });
 
+test('widget: a locked event is sent once until the server answers it', async ({ page }) => {
+    await open(page, 'widget');
+    const locked = page.getByText('Locked', { exact: true });
+    await locked.evaluate(e => {
+        e.click();
+        e.click(); // in the same task: before any answer of the server can come
+    });
+    await expect(status(page)).toContainText('locked 1');
+    await expect(locked).not.toHaveAttribute('aria-busy', 'true');
+    await locked.click();
+    await expect(status(page)).toContainText('locked 2');
+    await expect(status(page)).not.toContainText('locked 3');
+});
+
 test('text box: paste, filter, selection, sizes', async ({ page }) => {
     await open(page, 'textbox');
     const box = page.getByLabel('Pasted box');

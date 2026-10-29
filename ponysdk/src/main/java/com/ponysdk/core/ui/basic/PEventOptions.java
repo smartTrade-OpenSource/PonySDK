@@ -23,7 +23,7 @@ import jakarta.json.JsonObjectBuilder;
 public final class PEventOptions {
 
     /** No field, every event. */
-    public static final PEventOptions NONE = new PEventOptions(List.of(), 0, 0, false, false, false);
+    public static final PEventOptions NONE = new PEventOptions(List.of(), 0, 0, false, false, false, false);
 
     private final List<String> fields;
     private final long throttleMillis;
@@ -31,15 +31,18 @@ public final class PEventOptions {
     private final boolean preventDefault;
     private final boolean stopPropagation;
     private final boolean capture;
+    private final boolean lock;
 
     private PEventOptions(final List<String> fields, final long throttleMillis, final long debounceMillis,
-                          final boolean preventDefault, final boolean stopPropagation, final boolean capture) {
+                          final boolean preventDefault, final boolean stopPropagation, final boolean capture,
+                          final boolean lock) {
         this.fields = fields;
         this.throttleMillis = throttleMillis;
         this.debounceMillis = debounceMillis;
         this.preventDefault = preventDefault;
         this.stopPropagation = stopPropagation;
         this.capture = capture;
+        this.lock = lock;
     }
 
     /** The fields read on each event. */
@@ -48,31 +51,44 @@ public final class PEventOptions {
     }
 
     public PEventOptions withFields(final String... fields) {
-        return new PEventOptions(List.of(fields), throttleMillis, debounceMillis, preventDefault, stopPropagation, capture);
+        return new PEventOptions(List.of(fields), throttleMillis, debounceMillis, preventDefault, stopPropagation, capture, lock);
     }
 
     /** At most one event per period: the first at once, the last of the period at its end. */
     public PEventOptions throttle(final Duration period) {
-        return new PEventOptions(fields, period.toMillis(), debounceMillis, preventDefault, stopPropagation, capture);
+        return new PEventOptions(fields, period.toMillis(), debounceMillis, preventDefault, stopPropagation, capture, lock);
     }
 
     /** The last event only, once none came for the delay. */
     public PEventOptions debounce(final Duration delay) {
-        return new PEventOptions(fields, throttleMillis, delay.toMillis(), preventDefault, stopPropagation, capture);
+        return new PEventOptions(fields, throttleMillis, delay.toMillis(), preventDefault, stopPropagation, capture, lock);
     }
 
     /** The browser's default action is prevented: the listener cannot be passive. */
     public PEventOptions preventDefault() {
-        return new PEventOptions(fields, throttleMillis, debounceMillis, true, stopPropagation, capture);
+        return new PEventOptions(fields, throttleMillis, debounceMillis, true, stopPropagation, capture, lock);
     }
 
     public PEventOptions stopPropagation() {
-        return new PEventOptions(fields, throttleMillis, debounceMillis, preventDefault, true, capture);
+        return new PEventOptions(fields, throttleMillis, debounceMillis, preventDefault, true, capture, lock);
     }
 
     /** Listens in the capture phase: the events of the widget's children come first here. */
     public PEventOptions capture() {
-        return new PEventOptions(fields, throttleMillis, debounceMillis, preventDefault, stopPropagation, true);
+        return new PEventOptions(fields, throttleMillis, debounceMillis, preventDefault, stopPropagation, true, lock);
+    }
+
+    /**
+     * From an event until the server ran its listeners, the element is busy ({@code aria-busy}) and the terminal
+     * sends no other event of this name: a second submit before the answer is dropped, not processed twice. A
+     * {@link PFocusWidget}'s click does the same by default ({@link PFocusWidget#setEnabledOnRequest(boolean)}).
+     */
+    public PEventOptions lock() {
+        return new PEventOptions(fields, throttleMillis, debounceMillis, preventDefault, stopPropagation, capture, true);
+    }
+
+    public boolean isLock() {
+        return lock;
     }
 
     public List<String> getFields() {
@@ -92,6 +108,7 @@ public final class PEventOptions {
         if (preventDefault) json.add("prevent", true);
         if (stopPropagation) json.add("stop", true);
         if (capture) json.add("capture", true);
+        if (lock) json.add("lock", true);
         return json.build().toString();
     }
 
@@ -99,11 +116,11 @@ public final class PEventOptions {
     public boolean equals(final Object o) {
         return o instanceof PEventOptions other && fields.equals(other.fields) && throttleMillis == other.throttleMillis
                 && debounceMillis == other.debounceMillis && preventDefault == other.preventDefault
-                && stopPropagation == other.stopPropagation && capture == other.capture;
+                && stopPropagation == other.stopPropagation && capture == other.capture && lock == other.lock;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fields, throttleMillis, debounceMillis, preventDefault, stopPropagation, capture);
+        return Objects.hash(fields, throttleMillis, debounceMillis, preventDefault, stopPropagation, capture, lock);
     }
 }

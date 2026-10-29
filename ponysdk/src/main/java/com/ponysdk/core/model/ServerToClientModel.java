@@ -307,7 +307,10 @@ public enum ServerToClientModel {
 
     // A function of the terminal's window, called by name (ADR-0015): on a PScript, then optionally FUNCTION_ARGS,
     // COMMAND_ID, FIXDELAY; on a widget, called with its element then FUNCTION_ARGS; at a PFunction's creation
-    FUNCTION_NAME(ValueTypeModel.STRING);
+    FUNCTION_NAME(ValueTypeModel.STRING),
+
+    // A DOM event listened to by name with PEventOptions.lock(): the server ran its listeners, the name's lock goes
+    EVENT_HANDLED(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

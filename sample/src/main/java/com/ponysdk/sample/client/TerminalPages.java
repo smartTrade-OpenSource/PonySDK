@@ -299,6 +299,10 @@ final class TerminalPages {
         button(panel, "Restyle element", () -> plain.setStyleName("restyled"));
         button(panel, "Listen with detail", () -> clicks[0] = watched.addEventListener("click",
             PEventOptions.fields("type", "detail"), e -> status.add("detail " + e.getFields().getInt("detail", -1))));
+        final PLabel locked = Element.newPLabel("Locked");
+        final int[] lockedClicks = { 0 };
+        locked.addEventListener("click", PEventOptions.NONE.lock(), e -> status.add("locked " + ++lockedClicks[0]));
+        panel.add(locked);
         return panel;
     }
 

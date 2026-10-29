@@ -13,7 +13,7 @@ import {
 import { about, type Message } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { log } from './log.ts';
-import { listenByName } from './named-events.ts';
+import { listenByName, type NamedListener } from './named-events.ts';
 import { apply, BaseObject, type Context, type Setters, type TerminalObject } from './object.ts';
 import { pageFunction } from './page-function.ts';
 
@@ -54,8 +54,8 @@ export class Widget extends BaseObject {
     private stopped: Set<number> | undefined;
     private visibility: IntersectionObserver | undefined;
     private binding: NativeBinding | undefined;
-    /** The DOM events listened to by name (LISTEN_EVENT), each stopped by its controller. */
-    private named: Map<string, AbortController> | undefined;
+    /** The DOM events listened to by name (LISTEN_EVENT). */
+    private named: Map<string, NamedListener> | undefined;
 
     constructor(context: Context, id: number, type: number, element: HTMLElement, typeClass: string | null = null) {
         super(context, id, type);
@@ -77,20 +77,30 @@ export class Widget extends BaseObject {
         this.lifetime.abort();
         this.visibility?.disconnect();
         this.attachListeners = undefined;
-        if (this.named !== undefined) for (const controller of this.named.values()) controller.abort();
+        if (this.named !== undefined) for (const listener of this.named.values()) listener.stop();
+    }
+
+    /** A locked event sent while the connection was lost never reached the server: its lock goes. */
+    contextResumed(): void {
+        if (this.named !== undefined) for (const listener of this.named.values()) listener.handled();
     }
 
     /** LISTEN_EVENT: listens to a DOM event by name; listening again replaces the options. */
     listenEvent(json: string): void {
-        const [name, controller] = listenByName(this.context, this.id, this.element, json);
+        const listener = listenByName(this.context, this.id, this.element, json);
         this.named ??= new Map();
-        this.named.get(name)?.abort();
-        this.named.set(name, controller);
+        this.named.get(listener.name)?.stop();
+        this.named.set(listener.name, listener);
+    }
+
+    /** EVENT_HANDLED: the server answered the event that locked the name. */
+    eventHandled(name: string): void {
+        this.named?.get(name)?.handled();
     }
 
     /** UNLISTEN_EVENT. */
     unlistenEvent(name: string): void {
-        this.named?.get(name)?.abort();
+        this.named?.get(name)?.stop();
         this.named?.delete(name);
     }
 
@@ -501,4 +511,5 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     [K.STOP_EVENT, (w, r) => w.stopEvent(r.int)],
     [K.LISTEN_EVENT, (w, r) => w.listenEvent(r.str)],
     [K.UNLISTEN_EVENT, (w, r) => w.unlistenEvent(r.str)],
+    [K.EVENT_HANDLED, (w, r) => w.eventHandled(r.str)],
 ]);

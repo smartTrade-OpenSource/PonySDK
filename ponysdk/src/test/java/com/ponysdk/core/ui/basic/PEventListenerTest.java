@@ -184,4 +184,63 @@ public class PEventListenerTest extends PSuite {
         first.removeHandler();
         assertEquals(0, writer.count(ServerToClientModel.UNLISTEN_EVENT));
     }
+
+    @Test
+    public void aLockedEventIsAnsweredOnceItsListenersRanWhateverTheyDid() {
+        final PTextBox box = attachedBox();
+        final List<String> calls = new ArrayList<>();
+        box.addEventListener("submit", PEventOptions.NONE.lock(), e -> {
+            calls.add("listener");
+            if (calls.size() == 2) throw new IllegalStateException("broken listener");
+        });
+        assertEquals(List.of("{\"name\":\"submit\",\"lock\":true}"), writer.valuesOf(ServerToClientModel.LISTEN_EVENT));
+        writer.clear();
+
+        UIContext.get().fireClientData(event(box, "submit"));
+        assertEquals(List.of("submit"), writer.valuesOf(ServerToClientModel.EVENT_HANDLED));
+
+        writer.clear();
+        assertThrows(IllegalStateException.class, () -> UIContext.get().fireClientData(event(box, "submit")));
+        assertEquals(List.of("submit"), writer.valuesOf(ServerToClientModel.EVENT_HANDLED), "a listener that throws");
+
+        box.setEnabled(false); // its listeners are not called, its lock still goes
+        writer.clear();
+        UIContext.get().fireClientData(event(box, "submit"));
+        assertEquals(List.of("listener", "listener"), calls);
+        assertEquals(List.of("submit"), writer.valuesOf(ServerToClientModel.EVENT_HANDLED), "a disabled widget");
+
+        box.setEnabled(true);
+        box.setVisible(false);
+        writer.clear();
+        UIContext.get().fireClientData(event(box, "submit"));
+        assertEquals(List.of("submit"), writer.valuesOf(ServerToClientModel.EVENT_HANDLED), "a hidden widget");
+    }
+
+    @Test
+    public void anEventWithoutLockIsNotAnswered() {
+        final PTextBox box = attachedBox();
+        box.addEventListener("submit", PEventOptions.NONE, e -> {
+        });
+        UIContext.get().fireClientData(event(box, "submit"));
+        assertEquals(0, writer.count(ServerToClientModel.EVENT_HANDLED));
+    }
+
+    @Test
+    public void lockIsAnOptionLikeTheOthers() {
+        assertTrue(PEventOptions.NONE.lock().isLock());
+        assertEquals(PEventOptions.NONE.lock(), PEventOptions.NONE.lock());
+        assertEquals(PEventOptions.NONE.lock().hashCode(), PEventOptions.NONE.lock().hashCode());
+        assertTrue(!PEventOptions.NONE.equals(PEventOptions.NONE.lock()));
+        assertTrue(PEventOptions.NONE.lock().throttle(Duration.ofMillis(5)).isLock(), "kept by the other options");
+    }
+
+    @Test
+    public void aLockedEventWhoseListenerWentIsNotAnswered() {
+        final PTextBox box = attachedBox();
+        box.addEventListener("submit", PEventOptions.NONE.lock(), e -> {
+        }).removeHandler(); // the terminal stops listening: its lock goes with the listening
+        writer.clear();
+        UIContext.get().fireClientData(event(box, "submit"));
+        assertEquals(0, writer.count(ServerToClientModel.EVENT_HANDLED));
+    }
 }

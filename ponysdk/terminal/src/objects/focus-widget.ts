@@ -50,7 +50,8 @@ export class FocusWidget extends Widget {
         this.sendMouseEvent(type, event);
     }
 
-    contextResumed(): void {
+    override contextResumed(): void {
+        super.contextResumed();
         if (this.waiting) this.endOfProcessing();
     }
 
