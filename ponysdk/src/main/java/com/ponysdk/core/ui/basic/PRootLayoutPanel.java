@@ -34,7 +34,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     private static final String KEY = PRootLayoutPanel.class.getSimpleName();
 
     private PRootLayoutPanel(final PWindow window) {
-        this.window = window;
+        attach(window, null);
     }
 
     private PRootLayoutPanel(final PWindow window, final String id) {

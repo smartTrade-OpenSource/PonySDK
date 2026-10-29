@@ -29,8 +29,6 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import org.openqa.selenium.*;
 
-import javax.json.Json;
-import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
@@ -38,6 +36,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import jakarta.json.Json;
+import jakarta.json.JsonValue;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.model.WidgetType;
 
 public class PonyWebElement implements WebElement {
 
@@ -61,23 +74,17 @@ public class PonyWebElement implements WebElement {
     }
 
     public void printTree(final Writer writer) throws IOException {
-        printTree(0, writer);
+        final StringBuilder tree = new StringBuilder();
+        printTree(0, tree);
+        writer.write(tree.toString());
     }
 
-    void printTree(final int level, final Writer writer) throws IOException {
-        for (int i = 0; i < level; i++) {
-            writer.write('\t');
-        }
-        writer.write(this.toString());
-        writer.write('\n');
+    void printTree(final int level, final StringBuilder out) {
+        out.append("\t".repeat(level)).append(this).append('\n');
         for (final PonyWebElement e : children) {
-            e.printTree(level + 1, writer);
+            e.printTree(level + 1, out);
         }
-        for (int i = 0; i < level; i++) {
-            writer.write('\t');
-        }
-        writer.write("</" + widgetType.name() + '>');
-        writer.write('\n');
+        out.append("\t".repeat(level)).append("</").append(widgetType.name()).append(">\n");
     }
 
     @Override

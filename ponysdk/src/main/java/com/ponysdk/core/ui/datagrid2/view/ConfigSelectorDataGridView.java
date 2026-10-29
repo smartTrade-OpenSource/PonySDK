@@ -139,9 +139,7 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
         int columnConfigsNumber = buffer.getInt();
         while (columnConfigsNumber-- > 0) {
-            final ColumnConfig<V> columnConfig = decodeColumnConfig(buffer);
-            if (columnConfig == null) continue;
-            builder.addColumnConfig(columnConfig);
+            builder.addColumnConfig(decodeColumnConfig(buffer));
         }
         int customValuesNumber = buffer.getInt();
         while (customValuesNumber-- > 0) {
@@ -161,10 +159,15 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         for (final ColumnConfig<V> columnConfig : columnConfigs) {
             buffer = encodeColumnConfig(buffer, columnConfig);
         }
-        final Map<String, Object> customValues = config.getReadOnlyCustomValues();
+        final Map<String, String> customValues = new LinkedHashMap<>();
+        for (final Map.Entry<String, Object> entry : config.getReadOnlyCustomValues().entrySet()) {
+            final String value = encodeConfigCustomValue(entry.getKey(), entry.getValue());
+            if (value != null) customValues.put(entry.getKey(), value);
+        }
         buffer = encodeInt(buffer, customValues.size());
-        for (final Map.Entry<String, Object> entry : customValues.entrySet()) {
-            buffer = encodeCustomValue(buffer, entry.getKey(), entry.getValue());
+        for (final Map.Entry<String, String> entry : customValues.entrySet()) {
+            buffer = encodeString(buffer, entry.getKey());
+            buffer = encodeString(buffer, entry.getValue());
         }
         return buffer;
     }
@@ -174,12 +177,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         final Object value = decodeConfigCustomValue(key, decodeString(buffer));
         if (value == null) return;
         builder.addCustomValue(key, value);
-    }
-
-    private ByteBuffer encodeCustomValue(ByteBuffer buffer, final String key, final Object value) {
-        buffer = encodeString(buffer, key);
-        buffer = encodeString(buffer, encodeConfigCustomValue(key, value));
-        return buffer;
     }
 
     private static <V> ColumnConfig<V> decodeColumnConfig(final ByteBuffer buffer) {
@@ -367,8 +364,8 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
 
         public void onRemove() {
+            if (key.equals(defaultKey)) return; // current: set with the adapter, before any handler
             layout.remove(widget.asWidget());
-            if (current == null || key.equals(defaultKey)) return;
             if (this == current) {
                 handlers.get(defaultKey).onSelect();
             }
@@ -376,7 +373,7 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         }
 
         public void onSelect() {
-            if (current == null || this == current) return;
+            if (this == current) return;
             current.config = getView().getConfig();
             onUnselectConfigWidget(key, current.widget);
             current = this;

@@ -37,14 +37,16 @@ public class PonyServiceRegistry {
 
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
+    private PonyServiceRegistry() {
+    }
+
     public static void registerPonyService(final PonyService service) {
         final Set<Class<?>> classes = new HashSet<>();
 
         getGeneralizations(service.getClass(), classes);
 
         classes.stream().filter(PonyService.class::isAssignableFrom).forEach(clazz -> {
-            if (!registeredServices.containsKey(clazz)) {
-                registeredServices.put(clazz, service);
+            if (registeredServices.putIfAbsent(clazz, service) == null) {
                 log.info("Service registered #{}", clazz);
             } else {
                 throw new IllegalArgumentException("Already registered service #" + clazz);

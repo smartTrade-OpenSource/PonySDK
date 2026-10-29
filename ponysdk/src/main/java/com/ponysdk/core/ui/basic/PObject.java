@@ -27,15 +27,12 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import javax.json.JsonObject;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -44,33 +41,96 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Set;
+
+import com.ponysdk.core.util.CompactIntRunnableMap;
 
 /**
  * The superclass for all PonySDK objects.
  */
-public abstract class PObject {
+public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
     private static final Logger log = LoggerFactory.getLogger(PObject.class);
 
-    protected final int ID = UIContext.get().nextID();
+    /** The first frame of a stack that is not the framework's: where an application created an object. */
+    private static final StackWalker STACK = StackWalker.getInstance();
+
+    protected final int ID;
     protected PWindow window;
-    protected PFrame frame;
-    protected Set<InitializeListener> initializeListeners;
-    protected Set<DestroyListener> destroyListeners;
-    protected Object data;
 
-    protected LinkedHashMap<Integer, Runnable> stackedInstructions;
-    private String nativeBindingFunction;
+    /**
+     * Rarely used state, allocated on first use: every widget paid one reference slot per field
+     * (native binding, terminal handler, ajax handler) although almost none use them.
+     */
+    private static final class Extras {
+        private Set<InitializeListener> initializeListeners;
+        private Set<DestroyListener> destroyListeners;
+        private Object data;
+        /** PLabel only: kept here so that every other widget does not pay for it. */
+        private String attributeLinkedToValue;
+        private String nativeBindingFunction;
+        private PTerminalEvent.Handler terminalHandler;
+        private AjaxHandler ajaxHandler;
+        /** The frame the object lives in, when not directly in its window (rare: iframes). */
+        private PFrame frame;
+        /** In debug mode only: its class and where the application created it, for the terminal's inspector. */
+        private String debugInfo;
+    }
 
-    private PTerminalEvent.Handler terminalHandler;
+    private Extras extras;
+
+    /** Notifies the initialize listeners (end of the CREATE). */
+    void fireInitializeListeners() {
+        final Set<InitializeListener> listeners = extras != null ? extras.initializeListeners : null;
+        if (listeners == null) return;
+        extras.initializeListeners = null; // fired once: keeping them would retain what they capture
+        listeners.forEach(listener -> listener.onInitialize(this));
+    }
+
+    String getAttributeLinkedToValue0() {
+        return extras != null ? extras.attributeLinkedToValue : null;
+    }
+
+    void setAttributeLinkedToValue0(final String value) {
+        if (value != null || extras != null) extras().attributeLinkedToValue = value;
+    }
+
+    private Extras extras() {
+        if (extras == null) extras = new Extras();
+        return extras;
+    }
+
+    protected CompactIntRunnableMap stackedInstructions;
 
     protected boolean initialized = false;
     protected boolean destroy = false;
 
-    protected int saveKey = ServerToClientModel.MAX_VALUE; // Has to be higher than all ordinal of ServerToClientModel
-    private AjaxHandler ajaxHandler;
-
     PObject() {
+        final UIContext context = UIContext.get();
+        ID = context.nextID();
+        if (context.getConfiguration().isDebugMode()) extras().debugInfo = describe();
+    }
+
+    /** "PButton MainPage.java:87": the class, and the first line of the application on the stack. */
+    private String describe() {
+        final String type = getClass().getName();
+        final String site = STACK.walk(frames -> frames.filter(f -> !f.getClassName().startsWith("com.ponysdk.core."))
+            .findFirst().map(f -> " " + f.getFileName() + ":" + f.getLineNumber()).orElse(""));
+        return type.substring(type.lastIndexOf('.') + 1) + site;
+    }
+
+    /** In debug mode, the class and creation site the terminal shows ({@code DEBUG_INFO}); null otherwise. */
+    String getDebugInfo() {
+        return extras != null ? extras.debugInfo : null;
     }
 
 
@@ -82,7 +142,7 @@ public abstract class PObject {
     protected abstract WidgetType getWidgetType();
 
     protected boolean attach(final PWindow window, final PFrame frame) {
-        this.frame = frame;
+        setFrame(frame);
 
         if (this.window == null && window != null) {
             this.window = window;
@@ -99,36 +159,38 @@ public abstract class PObject {
     void init() {
         if (initialized) return;
         if (isParentInitialized()) applyInit();
-        else if (frame != null && !frame.isInitialized()) frame.addInitializeListener(event -> applyInit());
+        else if (getFrame() != null && !getFrame().isInitialized()) getFrame().addInitializeListener(event -> applyInit());
         else window.addOpenHandler(window -> applyInit());
     }
 
     public boolean isParentInitialized() {
+        final PFrame frame = getFrame();
         return window.isOpened() && (frame == null || frame.isInitialized());
     }
 
     protected void applyInit() {
-        final ModelWriter writer = UIContext.get().getWriter();
+        if (destroy) return; // destroyed while waiting for its window or frame
+        final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_CREATE, ID);
+        writeFrameId(writer);
+        writer.writeInt(ServerToClientModel.TYPE_CREATE, ID);
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichForCreation(writer);
         enrichForUpdate(writer);
-        writer.endObject();
+        writer.endCreate(ID); // protocol 3: an add written right after joins this block
 
         UIContext.get().registerObject(this);
 
         init0();
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.runAll();
             stackedInstructions = null;
         }
 
         initialized = true;
 
-        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+        fireInitializeListeners();
     }
 
     /**
@@ -155,7 +217,16 @@ public abstract class PObject {
     }
 
     public PFrame getFrame() {
-        return frame;
+        return extras != null ? extras.frame : null;
+    }
+
+    protected void setFrame(final PFrame frame) {
+        if (frame != null || extras != null) extras().frame = frame;
+    }
+
+    private void writeFrameId(final ModelWriter writer) {
+        final PFrame frame = getFrame();
+        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
     }
 
     public final int getID() {
@@ -183,27 +254,36 @@ public abstract class PObject {
      * </pre>
      */
     public void bindTerminalFunction(final String functionName) {
-        if (nativeBindingFunction != null)
-            throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+        if (extras != null && extras.nativeBindingFunction != null)
+            throw new IllegalAccessError("Object already bind to native function: " + extras.nativeBindingFunction);
 
-        nativeBindingFunction = functionName;
+        extras().nativeBindingFunction = functionName;
 
         saveUpdate(writer -> writer.write(ServerToClientModel.BIND, functionName));
     }
 
-    public void evalTerminalScript(final String script) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.EVAL, script));
+    /**
+     * Calls {@code window[functionName](element, args...)} in the terminal, the element being this object's: a
+     * function the application's own scripts define (ADR-0015).
+     *
+     * @param args strings, numbers, booleans or null
+     */
+    public void callTerminalFunction(final String functionName, final Object... args) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.FUNCTION_NAME, functionName);
+            if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
+        });
     }
 
     public void sendToNative(final JsonObject data) {
         if (destroy) return;
-        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
+        if (extras == null || extras.nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
         saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data.toString()));
     }
 
     public void setTerminalHandler(final PTerminalEvent.Handler terminalHandler) {
-        this.terminalHandler = terminalHandler;
+        if (terminalHandler != null || extras != null) extras().terminalHandler = terminalHandler;
     }
 
     /**
@@ -213,6 +293,7 @@ public abstract class PObject {
      */
     public void onClientData(final JsonObject event) {
         if (destroy) return;
+        final PTerminalEvent.Handler terminalHandler = extras != null ? extras.terminalHandler : null;
         if (terminalHandler != null) {
             final String nativeKey = ClientToServerModel.NATIVE.toStringValue();
             if (event.containsKey(nativeKey)) {
@@ -221,48 +302,145 @@ public abstract class PObject {
         }
     }
 
-    protected LinkedHashMap<Integer, Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>(8);
+    /**
+     * Called by the context after {@link #onClientData(JsonObject)}, whatever it did or threw: what answers the
+     * terminal for its message, which a subclass that filters the message before its parent's {@code onClientData}
+     * would otherwise skip.
+     *
+     * @param event Json received from the terminal
+     */
+    public void onClientDataProcessed(final JsonObject event) {
+        // nothing to answer by default
+    }
+
+    protected CompactIntRunnableMap safeStackedInstructions() {
+        if (stackedInstructions == null) stackedInstructions = new CompactIntRunnableMap(2); // usually the add + one
         return stackedInstructions;
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        saveUpdate(saveKey++, callback);
+        if (destroy) return;
+        if (initialized) writeUpdate(callback);
+        else safeStackedInstructions().append(() -> writeUpdate(callback));
     }
 
     protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
-        saveUpdate(serverToClientModel.getValue(), writer -> writer.write(serverToClientModel, value));
+        if (destroy) return;
+        // Hot path (every setter of a live widget): coalesced when the model allows it, otherwise
+        // written directly - no capturing lambda per update either way
+        if (initialized) {
+            if (!writer().deferUpdate(this, serverToClientModel, value)) writeUpdate(serverToClientModel, value);
+        }
+        else safeStackedInstructions().put(serverToClientModel.getValue(), () -> writeUpdate(serverToClientModel, value));
     }
 
-    private void saveUpdate(final int atomicKey, final ModelWriterCallback callback) {
+    /** Keyed update without value (a class added / removed, a style or attribute removed): coalesced per name. */
+    protected void saveKeyedUpdate(final ServerToClientModel keyModel, final String key) {
         if (destroy) return;
+        if (initialized) {
+            if (!writer().deferUpdate(this, keyModel, key)) writeUpdate(keyModel, key);
+        }
+        else safeStackedInstructions().append(() -> writeUpdate(keyModel, key));
+    }
 
-        if (initialized) writeUpdate(callback);
-        else safeStackedInstructions().put(atomicKey, () -> writeUpdate(callback));
+    /** Two-field update ({@code key1=value1, key2=value2}), e.g. a style or attribute name + value. */
+    protected void saveUpdate(final ServerToClientModel key1, final Object value1,
+                              final ServerToClientModel key2, final Object value2) {
+        if (destroy) return;
+        if (initialized) {
+            if (!(value1 instanceof String key && writer().deferUpdate(this, key1, key, key2, value2))) {
+                writeUpdate(key1, value1, key2, value2);
+            }
+        }
+        else safeStackedInstructions().append(() -> writeUpdate(key1, value1, key2, value2));
+    }
+
+    /**
+     * The writer of this object's context, resolved through its window (no ThreadLocal): a live object writes once
+     * attached, a destroyed one never.
+     */
+    private ModelWriter writer() {
+        return window.contextWriter();
+    }
+
+    /** {@link com.ponysdk.core.writer.UpdateTarget}: updates of one run share the window / frame header. */
+    @Override
+    public Object updateGroup() {
+        final PFrame frame = getFrame();
+        return frame != null ? frame : window;
+    }
+
+    @Override
+    public boolean isUpdatable() {
+        return initialized && !destroy;
+    }
+
+    /** {@link com.ponysdk.core.writer.UpdateTarget}: opens the update block of a coalesced update. */
+    @Override
+    public boolean beginCoalescedUpdate(final ModelWriter writer) {
+        if (destroy) return false;
+        writer.beginObject(window);
+        writeFrameId(writer);
+        writer.writeInt(ServerToClientModel.TYPE_UPDATE, ID);
+        return true;
+    }
+
+    private ModelWriter beginUpdate() {
+        final ModelWriter writer = writer();
+        writer.beginObject(window);
+        writeFrameId(writer);
+        writer.writeInt(ServerToClientModel.TYPE_UPDATE, ID);
+        return writer;
+    }
+
+    private void writeUpdate(final ServerToClientModel model, final Object value) {
+        if (destroy) return;
+        final ModelWriter writer = beginUpdate();
+        writer.write(model, value);
+        writer.endObject();
+    }
+
+    private void writeUpdate(final ServerToClientModel key1, final Object value1,
+                             final ServerToClientModel key2, final Object value2) {
+        if (destroy) return;
+        final ModelWriter writer = beginUpdate();
+        writer.write(key1, value1);
+        writer.write(key2, value2);
+        writer.endObject();
     }
 
     void writeUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
-
+        final ModelWriter writer = beginUpdate();
         callback.doWrite(writer);
         writer.endObject();
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID) {
-        saveAdd(objectID, parentObjectID, (ServerBinaryModel) null);
+        if (destroy) return;
+        // The common add (no extra model): one capture when deferred, none when written right away
+        if (initialized) writeAdd(objectID, parentObjectID);
+        else safeStackedInstructions().append(() -> writeAdd(objectID, parentObjectID));
+    }
+
+    private void writeAdd(final int objectID, final int parentObjectID) {
+        if (destroy) return;
+        final ModelWriter writer = writer();
+        if (writer.addToOpenCreate(objectID, parentObjectID)) return; // created in its parent
+        writer.beginObject(window);
+        writeFrameId(writer);
+        writer.writeInt(ServerToClientModel.TYPE_ADD, objectID);
+        writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        writer.endObject();
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         if (destroy) return;
 
         final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_ADD, objectID);
-            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            writer.writeInt(ServerToClientModel.TYPE_ADD, objectID);
+            writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             if (binaryModels != null) {
                 for (final ServerBinaryModel binaryModel : binaryModels) {
                     if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
@@ -270,15 +448,15 @@ public abstract class PObject {
             }
         };
         if (initialized) writeAdd(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeAdd(callback));
+        else safeStackedInstructions().append(() -> writeAdd(callback));
     }
 
     private void writeAdd(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();
@@ -289,16 +467,16 @@ public abstract class PObject {
 
         final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         if (initialized) writeAddHandler(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeAddHandler(callback));
+        else safeStackedInstructions().append(() -> writeAddHandler(callback));
     }
 
     void writeAddHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
+        writeFrameId(writer);
+        writer.writeInt(ServerToClientModel.TYPE_ADD_HANDLER, ID);
 
         callback.doWrite(writer);
         writer.endObject();
@@ -308,19 +486,21 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER);
+            // protocol 4: the object, which the NULL model above cannot carry (ADR-0003)
+            if (UIContext.get().getProtocolVersion() >= ProtocolVersion.LISTENERS) writer.writeInt(ServerToClientModel.WIDGET_ID, ID);
             writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         };
         if (initialized) writeRemoveHandler(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeRemoveHandler(callback));
+        else safeStackedInstructions().append(() -> writeRemoveHandler(callback));
     }
 
     private void writeRemoveHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();
@@ -330,42 +510,52 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
-            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            writer.writeInt(ServerToClientModel.TYPE_REMOVE, objectID);
+            writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         };
         if (initialized) writeRemove(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeRemove(callback));
+        else safeStackedInstructions().append(() -> writeRemove(callback));
     }
 
     private void writeRemove(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();
     }
 
     public void addInitializeListener(final InitializeListener listener) {
-        if (this.initializeListeners == null) initializeListeners = SetUtils.newArraySet(4);
-        this.initializeListeners.add(listener);
+        if (initialized) return; // already fired, it would never be called
+        final Extras x = extras();
+        if (x.initializeListeners == null) x.initializeListeners = SetUtils.newArraySet(4);
+        x.initializeListeners.add(listener);
     }
 
     public void addDestroyListener(final DestroyListener listener) {
-        if (this.destroyListeners == null) destroyListeners = SetUtils.newArraySet(4);
-        this.destroyListeners.add(listener);
+        final Extras x = extras();
+        if (x.destroyListeners == null) x.destroyListeners = SetUtils.newArraySet(4);
+        x.destroyListeners.add(listener);
+    }
+
+    public void removeDestroyListener(final DestroyListener listener) {
+        if (extras != null && extras.destroyListeners != null) extras.destroyListeners.remove(listener);
     }
 
     public void onDestroy() {
         destroy = true;
-        terminalHandler = null;
-        initializeListeners = null;
+        if (extras != null) extras.terminalHandler = null;
+        final Set<DestroyListener> destroyListeners = extras != null ? extras.destroyListeners : null;
+        if (extras != null) {
+            extras.initializeListeners = null;
+            extras.destroyListeners = null;
+        }
         if (destroyListeners != null) {
             destroyListeners.forEach(this::doDestroy);
         }
-        destroyListeners = null;
         window = null;
     }
 
@@ -378,11 +568,11 @@ public abstract class PObject {
     }
 
     public void setData(final Object data) {
-        this.data = data;
+        if (data != null || extras != null) extras().data = data;
     }
 
     public Object getData() {
-        return data;
+        return extras != null ? extras.data : null;
     }
 
     public boolean isInitialized() {
@@ -410,11 +600,12 @@ public abstract class PObject {
      * "UI_CONTEXT_ID" : pony.getContextId(), "OBJECT_ID" : this.id } });
      */
     public void setAjaxHandler(final AjaxHandler httpRequestHandler) {
-        this.ajaxHandler = httpRequestHandler;
+        if (httpRequestHandler != null || extras != null) extras().ajaxHandler = httpRequestHandler;
     }
 
     public final void handleAjaxRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
+        final AjaxHandler ajaxHandler = extras != null ? extras.ajaxHandler : null;
         if (ajaxHandler != null) ajaxHandler.handleAjaxRequest(request, response);
     }
 

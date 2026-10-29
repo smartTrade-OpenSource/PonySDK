@@ -93,20 +93,18 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     public void setCaptionOrientation(final CaptionOrientation captionOriantation) {
         if (this.captionOrientation != null) removeStyleName(this.captionOrientation.name());
         this.captionOrientation = captionOriantation;
-        addStyleName(captionOriantation.name());
+        addStyleName(captionOriantation.name()); // never null past this line
 
-        if (this.captionOrientation != null) {
-            final int captionPosition = getWidgetIndex(captionLabel);
-            if (captionOrientation == CaptionOrientation.TOP || captionOrientation == CaptionOrientation.LEFT) {
-                if (captionPosition != 0) {
-                    remove(captionLabel);
-                    insert(captionLabel, 0);
-                }
-            } else {
-                if (captionPosition != 1) {
-                    remove(captionLabel);
-                    insert(captionLabel, 1);
-                }
+        final int captionPosition = getWidgetIndex(captionLabel);
+        if (captionOrientation == CaptionOrientation.TOP || captionOrientation == CaptionOrientation.LEFT) {
+            if (captionPosition != 0) {
+                remove(captionLabel);
+                insert(captionLabel, 0);
+            }
+        } else {
+            if (captionPosition != 1) {
+                remove(captionLabel);
+                insert(captionLabel, 1);
             }
         }
     }

@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2026 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.ponysdk.core.writer;
+
+/**
+ * An object whose property updates can be coalesced by {@link ModelWriter#deferUpdate}. Internal
+ * protocol plumbing, implemented by {@code PObject}.
+ */
+public interface UpdateTarget {
+
+    /** Object id (unique within its UIContext). */
+    int getID();
+
+    /**
+     * Window / frame routing of this object's updates. Objects of one update run must share it: the run
+     * is written in a single block, whose WINDOW_ID / FRAME_ID header applies to all of them.
+     */
+    Object updateGroup();
+
+    /** False once destroyed: its pending updates are dropped. */
+    boolean isUpdatable();
+
+    /**
+     * Opens an update block for this object on {@code writer} (window, frame, TYPE_UPDATE id).
+     *
+     * @return false if the object has been destroyed meanwhile (nothing written)
+     */
+    boolean beginCoalescedUpdate(ModelWriter writer);
+}

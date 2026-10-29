@@ -41,6 +41,9 @@ public class PNotificationManager {
     public static final int warningDuration = 6000;
     public static final int trayDuration = 6000;
 
+    private PNotificationManager() {
+    }
+
     public static void notify(final String message, final Notification notification) {
         notify(PWindow.getMain(), message, notification);
     }
@@ -56,10 +59,8 @@ public class PNotificationManager {
             case WARNING_MESSAGE:
                 showWarningNotification(window, Element.newPLabel(message));
                 break;
-            case ERROR_MESSAGE:
+            default: // ERROR_MESSAGE
                 showErrorNotification(window, Element.newPLabel(message));
-                break;
-            default:
                 break;
         }
     }
@@ -75,10 +76,8 @@ public class PNotificationManager {
             case WARNING_MESSAGE:
                 showWarningNotification(window, w);
                 break;
-            case ERROR_MESSAGE:
+            default: // ERROR_MESSAGE
                 showErrorNotification(window, w);
-                break;
-            default:
                 break;
         }
     }
@@ -156,7 +155,7 @@ public class PNotificationManager {
     private static void displayAtBottomRight(final PPopupPanel popupPanel, final String closingAnimation) {
         popupPanel.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
             popupPanel.setPopupPosition(windowWidth - offsetWidth - 5, windowHeight - offsetHeight - 5);
-            if (closingAnimation != null) popupPanel.addStyleName(closingAnimation);
+            popupPanel.addStyleName(closingAnimation);
         });
     }
 

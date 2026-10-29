@@ -63,6 +63,10 @@ public class EventBus {
         if (eventSource == null) return Collections.emptyList();
         final Collection<EventHandler> handlers = eventSource.getEventHandlers(eventType);
         if (handlers.isEmpty()) return Collections.emptyList();
+        // CompactEventSource already returns a safe snapshot (singletonList or new ArrayList).
+        // For the original EventSource/TinyEventSource (HashMap-backed), we still need a copy
+        // to protect against ConcurrentModificationException during iteration.
+        if (eventSource instanceof CompactEventSource) return handlers;
         return new ArrayList<>(handlers);
     }
 

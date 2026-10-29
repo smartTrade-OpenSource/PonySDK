@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind Treasury portal</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="app-url.js" defer></script>
+<script src="portal.js" defer></script>
+</head>
+<body>
+<!--
+  U4, U6, U7 and U8 of the gallery (index.html): a page of another origin, with no PonySDK in it but the <pony-app>
+  elements (docs/decisions/0008-embedded-application.md, 0009-embedding-limits.md). portal.js loads the application's
+  terminal.js and gives each element its src: http://<this host>:8081/sample/, or the query's app.
+-->
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">This page is not PonySDK: it embeds PonySDK applications with &lt;pony-app&gt;.</div>
+  <span id="status" class="portal-status" role="status">Connected</span>
+</header>
+
+<main>
+  <section class="portal-toolbar">
+    <label>Instrument of the first ticket
+      <select id="instrument">
+        <option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>USDCHF</option>
+      </select>
+    </label>
+    <button id="reset" type="button">Reset the tickets</button>
+  </section>
+
+  <section class="portal-tickets">
+    <figure class="portal-ticket">
+      <figcaption id="ticket-1-title">Ticket 1</figcaption>
+      <pony-app id="ticket-1" view="ticket" instrument="EURUSD" quantity="1000000">Loading the ticket…</pony-app>
+    </figure>
+    <figure class="portal-ticket">
+      <figcaption id="ticket-2-title">Ticket 2</figcaption>
+      <pony-app id="ticket-2" view="ticket" instrument="USDJPY" quantity="500000">Loading the ticket…</pony-app>
+    </figure>
+  </section>
+
+  <section class="portal-blotter">
+    <h2>Blotter <small>the portal's own table, fed by the tickets' trade events</small></h2>
+    <table>
+      <thead><tr><th>Time</th><th>Ticket</th><th>Side</th><th>Quantity</th><th>Instrument</th><th>Price</th></tr></thead>
+      <tbody id="trades"><tr class="portal-empty"><td colspan="6">No trade yet</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="portal-code" aria-labelledby="code-title">
+    <h2 id="code-title">The code behind a ticket <small>this page's part, then the application's, in Java</small></h2>
+    <div class="portal-code-parts">
+      <figure>
+        <figcaption>This page: the element, and its script (<a href="portal.js">portal.js</a>)</figcaption>
+<pre class="snippet">&lt;script type="module" src="https://fx.example.com/sample/ponyterminal/terminal.js"&gt;&lt;/script&gt;
+
+&lt;pony-app id="ticket-2" src="https://fx.example.com/sample/"
+          view="ticket" instrument="USDJPY" quantity="500000"&gt;Loading the ticket…&lt;/pony-app&gt;
+
+ticket.credential = () =&gt; Promise.resolve(token);              // PHost.getCredential()
+ticket.setAttribute('instrument', 'GBPUSD');                   // addAttributeListener("instrument", …)
+ticket.dispatchEvent(new CustomEvent('reset'));                // addEventListener("reset", …)
+ticket.addEventListener('trade', e =&gt; blotter(e.detail));      // host.dispatchEvent("trade", …)
+ticket.addEventListener('pony-title', e =&gt; caption(e.detail)); // PWindow.getMain().setTitle(…)</pre>
+      </figure>
+      <figure>
+        <figcaption>The application's entry point: an element whose <code>view</code> is <code>ticket</code> gets the
+          ticket (<code>UISampleEntryPoint.java</code>)</figcaption>
+        <pre class="snippet" data-source="source/UISampleEntryPoint.java" data-region="embedded">Loading…</pre>
+      </figure>
+    </div>
+    <figure>
+      <figcaption>The ticket's class (<code>EmbeddedTicket.java</code>): <code>PHost</code> reads the attributes,
+        receives <code>reset</code>, sends <code>trade</code>; the rest is PonySDK as in any page</figcaption>
+      <pre class="snippet portal-source" data-source="source/EmbeddedTicket.java">Loading…</pre>
+    </figure>
+  </section>
+
+  <section class="portal-app">
+    <h2>An existing application, unchanged: the showcase</h2>
+    <pony-app id="showcase" class="portal-showcase">Loading the showcase…</pony-app>
+  </section>
+</main>
+</body>
+</html>

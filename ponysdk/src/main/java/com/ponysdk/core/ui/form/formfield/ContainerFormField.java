@@ -105,11 +105,6 @@ public class ContainerFormField<T> extends AbstractFormField<T, PPanel> implemen
     }
 
     @Override
-    public void reset() {
-        formField.reset();
-    }
-
-    @Override
     public void setValidator(final FieldValidator validator) {
         formField.setValidator(validator);
     }
@@ -121,7 +116,16 @@ public class ContainerFormField<T> extends AbstractFormField<T, PPanel> implemen
 
     @Override
     protected void reset0() {
-        // Nothing to do
+        formField.reset(); // the inner field holds the value
+    }
+
+    /**
+     * The inner field's reset alone: it comes back through {@link #afterReset}, which clears the container's error and
+     * tells its listeners, as when the inner field is reset directly.
+     */
+    @Override
+    public void reset() {
+        reset0();
     }
 
 }

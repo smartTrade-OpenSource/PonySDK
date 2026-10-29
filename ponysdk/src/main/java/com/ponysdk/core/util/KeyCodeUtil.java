@@ -57,6 +57,9 @@ public class KeyCodeUtil {
         KEY_CODES.put(105, "9");
     }
 
+    private KeyCodeUtil() {
+    }
+
     public static String getString(final int jsKeyCode) {
         return KEY_CODES.get(jsKeyCode);
     }

@@ -32,19 +32,19 @@ public class PonyDriverPerMessageDeflateExtension extends PerMessageDeflateExten
 
     public PonyDriverPerMessageDeflateExtension(final PonyBandwithListener listener) {
         super();
-        this.listener = listener;
+        this.listener = listener; // may be null: bandwidth accounting is then skipped
     }
 
     @Override
     public Frame processIncoming(final ExtensionContext context, final Frame frame) {
-        listener.onReceiveCompressed(getFrameHeaderLength(frame) + (int) frame.getPayloadLength());
+        if (listener != null) listener.onReceiveCompressed(getFrameHeaderLength(frame) + (int) frame.getPayloadLength());
         return super.processIncoming(context, frame);
     }
 
     @Override
     public Frame processOutgoing(final ExtensionContext context, final Frame frame) {
         final Frame f = super.processOutgoing(context, frame);
-        listener.onSendCompressed(getFrameHeaderLength(f) + (int) f.getPayloadLength());
+        if (listener != null) listener.onSendCompressed(getFrameHeaderLength(f) + (int) f.getPayloadLength());
         return f;
     }
 
@@ -59,7 +59,8 @@ public class PonyDriverPerMessageDeflateExtension extends PerMessageDeflateExten
         // we have a 7 bit length
         else length += 1;
 
-        if (frame.isMask()) length++;
+        // the masking key is 4 bytes
+        if (frame.isMask()) length += 4;
 
         return length;
     }

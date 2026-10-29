@@ -58,7 +58,9 @@ public enum HandlerModel {
     HANDLER_STREAM_REQUEST(false),
     HANDLER_SCROLL(false),
     HANDLER_PASTE(false),
-    HANDLER_VISIBILITY(false);
+    HANDLER_VISIBILITY(false),
+    // A cookie of an embedded application (ADR-0009): a stream request the terminal fetches, answered by Set-Cookie
+    HANDLER_COOKIE_REQUEST(false);
 
     private static final HandlerModel[] VALUES = HandlerModel.values();
 

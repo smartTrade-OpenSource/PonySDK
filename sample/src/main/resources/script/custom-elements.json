@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "2.1.0",
+  "readme": "The Custom Elements Manifest of webcomponents.js: the sample's build generates their Java classes from it (ADR-0010).",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "script/webcomponents.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "MyCounter",
+          "customElement": true,
+          "tagName": "my-counter",
+          "description": "A counter with a +1 button.",
+          "members": [
+            { "kind": "field", "name": "count", "type": { "text": "number" }, "description": "The value shown." },
+            { "kind": "method", "name": "reset", "description": "Sets the count to 0 and fires count-changed." }
+          ],
+          "attributes": [
+            { "name": "label", "type": { "text": "string" }, "description": "The text before the count." }
+          ],
+          "events": [
+            { "name": "count-changed", "type": { "text": "CustomEvent<{ count: number; action: 'increment' | 'reset' }>" },
+              "description": "The count changed, by the button or by reset()." }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "MyStats",
+          "customElement": true,
+          "tagName": "my-stats",
+          "description": "Statistics as labelled values; renders when its object changes identity.",
+          "members": [
+            { "kind": "field", "name": "stats", "type": { "text": "Record<string, string | number>" },
+              "description": "The values, by label." },
+            { "kind": "field", "name": "renderCount", "type": { "text": "number" }, "readonly": true }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "MyDashboard",
+          "customElement": true,
+          "tagName": "my-dashboard",
+          "description": "A dashboard frame: a header, a toolbar, a content area and a footer.",
+          "attributes": [
+            { "name": "title", "type": { "text": "string" }, "description": "The header's text." },
+            { "name": "theme", "type": { "text": "'light' | 'dark'" } }
+          ],
+          "slots": [
+            { "name": "toolbar", "description": "Buttons above the content." },
+            { "name": "content" },
+            { "name": "footer" }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "MyCard",
+          "customElement": true,
+          "tagName": "my-card",
+          "description": "A card: a title, a body and an actions bar.",
+          "members": [
+            { "kind": "field", "name": "content", "type": { "text": "string" }, "description": "The body's text." }
+          ],
+          "attributes": [
+            { "name": "title", "type": { "text": "string" }, "description": "The header's text." },
+            { "name": "theme", "type": { "text": "'light' | 'dark'" } }
+          ],
+          "slots": [
+            { "name": "", "description": "Below the body's text." },
+            { "name": "actions", "description": "The buttons of the actions bar." }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -105,19 +105,12 @@ public class POptionPane implements IsPWidget {
     }
 
     private static String[] getOptions(final POptionType optionType) {
-        switch (optionType) {
-            case DEFAULT_OPTION:
-                return new String[] { POption.OK_OPTION.getName() };
-            case OK_CANCEL_OPTION:
-                return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-            case YES_NO_CANCEL_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
-            case YES_NO_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
-            default:
-                break;
-        }
-        return null;
+        return switch (optionType) {
+            case DEFAULT_OPTION -> new String[] { POption.OK_OPTION.getName() };
+            case OK_CANCEL_OPTION -> new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_CANCEL_OPTION -> new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+            case YES_NO_OPTION -> new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
+        };
     }
 
     public PDialogBox getDialogBox() {

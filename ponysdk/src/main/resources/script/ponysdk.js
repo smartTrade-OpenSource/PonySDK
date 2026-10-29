@@ -3,8 +3,10 @@ var pony;
 document.ponyLoaded = false;
 
 document.onPonyLoadedListeners = [];
+// After the load, at once: a <pony-app> element loads its application's scripts once pony is there (ADR-0008)
 document.onPonyLoaded = function (callback) {
-    document.onPonyLoadedListeners.push(callback);
+    if (document.ponyLoaded) callback(pony);
+    else document.onPonyLoadedListeners.push(callback);
 };
 
 document.onConnectionLostListeners = [];
@@ -16,10 +18,69 @@ document.doReload = function () {
     document.location.reload();
 };
 
-function onPonySDKModuleLoaded() {
+// ---- pony.wc — Web Component utilities ----
+// Exposed as pony.wc once pony is initialized.
+//
+// pony.wc.registerSharedSheet(href)
+//   Registers a CSS stylesheet URL to be injected into every shadow root that calls
+//   pony.wc.initShadow(this). Call before your components are connected.
+//   If never called, nothing is injected — fully opt-in.
+//
+// pony.wc.initShadow(element)
+//   Call at the top of connectedCallback() to attach a shadow root (open mode) and
+//   inject all registered shared sheets. Safe to call multiple times — idempotent.
+//   Returns the shadowRoot.
+//
+// pony.wc.PonyElement
+//   Convenience base class. Calls initShadow + _render() in connectedCallback.
+//   IMPORTANT: subclasses must NOT define a constructor (or only call super() with
+//   no other logic), because the terminal creates custom elements via document.createElement()
+//   which invokes the constructor — any work done there will crash.
+//   Put all initialisation in connectedCallback() or _render() instead.
+var PonyWC = (function () {
+    var _sheets = [];
+
+    function initShadow(el) {
+        if (!el.shadowRoot) {
+            el.attachShadow({ mode: 'open' });
+            for (var i = 0; i < _sheets.length; i++) {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = _sheets[i];
+                el.shadowRoot.appendChild(link);
+            }
+        }
+        return el.shadowRoot;
+    }
+
+    // PonyElement — optional base class.
+    // Subclasses get shadow DOM + shared sheets for free in connectedCallback.
+    // Do NOT put logic in the constructor — use connectedCallback / _render instead.
+    class PonyElement extends HTMLElement {
+        connectedCallback() {
+            initShadow(this);
+            if (typeof this._render === 'function') this._render();
+        }
+    }
+
+    // The sheets the application configured (wcSharedSheets), listed by the bootstrap page
+    var configured = document.querySelector('meta[name="pony-wc-shared-sheets"]');
+    if (configured) _sheets.push.apply(_sheets, configured.content.split(' ').filter(Boolean));
+
+    return {
+        registerSharedSheet: function (href) { _sheets.push(href); },
+        initShadow: initShadow,
+        PonyElement: PonyElement
+    };
+}());
+
+// Called by the terminal once loaded, with itself
+function onPonySDKModuleLoaded(terminal) {
     console.log("onPonySDKModuleLoaded");
 
-    pony = com.ponysdk.core.terminal.PonySDK.get();
+    pony = terminal;
+    pony.wc = PonyWC;
+
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
     else window['pony'] = pony;
 
@@ -38,16 +99,17 @@ function onPonySDKModuleLoaded() {
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
 else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
 
-// Decode ArrayBuffer from server
-var textDecoder = null;
-if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
-
-function decode(arrayBufferView, byteOffset, byteLength) {
-    if (textDecoder != null) return textDecoder.decode(arrayBufferView.subarray(byteOffset, byteLength));
-    else return UTF8.getStringFromBytes(arrayBufferView, byteOffset, byteLength);
+// Trailing-edge debounce, same contract as jQuery throttle-debounce's $.debounce(delay, fn): fn runs
+// once, `delay` ms after the last call. Built in so the DataGrid does not depend on a jQuery plugin
+// that is not shipped (the grid crashed with "$.debounce is not a function").
+function ponyDebounce(delay, fn) {
+    var timer = null;
+    return function () {
+        var self = this, args = arguments;
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(function () { timer = null; fn.apply(self, args); }, delay);
+    };
 }
-if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
-else window['decode'] = decode;
 
 function AbstractAddon(id, args, widgetID, element) {
     this.id = id;
@@ -82,9 +144,25 @@ AbstractAddon.prototype.setLogLevel = function (logLevel) {
     this.logLevel = parseInt(logLevel);
 };
 
+// Through the addon's own terminal: a page with <pony-app> elements runs one per element (ADR-0008)
 AbstractAddon.prototype.sendDataToServer = function (params, callback) {
-    pony.sendDataToServer(this.id, params, callback);
+    (this.terminal || pony).sendDataToServer(this.id, params, callback);
 };
+
+// The element of this id in the addon's tree: the document, or the shadow root of a <pony-app> element (ADR-0008)
+AbstractAddon.prototype.elementById = function (id) {
+    var root = this.element ? this.element.getRootNode() : document;
+    return (typeof root.getElementById === 'function' ? root : document).getElementById(id);
+};
+
+// The element of an event's composed path under the page's body, or under a <pony-app> element's container
+function ponyTopElement(path) {
+    for (var i = 0; i < path.length; i++) {
+        var parent = path[i].parentNode;
+        if (parent && (parent === document.body || (parent.hasAttribute && parent.hasAttribute('data-pony-body')))) return path[i];
+    }
+    return null;
+}
 
 AbstractAddon.prototype.log = function () {
     var args = Array.prototype.splice.call(arguments, 0);
@@ -141,7 +219,7 @@ AbstractAddon.defineAddon = function (name, propertiesObj) {
 
     AbstractAddon[name] = JsClass;
 
-    // Wrap the constructor method since GWT uses the function as a method and not a constructor
+    // Wrap the constructor: the terminal calls the factory as a function, not as a constructor
     var wrap = function (id, args, widgetID, element) {
         return new JsClass(id, args, widgetID, element);
     }
@@ -228,275 +306,6 @@ var mapStaticProperties = function (objSrc, ClassFunction) {
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports = AbstractAddon;
 else window['AbstractAddon'] = AbstractAddon;
 
-/*! http://mths.be/fromcodepoint v0.2.1 by @mathias */
-if (!String.fromCodePoint) {
-    (function () {
-        var defineProperty = (function () {
-            // IE 8 only supports `Object.defineProperty` on DOM elements
-            try {
-                var object = {};
-                var $defineProperty = Object.defineProperty;
-                var result = $defineProperty(object, object, object) && $defineProperty;
-            } catch (error) { }
-            return result;
-        }());
-        var stringFromCharCode = String.fromCharCode;
-        var floor = Math.floor;
-        var fromCodePoint = function (_) {
-            var MAX_SIZE = 0x4000;
-            var codeUnits = [];
-            var highSurrogate;
-            var lowSurrogate;
-            var index = -1;
-            var length = arguments.length;
-            if (!length) {
-                return '';
-            }
-            var result = '';
-            while (++index < length) {
-                var codePoint = Number(arguments[index]);
-                if (
-                    !isFinite(codePoint) || // `NaN`, `+Infinity`, or `-Infinity`
-                    codePoint < 0 || // not a valid Unicode code point
-                    codePoint > 0x10FFFF || // not a valid Unicode code point
-                    floor(codePoint) != codePoint // not an integer
-                ) {
-                    throw RangeError('Invalid code point: ' + codePoint);
-                }
-                if (codePoint <= 0xFFFF) { // BMP code point
-                    codeUnits.push(codePoint);
-                } else { // Astral code point; split in surrogate halves
-                    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
-                    codePoint -= 0x10000;
-                    highSurrogate = (codePoint >> 10) + 0xD800;
-                    lowSurrogate = (codePoint % 0x400) + 0xDC00;
-                    codeUnits.push(highSurrogate, lowSurrogate);
-                }
-                if (index + 1 == length || codeUnits.length > MAX_SIZE) {
-                    result += stringFromCharCode.apply(null, codeUnits);
-                    codeUnits.length = 0;
-                }
-            }
-            return result;
-        };
-        if (defineProperty) {
-            defineProperty(String, 'fromCodePoint', {
-                'value': fromCodePoint,
-                'configurable': true,
-                'writable': true
-            });
-        } else {
-            String.fromCodePoint = fromCodePoint;
-        }
-    }());
-}
-
-/*! http://mths.be/codepointat v0.2.0 by @mathias */
-if (!String.prototype.codePointAt) {
-    (function () {
-        'use strict'; // needed to support `apply`/`call` with `undefined`/`null`
-        var defineProperty = (function () {
-            // IE 8 only supports `Object.defineProperty` on DOM elements
-            try {
-                var object = {};
-                var $defineProperty = Object.defineProperty;
-                var result = $defineProperty(object, object, object) && $defineProperty;
-            } catch (error) { }
-            return result;
-        }());
-        var codePointAt = function (position) {
-            if (this == null) {
-                throw TypeError();
-            }
-            var string = String(this);
-            var size = string.length;
-            // `ToInteger`
-            var index = position ? Number(position) : 0;
-            if (index != index) { // better `isNaN`
-                index = 0;
-            }
-            // Account for out-of-bounds indices:
-            if (index < 0 || index >= size) {
-                return undefined;
-            }
-            // Get the first code unit
-            var first = string.charCodeAt(index);
-            var second;
-            if ( // check if it is the start of a surrogate pair
-                first >= 0xD800 && first <= 0xDBFF && // high surrogate
-                size > index + 1 // there is a next code unit
-            ) {
-                second = string.charCodeAt(index + 1);
-                if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
-                    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
-                    return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-                }
-            }
-            return first;
-        };
-        if (defineProperty) {
-            defineProperty(String.prototype, 'codePointAt', {
-                'value': codePointAt,
-                'configurable': true,
-                'writable': true
-            });
-        } else {
-            String.prototype.codePointAt = codePointAt;
-        }
-    }());
-}
-
-// https://github.com/nfroidure/UTF8.js v1.0.0
-// UTF8 : Manage UTF-8 strings in ArrayBuffers
-var _UTF8 = {
-    // non UTF8 encoding detection (cf README file for details)
-    'isNotUTF8': function (bytes, byteOffset, byteLength) {
-        try {
-            UTF8.getStringFromBytes(bytes, byteOffset, byteLength, true);
-        } catch (e) {
-            return true;
-        }
-        return false;
-    },
-    // UTF8 decoding functions
-    'getCharLength': function (theByte) {
-        // 4 bytes encoded char (mask 11110000)
-        if (0xF0 == (theByte & 0xF0)) {
-            return 4;
-            // 3 bytes encoded char (mask 11100000)
-        } else if (0xE0 == (theByte & 0xE0)) {
-            return 3;
-            // 2 bytes encoded char (mask 11000000)
-        } else if (0xC0 == (theByte & 0xC0)) {
-            return 2;
-            // 1 bytes encoded char
-        } else if (theByte == (theByte & 0x7F)) {
-            return 1;
-        }
-        return 0;
-    },
-    'getCharCode': function (bytes, byteOffset, charLength) {
-        var charCode = 0, mask = '';
-        byteOffset = byteOffset || 0;
-        // Retrieve charLength if not given
-        charLength = charLength || UTF8.getCharLength(bytes[byteOffset]);
-        if (charLength == 0) {
-            throw new Error(bytes[byteOffset].toString(2) + ' is not a significative' +
-                ' byte (offset:' + byteOffset + ').');
-        }
-        // Return byte value if charlength is 1
-        if (1 === charLength) {
-            return bytes[byteOffset];
-        }
-        // Test UTF8 integrity
-        mask = '00000000'.slice(0, charLength) + 1 + '00000000'.slice(charLength + 1);
-        if (bytes[byteOffset] & (parseInt(mask, 2))) {
-            throw Error('Index ' + byteOffset + ': A ' + charLength + ' bytes' +
-                ' encoded char' + ' cannot encode the ' + (charLength + 1) + 'th rank bit to 1.');
-        }
-        // Reading the first byte
-        mask = '0000'.slice(0, charLength + 1) + '11111111'.slice(charLength + 1);
-        charCode += (bytes[byteOffset] & parseInt(mask, 2)) << ((--charLength) * 6);
-        // Reading the next bytes
-        while (charLength) {
-            if (0x80 !== (bytes[byteOffset + 1] & 0x80)
-                || 0x40 === (bytes[byteOffset + 1] & 0x40)) {
-                throw Error('Index ' + (byteOffset + 1) + ': Next bytes of encoded char'
-                    + ' must begin with a "10" bit sequence.');
-            }
-            charCode += ((bytes[++byteOffset] & 0x3F) << ((--charLength) * 6));
-        }
-        return charCode;
-    },
-    'getStringFromBytes': function (bytes, byteOffset, byteLength, strict) {
-        var charLength, chars = [];
-        byteOffset = byteOffset | 0;
-        byteLength = ('number' === typeof byteLength ?
-            byteLength :
-            bytes.byteLength || bytes.length
-        );
-        for (; byteOffset < byteLength; byteOffset++) {
-            charLength = UTF8.getCharLength(bytes[byteOffset]);
-            if (byteOffset + charLength > byteLength) {
-                if (strict) {
-                    throw Error('Index ' + byteOffset + ': Found a ' + charLength +
-                        ' bytes encoded char declaration but only ' +
-                        (byteLength - byteOffset) + ' bytes are available.');
-                }
-            } else {
-                chars.push(String.fromCodePoint(
-                    UTF8.getCharCode(bytes, byteOffset, charLength, strict)
-                ));
-            }
-            byteOffset += charLength - 1;
-        }
-        return chars.join('');
-    },
-    // UTF8 encoding functions
-    'getBytesForCharCode': function (charCode) {
-        if (charCode < 128) {
-            return 1;
-        } else if (charCode < 2048) {
-            return 2;
-        } else if (charCode < 65536) {
-            return 3;
-        } else if (charCode < 2097152) {
-            return 4;
-        }
-        throw new Error('CharCode ' + charCode + ' cannot be encoded with UTF8.');
-    },
-    'setBytesFromCharCode': function (charCode, bytes, byteOffset, neededBytes) {
-        charCode = charCode | 0;
-        bytes = bytes || [];
-        byteOffset = byteOffset | 0;
-        neededBytes = neededBytes || UTF8.getBytesForCharCode(charCode);
-        // Setting the charCode as it to bytes if the byte length is 1
-        if (1 == neededBytes) {
-            bytes[byteOffset] = charCode;
-        } else {
-            // Computing the first byte
-            bytes[byteOffset++] =
-                (parseInt('1111'.slice(0, neededBytes), 2) << 8 - neededBytes) +
-                (charCode >>> ((--neededBytes) * 6));
-            // Computing next bytes
-            for (; neededBytes > 0;) {
-                bytes[byteOffset++] = ((charCode >>> ((--neededBytes) * 6)) & 0x3F) | 0x80;
-            }
-        }
-        return bytes;
-    },
-    'setBytesFromString': function (string, bytes, byteOffset, byteLength, strict) {
-        string = string || '';
-        bytes = bytes || [];
-        byteOffset = byteOffset | 0;
-        byteLength = ('number' === typeof byteLength ?
-            byteLength :
-            bytes.byteLength || Infinity
-        );
-        for (var i = 0, j = string.length; i < j; i++) {
-            var neededBytes = UTF8.getBytesForCharCode(string[i].codePointAt(0));
-            if (strict && byteOffset + neededBytes > byteLength) {
-                throw new Error('Not enought bytes to encode the char "' + string[i] +
-                    '" at the offset "' + byteOffset + '".');
-            }
-            UTF8.setBytesFromCharCode(string[i].codePointAt(0),
-                bytes, byteOffset, neededBytes, strict);
-            byteOffset += neededBytes;
-        }
-        return bytes;
-    }
-};
-
-
-if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
-    var UTF8 = _UTF8;
-    module.exports = UTF8;
-} else {
-    UTF8 = _UTF8;
-    window['UTF8'] = UTF8;
-}
-_UTF8 = undefined;
-
 (function () {
     "use strict";
     
@@ -562,7 +371,7 @@ _UTF8 = undefined;
                     that.unpinnedFooter.scrollLeft = scrollLeft;
             });
             this.unpinnedHeader.scrollLeft = 0;
-            this.body.addEventListener("scroll", $.debounce(100, this.checkPosition.bind(this)));
+            this.body.addEventListener("scroll", ponyDebounce(100, this.checkPosition.bind(this)));
 
             window.onresize = function (e) {
                 that.refreshVerticalMargins();
@@ -1191,7 +1000,7 @@ _UTF8 = undefined;
             // Else return false
             let isNested = function (element) {
                 while (element && element.getAttribute('multilvl-parent')) {
-                    element = document.getElementById(element.getAttribute('multilvl-parent'));
+                    element = that.elementById(element.getAttribute('multilvl-parent'));
                     if (!element) break;
                     if (element.id === that.element.id) return true;
                 }
@@ -1200,11 +1009,9 @@ _UTF8 = undefined;
             this.mouseDownEventListener = function (event) {
                 if (that.visible) {
                     // Cancel event if the target is a nested dropdown
-                    // 5 is an optimization to start to loop after : window, document, html, body
-                    let path = event.composedPath();
-                    if (isNested(path[path.length - 5])) return;
+                    if (isNested(ponyTopElement(event.composedPath()))) return;
 
-                    if (!that.parentElement) that.parentElement = document.getElementById(that.parentId);
+                    if (!that.parentElement) that.parentElement = that.elementById(that.parentId);
                     var parentRect = that.parentElement.getBoundingClientRect();
                     var rect = that.element.getBoundingClientRect();
                     var x = event.clientX;
@@ -1293,7 +1100,7 @@ _UTF8 = undefined;
         },
 
         updatePosition: function () {
-            if (!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+            if (!this.parentElement) this.parentElement = this.elementById(this.parentId);
             this.element.style.top = '0px';
             var offsets = this.parentElement.getBoundingClientRect();
             this.element.style.width = offsets.width + 'px';
@@ -1363,7 +1170,7 @@ _UTF8 = undefined;
         },
 
         adjustPosition: function () {
-            if (!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+            if (!this.parentElement) this.parentElement = this.elementById(this.parentId);
             var offsets = this.parentElement.getBoundingClientRect();
             this.element.style.width = offsets.width + 'px';
             // Down or top display

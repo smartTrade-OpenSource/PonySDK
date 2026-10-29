@@ -23,25 +23,33 @@
 
 package com.ponysdk.core.writer;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.test.PSuite;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelWriterTest extends PSuite {
 
     private ModelWriter modelWriter;
     private WebsocketEncoder websocketEncoder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         websocketEncoder = Mockito.mock(WebsocketEncoder.class);
         modelWriter = new ModelWriter(websocketEncoder);
@@ -62,7 +70,7 @@ public class ModelWriterTest extends PSuite {
         modelWriter.beginObject(window2);
 
         Mockito.verify(websocketEncoder, Mockito.times(3)).beginObject();
-        Mockito.verify(websocketEncoder, Mockito.times(2)).encode(ArgumentMatchers.eq(ServerToClientModel.WINDOW_ID), ArgumentMatchers.any());
+        Mockito.verify(websocketEncoder, Mockito.times(2)).encodeInt(ArgumentMatchers.eq(ServerToClientModel.WINDOW_ID), ArgumentMatchers.anyInt());
         assertEquals(window2, modelWriter.getCurrentWindow());
     }
 
@@ -92,6 +100,243 @@ public class ModelWriterTest extends PSuite {
     public void testEndObject() {
         modelWriter.endObject();
         Mockito.verify(websocketEncoder).endObject();
+    }
+
+    private static UpdateTarget target(final int id) {
+        final UpdateTarget target = Mockito.mock(UpdateTarget.class);
+        Mockito.when(target.getID()).thenReturn(id);
+        Mockito.when(target.isUpdatable()).thenReturn(true);
+        Mockito.when(target.beginCoalescedUpdate(ArgumentMatchers.any())).thenReturn(true);
+        return target;
+    }
+
+    @Test
+    public void onlyCoalescibleKeyedUpdatesAreDeferred() {
+        final UpdateTarget target = target(5);
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.TEXT, "off"), "coalescing is off");
+
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.isCoalescing());
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.TYPE_UPDATE, 5), "not a property");
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.PUT_STYLE_KEY, null, ServerToClientModel.STYLE_VALUE, "red"));
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.ADD_STYLE_NAME, null));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.TEXT, "a"));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red"));
+        assertTrue(modelWriter.deferUpdate(target, ServerToClientModel.ADD_STYLE_NAME, "k"));
+        assertEquals(3, modelWriter.pendingUpdateCount());
+
+        modelWriter.setCoalescing(false); // drains
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.TEXT, "a");
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.ADD_STYLE_NAME, "k");
+    }
+
+    @Test
+    public void updatesDrainedOutsideTheContextAreDropped() throws Exception {
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.deferUpdate(target(5), ServerToClientModel.TEXT, "a"));
+
+        final Thread thread = Thread.ofVirtual().start(modelWriter::drainPendingUpdates);
+        thread.join();
+
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        Mockito.verify(websocketEncoder, Mockito.never()).encode(ServerToClientModel.TEXT, "a");
+    }
+
+    @Test
+    public void aValueOfTheWrongTypeIsNamed() {
+        assertTrue(ModelWriter.accepts(ServerToClientModel.TEXT, "a"));
+        assertTrue(ModelWriter.accepts(null, 1));
+        assertFalse(ModelWriter.accepts(ServerToClientModel.TEXT, 5));
+        assertEquals("TEXT takes STRING, given Integer 5",
+            assertThrows(AssertionError.class, () -> modelWriter.write(ServerToClientModel.TEXT, 5)).getMessage());
+        assertEquals("TYPE_UPDATE takes UINT31, given null",
+            assertThrows(AssertionError.class, () -> modelWriter.write(ServerToClientModel.TYPE_UPDATE, null)).getMessage());
+        assertEquals("TEXT takes STRING, given Integer 5",
+            assertThrows(AssertionError.class, () -> modelWriter.writeInt(ServerToClientModel.TEXT, 5)).getMessage());
+        Mockito.verifyNoInteractions(websocketEncoder);
+    }
+
+    @Test
+    public void aDeferredValueOfTheWrongTypeFailsWhenDrained() {
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.deferUpdate(new Target(5), ServerToClientModel.TEXT, 7));
+        assertEquals("TEXT takes STRING, given Integer 7",
+            assertThrows(AssertionError.class, modelWriter::drainPendingUpdates).getMessage());
+    }
+
+    /** A plain target writing its own update header. */
+    private static class Target implements UpdateTarget {
+
+        private final int id;
+
+        Target(final int id) {
+            this.id = id;
+        }
+
+        @Override
+        public int getID() {
+            return id;
+        }
+
+        @Override
+        public Object updateGroup() {
+            return null;
+        }
+
+        @Override
+        public boolean isUpdatable() {
+            return true;
+        }
+
+        @Override
+        public boolean beginCoalescedUpdate(final ModelWriter writer) {
+            writer.writeInt(ServerToClientModel.TYPE_UPDATE, id);
+            return true;
+        }
+    }
+
+    private static void outsideTheContext(final Runnable task) throws InterruptedException {
+        Thread.ofVirtual().start(task).join();
+    }
+
+    @Test
+    public void nothingIsDeferredOutsideALiveContext() throws Exception {
+        modelWriter.setCoalescing(true);
+        final Target target = new Target(5);
+        final List<Boolean> deferred = new ArrayList<>();
+        final Runnable defer = () -> {
+            deferred.add(modelWriter.deferUpdate(target, ServerToClientModel.TEXT, (Object) "a"));
+            deferred.add(modelWriter.deferUpdate(target, ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red"));
+            deferred.add(modelWriter.deferUpdate(target, ServerToClientModel.ADD_STYLE_NAME, "k"));
+        };
+        outsideTheContext(defer);
+        outsideTheContext(() -> {
+            UIContext.setCurrent(Mockito.mock(UIContext.class)); // not alive
+            defer.run();
+        });
+
+        assertEquals(List.of(false, false, false, false, false, false), deferred);
+        assertEquals(0, modelWriter.pendingUpdateCount());
+    }
+
+    @Test
+    public void keyedUpdatesOfANonPropertyAreNotDeferred() {
+        modelWriter.setCoalescing(true);
+        final Target target = new Target(5);
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.STYLE_VALUE, "color", ServerToClientModel.STYLE_VALUE, "red"));
+        assertFalse(modelWriter.deferUpdate(target, ServerToClientModel.TYPE_UPDATE, "k"));
+        assertEquals(0, modelWriter.pendingUpdateCount());
+    }
+
+    @Test
+    public void anUpdateDeferredWhileDrainingIsWrittenByItsCaller() {
+        modelWriter.setCoalescing(true);
+        final List<Boolean> deferred = new ArrayList<>();
+        final Target reentrant = new Target(5) {
+
+            @Override
+            public boolean beginCoalescedUpdate(final ModelWriter writer) {
+                deferred.add(writer.deferUpdate(this, ServerToClientModel.TEXT, (Object) "b"));
+                deferred.add(writer.deferUpdate(this, ServerToClientModel.PUT_STYLE_KEY, "color", ServerToClientModel.STYLE_VALUE, "red"));
+                deferred.add(writer.deferUpdate(this, ServerToClientModel.ADD_STYLE_NAME, "k"));
+                return super.beginCoalescedUpdate(writer);
+            }
+        };
+        assertTrue(modelWriter.deferUpdate(reentrant, ServerToClientModel.TEXT, "a"));
+
+        modelWriter.drainPendingUpdates();
+
+        assertEquals(List.of(false, false, false), deferred);
+        assertEquals(0, modelWriter.pendingUpdateCount());
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.TEXT, "a");
+    }
+
+    @Test
+    public void writesOutsideALiveContextAreDropped() throws Exception {
+        outsideTheContext(() -> {
+            modelWriter.writeInt(ServerToClientModel.TYPE_UPDATE, 1);
+            modelWriter.write(ServerToClientModel.TEXT, "a");
+            modelWriter.endObject();
+        });
+        Mockito.verifyNoInteractions(websocketEncoder);
+    }
+
+    @Test
+    public void aCreateEndedOutsideALiveContextIsNotHeldBack() throws Exception {
+        Mockito.when(websocketEncoder.protocolVersion()).thenReturn(ProtocolVersion.CREATE_IN_PARENT);
+        outsideTheContext(() -> modelWriter.endCreate(5));
+        assertFalse(modelWriter.addToOpenCreate(5, 1));
+        Mockito.verify(websocketEncoder, Mockito.never()).endObject();
+    }
+
+    @Test
+    public void onlyTheObjectOfTheOpenCreateJoinsIt() throws Exception {
+        Mockito.when(websocketEncoder.protocolVersion()).thenReturn(ProtocolVersion.CREATE_IN_PARENT);
+        modelWriter.endCreate(5);
+        assertFalse(modelWriter.addToOpenCreate(6, 1), "another object");
+        final boolean[] added = new boolean[1];
+        outsideTheContext(() -> added[0] = modelWriter.addToOpenCreate(5, 1));
+        assertFalse(added[0], "context gone");
+        Mockito.verify(websocketEncoder, Mockito.never()).encodeInt(ArgumentMatchers.eq(ServerToClientModel.PARENT_OBJECT_ID), ArgumentMatchers.anyInt());
+
+        assertTrue(modelWriter.addToOpenCreate(5, 1));
+        Mockito.verify(websocketEncoder).encodeInt(ServerToClientModel.PARENT_OBJECT_ID, 1);
+        Mockito.verify(websocketEncoder).endObject();
+    }
+
+    @Test
+    public void aBufferKeptByAVirtualThreadDrainsOnceOnly() throws Exception {
+        modelWriter.setCoalescing(true);
+        assertTrue(modelWriter.deferUpdate(new Target(5), ServerToClientModel.TEXT, "a"));
+        outsideTheContext(modelWriter::drainPendingUpdates);
+        outsideTheContext(modelWriter::drainPendingUpdates);
+        modelWriter.drainPendingUpdates();
+        Mockito.verifyNoInteractions(websocketEncoder);
+    }
+
+    @Test
+    public void aWriterWithoutEncoderDrainsWithoutWriting() {
+        final ModelWriter writer = new ModelWriter(null);
+        writer.setCoalescing(true);
+        final UpdateTarget destroyed = Mockito.mock(UpdateTarget.class);
+        assertTrue(writer.deferUpdate(destroyed, ServerToClientModel.TEXT, "a"));
+        writer.drainPendingUpdates();
+        assertEquals(0, writer.pendingUpdateCount());
+        Mockito.verify(destroyed, Mockito.never()).beginCoalescedUpdate(ArgumentMatchers.any());
+    }
+
+    @Test
+    public void buffersAreReusedAcrossWritersOfOneThread() {
+        final WebsocketEncoder otherEncoder = Mockito.mock(WebsocketEncoder.class);
+        final ModelWriter other = new ModelWriter(otherEncoder);
+        modelWriter.setCoalescing(true);
+        other.setCoalescing(true);
+        assertTrue(modelWriter.deferUpdate(new Target(5), ServerToClientModel.TEXT, "a"));
+        assertTrue(other.deferUpdate(new Target(6), ServerToClientModel.TEXT, "b"));
+
+        modelWriter.drainPendingUpdates(); // its buffer becomes the thread's spare
+        other.drainPendingUpdates(); // spare taken: this one is dropped
+
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.TEXT, "a");
+        Mockito.verify(otherEncoder).encode(ServerToClientModel.TEXT, "b");
+        assertTrue(other.deferUpdate(new Target(6), ServerToClientModel.TEXT, "c"));
+        other.drainPendingUpdates();
+        Mockito.verify(otherEncoder).encode(ServerToClientModel.TEXT, "c");
+    }
+
+    @Test
+    public void anOversizedBufferStillWritesEverything() {
+        modelWriter.setCoalescing(true);
+        for (int id = 0; id < 5_000; id++) assertTrue(modelWriter.deferUpdate(new Target(id), ServerToClientModel.TEXT, "a"));
+        modelWriter.drainPendingUpdates();
+        Mockito.verify(websocketEncoder, Mockito.times(5_000)).encode(ServerToClientModel.TEXT, "a");
+
+        assertTrue(modelWriter.deferUpdate(new Target(1), ServerToClientModel.TEXT, "b"));
+        assertEquals(1, modelWriter.pendingUpdateCount());
+        modelWriter.drainPendingUpdates();
+        Mockito.verify(websocketEncoder).encode(ServerToClientModel.TEXT, "b");
     }
 
 }

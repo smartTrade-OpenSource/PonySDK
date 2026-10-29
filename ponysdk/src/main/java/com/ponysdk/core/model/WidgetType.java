@@ -82,7 +82,10 @@ public enum WidgetType {
     SUGGESTBOX,
     MULTIWORD_SUGGEST_ORACLE,
     FUNCTION,
-    FUNCTIONAL_LABEL;
+    FUNCTIONAL_LABEL,
+    WEB_COMPONENT,
+    // The element <pony-app> an embedded application runs in (docs/decisions/0008-embedded-application.md)
+    HOST;
 
     private static final WidgetType[] VALUES = WidgetType.values();
 

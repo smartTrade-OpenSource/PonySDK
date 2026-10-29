@@ -1,0 +1,27 @@
+# Dependabot: a pull request when a dependency has a new version, grouped per ecosystem, once a week.
+# The alerts on vulnerable dependencies come from the dependency graph (workflow dependency-graph.yml for Gradle).
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      gradle:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories: [/ponysdk/terminal, /sample]
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

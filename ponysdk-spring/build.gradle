@@ -1,0 +1,94 @@
+plugins {
+    id 'jacoco'
+}
+
+def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
+group = 'com.ponysdk'
+version = '3.0.0' + versionSuffix
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'ponysdk-spring'
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/smartTrade-OpenSource/PonySDK")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation project(':ponysdk')
+    implementation libs.spring.core
+    implementation libs.spring.beans
+    implementation libs.spring.context
+
+    testImplementation(
+            libs.junit.jupiter,
+            libs.mockito.core
+    )
+
+    testRuntimeOnly(
+            libs.junit.platform.launcher
+    )
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
+    }
+}
+
+// Coverage gate. Thresholds sit just below the current verified ratios; raise them as coverage improves (ratchet,
+// never lower them).
+jacocoTestCoverageVerification {
+    violationRules {
+        // Whole-module floor.
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+        // Every package: a floor on its lines (checked package by package).
+        rule {
+            element = 'PACKAGE'
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.99 }
+        }
+    }
+}
+
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification

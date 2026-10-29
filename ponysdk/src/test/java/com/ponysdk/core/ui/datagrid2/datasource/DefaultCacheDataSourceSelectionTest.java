@@ -26,9 +26,9 @@ package com.ponysdk.core.ui.datagrid2.datasource;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +40,7 @@ public class DefaultCacheDataSourceSelectionTest {
 
     private DefaultCacheDataSource<String, String> dataSource;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         dataSource = new DefaultCacheDataSource<>();
         dataSource.setFilterController(new FilterController<>());
@@ -57,39 +57,39 @@ public class DefaultCacheDataSourceSelectionTest {
     public void testSelectKeysSelectsMultipleRows() {
         final Interval interval = dataSource.selectKeys(List.of("a", "c", "e"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertFalse(dataSource.isSelected("d"));
-        Assert.assertTrue(dataSource.isSelected("e"));
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertFalse(dataSource.isSelected("d"));
+        Assertions.assertTrue(dataSource.isSelected("e"));
     }
 
     @Test
     public void testSelectKeysReturnsNullWhenNoKeysExist() {
         final Interval interval = dataSource.selectKeys(List.of("x", "y", "z"));
 
-        Assert.assertNull(interval);
+        Assertions.assertNull(interval);
     }
 
     @Test
     public void testSelectKeysReturnsNullForEmptyCollection() {
         final Interval interval = dataSource.selectKeys(Collections.emptyList());
 
-        Assert.assertNull(interval);
+        Assertions.assertNull(interval);
     }
 
     @Test
     public void testSelectKeysDoesNotDoubleSelect() {
         dataSource.select("a");
-        Assert.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("a"));
 
         final Interval interval = dataSource.selectKeys(List.of("a", "b"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("b"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("b"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -98,18 +98,18 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.unselectKeys(List.of("b", "d"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertFalse(dataSource.isSelected("d"));
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertFalse(dataSource.isSelected("d"));
     }
 
     @Test
     public void testUnselectKeysReturnsNullWhenNoneSelected() {
         final Interval interval = dataSource.unselectKeys(List.of("a", "b"));
 
-        Assert.assertNull(interval);
+        Assertions.assertNull(interval);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.unselectKeys(Collections.emptyList());
 
-        Assert.assertNull(interval);
+        Assertions.assertNull(interval);
     }
 
     @Test
@@ -127,12 +127,12 @@ public class DefaultCacheDataSourceSelectionTest {
         dataSource.select("a");
         final Interval rangeInterval = dataSource.selectKeys(List.of("a", "b", "c", "d"));
 
-        Assert.assertNotNull(rangeInterval);
-        Assert.assertEquals(4, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(rangeInterval);
+        Assertions.assertEquals(4, dataSource.getlLiveSelectedDataCount());
 
         dataSource.unselectAllData();
-        Assert.assertEquals(0, dataSource.getlLiveSelectedDataCount());
-        Assert.assertFalse(dataSource.isSelected("a"));
+        Assertions.assertEquals(0, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertFalse(dataSource.isSelected("a"));
     }
 
     @Test
@@ -140,22 +140,22 @@ public class DefaultCacheDataSourceSelectionTest {
         // Mix of existing and non-existing keys
         final Interval interval = dataSource.selectKeys(List.of("a", "x", "c", "y"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertFalse(dataSource.isSelected("x"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertFalse(dataSource.isSelected("x"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
     public void testSelectKeysIntervalCoversAllAffectedRows() {
-        // Selecting "a" and "e" inserts them into liveSelectedData at positions 0 and 1
+        // "a" and "e" are the rows at positions 0 and 4 of the live data
         final Interval interval = dataSource.selectKeys(List.of("a", "e"));
 
-        Assert.assertNotNull(interval);
-        // Interval covers position 0 (first insertion) to position 1 (second insertion) in liveSelectedData
-        Assert.assertEquals(0, interval.from);
-        Assert.assertEquals(1, interval.to);
+        Assertions.assertNotNull(interval);
+        // Interval covers the rows to redraw, from row 0 to row 4 inclusive
+        Assertions.assertEquals(0, interval.from);
+        Assertions.assertEquals(5, interval.to);
     }
 
     @Test
@@ -164,9 +164,9 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.unselectKeys(List.of("a", "e"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(interval.from <= interval.to);
-        Assert.assertEquals(3, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(interval.from <= interval.to);
+        Assertions.assertEquals(3, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -174,21 +174,21 @@ public class DefaultCacheDataSourceSelectionTest {
         // selectAllLiveData selects everything — selectKeys should have no additional effect
         dataSource.selectAllLiveData();
 
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("e"));
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("e"));
     }
 
     @Test
     public void testConsecutiveSelectKeysAccumulates() {
         // First shift-click: select a-c
         dataSource.selectKeys(List.of("a", "b", "c"));
-        Assert.assertEquals(3, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertEquals(3, dataSource.getlLiveSelectedDataCount());
 
         // Second shift-click: extend to d-e (without clearing previous)
         dataSource.selectKeys(List.of("d", "e"));
-        Assert.assertEquals(5, dataSource.getlLiveSelectedDataCount());
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("e"));
+        Assertions.assertEquals(5, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("e"));
     }
 
     @Test
@@ -199,12 +199,12 @@ public class DefaultCacheDataSourceSelectionTest {
         // Unselect b, d — only b is actually unselected, d was not selected
         final Interval interval = dataSource.unselectKeys(List.of("b", "d"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertFalse(dataSource.isSelected("d"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertFalse(dataSource.isSelected("d"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -213,10 +213,10 @@ public class DefaultCacheDataSourceSelectionTest {
 
         dataSource.removeData("b");
 
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -226,11 +226,11 @@ public class DefaultCacheDataSourceSelectionTest {
         dataSource.unselect("b");
         dataSource.unselect("d");
 
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertFalse(dataSource.isSelected("d"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertFalse(dataSource.isSelected("d"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -241,8 +241,8 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.unselectKeys(List.of("a", "b", "c"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertEquals(0, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertEquals(0, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -252,17 +252,17 @@ public class DefaultCacheDataSourceSelectionTest {
         // select(k) returns null when k is already selected → selectKeys returns null when no state changes
         final Interval interval = dataSource.selectKeys(List.of("a", "b", "c"));
 
-        Assert.assertNull(interval);
-        Assert.assertEquals(3, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNull(interval);
+        Assertions.assertEquals(3, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
     public void testSelectKeysSingleElement() {
         final Interval interval = dataSource.selectKeys(List.of("c"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertEquals(1, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertEquals(1, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -271,9 +271,9 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.unselectKeys(List.of("c"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertFalse(dataSource.isSelected("c"));
-        Assert.assertEquals(0, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertFalse(dataSource.isSelected("c"));
+        Assertions.assertEquals(0, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -283,11 +283,11 @@ public class DefaultCacheDataSourceSelectionTest {
 
         final Interval interval = dataSource.selectKeys(List.of("d", "e"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertFalse(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("d"));
-        Assert.assertTrue(dataSource.isSelected("e"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertFalse(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("d"));
+        Assertions.assertTrue(dataSource.isSelected("e"));
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -313,13 +313,13 @@ public class DefaultCacheDataSourceSelectionTest {
 
         // "b" and "d" are filtered out — selecting them should return null
         final Interval interval = dataSource.selectKeys(List.of("b", "d"));
-        Assert.assertNull(interval);
+        Assertions.assertNull(interval);
 
         // "a" and "c" are still visible — selecting them should work
         final Interval interval2 = dataSource.selectKeys(List.of("a", "c"));
-        Assert.assertNotNull(interval2);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertNotNull(interval2);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
     }
 
     /**
@@ -399,17 +399,17 @@ public class DefaultCacheDataSourceSelectionTest {
         // Simulates: user clicks "b" (anchor), then Shift+clicks "d"
         // Expected: range "b", "c", "d" selected
         dataSource.select("b");
-        Assert.assertEquals(1, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertEquals(1, dataSource.getlLiveSelectedDataCount());
 
         final Interval rangeInterval = dataSource.selectKeys(List.of("b", "c", "d"));
 
-        Assert.assertNotNull(rangeInterval);
-        Assert.assertFalse(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertTrue(dataSource.isSelected("d"));
-        Assert.assertFalse(dataSource.isSelected("e"));
-        Assert.assertEquals(3, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(rangeInterval);
+        Assertions.assertFalse(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertTrue(dataSource.isSelected("d"));
+        Assertions.assertFalse(dataSource.isSelected("e"));
+        Assertions.assertEquals(3, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -420,11 +420,11 @@ public class DefaultCacheDataSourceSelectionTest {
         // Shift+click on "b" while "a" (anchor) was already selected — unselect b-c range
         final Interval interval = dataSource.unselectKeys(List.of("b", "c"));
 
-        Assert.assertNotNull(interval);
-        Assert.assertTrue(dataSource.isSelected("a"));
-        Assert.assertFalse(dataSource.isSelected("b"));
-        Assert.assertFalse(dataSource.isSelected("c"));
-        Assert.assertEquals(1, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertNotNull(interval);
+        Assertions.assertTrue(dataSource.isSelected("a"));
+        Assertions.assertFalse(dataSource.isSelected("b"));
+        Assertions.assertFalse(dataSource.isSelected("c"));
+        Assertions.assertEquals(1, dataSource.getlLiveSelectedDataCount());
     }
 
     @Test
@@ -433,23 +433,23 @@ public class DefaultCacheDataSourceSelectionTest {
         dataSource.select("d");
         final Interval rangeInterval = dataSource.selectKeys(List.of("b", "c", "d"));
 
-        Assert.assertNotNull(rangeInterval);
-        Assert.assertFalse(dataSource.isSelected("a"));
-        Assert.assertTrue(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("c"));
-        Assert.assertTrue(dataSource.isSelected("d"));
-        Assert.assertFalse(dataSource.isSelected("e"));
+        Assertions.assertNotNull(rangeInterval);
+        Assertions.assertFalse(dataSource.isSelected("a"));
+        Assertions.assertTrue(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("c"));
+        Assertions.assertTrue(dataSource.isSelected("d"));
+        Assertions.assertFalse(dataSource.isSelected("e"));
     }
 
     @Test
     public void testSelectRangeSimulation_extendExistingRange() {
         // First range: b-c, then extend to b-e
         dataSource.selectKeys(List.of("b", "c"));
-        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertEquals(2, dataSource.getlLiveSelectedDataCount());
 
         dataSource.selectKeys(List.of("b", "c", "d", "e"));
-        Assert.assertEquals(4, dataSource.getlLiveSelectedDataCount());
-        Assert.assertTrue(dataSource.isSelected("b"));
-        Assert.assertTrue(dataSource.isSelected("e"));
+        Assertions.assertEquals(4, dataSource.getlLiveSelectedDataCount());
+        Assertions.assertTrue(dataSource.isSelected("b"));
+        Assertions.assertTrue(dataSource.isSelected("e"));
     }
 }

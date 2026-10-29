@@ -30,14 +30,13 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
@@ -83,6 +82,24 @@ public class PonySDKWebDriver implements WebDriver {
     private ByteBuffer buffer = ByteBuffer.allocate(4096);
     private int length = 0;
 
+    /**
+     * Client side of the String Dictionary (DICTIONARY_ADD defines an id, DICTIONARY_REF reuses it),
+     * mirroring the terminal's ReaderBuffer. The dictionary is on by default server-side, so without
+     * this the driver failed on the first interned string.
+     */
+    private String[] dictionary = new String[256];
+
+    private void dictionaryPut(final int id, final String value) {
+        if (id >= dictionary.length) dictionary = Arrays.copyOf(dictionary, Math.max(id + 1, dictionary.length * 2));
+        dictionary[id] = value;
+    }
+
+    private String dictionaryGet(final int id) {
+        final String value = id < dictionary.length ? dictionary[id] : null; // a uint31: never negative
+        if (value == null) throw new PonyIOException("Unknown dictionary ID: " + id);
+        return value;
+    }
+
     public PonySDKWebDriver() {
         this(null, null, null, true);
     }
@@ -94,7 +111,7 @@ public class PonySDKWebDriver implements WebDriver {
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
         sessionListener = sessionListener == null ? INDIFFERENT_SESSION_LISTENER : sessionListener;
-        this.client = new WebsocketClient(messageHandler, bandwithListener, sessionListener);
+        this.client = new WebsocketClient(messageHandler, this.bandwithListener, sessionListener); // field: never null (the parameter may be)
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
             if (handleImplicitCommunication) sendCookies();
@@ -103,7 +120,8 @@ public class PonySDKWebDriver implements WebDriver {
             if ((boolean) frame.getValue()) {
                 final String typeHistory = (String) findValueForModel(message, ServerToClientModel.TYPE_HISTORY);
                 if (typeHistory == null) return;
-                if (handleImplicitCommunication) sendTypeHistory(this.typeHistory = typeHistory);
+                this.typeHistory = typeHistory;
+                if (handleImplicitCommunication) sendTypeHistory(typeHistory);
             }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_ADD, (message, frame) -> {
@@ -138,7 +156,14 @@ public class PonySDKWebDriver implements WebDriver {
             final Byte widget = (Byte) findValueForModel(message, ServerToClientModel.WIDGET_TYPE);
             if (widget == null) return;
             final int elementId = (int) frame.value;
-            elements.put(elementId, new PonyWebElement(this, elementId, WidgetType.fromRawValue(widget)));
+            final PonyWebElement element = new PonyWebElement(this, elementId, WidgetType.fromRawValue(widget));
+            elements.put(elementId, element);
+            // protocol 3: created directly in its parent
+            final Object parentId = findValueForModel(message, ServerToClientModel.PARENT_OBJECT_ID);
+            if (parentId != null) {
+                element.parent = elements.get(parentId);
+                if (element.parent != null) element.parent.children.add(element);
+            }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_GC, (message, frame) -> {
             elements.remove(frame.value);
@@ -215,7 +240,7 @@ public class PonySDKWebDriver implements WebDriver {
     @Override
     public void get(final String url) {
         try {
-            client.connect(new URI(url));
+            client.connect(new URI(withProtocolVersion(url)));
             this.url = url;
         } catch (final Exception e) {
             throw new PonyIOException("Unable to connect to " + url, e);
@@ -256,13 +281,11 @@ public class PonySDKWebDriver implements WebDriver {
 
     @Override
     public String getPageSource() {
-        final StringWriter writer = new StringWriter();
-        try {
-            printAsXml(writer);
-        } catch (final IOException e) {
-            //unreachable
+        final StringBuilder page = new StringBuilder("<WEB>\n");
+        for (final PonyWebElement e : elements.values()) {
+            if (e.parent == null) e.printTree(1, page);
         }
-        return writer.toString();
+        return page.append("</WEB>").toString();
     }
 
     @Override
@@ -309,7 +332,24 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private String getString(final ByteBuffer b) {
-        int stringLength = readUnsignedByte(b);
+        final int tag = readUnsignedByte(b);
+        if (tag == ValueTypeModel.STRING_DICTIONARY_REF) {
+            length += Short.BYTES;
+            return dictionaryGet(getUint31(b));
+        }
+        if (tag == ValueTypeModel.STRING_DICTIONARY_ADD) {
+            length += Short.BYTES;
+            final int id = getUint31(b);
+            length += 1; // inner string tag
+            final String value = getInlineString(b, readUnsignedByte(b));
+            dictionaryPut(id, value);
+            return value;
+        }
+        return getInlineString(b, tag);
+    }
+
+    private String getInlineString(final ByteBuffer b, final int tag) {
+        int stringLength = tag;
         boolean ascii = true;
         if (stringLength > ValueTypeModel.STRING_ASCII_UINT8) {
             switch (stringLength) {
@@ -331,13 +371,11 @@ public class PonySDKWebDriver implements WebDriver {
                     stringLength = readUnsignedShort(b);
                     ascii = false;
                     break;
-                case ValueTypeModel.STRING_UTF8_INT32:
+                default: // STRING_UTF8_INT32, the last tag above STRING_ASCII_UINT8
                     length += 4;
                     stringLength = b.getInt();
                     ascii = false;
                     break;
-                default:
-                    assert false; //unreachable
             }
         }
         length += stringLength;
@@ -351,7 +389,13 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private Object getArray(final ByteBuffer b) {
-        final Object[] array = new Object[readUnsignedByte(b)];
+        int size = readUnsignedByte(b);
+        // 255 is the escape: a uint31 length (2 or 4 bytes) follows — mirrors WebSocketPusher / ReaderBuffer
+        if (size == ArrayValueModel.LENGTH_UINT31_ESCAPE) {
+            length += Short.BYTES;
+            size = getUint31(b);
+        }
+        final Object[] array = new Object[size];
         length += array.length; //elements types
         for (int i = 0; i < array.length; i++) {
             final ArrayValueModel model = readArrayValueModel(b);
@@ -369,67 +413,44 @@ public class PonySDKWebDriver implements WebDriver {
 
     private Object readArrayElementValue(final ByteBuffer b, final ArrayValueModel model) {
         length += model.getMinSize();
-        switch (model) {
-            case NULL:
-                return null;
-            case BOOLEAN_FALSE:
-                return Boolean.FALSE;
-            case BOOLEAN_TRUE:
-                return Boolean.TRUE;
-            case BYTE:
-                return b.get();
-            case SHORT:
-                return b.getShort();
-            case INTEGER:
-                return b.getInt();
-            case LONG:
-                return b.getLong();
-            case DOUBLE:
-                return b.getDouble();
-            case FLOAT:
-                return b.getFloat();
-            case STRING_ASCII_UINT8_LENGTH:
-                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedByte);
-            case STRING_ASCII_UINT16_LENGTH:
-                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort);
-            case STRING_UTF8_UINT8_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
-            case STRING_UTF8_UINT16_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
-            case STRING_UTF8_UINT32_LENGTH:
-                return getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
-            default:
-                throw new IllegalArgumentException("ArrayValueModel " + model + " is not supported");
-        }
+        return switch (model) {
+            case NULL -> null;
+            case BOOLEAN_FALSE -> Boolean.FALSE;
+            case BOOLEAN_TRUE -> Boolean.TRUE;
+            case BYTE -> b.get();
+            case SHORT -> b.getShort();
+            case INTEGER -> b.getInt();
+            case LONG -> b.getLong();
+            case DOUBLE -> b.getDouble();
+            case FLOAT -> b.getFloat();
+            case STRING_ASCII_UINT8_LENGTH -> getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedByte);
+            case STRING_ASCII_UINT16_LENGTH -> getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_UINT8_LENGTH -> getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
+            case STRING_UTF8_UINT16_LENGTH -> getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_UINT32_LENGTH -> getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
+            case STRING_DICTIONARY_REF -> dictionaryGet(getUint31(b)); // min size (2) already counted above
+            case STRING_DICTIONARY_ADD -> {
+                final int id = getUint31(b);
+                length += 1; // inner element tag
+                final Object value = readArrayElementValue(b, readArrayValueModel(b));
+                dictionaryPut(id, (String) value);
+                yield value;
+            }
+        };
     }
 
     private Object readModelValue(final ByteBuffer b, final ValueTypeModel type) {
-        switch (type) {
-            case NULL:
-                return null;
-            case BOOLEAN:
-                return readValue(b, 1, buff -> buff.get() == BooleanModel.TRUE.getValue());
-            case BYTE:
-                return readValue(b, 1, ByteBuffer::get);
-            case SHORT:
-                return readValue(b, 2, ByteBuffer::getShort);
-            case INTEGER:
-                return readValue(b, 4, ByteBuffer::getInt);
-            case LONG:
-                return readValue(b, 8, ByteBuffer::getLong);
-            case DOUBLE:
-                return readValue(b, 8, ByteBuffer::getDouble);
-            case FLOAT:
-                return readValue(b, 4, ByteBuffer::getFloat);
-            case STRING:
-                return readValue(b, 1, this::getString);
-            case ARRAY:
-                return readValue(b, 1, this::getArray);
-            case UINT31:
-                return readValue(b, 2, this::getUint31);
-            default:
-                throw new IllegalArgumentException("ValueTypeModel " + type + " is not supported");
-        }
+        return switch (type) {
+            case NULL -> null;
+            case BOOLEAN -> readValue(b, 1, buff -> buff.get() == BooleanModel.TRUE.getValue());
+            case BYTE -> readValue(b, 1, ByteBuffer::get);
+            case INTEGER -> readValue(b, 4, ByteBuffer::getInt);
+            case LONG -> readValue(b, 8, ByteBuffer::getLong);
+            case DOUBLE -> readValue(b, 8, ByteBuffer::getDouble);
+            case STRING -> readValue(b, 1, this::getString);
+            case ARRAY -> readValue(b, 1, this::getArray);
+            case UINT31 -> readValue(b, 2, this::getUint31);
+        };
     }
 
     private synchronized void onMessage(final ByteBuffer message) {
@@ -493,21 +514,80 @@ public class PonySDKWebDriver implements WebDriver {
             } else {
                 b.compact();
             }
-        } else if (b == buffer && !b.hasRemaining()) {
+        } else if (b == buffer) {
             b.clear();
         }
     }
 
     private void onMessage(final ServerToClientModel model, final Object value) {
         if (model == ServerToClientModel.END) {
-            onMessage(messageInConstruction);
-            messageInConstruction.clear();
+            try {
+                onMessage(messageInConstruction);
+            } finally {
+                messageInConstruction.clear(); // a listener failure must not leak this message into the next one
+            }
         } else {
             messageInConstruction.add(new PonyFrame(model, value));
         }
     }
 
+    /** Binary protocol version announced at handshake (default: the latest; 1 = original format). */
+    private int protocolVersion = com.ponysdk.core.model.ProtocolVersion.CURRENT;
+
+    public void setProtocolVersion(final int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public int getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    private String withProtocolVersion(final String url) {
+        final String key = ClientToServerModel.PROTOCOL_VERSION.toStringValue();
+        if (url.contains("?" + key + "=") || url.contains("&" + key + "=")) return url;
+        return url + (url.indexOf('?') >= 0 ? "&" : "?") + key + "=" + protocolVersion;
+    }
+
+    /**
+     * An update run (protocol 2) carries several objects in one block, chained by UPDATE_NEXT markers.
+     * It is split into one message per object - each with the block's WINDOW_ID / FRAME_ID header and a
+     * TYPE_UPDATE frame - so element tracking and message listeners see the same shape as version 1.
+     */
     private void onMessage(final List<PonyFrame> message) {
+        int updateIndex = -1;
+        boolean run = false;
+        for (int i = 0; i < message.size(); i++) {
+            final ServerToClientModel m = message.get(i).getModel();
+            if (m == ServerToClientModel.TYPE_UPDATE && updateIndex < 0) updateIndex = i;
+            else if (m == ServerToClientModel.UPDATE_NEXT || m == ServerToClientModel.UPDATE_NEXT_DELTA
+                    || m == ServerToClientModel.UPDATE_NEXT_ID) run = true;
+        }
+        if (!run || updateIndex < 0) {
+            dispatch(message);
+            return;
+        }
+        final List<PonyFrame> header = message.subList(0, updateIndex);
+        int id = ((Number) message.get(updateIndex).getValue()).intValue();
+        List<PonyFrame> current = new ArrayList<>(header);
+        current.add(message.get(updateIndex));
+        for (int i = updateIndex + 1; i < message.size(); i++) {
+            final PonyFrame frame = message.get(i);
+            final ServerToClientModel m = frame.getModel();
+            if (m == ServerToClientModel.UPDATE_NEXT) id += 1;
+            else if (m == ServerToClientModel.UPDATE_NEXT_DELTA) id += 2 + (((Number) frame.getValue()).intValue() & 0xFF);
+            else if (m == ServerToClientModel.UPDATE_NEXT_ID) id = ((Number) frame.getValue()).intValue();
+            else {
+                current.add(frame);
+                continue;
+            }
+            dispatch(current);
+            current = new ArrayList<>(header);
+            current.add(new PonyFrame(ServerToClientModel.TYPE_UPDATE, id));
+        }
+        dispatch(current);
+    }
+
+    private void dispatch(final List<PonyFrame> message) {
         loggerIn.trace("{}", message);
         for (final PonyFrame frame : message) {
             onMessageSwitch.getOrDefault(frame.getModel(), DO_NOTHING_WITH_FRAME).accept(message, frame);
@@ -605,12 +685,7 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     public void printAsXml(final Writer writer) throws IOException {
-        writer.write("<WEB>");
-        writer.write('\n');
-        for (final PonyWebElement e : elements.values()) {
-            if (e.parent == null) e.printTree(1, writer);
-        }
-        writer.write("</WEB>");
+        writer.write(getPageSource());
     }
 
     public void clear() {

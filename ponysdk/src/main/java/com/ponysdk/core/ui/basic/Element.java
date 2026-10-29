@@ -70,6 +70,9 @@ public class Element {
 
     public static ElementFactory f = new DefaultElementFactory();
 
+    private Element() {
+    }
+
     public static void setElementFactory(final ElementFactory ef) {
         f = ef;
     }

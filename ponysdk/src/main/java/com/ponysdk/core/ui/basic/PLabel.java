@@ -37,14 +37,14 @@ import java.util.stream.Collectors;
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt; element,
  * causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Label { }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-Label</dt>
+ * <dd>the label</dd>
+ * </dl>
  */
 public class PLabel extends PWidget {
 
     protected String text;
-    private String attributeLinkedToValue;
 
     protected PLabel() {
         this(null);
@@ -62,8 +62,9 @@ public class PLabel extends PWidget {
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
-        if (this.attributeLinkedToValue != null)
-            writer.write(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, this.attributeLinkedToValue);
+        final String attributeLinkedToValue = getAttributeLinkedToValue0();
+        if (attributeLinkedToValue != null)
+            writer.write(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, attributeLinkedToValue);
         if (this.text != null) writer.write(ServerToClientModel.TEXT, this.text);
     }
 
@@ -83,7 +84,7 @@ public class PLabel extends PWidget {
     }
 
     public String getAttributeLinkedToValue() {
-        return attributeLinkedToValue;
+        return getAttributeLinkedToValue0();
     }
 
     /**
@@ -91,9 +92,9 @@ public class PLabel extends PWidget {
      */
     @Incubation(since = "2.8.11")
     public void setAttributeLinkedToValue(final String attributeLinkedToValue) {
-        if (Objects.equals(this.attributeLinkedToValue, attributeLinkedToValue)) return;
-        this.attributeLinkedToValue = attributeLinkedToValue;
-        if (initialized) saveUpdate(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, this.attributeLinkedToValue);
+        if (Objects.equals(getAttributeLinkedToValue0(), attributeLinkedToValue)) return;
+        setAttributeLinkedToValue0(attributeLinkedToValue);
+        if (initialized) saveUpdate(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, attributeLinkedToValue);
     }
 
     public HandlerRegistration addClickHandler(final PClickHandler handler) {

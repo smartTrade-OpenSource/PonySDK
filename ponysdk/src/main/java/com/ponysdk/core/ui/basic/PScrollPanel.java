@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -79,17 +79,14 @@ public class PScrollPanel extends PSimplePanel {
     }
 
     public void addScrollHandler(final PScrollHandler handler) {
-        if (scrollHandlers == null) {
-            scrollHandlers = new ArrayList<>();
-            saveAddHandler(HandlerModel.HANDLER_SCROLL);
-        }
+        if (scrollHandlers == null) scrollHandlers = new ArrayList<>();
+        if (scrollHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_SCROLL); // the first, or the first again
         scrollHandlers.add(handler);
     }
 
     public void removeScrollHandler(final PScrollHandler handler) {
-        if (scrollHandlers != null) {
-            scrollHandlers.remove(handler);
-            if (scrollHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_SCROLL);
+        if (scrollHandlers != null && scrollHandlers.remove(handler) && scrollHandlers.isEmpty()) {
+            saveRemoveHandler(HandlerModel.HANDLER_SCROLL);
         }
     }
 

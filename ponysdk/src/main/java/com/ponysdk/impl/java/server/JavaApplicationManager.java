@@ -24,20 +24,23 @@
 package com.ponysdk.impl.java.server;
 
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.HotReload;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class JavaApplicationManager extends ApplicationManager {
 
     @Override
     public void start() {
-        // Nothing to do
+        hotReload(configuration.getEntryPointClass());
     }
 
     @Override
     protected EntryPoint initializeEntryPoint() {
-        final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
+        final HotReload reload = hotReload();
+        final Class<? extends EntryPoint> entryPointClass = reload != null
+                ? reload.current(EntryPoint.class, configuration.getEntryPointClass()) : configuration.getEntryPointClass();
         try {
-            return entryPointClassName.getDeclaredConstructor().newInstance();
+            return entryPointClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }

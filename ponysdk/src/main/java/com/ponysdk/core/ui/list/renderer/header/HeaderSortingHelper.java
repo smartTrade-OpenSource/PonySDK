@@ -43,15 +43,11 @@ public class HeaderSortingHelper {
     }
 
     public static String getAssociatedStyleName(final SortingType sortingType) {
-        switch (sortingType) {
-            case ASCENDING:
-                return "ascending";
-            case DESCENDING:
-                return "descending";
-            case NONE:
-                return "none";
-        }
-        return "none";
+        return switch (sortingType) {
+            case ASCENDING -> "ascending";
+            case DESCENDING -> "descending";
+            case NONE -> "none";
+        };
     }
 
 }

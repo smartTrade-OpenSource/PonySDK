@@ -23,11 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.testutil.CapturingModelWriter;
+import com.ponysdk.core.model.ServerToClientModel;
+import java.util.List;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.test.PSuite;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class PButtonTest extends PSuite {
 
@@ -114,4 +118,46 @@ public class PButtonTest extends PSuite {
         assertEquals("<button pid=\"" + ID + "\" class=\"style\">text</button>", button.dumpDOM());
     }
 
+
+    @Test
+    public void testCreationAndUpdatesAreWritten() {
+        final CapturingModelWriter writer = CapturingModelWriter.install();
+        try {
+            final PButton html = Element.newPButton(null, "<b>x</b>");
+            PWindow.getMain().add(html);
+            assertEquals(List.of("<b>x</b>"), writer.valuesOf(ServerToClientModel.HTML));
+            assertEquals(0, writer.count(ServerToClientModel.TEXT));
+
+            writer.clear();
+            html.setHTML("<b>x</b>");
+            assertTrue(writer.isEmpty());
+            html.setHTML("<i>y</i>");
+            assertEquals(List.of("<i>y</i>"), writer.valuesOf(ServerToClientModel.HTML));
+            assertEquals("<button pid=\"" + html.getID() + "\" class=\"\"><i>y</i></button>", html.dumpDOM());
+
+            writer.clear();
+            final PButton text = Element.newPButton("t");
+            PWindow.getMain().add(text);
+            assertEquals(List.of("t"), writer.valuesOf(ServerToClientModel.TEXT));
+            assertEquals(0, writer.count(ServerToClientModel.HTML));
+            text.setHTML("<u>h</u>");
+            assertNull(text.getText());
+            html.removeFromParent();
+            text.removeFromParent();
+        } finally {
+            writer.uninstall();
+        }
+    }
+
+    @Test
+    public void aButtonWithoutTextDumpsItsHtmlOnly() {
+        final PButton button = Element.newPButton();
+        button.setHTML("<b>h</b>");
+        assertTrue(button.dumpDOM().endsWith("><b>h</b></button>"), button.dumpDOM());
+    }
+
+    @Test
+    public void aTextButtonDumpsItsText() {
+        assertTrue(Element.newPButton("t").dumpDOM().endsWith(">t</button>"));
+    }
 }

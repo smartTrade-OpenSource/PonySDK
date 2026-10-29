@@ -27,17 +27,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ContextKeys;
 import com.ponysdk.core.server.application.UIContext;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
     private final Map<String, Application> applications = new ConcurrentHashMap<>();
+    /** The contexts that have keys (embedded terminals), by id, until destroyed. */
+    private final Map<Integer, UIContext> keyed = new ConcurrentHashMap<>();
 
     private final List<ApplicationListener> listeners = new ArrayList<>();
 
@@ -67,12 +73,60 @@ public class SessionManager {
         listeners.add(listener);
     }
 
-    public UIContext getUIContext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
+    /**
+     * Returns the {@link UIContext} with the given id <strong>only if</strong> it belongs to the
+     * application identified by {@code applicationId} (i.e. the caller's HTTP session).
+     * <p>
+     * This is the safe lookup to use from HTTP endpoints: it prevents a client from reaching a
+     * UIContext owned by another session by guessing its (sequential) id — an IDOR.
+     *
+     * @param applicationId the caller's application id (its HTTP session id)
+     * @param id            the UIContext id
+     * @return the UIContext, or {@code null} if no such context exists in that application
+     */
+    public UIContext getUIContext(final String applicationId, final int id) {
+        if (applicationId == null) return null;
+        final Application app = applications.get(applicationId);
+        return app != null ? app.getUIContext(id) : null;
+    }
+
+    /** A context with keys is found by them until it is destroyed (docs/decisions/0009-embedding-limits.md). */
+    public void registerKeys(final UIContext uiContext) {
+        if (uiContext.getKeys() == null) return;
+        keyed.put(uiContext.getID(), uiContext);
+        uiContext.addContextDestroyListener(destroyed -> keyed.remove(destroyed.getID(), destroyed));
+    }
+
+    /** The context whose key K this is, or null. */
+    public UIContext getUIContextByKey(final int id, final String key) {
+        final UIContext uiContext = keyed.get(id);
+        return uiContext != null && uiContext.getKeys().isKey(key) ? uiContext : null;
+    }
+
+    /**
+     * The context an HTTP request names, by the caller's session first; then, for an embedded terminal of another
+     * site, which sends no cookie, by its key K in the header {@code CONTEXT_KEY}, or, when the request fetches a
+     * pending stream by its URL, by its stream key S in the parameter {@code STREAM_KEY}. Null when none: the same
+     * answer whether the context is missing or another caller's.
+     */
+    public UIContext getUIContext(final HttpServletRequest request, final int id, final boolean pendingStream) {
+        final HttpSession session = request.getSession(false);
+        final UIContext bySession = session != null ? getUIContext(session.getId(), id) : null;
+        if (bySession != null) return bySession;
+        final UIContext uiContext = keyed.get(id);
+        if (uiContext == null) return null;
+        final ContextKeys keys = uiContext.getKeys();
+        if (keys.isKey(request.getHeader(ClientToServerModel.CONTEXT_KEY.name()))) return uiContext;
+        return pendingStream && keys.isStreamKey(request.getParameter(ClientToServerModel.STREAM_KEY.toStringValue()))
+                ? uiContext : null;
     }
 
     public int countUIContexts() {
-        return applications.values().stream().mapToInt(Application::countUIContexts).sum();
+        int count = 0;
+        for (final Application app : applications.values()) {
+            count += app.countUIContexts();
+        }
+        return count;
     }
 
 }

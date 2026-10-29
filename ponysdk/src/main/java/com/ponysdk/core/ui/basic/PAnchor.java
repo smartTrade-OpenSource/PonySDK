@@ -33,11 +33,10 @@ import java.util.stream.Collectors;
 /**
  * A widget that represents a simple &lt;a&gt; element.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Anchor { }</li>
- * </ul>
- *
- * @see com.google.gwt.user.client.ui.Anchor
+ * <dl>
+ * <dt>.pony-Anchor</dt>
+ * <dd>the link</dd>
+ * </dl>
  */
 public class PAnchor extends PFocusWidget {
 

@@ -29,8 +29,8 @@ import java.util.List;
 public enum OperatingSystem {
 
     // the order is important since the agent string is being compared with the aliases
-    XBOX_360(Manufacturer.MICROSOFT, null, 1, "Xbox 360", new String[]{"Xbox"}, null, DeviceType.GAME_CONSOLE, null),
-    XBOX_ONE(Manufacturer.MICROSOFT, OperatingSystem.XBOX_360, 1, "Xbox One", new String[]{"Xbox One"}, null,
+    XBOX_360(Manufacturer.MICROSOFT, null, 60, "Xbox 360", new String[]{"Xbox"}, null, DeviceType.GAME_CONSOLE, null),
+    XBOX_ONE(Manufacturer.MICROSOFT, OperatingSystem.XBOX_360, 61, "Xbox One", new String[]{"Xbox One"}, null,
             DeviceType.GAME_CONSOLE, null),
 
     /**
@@ -123,7 +123,7 @@ public enum OperatingSystem {
      * Google TV uses Android 2.x or 3.x but doesn't identify itself as Android.
      */
     GOOGLE_TV(Manufacturer.GOOGLE, null, 100, "Android (Google TV)", new String[]{"GoogleTV"}, null, DeviceType.DMR, null),
-    CHROME_OS(Manufacturer.GOOGLE, null, 1, "ChromeOS", new String[]{"CrOS"}, null, DeviceType.COMPUTER, null),
+    CHROME_OS(Manufacturer.GOOGLE, null, 3, "ChromeOS", new String[]{"CrOS"}, null, DeviceType.COMPUTER, null),
 
     /**
      * Various Linux based operating systems.
@@ -176,18 +176,18 @@ public enum OperatingSystem {
     SUN_OS(Manufacturer.SUN, null, 1, "SunOS", new String[]{"SunOS"}, null, DeviceType.COMPUTER, null),
 
     PLAYSTATION_3(Manufacturer.SONY, null, 1, "PlayStation 3", new String[]{"PLAYSTATION 3"}, null, DeviceType.GAME_CONSOLE, null),
-    PLAYSTATION_4(Manufacturer.SONY, null, 1, "PlayStation 4", new String[]{"PLAYSTATION 4"}, null, DeviceType.GAME_CONSOLE, null),
-    PSP(Manufacturer.SONY, null, 1, "PlayStation Portable", new String[]{"PlayStation Portable"}, null, DeviceType.GAME_CONSOLE,
+    PLAYSTATION_4(Manufacturer.SONY, null, 2, "PlayStation 4", new String[]{"PLAYSTATION 4"}, null, DeviceType.GAME_CONSOLE, null),
+    PSP(Manufacturer.SONY, null, 3, "PlayStation Portable", new String[]{"PlayStation Portable"}, null, DeviceType.GAME_CONSOLE,
             null),
-    PS_VITA(Manufacturer.SONY, null, 1, "PlayStation Vita", new String[]{"PlayStation Vita"}, null, DeviceType.GAME_CONSOLE, null),
+    PS_VITA(Manufacturer.SONY, null, 4, "PlayStation Vita", new String[]{"PlayStation Vita"}, null, DeviceType.GAME_CONSOLE, null),
 
     /**
      * Nintendo game console.
      */
     WII_U(Manufacturer.NINTENDO, null, 1, "Nintendo Wii U", new String[]{"Nintendo WiiU"}, null, DeviceType.GAME_CONSOLE, null),
-    WII(Manufacturer.NINTENDO, null, 1, "Nintendo Wii", new String[]{"Nintendo Wii"}, null, DeviceType.GAME_CONSOLE, null),
-    NINTENDO_3DS(Manufacturer.NINTENDO, null, 1, "Nintendo 3DS", new String[]{"Nintendo 3DS"}, null, DeviceType.GAME_CONSOLE, null),
-    NINTENDO_DSI(Manufacturer.NINTENDO, null, 1, "Nintendo DSi", new String[]{"Nintendo DSi"}, null, DeviceType.GAME_CONSOLE, null),
+    WII(Manufacturer.NINTENDO, null, 2, "Nintendo Wii", new String[]{"Nintendo Wii"}, null, DeviceType.GAME_CONSOLE, null),
+    NINTENDO_3DS(Manufacturer.NINTENDO, null, 3, "Nintendo 3DS", new String[]{"Nintendo 3DS"}, null, DeviceType.GAME_CONSOLE, null),
+    NINTENDO_DSI(Manufacturer.NINTENDO, null, 4, "Nintendo DSi", new String[]{"Nintendo DSi"}, null, DeviceType.GAME_CONSOLE, null),
 
     /**
      * BlackBerryOS. The BlackBerryOS exists in different version. How relevant
@@ -203,9 +203,9 @@ public enum OperatingSystem {
             DeviceType.TABLET, null),
 
     ROKU(Manufacturer.ROKU, null, 1, "Roku OS", new String[]{"Roku"}, null, DeviceType.DMR, null),
-    DTV(Manufacturer.OTHER, null, 1, "DigitalTV", new String[]{"DTV"}, null, DeviceType.DMR, null),
+    DTV(Manufacturer.OTHER, null, 3, "DigitalTV", new String[]{"DTV"}, null, DeviceType.DMR, null),
 
-    UNKNOWN(Manufacturer.OTHER, null, 1, "UNKNOWN", new String[0], null, DeviceType.UNKNOWN, null);
+    UNKNOWN(Manufacturer.OTHER, null, 0, "UNKNOWN", new String[0], null, DeviceType.UNKNOWN, null);
 
     private final short id;
     private final String name;

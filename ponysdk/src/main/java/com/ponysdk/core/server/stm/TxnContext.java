@@ -30,10 +30,9 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
 
-    private final WebSocket socket;
+    private WebSocket socket;
     private final ModelWriter modelWriter;
 
-    private boolean flushNow = false;
     private Application application;
 
     public TxnContext(final WebSocket socket) {
@@ -46,16 +45,13 @@ public class TxnContext implements TxnListener {
     }
 
     void flush() {
+        modelWriter.drainPendingUpdates();
         socket.flush();
     }
 
     @Override
     public void beforeFlush(final TxnContext txnContext) {
-        if (!flushNow) return;
-
-        flushNow = false;
-
-        Txn.get().flush();
+        // Nothing to do
     }
 
     @Override
@@ -70,6 +66,14 @@ public class TxnContext implements TxnListener {
 
     public WebSocket getSocket() {
         return socket;
+    }
+
+    /**
+     * Swaps the underlying WebSocket — used during transparent reconnection
+     * so that {@link #flush()} targets the new live connection.
+     */
+    public void setSocket(final WebSocket socket) {
+        this.socket = socket;
     }
 
     public Application getApplication() {
@@ -102,7 +106,7 @@ public class TxnContext implements TxnListener {
 
     @Override
     public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", modelWriter=" + modelWriter + '}';
+        return "TxnContext{" + "modelWriter=" + modelWriter + '}';
     }
 
 }

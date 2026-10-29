@@ -27,9 +27,10 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class SceneTest extends PSuite {
 
@@ -85,6 +86,83 @@ public class SceneTest extends PSuite {
         assertEquals(2, listener4Test.stoppingCount);
         assertEquals(2, listener4Test.stoppedCount);
         assertFalse(scene.isStarted());
+    }
+
+    @Test
+    public void testStartAndStopWithoutListener() {
+        final Scene scene = labelScene();
+        PWindow.getMain().add(scene);
+        scene.start();
+        assertTrue(scene.isStarted());
+        assertEquals("true", scene.asWidget().getAttribute("started"));
+        scene.stop();
+        assertFalse(scene.isStarted());
+        assertEquals("false", scene.asWidget().getAttribute("started"));
+    }
+
+    @Test
+    public void testStartBeforeAttachBuildsTheSceneWidget() {
+        final int[] firstStarts = new int[1];
+        final Scene scene = new AbstractScene("id", "name", "token") {
+            @Override
+            public PWidget buildGUI() {
+                return Element.newPLabel("scene");
+            }
+
+            @Override
+            protected void onFirstStart() {
+                firstStarts[0]++;
+            }
+        };
+        final SceneListener4Test listener = new SceneListener4Test();
+        scene.addLifeCycleListener(listener);
+
+        scene.start();
+        // not attached yet: started once the widget is initialized
+        assertFalse(scene.isStarted());
+        assertEquals(1, listener.startingCount);
+        assertEquals(0, listener.startedCount);
+        assertTrue(scene.asWidget().hasStyleName("scene"));
+
+        PWindow.getMain().add(scene);
+        assertTrue(scene.isStarted());
+        assertEquals(1, listener.startedCount);
+        assertEquals(1, firstStarts[0]);
+
+        scene.start();
+        assertEquals(1, listener.startingCount);
+    }
+
+    @Test
+    public void testStopWhenNotStartedAndRemoveListener() {
+        final Scene scene = labelScene();
+        scene.removeLifeCycleListener(new SceneListener4Test());
+        final SceneListener4Test listener = new SceneListener4Test();
+        scene.addLifeCycleListener(listener);
+        scene.stop();
+        assertEquals(0, listener.stoppingCount);
+
+        scene.removeLifeCycleListener(listener);
+        PWindow.getMain().add(scene);
+        scene.start();
+        assertTrue(scene.isStarted());
+        assertEquals(0, listener.startingCount);
+
+        final SceneListener4Test other = new SceneListener4Test();
+        scene.addLifeCycleListener(listener);
+        scene.addLifeCycleListener(other);
+        scene.stop();
+        assertEquals(1, listener.stoppedCount);
+        assertEquals(1, other.stoppedCount);
+    }
+
+    private static Scene labelScene() {
+        return new AbstractScene("id", "name", "token") {
+            @Override
+            public PWidget buildGUI() {
+                return Element.newPLabel("scene");
+            }
+        };
     }
 
     private class SceneListener4Test implements Scene.Listener {

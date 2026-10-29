@@ -1,10 +1,12 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./coverage');
+
+const BASE_URL = process.env.BASE_URL || 'http://localhost/sample/';
 
 test.describe('FlexLayout PonySDK Integration', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('./', { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.fl-layout', { timeout: 8000 });
   });
 
@@ -1311,7 +1313,7 @@ async function dragFromToolbar(page, srcSelector) {
 
 test.describe('FlexLayout Popout Theme', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('./', { waitUntil: 'domcontentloaded' });
+    await page.goto(process.env.BASE_URL || 'http://localhost/sample/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.fl-layout', { timeout: 8000 });
   });
 
@@ -1336,7 +1338,7 @@ test.describe('FlexLayout Popout Theme', () => {
 test.describe('FlexLayout Performance', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('./', { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.fl-layout', { timeout: 8000 });
   });
 
@@ -1378,7 +1380,7 @@ test.describe('FlexLayout Performance', () => {
 test.describe('FlexLayout Visual Snapshots', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('./', { waitUntil: 'domcontentloaded' });
+    await page.goto(process.env.BASE_URL || 'http://localhost/sample/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.fl-layout', { timeout: 8000 });
     await page.waitForTimeout(500); // let sidebars render
   });

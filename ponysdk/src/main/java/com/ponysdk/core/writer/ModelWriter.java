@@ -32,20 +32,228 @@ import com.ponysdk.core.ui.basic.PWindow;
 
 public class ModelWriter {
 
-    private final WebsocketEncoder encoder;
+    private WebsocketEncoder encoder;
 
     private WeakReference<PWindow> currentWindow;
+
+    /**
+     * True from a block's start to its END. A block still open at the next block, drain or flush was interrupted by
+     * an exception: it is ended where it stopped. Its fields are whole (a field that fails is not written) and may
+     * announce dictionary strings the terminal must learn, so it is ended, never dropped.
+     */
+    private boolean blockOpen;
+
+    /** The UIContext this writer belongs to (set by the UIContext constructor). */
+    private UIContext owner;
+
+    public void bindTo(final UIContext owner) {
+        this.owner = owner;
+    }
+
+    // ---- Coalesced ("last value wins") property updates ----
+
+    /**
+     * Models whose update is a pure assignment: setting the property again before the flush makes the
+     * previous value irrelevant (the browser applies a whole frame before painting anyway).
+     * A class added / removed and a style / attribute removed are keyed by their name (the last change of a
+     * name wins, in order with the other updates of the object). Anything with side effects (method calls,
+     * eval, addon calls, children added / removed...) is never deferred.
+     */
+    private static final boolean[] COALESCIBLE = new boolean[ServerToClientModel.values().length];
+    static {
+        for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.TEXT, ServerToClientModel.HTML,
+                ServerToClientModel.WIDGET_TITLE, ServerToClientModel.WIDGET_WIDTH, ServerToClientModel.WIDGET_HEIGHT,
+                ServerToClientModel.WIDGET_VISIBLE, ServerToClientModel.STYLE_NAME,
+                ServerToClientModel.ADD_STYLE_NAME, ServerToClientModel.REMOVE_STYLE_NAME,
+                ServerToClientModel.REMOVE_STYLE_KEY, ServerToClientModel.REMOVE_ATTRIBUTE_KEY,
+                ServerToClientModel.PUT_STYLE_KEY, ServerToClientModel.PUT_ATTRIBUTE_KEY, ServerToClientModel.PUT_PROPERTY_KEY }) {
+            COALESCIBLE[m.ordinal()] = true;
+        }
+    }
+
+    private boolean coalescing;
+    private PendingUpdates pending;
+    private boolean draining;
+
+    /** Enables update coalescing (see {@link #deferUpdate}). Off by default; turned on by the UIContext. */
+    public void setCoalescing(final boolean coalescing) {
+        if (!coalescing) drainPendingUpdates();
+        this.coalescing = coalescing;
+    }
+
+    public boolean isCoalescing() {
+        return coalescing;
+    }
+
+    /**
+     * Defers a single-property update of a live object until the next block or flush. Setting the same
+     * property of the same object again replaces the pending value; consecutive deferred updates of one
+     * object share a single update block on the wire.
+     * <p>
+     * Ordering is preserved: any other write (structural change, method call, non-deferrable update,
+     * even of another object) first writes everything pending.
+     *
+     * @return false if the update was not deferred and must be written immediately by the caller
+     */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel model, final Object value) {
+        if (!coalescing || !COALESCIBLE[model.ordinal()] || draining || !canWrite()) return false;
+        pending().put(target, model, null, null, value);
+        return true;
+    }
+
+    /** Keyed variant (style / attribute / property name + value): coalesced per object and key. */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel keyModel, final String key,
+                               final ServerToClientModel valueModel, final Object value) {
+        if (!coalescing || !COALESCIBLE[keyModel.ordinal()] || key == null || draining || !canWrite()) return false;
+        pending().put(target, keyModel, key, valueModel, value);
+        return true;
+    }
+
+    /** Keyed variant without value (a class added / removed, a style or attribute removed): coalesced per object and key. */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel keyModel, final String key) {
+        if (!coalescing || !COALESCIBLE[keyModel.ordinal()] || key == null || draining || !canWrite()) return false;
+        pending().put(target, keyModel, key, null, null);
+        return true;
+    }
+
+    /**
+     * Pending buffers are borrowed, not owned: a session only holds one between its first deferred update
+     * and the drain (normally the same transaction, on the same thread), so the pool keeps about one buffer
+     * per worker thread instead of one per session (~8 KB each once warm).
+     */
+    private static final ThreadLocal<PendingUpdates> SPARE = new ThreadLocal<>();
+
+    private PendingUpdates pending() {
+        PendingUpdates p = pending;
+        if (p == null) {
+            p = SPARE.get();
+            if (p != null) SPARE.set(null);
+            else p = new PendingUpdates();
+            pending = p;
+        }
+        return p;
+    }
+
+    /** Gives the drained (empty) buffer back to the current thread's spare slot; an oversized one is left to the GC. */
+    private void releasePending(final PendingUpdates p) {
+        // a virtual thread is short-lived: its ThreadLocal would never be reused, keep the buffer instead
+        if (Thread.currentThread().isVirtual()) return;
+        pending = null;
+        if (!p.isOversized() && SPARE.get() == null) SPARE.set(p);
+    }
+
+    // ---- Create in parent (ProtocolVersion.CREATE_IN_PARENT) ----
+
+    /** True while a create block is open: its END is held back until the next write. */
+    private boolean createOpen; // default false: also right for a writer created without its initializers (mocks)
+    private int openCreate;
+
+    /**
+     * Ends the create block of an object. Since protocol 3 the END is held back: if the next thing written is the
+     * plain add of that object ({@link #addToOpenCreate}), the add joins the create block.
+     */
+    public void endCreate(final int objectID) {
+        closeOpenCreate();
+        if (supportsCreateInParent() && canWrite()) {
+            openCreate = objectID;
+            createOpen = true;
+        } else {
+            endObject();
+        }
+    }
+
+    /**
+     * Adds an object to its parent inside its own create block, when that block is the last thing written.
+     *
+     * @return false if the add must be written as an add block
+     */
+    public boolean addToOpenCreate(final int objectID, final int parentObjectID) {
+        if (!createOpen || openCreate != objectID || !canWrite()) return false;
+        createOpen = false;
+        writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        endObject();
+        return true;
+    }
+
+    private void closeOpenCreate() {
+        if (createOpen) {
+            createOpen = false;
+            endObject();
+        }
+    }
+
+    boolean supportsCreateInParent() {
+        final WebsocketEncoder e = encoder;
+        return e != null && e.protocolVersion() >= com.ponysdk.core.model.ProtocolVersion.CREATE_IN_PARENT;
+    }
+
+    /**
+     * Writes everything held back - deferred updates, an open create block - now, and ends a block an exception
+     * interrupted. Called before any other block, before each flush and before any write that bypasses this writer.
+     */
+    public void drainPendingUpdates() {
+        closeOpenCreate();
+        if (blockOpen) endObject(); // interrupted by an exception
+        final PendingUpdates p = pending;
+        if (p == null || p.isEmpty()) return; // a drain empties it before writing: a re-entrant call ends here
+        draining = true;
+        try {
+            // Liveness / lock ownership checked once for the whole drain instead of once per field
+            if (canWrite()) p.drainTo(this);
+            else p.discard();
+        } finally {
+            draining = false;
+            releasePending(p);
+        }
+    }
+
+    /** True if the terminal decodes update runs (ProtocolVersion.UPDATE_RUNS) and they are not disabled. */
+    boolean supportsUpdateRuns() {
+        final WebsocketEncoder e = encoder;
+        return e != null && e.protocolVersion() >= com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS;
+    }
+
+    /** Number of updates currently deferred (diagnostics / tests). */
+    public int pendingUpdateCount() {
+        return pending == null ? 0 : pending.size();
+    }
+
+    /**
+     * Writes are only performed for a live context. Fast path: the owner's lock is held by this thread
+     * (the normal case, under execute()/acquire()), which avoids a ThreadLocal lookup on every field;
+     * otherwise falls back to the current-thread context, exactly as before.
+     */
+    private boolean canWrite() {
+        final UIContext o = owner;
+        if (o != null && o.isHeldByCurrentThread()) return o.isAlive();
+        final UIContext ctx = UIContext.get();
+        return ctx != null && ctx.isAlive();
+    }
 
     public ModelWriter(final WebsocketEncoder encoder) {
         this.encoder = encoder;
     }
 
-    public void beginObject(final PWindow window) {
-        encoder.beginObject();
+    /**
+     * Swaps the underlying encoder — used during transparent WebSocket reconnection
+     * to reattach a live UIContext to a new WebSocket session.
+     */
+    public void setEncoder(final WebsocketEncoder encoder) {
+        closeOpenCreate(); // the block belongs to the previous encoder's stream
+        this.encoder = encoder;
+        this.currentWindow = null; // force WINDOW_ID re-emission on next write
+    }
 
-        if (currentWindow == null || !window.equals(currentWindow.get())) {
+    public void beginObject(final PWindow window) {
+        if (createOpen) closeOpenCreate();
+        if (blockOpen) endObject(); // interrupted by an exception
+        if (pending != null && !pending.isEmpty()) drainPendingUpdates(); // keep write order
+        encoder.beginObject();
+        blockOpen = true;
+
+        if (currentWindow == null || currentWindow.get() != window) {
             currentWindow = new WeakReference<>(window);
-            encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
+            encoder.encodeInt(ServerToClientModel.WINDOW_ID, window.getID());
         }
     }
 
@@ -57,15 +265,54 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        if (UIContext.get().isAlive()) {
+        assert accepts(model, value) : rejection(model, value);
+        if (canWrite()) {
             encoder.encode(model, value);
         }
     }
 
+    /** Drain-internal writes: the caller already checked {@link #canWrite()} for the whole drain. */
+    void writeUnchecked(final ServerToClientModel model, final Object value) {
+        assert accepts(model, value) : rejection(model, value);
+        encoder.encode(model, value);
+    }
+
+    void writeIntUnchecked(final ServerToClientModel model, final int value) {
+        encoder.encodeInt(model, value);
+    }
+
+    void endObjectUnchecked() {
+        blockOpen = false;
+        encoder.endObject();
+    }
+
+    /** Primitive variant of {@link #write(ServerToClientModel, Object)} for int values (no boxing). */
+    public void writeInt(final ServerToClientModel model, final int value) {
+        assert accepts(model, value) : rejection(model, value);
+        if (canWrite()) {
+            encoder.encodeInt(model, value);
+        }
+    }
+
     public void endObject() {
-        if (UIContext.get().isAlive()) {
+        blockOpen = false;
+        if (canWrite()) {
             encoder.endObject();
         }
+    }
+
+    /**
+     * Checked by assertions (tests run with them): a value of the wrong type fails in the encoder, in the middle of its
+     * block, only once a terminal is connected.
+     */
+    protected static boolean accepts(final ServerToClientModel model, final Object value) {
+        return model == null || model.getTypeModel().accepts(value);
+    }
+
+    /** The message of a value {@link #accepts} refuses. */
+    protected static String rejection(final ServerToClientModel model, final Object value) {
+        return model + " takes " + model.getTypeModel() + ", given "
+                + (value == null ? "null" : value.getClass().getSimpleName() + " " + value);
     }
 
     public PWindow getCurrentWindow() {

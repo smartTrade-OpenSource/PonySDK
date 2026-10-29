@@ -74,22 +74,24 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         super.init0();
         forEach(child -> {
             child.setTree(tree);
-            child.attach(window, frame);
+            child.attach(window, getFrame());
         });
 
         if (widget != null) {
-            if (widget.getParent() != null) widget.removeFromParent();
-
-            if (tree != null) {
-                tree.orphan(widget);
-                widget.saveRemove(widget.getID(), tree.getID());
+            if (widget.getParent() == tree) {
+                // Held by another item of this tree: it moves here, the tree orphans it below
+                tree.itemOf(widget).widget = null; // never this item: it adopts its widget only below, once
+            } else if (widget.getParent() != null) {
+                widget.removeFromParent();
             }
 
-            if (tree != null) {
-                tree.adopt(widget, this);
-                widget.attach(window, frame);
-                saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
-            }
+            // An item is initialized in its tree: the root holds it, added items take it
+            tree.orphan(widget);
+            widget.saveRemove(widget.getID(), tree.getID());
+
+            tree.adopt(widget, this);
+            widget.attach(window, getFrame());
+            saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
         }
     }
 
@@ -115,8 +117,10 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
+    /** Also sets it on the items below: a subtree built first and added to the tree afterwards knows its tree. */
     private void setTree(final PTree tree) {
         this.tree = tree;
+        if (children != null) children.forEach(child -> child.setTree(tree));
     }
 
     public void setSelected(final boolean newSelected) {
@@ -126,7 +130,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean isSelected() {
-        return this.equals(tree.getSelectedItem());
+        return tree != null && this.equals(tree.getSelectedItem());
     }
 
     public void setState(final boolean openState) {
@@ -145,7 +149,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(beforeIndex, item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window, frame);
+        if (isInitialized()) item.attach(window, getFrame());
 
         if (!isInitialized()) item.saveAdd(item.getID(), ID);
         else item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
@@ -158,7 +162,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window, frame);
+        if (isInitialized()) item.attach(window, getFrame());
         item.saveAdd(item.getID(), ID);
         return item;
     }
@@ -168,8 +172,9 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean remove(final PTreeItem item) {
+        if (children == null || !children.remove(item)) return false;
         item.saveRemove(item.getID(), ID);
-        return children.remove(item);
+        return true;
     }
 
     public PTreeItem get(final int index) {
@@ -195,7 +200,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     void clear() {
-        children.clear();
+        if (children != null) children.clear();
     }
 
     @Override
@@ -215,7 +220,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     protected String dumpDOM() {
         String DOM = "<div item=\"" + text + "\">";
 
-        Iterator<PTreeItem> iter = children.iterator();
+        final Iterator<PTreeItem> iter = iterator();
         while (iter.hasNext()) {
             DOM += iter.next().dumpDOM();
         }

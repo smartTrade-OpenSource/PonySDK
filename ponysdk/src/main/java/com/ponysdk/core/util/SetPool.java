@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.util;
 
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
@@ -183,6 +184,9 @@ public class SetPool<E> {
 
         private final Set<E> s;
         private final int hashCode;
+        // Pooled, so shared by every holder of this set: joined once, then the same String instance
+        // (hash cached) for all of them. A benign race: a String is safely published.
+        private String joined;
 
         private ImmutableSet(final Set<E> s, final int hashCode) {
             super();
@@ -266,7 +270,29 @@ public class SetPool<E> {
          * <code>(this UNION {e})</code>, or {@code this} if {@code e} already belongs to it
          */
         public ImmutableSet getAdd(final E e) {
-            return SetPool.this.add(this, e);
+            return transition(true, e);
+        }
+
+        /** A transition from this set: add or remove one element, and the resulting pooled set. Immutable. */
+        private record Transition(boolean add, Object element, Object result) {}
+
+        // Direct-mapped memo of the last transitions (a ticker flips the same classes over and over): no pool
+        // lookup (thread-local scratch set, synchronized cache) for them. Racy by design: a Transition is
+        // immutable, a lost update only costs a pool lookup. The result is the pooled instance, kept alive by
+        // this memo, so the pool keeps answering the same instance for it.
+        private Transition[] transitions;
+
+        @SuppressWarnings("unchecked")
+        private ImmutableSet transition(final boolean add, final Object o) {
+            if (o == null) return add ? SetPool.this.add(this, null) : SetPool.this.remove(this, null);
+            final int slot = (o.hashCode() ^ (add ? 0 : 2)) & 3;
+            Transition[] memo = transitions;
+            final Transition t = memo != null ? memo[slot] : null;
+            if (t != null && t.add == add && t.element.equals(o)) return (ImmutableSet) t.result;
+            final ImmutableSet result = add ? SetPool.this.add(this, (E) o) : SetPool.this.remove(this, o);
+            if (memo == null) transitions = memo = new Transition[4];
+            memo[slot] = new Transition(add, o, result);
+            return result;
         }
 
         /**
@@ -283,7 +309,7 @@ public class SetPool<E> {
          * <code>(this MINUS {e})</code>, or {@code this} if {@code o} doesn't belong to it
          */
         public ImmutableSet getRemove(final Object o) {
-            return SetPool.this.remove(this, o);
+            return transition(false, o);
         }
 
         @Override
@@ -376,6 +402,20 @@ public class SetPool<E> {
             return hashCode;
         }
 
+        /** The elements separated by a space (e.g. a CSS class list), computed once per pooled set. */
+        public String join() {
+            String j = joined;
+            if (j == null) {
+                final StringBuilder sb = new StringBuilder();
+                for (final E e : s) {
+                    if (!sb.isEmpty()) sb.append(' ');
+                    sb.append(e);
+                }
+                joined = j = sb.toString();
+            }
+            return j;
+        }
+
         @Override
         public Stream<E> stream() {
             return s.stream();
@@ -409,7 +449,7 @@ public class SetPool<E> {
     /**
      * Used exclusively as a key to retrieve an equivalent ImmutableSet from a Map
      */
-    private abstract class MutableSet<D> implements Set<E> {
+    private abstract class MutableSet<D> extends AbstractSet<E> {
 
         private ImmutableSet originalSet;
         private D delta;
@@ -461,58 +501,9 @@ public class SetPool<E> {
             return size;
         }
 
-        @Override
-        public final boolean isEmpty() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean contains(final Object o) {
-            throw new UnsupportedOperationException();
-        }
-
+        /** Never iterated: a key only answers {@link #hashCode()}, {@link #size()} and {@link #containsAll}. */
         @Override
         public final Iterator<E> iterator() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final Object[] toArray() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final <T> T[] toArray(final T[] a) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean add(final Object e) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean remove(final Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean addAll(final Collection<? extends E> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean retainAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final boolean removeAll(final Collection<?> c) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final void clear() {
             throw new UnsupportedOperationException();
         }
 
@@ -532,10 +523,8 @@ public class SetPool<E> {
          */
         @Override
         public boolean equals(final Object o) {
-            if (o == this) return true;
-            if (o == null) return false;
+            if (o == null) return false; // a key the GC cleared
 
-            if (!(o instanceof SetPool<?>.ImmutableSet)) throw new IllegalArgumentException();
             final Collection<?> c = (Collection<?>) o;
             if (c.size() != size()) return false;
             /*
@@ -622,7 +611,7 @@ public class SetPool<E> {
         @Override
         protected boolean containsAll(final ImmutableSet originalSet, final Set<? extends E> delta, final Collection<?> c) {
             for (final Object o : c) {
-                if (!delta.contains(o) || !originalSet.contains(o)) {
+                if (!delta.contains(o) && !originalSet.contains(o)) {
                     return false;
                 }
             }
@@ -657,7 +646,7 @@ public class SetPool<E> {
         @Override
         protected boolean containsAll(final ImmutableSet originalSet, final Set<?> delta, final Collection<?> c) {
             for (final Object o : c) {
-                if (!delta.contains(o) && !originalSet.contains(o)) {
+                if (!delta.contains(o) || !originalSet.contains(o)) {
                     return false;
                 }
             }

@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,14 +77,6 @@ public abstract class PValueBoxBase extends PFocusWidget {
         }
     }
 
-    /**
-     * @deprecated Use {@link #select(int, int)} instead
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    public void setSelectionRange(final int startPosition, final int rangeLength) {
-        select(startPosition, rangeLength);
-    }
-
     public void setCursorPosition(final int cursorPosition) {
         saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
@@ -101,17 +93,14 @@ public abstract class PValueBoxBase extends PFocusWidget {
     }
 
     public void addPasteHandler(final PPasteHandler pasteHandler) {
-        if (pasteHandlers == null) {
-            pasteHandlers = new ArrayList<>();
-            saveAddHandler(HandlerModel.HANDLER_PASTE);
-        }
+        if (pasteHandlers == null) pasteHandlers = new ArrayList<>();
+        if (pasteHandlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_PASTE); // the first, or the first again
         pasteHandlers.add(pasteHandler);
     }
 
     public void removePasteHandler(final PPasteHandler pasteHandler) {
-        if (pasteHandlers != null) {
-            pasteHandlers.remove(pasteHandler);
-            if (pasteHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_PASTE);
+        if (pasteHandlers != null && pasteHandlers.remove(pasteHandler) && pasteHandlers.isEmpty()) {
+            saveRemoveHandler(HandlerModel.HANDLER_PASTE);
         }
     }
 

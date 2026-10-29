@@ -30,10 +30,10 @@ import com.ponysdk.core.writer.ModelWriter;
 /**
  * A normal push button with custom styling.
  * <h3>CSS Style Rules</h3>
- * <ul class="css">
- * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-
- * disabled {.html-face}</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-PushButton</dt>
+ * <dd>the button holding its image; <code>:active</code> while pressed</dd>
+ * </dl>
  */
 public class PPushButton extends PButton {
 

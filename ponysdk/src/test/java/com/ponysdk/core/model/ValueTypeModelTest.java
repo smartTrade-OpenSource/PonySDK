@@ -23,9 +23,11 @@
 
 package com.ponysdk.core.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ValueTypeModelTest {
 
@@ -34,7 +36,7 @@ public class ValueTypeModelTest {
      */
     @Test
     public void testFromRawValue() {
-        final ValueTypeModel expected = ValueTypeModel.SHORT;
+        final ValueTypeModel expected = ValueTypeModel.LONG;
         assertEquals(expected, ValueTypeModel.fromRawValue(expected.getValue()));
     }
 
@@ -43,7 +45,26 @@ public class ValueTypeModelTest {
      */
     @Test
     public void testGetSize() {
-        assertEquals(2, ValueTypeModel.SHORT.getSize());
+        assertEquals(8, ValueTypeModel.LONG.getSize());
+    }
+
+    @Test
+    public void acceptsOnlyTheValuesTheEncoderCasts() {
+        assertTrue(ValueTypeModel.NULL.accepts("anything"));
+        assertTrue(ValueTypeModel.BOOLEAN.accepts(true));
+        assertTrue(ValueTypeModel.BYTE.accepts((byte) 1));
+        assertTrue(ValueTypeModel.INTEGER.accepts(1));
+        assertTrue(ValueTypeModel.UINT31.accepts(1));
+        assertFalse(ValueTypeModel.INTEGER.accepts(1L));
+        assertTrue(ValueTypeModel.LONG.accepts(1L));
+        assertFalse(ValueTypeModel.LONG.accepts(1));
+        assertTrue(ValueTypeModel.DOUBLE.accepts(1.0));
+        assertFalse(ValueTypeModel.DOUBLE.accepts(1f));
+        assertTrue(ValueTypeModel.STRING.accepts(null));
+        assertTrue(ValueTypeModel.STRING.accepts("s"));
+        assertFalse(ValueTypeModel.STRING.accepts(1));
+        assertTrue(ValueTypeModel.ARRAY.accepts(new Object[0]));
+        assertFalse(ValueTypeModel.ARRAY.accepts(null));
     }
 
 }

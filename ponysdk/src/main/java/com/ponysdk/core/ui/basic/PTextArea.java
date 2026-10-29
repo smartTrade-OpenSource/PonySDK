@@ -31,11 +31,10 @@ import com.ponysdk.core.model.WidgetType;
 /**
  * A text box that allows multiple lines of text to be entered.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TextArea { primary style }</li>
- * <li>.gwt-TextArea-readonly { dependent style set
- * when the text area is read-only }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-TextArea</dt>
+ * <dd>the text area; <code>:read-only</code> when read-only</dd>
+ * </dl>
  */
 public class PTextArea extends PTextBoxBase {
 

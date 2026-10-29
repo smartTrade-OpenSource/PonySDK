@@ -23,10 +23,12 @@
 
 package com.ponysdk.impl.java.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
@@ -45,7 +47,7 @@ public class JavaApplicationManagerTest extends PSuite {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         applicationManager = new JavaApplicationManager();
         configuration = new ApplicationConfiguration();
@@ -60,9 +62,42 @@ public class JavaApplicationManagerTest extends PSuite {
     @Test
     public void testStartApplication() throws Exception {
         configuration.setEntryPointClass(SampleEntryPoint.class);
+        applicationManager.start(); // no hot reload: nothing to start
         applicationManager.startApplication(UIContext.get());
 
         assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass());
+        applicationManager.shutdown();
+    }
+
+    @Test
+    public void withHotReloadTheEntryPointComesFromItsLastCompilation() {
+        configuration.setEntryPointClass(SampleEntryPoint.class);
+        configuration.setHotReload(true);
+        applicationManager.start();
+        try {
+            applicationManager.start(); // started once
+            assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass(), "not changed yet");
+        } finally {
+            applicationManager.shutdown();
+        }
+        applicationManager.shutdown(); // closed twice: nothing more
+    }
+
+    public static final class NoDefaultConstructorEntryPoint implements EntryPoint {
+
+        public NoDefaultConstructorEntryPoint(final String unused) {
+        }
+
+        @Override
+        public void start(final UIContext uiContext) {
+        }
+    }
+
+    @Test
+    public void anEntryPointThatCannotBeInstantiatedIsReported() {
+        configuration.setEntryPointClass(NoDefaultConstructorEntryPoint.class);
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, applicationManager::initializeEntryPoint);
+        assertInstanceOf(NoSuchMethodException.class, e.getCause());
     }
 
     /**

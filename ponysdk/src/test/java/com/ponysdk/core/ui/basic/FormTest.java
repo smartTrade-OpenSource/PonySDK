@@ -24,8 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.test.PSuite;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
@@ -40,16 +40,16 @@ public class FormTest extends PSuite {
 
         final StringTextBoxFormField formField = new StringTextBoxFormField();
         form.addFormField(formField);
-        Assert.assertTrue(form.isValid());
+        Assertions.assertTrue(form.isValid());
 
         formField.setValidator(new NotEmptyFieldValidator());
-        Assert.assertFalse(form.isValid());
+        Assertions.assertFalse(form.isValid());
 
         formField.setValue("test");
-        Assert.assertTrue(form.isValid());
+        Assertions.assertTrue(form.isValid());
 
         formField.reset();
-        Assert.assertFalse(form.isValid());
+        Assertions.assertFalse(form.isValid());
     }
 
     @Test
@@ -62,19 +62,19 @@ public class FormTest extends PSuite {
         formField.getWidget().addItem("test3");
 
         form.addFormField(formField);
-        Assert.assertTrue(form.isValid());
+        Assertions.assertTrue(form.isValid());
 
         formField.setValidator(new NotEmptyFieldValidator());
-        Assert.assertFalse(form.isValid());
+        Assertions.assertFalse(form.isValid());
 
         formField.setValue("test1");
-        Assert.assertTrue(form.isValid());
+        Assertions.assertTrue(form.isValid());
 
         formField.reset();
-        Assert.assertFalse(form.isValid());
+        Assertions.assertFalse(form.isValid());
 
         formField.setValue("test1");
-        Assert.assertTrue(form.isValid());
+        Assertions.assertTrue(form.isValid());
     }
 
 }

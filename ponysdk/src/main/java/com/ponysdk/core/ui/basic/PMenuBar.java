@@ -40,66 +40,18 @@ import java.util.Objects;
  * each of which can either fire a {@link Runnable} or open a cascaded menu bar.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-MenuBar</dt>
- * <dd>the menu bar itself</dd>
- * <dt>.gwt-MenuBar-horizontal</dt>
- * <dd>dependent style applied to horizontal menu bars</dd>
- * <dt>.gwt-MenuBar-vertical</dt>
- * <dd>dependent style applied to vertical menu bars</dd>
- * <dt>.gwt-MenuBar .gwt-MenuItem</dt>
- * <dd>menu items</dd>
- * <dt>.gwt-MenuBar .gwt-MenuItem-selected</dt>
- * <dd>selected menu items</dd>
- * <dt>.gwt-MenuBar .gwt-MenuItemSeparator</dt>
- * <dd>section breaks between menu items</dd>
- * <dt>.gwt-MenuBar .gwt-MenuItemSeparator .menuSeparatorInner</dt>
- * <dd>inner component of section separators</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopLeft</dt>
- * <dd>the top left cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopLeftInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopCenter</dt>
- * <dd>the top center cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopCenterInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopRight</dt>
- * <dd>the top right cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupTopRightInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleLeft</dt>
- * <dd>the middle left cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleLeftInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleCenter</dt>
- * <dd>the middle center cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleCenterInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleRight</dt>
- * <dd>the middle right cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupMiddleRightInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomLeft</dt>
- * <dd>the bottom left cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomLeftInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomCenter</dt>
- * <dd>the bottom center cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomCenterInner</dt>
- * <dd>the inner element of the cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomRight</dt>
- * <dd>the bottom right cell</dd>
- * <dt>.gwt-MenuBarPopup .menuPopupBottomRightInner</dt>
- * <dd>the inner element of the cell</dd>
+ * <dt>.pony-MenuBar</dt>
+ * <dd>the bar (role menubar, or menu in a submenu); <code>[aria-orientation]</code></dd>
+ * <dt>.pony-MenuItem</dt>
+ * <dd>an item (role menuitem); <code>[aria-expanded=true]</code> while its submenu shows, <code>[aria-disabled=true]</code></dd>
+ * <dt>.pony-MenuItemSeparator</dt>
+ * <dd>a separator</dd>
+ * <dt>.pony-MenuPopup</dt>
+ * <dd>the popup of a submenu</dd>
  * </dl>
- * <p>
- * MenuBar elements in UiBinder template files can have a <code>vertical</code>
- * boolean attribute (which defaults to false), and may have only MenuItem
- * elements as children. MenuItems may contain HTML and MenuBars.
- * </p>
  */
 public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
     private static final Logger log = LoggerFactory.getLogger(PMenuBar.class);
 
     private final List<PMenuSubElement> items = new ArrayList<>();
@@ -117,7 +69,7 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     @Override
     void init0() {
         super.init0();
-        forEach(item -> item.attach(window, frame));
+        forEach(item -> item.attach(window, getFrame()));
     }
 
     @Override
@@ -162,14 +114,14 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     public <T extends PMenuSubElement> T addElement(final T elt) {
         items.add(elt);
         elt.saveAdd(elt.getID(), ID);
-        elt.attach(window, frame);
+        elt.attach(window, getFrame());
         return elt;
     }
 
     public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, elt);
         elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        elt.attach(window, frame);
+        elt.attach(window, getFrame());
         return elt;
     }
 

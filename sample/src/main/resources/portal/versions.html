@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two versions on a page</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="app-url.js" defer></script>
+<script src="gallery.js" defer></script>
+<!-- This portal's own copy of PonySDK, as a product of another version would bring it: it defines <pony-app> -->
+<script type="module" src="vendor/ponysdk/ponyterminal/terminal.js"></script>
+</head>
+<body>
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">U9 · Two versions on a page</div>
+</header>
+<main>
+  <section class="gallery-intro">
+    <h1>Two versions on a page</h1>
+    <p>This page loads its own copy of PonySDK's terminal, which defines <code>&lt;pony-app&gt;</code>. The
+      ticket's manifest names its server's terminal, another URL: the element hands itself to that terminal
+      (<code>mountPonyApp</code>), which runs the ticket. Here both copies are the same build, served by two servers;
+      the hand-over is the same for two versions. <code>ponysdk.js</code> is one per page, the first loaded.</p>
+  </section>
+  <div class="gallery-row">
+    <pony-app id="ticket" view="ticket" instrument="GBPUSD" data-src="{app}">Loading the ticket…</pony-app>
+    <dl class="gallery-aside">
+      <dt>The terminals this page loaded</dt>
+      <dd><ol id="terminals"></ol></dd>
+    </dl>
+  </div>
+</main>
+<script>
+  // Each terminal.js the page loads, in order: the first defines the element, the application's runs it
+  new PerformanceObserver(function (list) {
+    list.getEntries().forEach(function (entry) {
+      if (!/\/terminal\.js$/.test(new URL(entry.name).pathname)) return;
+      var item = document.createElement('li');
+      item.textContent = entry.name;
+      document.getElementById('terminals').appendChild(item);
+    });
+  }).observe({ type: 'resource', buffered: true });
+</script>
+</body>
+</html>

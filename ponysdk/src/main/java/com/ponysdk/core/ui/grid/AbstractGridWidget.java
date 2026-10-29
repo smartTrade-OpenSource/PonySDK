@@ -202,9 +202,8 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
 
             @Override
             public void remove() {
-                final PComplexPanel row = (PComplexPanel) body.getWidget(index);
-                row.remove(index);
-                index++;
+                final PComplexPanel row = (PComplexPanel) body.getWidget(index - 1);
+                row.remove(column);
             }
 
         };
@@ -226,8 +225,11 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
         checkColumnBound(index);
         checkColumnBound(beforeIndex);
 
-        final PComplexPanel parentElement = index == 0 ? head : body;
+        moveColumn(head, index, beforeIndex);
+        moveColumn(body, index, beforeIndex);
+    }
 
+    private static void moveColumn(final PComplexPanel parentElement, final int index, final int beforeIndex) {
         for (int r = 0; r < parentElement.getWidgetCount(); r++) {
             final PComplexPanel row = (PComplexPanel) parentElement.getWidget(r);
             row.insert(row.getWidget(index), beforeIndex);
@@ -323,7 +325,7 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
 
     public void removeColumn(final int index) {
         for (int r = 0; r < head.getWidgetCount(); r++) {
-            final PElement tr = (PElement) head.getWidget(r);
+            final PComplexPanel tr = (PComplexPanel) head.getWidget(r);
             tr.remove(index);
         }
 

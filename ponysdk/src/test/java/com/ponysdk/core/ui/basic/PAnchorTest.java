@@ -23,11 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.test.PSuite;
-import org.junit.Test;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.testutil.CapturingModelWriter;
+import com.ponysdk.test.PSuite;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 public class PAnchorTest extends PSuite {
 
@@ -131,4 +136,53 @@ public class PAnchorTest extends PSuite {
         assertEquals("<a pid=\"" + ID + "\" class=\"style\" href=\"href\">text</a>", a.dumpDOM());
     }
 
+    @Test
+    public void testCreationAndUpdatesAreWritten() {
+        final CapturingModelWriter writer = CapturingModelWriter.install();
+        try {
+            final PAnchor anchor = Element.newPAnchor("Text", "#a");
+            PWindow.getMain().add(anchor);
+            assertEquals(List.of("Text"), writer.valuesOf(ServerToClientModel.TEXT));
+            assertEquals(List.of("#a"), writer.valuesOf(ServerToClientModel.HREF));
+            assertEquals(0, writer.count(ServerToClientModel.HTML));
+
+            writer.clear();
+            anchor.setText("Text");
+            anchor.setHref("#a");
+            assertTrue(writer.isEmpty());
+
+            anchor.setHref("#b");
+            anchor.setHTML("<b>x</b>");
+            anchor.setHTML("<b>x</b>");
+            anchor.setText("t");
+            assertEquals(List.of("#b"), writer.valuesOf(ServerToClientModel.HREF));
+            assertEquals(List.of("<b>x</b>"), writer.valuesOf(ServerToClientModel.HTML));
+            assertEquals(List.of("t"), writer.valuesOf(ServerToClientModel.TEXT));
+            assertNull(anchor.getHTML());
+
+            writer.clear();
+            final PAnchor html = Element.newPAnchor();
+            html.setHTML("<i>h</i>");
+            PWindow.getMain().add(html);
+            assertEquals(List.of("<i>h</i>"), writer.valuesOf(ServerToClientModel.HTML));
+            assertEquals(0, writer.count(ServerToClientModel.TEXT));
+            assertEquals(0, writer.count(ServerToClientModel.HREF));
+            anchor.removeFromParent();
+            html.removeFromParent();
+        } finally {
+            writer.uninstall();
+        }
+    }
+
+    @Test
+    public void anAnchorWithoutTextDumpsItsHtmlOnly() {
+        final PAnchor anchor = Element.newPAnchor();
+        anchor.setHTML("<b>h</b>");
+        assertTrue(anchor.dumpDOM().endsWith("><b>h</b></a>"), anchor.dumpDOM());
+    }
+
+    @Test
+    public void aTextAnchorDumpsItsText() {
+        assertTrue(Element.newPAnchor("t").dumpDOM().endsWith(">t</a>"));
+    }
 }

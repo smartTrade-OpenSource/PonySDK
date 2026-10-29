@@ -2,11 +2,14 @@ package com.ponysdk.core.server.concurrent;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -24,22 +27,28 @@ import java.util.concurrent.TimeUnit;
  */
 public final class Scheduler {
 
-	private final ScheduledExecutorService executor;
+	private final ScheduledThreadPoolExecutor executor;
 	private final ConcurrentLinkedQueue<SchedulingContextImpl> realtimeContexts = new ConcurrentLinkedQueue<>();
+	// The contexts created here, for shutdown() to destroy the ones still in the executor queue: shutdownNow()
+	// hands back the executor's own wrappers, not the contexts
+	private final Set<SchedulingContextImpl> contexts = Collections
+			.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	public Scheduler(final int poolSize) {
-		executor = Executors.newScheduledThreadPool(poolSize);
+		this(poolSize, Executors.defaultThreadFactory());
 	}
 
 	public Scheduler(final int poolSize, final ThreadFactory factory) {
-		executor = Executors.newScheduledThreadPool(poolSize, factory);
+		executor = new ScheduledThreadPoolExecutor(poolSize, factory);
 	}
 
 	/**
 	 * Create a new {@link SchedulingContext} that can be used to submit new tasks
 	 */
 	public SchedulingContext createContext(final String name) {
-		return new SchedulingContextImpl(name, this);
+		final SchedulingContextImpl context = new SchedulingContextImpl(name, this);
+		contexts.add(context);
+		return context;
 	}
 
 	/**
@@ -47,12 +56,13 @@ public final class Scheduler {
 	 * possible.<br>
 	 */
 	public void shutdown() {
-		for (final Runnable r : executor.shutdownNow()) {
-			if (r instanceof SchedulingContext) {
-				((SchedulingContext) r).destroy();
+		executor.shutdownNow();
+		synchronized (contexts) {
+			for (final SchedulingContextImpl context : contexts) {
+				if (context.isQueued())
+					context.destroy();
 			}
 		}
-
 		realtimeContexts.clear();
 	}
 

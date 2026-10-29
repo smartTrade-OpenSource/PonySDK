@@ -32,7 +32,6 @@ import java.time.Duration;
  * move them to their new positions over some period of time.
  * </p>
  * 
- * @see com.google.gwt.user.client.ui.AnimatedLayout
  */
 @FunctionalInterface
 public interface PAnimatedLayout {

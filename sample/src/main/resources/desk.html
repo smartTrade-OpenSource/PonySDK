@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading desk</title>
+<!--
+  U2 of the integration gallery (sample/src/main/resources/portal): a custom page of the application, its own HTML,
+  served by the application under its path. It loads what the bootstrap page loads (ApplicationConfiguration), and the
+  terminal starts the application in it: the widgets go into the body, after this page's header.
+-->
+<link rel="icon" href="data:,">
+<link id="ponysdk" rel="stylesheet" href="style/ponysdk.css">
+<link id="flexlayout" rel="stylesheet" href="style/flexlayout.css">
+<link id="showcase" rel="stylesheet" href="css/showcase.css">
+<style>
+  .desk-header { display: flex; align-items: baseline; gap: 16px; padding: 12px 24px; background: #0f172a; color: #e2e8f0;
+                 font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .desk-header strong { color: #fff; font-size: 16px; }
+  .desk-header span { color: #94a3b8; }
+</style>
+<script>window.ponyReconnectMode = true;</script>
+<script src="script/ponysdk.js"></script>
+<script type="module" src="ponyterminal/terminal.js"></script>
+<script src="script/jquery-3.7.1.min.js"></script>
+<script src="script/webcomponents.js"></script>
+<script src="script/sample.js"></script>
+<script src="script/flexlayout.js"></script>
+<script src="script/flexlayout-addon.js"></script>
+<script src="script/fdc3-agent.js"></script>
+<script src="script/fdc3-addon.js"></script>
+</head>
+<body>
+<header class="desk-header">
+  <strong>Northwind Treasury · Trading desk</strong>
+  <span>A custom page of the application: this header is its HTML, the showcase below is its widgets.</span>
+</header>
+<div id="loading">Loading the desk…</div>
+</body>
+</html>

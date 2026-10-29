@@ -60,13 +60,16 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            // Resolve the UIContext within the caller's HTTP session, or by its key — never by its id alone.
+            // A global lookup would let a client reach another session's context by guessing its id (IDOR).
+            final UIContext uiContext = SessionManager.get().getUIContext(req, uiContextID, false);
             if (uiContext != null) {
                 final int objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {
                     try {
                         final PObject pObject = uiContext.getObject(objectID);
-                        pObject.handleAjaxRequest(req, resp);
+                        if (pObject != null) pObject.handleAjaxRequest(req, resp);
+                        else resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Object #" + objectID + " not found");
                     } catch (ServletException | IOException e) {
                         log.error("Cannot stream request", e);
                         try {
@@ -77,8 +80,10 @@ public class AjaxServlet extends HttpServlet {
                     }
                 });
             } else {
-                log.warn("Can't found UI Context #{}, already destroyed ?", uiContextID);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
+                // Same response whether the context is missing or owned by another session,
+                // so the endpoint does not leak the existence of other sessions' contexts.
+                log.warn("UI Context #{} not found for the calling session", uiContextID);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "UI Context #" + uiContextID + " not found");
             }
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

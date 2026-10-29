@@ -38,8 +38,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * button is cleared as a side effect of another in the group being clicked.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-RadioButton</dt>
- * <dd>the outer element</dd>
+ * <dt>.pony-RadioButton</dt>
+ * <dd>each radio button of the group</dd>
  * </dl>
  */
 public class PRadioButtonGroup {
@@ -66,9 +66,9 @@ public class PRadioButtonGroup {
         if (this.buttons == null) this.buttons = new ArrayList<>();
         radioButton.setName(name);
         radioButton.addValueChangeHandler(event -> {
-            for (final PRadioButton button : buttons) {
-                if (button != radioButton) {
-                    button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED, false);
+            if (event.getData()) {
+                for (final PRadioButton button : buttons) {
+                    if (button != radioButton) button.setState(PCheckBoxState.UNCHECKED, false);
                 }
             }
             if (handlers != null) {
@@ -87,6 +87,7 @@ public class PRadioButtonGroup {
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
+        if (buttons == null) return;
         for (final PRadioButton button : buttons) {
             button.setName(name);
         }

@@ -8,7 +8,10 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.flexlayout.FlexLayoutModel;
 import com.ponysdk.core.ui.flexlayout.FlexLayoutPanel;
+import com.ponysdk.core.ui.flexlayout.FlexTab;
+import com.ponysdk.core.ui.flexlayout.FlexTabset;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
@@ -19,16 +22,31 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
     @Override
     public void start(final UIContext uiContext) {
-        // Main wrapper: full viewport
+        PWindow.getMain().add(buildDemo(true));
+    }
+
+    /**
+     * Builds the FlexLayout demo content as a self-contained widget, so it can be shown both as the
+     * standalone demo entry point and embedded inside another page (e.g. the widget showcase's
+     * "FlexLayout" tab).
+     *
+     * @param fullViewport {@code true} → the root fills the browser viewport (100vw/100vh) for the
+     *                     standalone demo; {@code false} → the root fills its parent (100%/100%) so
+     *                     it can be embedded inside a sized container.
+     * @return the demo root panel
+     */
+    public static PFlowPanel buildDemo(final boolean fullViewport) {
+        // Main wrapper
         final PFlowPanel root = Element.newPFlowPanel();
         root.setStyleProperty("display", "flex");
         root.setStyleProperty("flex-direction", "column");
-        root.setStyleProperty("width", "100vw");
-        root.setStyleProperty("height", "100vh");
+        root.setStyleProperty("width", fullViewport ? "100vw" : "100%");
+        root.setStyleProperty("height", fullViewport ? "100vh" : "100%");
         root.setStyleProperty("overflow", "hidden");
 
         // Toolbar with drag sources
         final PFlowPanel toolbar = Element.newPFlowPanel();
+        toolbar.addStyleName("fl-demo-toolbar"); // the embedding page may restyle it
         toolbar.setStyleProperty("display", "flex");
         toolbar.setStyleProperty("align-items", "center");
         toolbar.setStyleProperty("gap", "8px");
@@ -103,14 +121,9 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         root.add(toolbar);
 
         // FlexLayout panel
-        final String initialModel = "{\"type\":\"row\",\"children\":["
-            + "{\"type\":\"tabset\",\"weight\":60,\"children\":["
-            + "{\"type\":\"tab\",\"name\":\"Welcome\",\"component\":\"welcome\"}"
-            + "]},"
-            + "{\"type\":\"tabset\",\"weight\":40,\"children\":["
-            + "{\"type\":\"tab\",\"name\":\"Info\",\"component\":\"info\"}"
-            + "]}"
-            + "]}";
+        final FlexLayoutModel initialModel = FlexLayoutModel.row()
+            .tabset(FlexTabset.create().weight(60).tab(FlexTab.create("Welcome").component("welcome")))
+            .tabset(FlexTabset.create().weight(40).tab(FlexTab.create("Info").component("info")));
 
         final FlexLayoutPanel flexLayout = new FlexLayoutPanel(initialModel, null);
 
@@ -143,6 +156,10 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         // Theme selector handler
         themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
+        if (!fullViewport) { // embedded in the (light) showcase: start with the light theme
+            flexLayout.setTheme("fl-theme-light");
+            themeSelector.setSelectedIndex(1);
+        }
 
         // Shared state for interactive widgets (simulates persistence)
         final java.util.Map<String, int[]> counterStates = new java.util.concurrent.ConcurrentHashMap<>();
@@ -329,7 +346,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         layoutContainer.setStyleProperty("position", "relative");
         root.add(layoutContainer);
 
-        PWindow.getMain().add(root);
+        return root;
     }
 
     private static void styleDragSource(final PLabel label) {

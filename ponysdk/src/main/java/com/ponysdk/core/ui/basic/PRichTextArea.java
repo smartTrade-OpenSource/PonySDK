@@ -27,7 +27,7 @@ import com.ponysdk.core.model.*;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**
@@ -36,8 +36,10 @@ import java.util.*;
  * both of these, while one that supports only the basic functionality will return <code>null</code> for the latter.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-RichTextArea</dt>
- * <dd>Applied to the rich text element.</dd>
+ * <dt>.pony-RichTextArea</dt>
+ * <dd>the editable element (role textbox)</dd>
+ * <dt>.pony-hasRichTextToolbar</dt>
+ * <dd>added when a toolbar drives it</dd>
  * </dl>
  */
 public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandlers<String> {

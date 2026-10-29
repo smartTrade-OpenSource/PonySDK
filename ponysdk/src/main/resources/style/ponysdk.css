@@ -121,7 +121,7 @@
     cursor: pointer;
 }
 
-.dd-listbox-container.dd-listbox-multi .is-viewport .is-container .is-item .gwt-Label {
+.dd-listbox-container.dd-listbox-multi .is-viewport .is-container .is-item .pony-Label {
   padding-left: 20px;
 }
 
@@ -155,7 +155,7 @@
   user-select: none;
 }
 
-.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-CheckBox {
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .pony-CheckBox {
   position: absolute;
   left: 7px;
   height: 100%;
@@ -163,14 +163,14 @@
   pointer-events: none;
 }
 
-.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-Label {
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .pony-Label {
   display: inline-block;
   width: 100%;
   height: 100%;
   padding-top: 3px;
 }
 
-.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-Label[disabled] {
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .pony-Label[disabled] {
   cursor: not-allowed;
   opacity: .60;
 }
@@ -205,7 +205,7 @@
   border: none;
 }
 
-.multi-level-dropdown-container .is-item-wrapper .gwt-Label {
+.multi-level-dropdown-container .is-item-wrapper .pony-Label {
   height: 100%;
   width: 100%;
   padding-left: 5px;

@@ -92,6 +92,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     }
 
     private Interval updateData(final K k, final DefaultRow<V> row, final V newV) {
+        clearRenderingHelpers(row);
         if (row.isAccepted()) {
             final int oldLiveDataSize = liveData.size();
             final int oldRowIndex = removeRow(liveData, row);
@@ -249,16 +250,18 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     public Interval select(final K k) {
         final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.add(k) || !row.isAccepted()) return null;
-        final int i = insertRow(liveSelectedData, row);
-        return new Interval(i, i);
+        insertRow(liveSelectedData, row);
+        final int i = findRowIndex(liveData, row);
+        return new Interval(i, i + 1);
     }
 
     @Override
     public Interval unselect(final K k) {
         final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.remove(k) || !row.isAccepted()) return null;
-        final int i = removeRow(liveSelectedData, row);
-        return new Interval(i, i);
+        removeRow(liveSelectedData, row);
+        final int i = findRowIndex(liveData, row);
+        return new Interval(i, i + 1);
     }
 
 }

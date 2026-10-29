@@ -2,44 +2,49 @@ name: CI
 
 on:
   push:
-    branches: ['master', 'v2.8.x', 'v2.10.x']
   pull_request:
-    branches: ['master']
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  build:
+    name: Build & Test (JDK 25)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: '25'
           distribution: 'temurin'
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build and test
+        run: ./gradlew build --stacktrace
+
+  e2e:
+    name: FlexLayout E2E (Playwright)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          java-version: '25'
+          distribution: 'temurin'
 
-      - name: Build
-        run: ./gradlew :sample:compileJava --no-daemon
-
-      - name: Unit Tests (JUnit)
-        run: ./gradlew :ponysdk:test :sample:test --no-daemon
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: sample/package-lock.json
+          node-version: '24'
 
       - name: Install Playwright
         working-directory: sample
@@ -47,43 +52,127 @@ jobs:
           npm ci
           npx playwright install chromium --with-deps
 
-      # The demo server is started and stopped by Playwright itself, see
-      # sample/playwright.config.js. Retries come from the same file.
-      #
-      # Visual snapshots are skipped here: the committed baselines were recorded on
-      # chromium/win32 and this job runs on ubuntu, where font rendering differs enough
-      # to report regressions that do not exist. Regenerate them per platform before
-      # enabling, otherwise the suite fails for reasons unrelated to the change.
+      - name: Start FlexLayout demo server
+        run: |
+          ./gradlew :sample:processResources :sample:runFlexLayoutDemo &
+          echo $! > server.pid
+          echo "Waiting for server..."
+          for i in $(seq 1 60); do
+            if curl -s http://localhost:8081/sample/ > /dev/null 2>&1; then
+              echo "Server ready"
+              break
+            fi
+            sleep 2
+          done
+
       - name: E2E Tests (Playwright)
         working-directory: sample
-        run: npx playwright test tests/flexlayout.spec.js --ignore-snapshots
+        env:
+          BASE_URL: 'http://localhost:8081/sample/'
+        run: npx playwright test tests/flexlayout.spec.js --retries=2 --ignore-snapshots
+
+      - name: Stop server
+        if: always()
+        run: kill $(cat server.pid) 2>/dev/null || true
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: playwright-results
-          path: |
-            sample/test-results/
-            sample/playwright-report/
+          name: test-results
+          path: sample/test-results/
+
+  oracle:
+    # docs/decisions/0002-javascript-terminal.md: what the server receives, compared to the traces recorded with the
+    # former GWT terminal
+    name: Terminal behaviour oracle (Playwright)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Playwright
+        working-directory: sample
+        run: |
+          npm ci
+          npx playwright install chromium --with-deps
+
+      - name: Start the showcase
+        run: |
+          nohup ./gradlew :sample:runShowcase > showcase.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -s http://localhost:8081/sample/ > /dev/null 2>&1; then echo "Server ready"; break; fi
+            sleep 2
+          done
+
+      - name: Oracle, keyboard and legacy layer
+        working-directory: sample
+        env:
+          BASE_URL: 'http://localhost:8081/sample/'
+        # No retry: a trace that changes from one run to the next is a defect of the scenario
+        run: |
+          npx playwright test tests/oracle.spec.js tests/reconnection.spec.js -g "oracle|terminal objects" --retries=0
+          npx playwright test tests/typescript-terminal.spec.js tests/legacy.spec.js --retries=0
+
+      - name: Showcase, Web Components, reconnection, embedding, integration gallery and FDC3
+        working-directory: sample
+        env:
+          BASE_URL: 'http://localhost:8081/sample/'
+        # The embedding and gallery specs reach the portal ShowcaseMain serves on port 8082, as another site
+        run: |
+          npx playwright test tests/showcase-smoke.spec.js tests/csp.spec.js tests/webcomponents.spec.js tests/embedding.spec.js tests/integration-gallery.spec.js tests/fdc3.spec.js
+          npx playwright test tests/reconnection.spec.js --grep-invert "oracle|terminal objects"
+
+      - name: Showcase log
+        if: failure()
+        run: cat showcase.log || true
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: oracle-results
+          path: sample/test-results/
 
   publish:
     name: Publish Snapshot
+    needs: build
+    # Only publish on direct pushes to the main / release branches (never on PRs)
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' ||
+       github.ref == 'refs/heads/v3.x')
     runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.event_name == 'push'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: '25'
           distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Publish
         env:
           USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish --no-daemon
+        run: ./gradlew publish

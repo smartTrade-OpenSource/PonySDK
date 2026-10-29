@@ -25,11 +25,14 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
+import com.ponysdk.core.writer.ModelWriterCallback;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PBlurHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -44,7 +47,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable {
+public abstract class PFocusWidget extends PWidget {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -54,21 +57,16 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
         if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = TabindexMode.FOCUSABLE.getTabIndex();
     }
 
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
+        if (!enabled) writer.write(ServerToClientModel.ENABLED, false);
+    }
+
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
         saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
-    }
-
-    /**
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     * @since v2.7.16
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {
@@ -78,7 +76,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(ServerToClientModel.ENABLED, enabled);
+        if (initialized) saveUpdate(ServerToClientModel.ENABLED, enabled); // replayed by enrichForUpdate otherwise
     }
 
     public boolean isShowLoadingOnRequest() {
@@ -108,38 +106,36 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
     }
 
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
-        if (showLoadingOnRequest || !enabledOnRequest) {
-            return addDomHandler((PClickHandler) event -> {
-                try {
-                    handler.onClick(event);
-                } finally {
-                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
-                }
-            }, PClickEvent.TYPE);
-        } else {
-            return addDomHandler(handler, PClickEvent.TYPE);
-        }
+        return addDomHandler(handler, PClickEvent.TYPE);
     }
 
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
-        if (showLoadingOnRequest || !enabledOnRequest) {
-            final PDoubleClickHandler clickHandler = event -> {
-                try {
-                    handler.onDoubleClick(event);
-                } finally {
-                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
-                }
-            };
-
-            return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);
-        } else {
-            return addDomHandler(handler, PDoubleClickEvent.TYPE);
-        }
+        return addDomHandler(handler, PDoubleClickEvent.TYPE);
     }
+
+    private static final String DOM_HANDLER_TYPE_KEY = ClientToServerModel.DOM_HANDLER_TYPE.toStringValue();
+    private static final ModelWriterCallback END_OF_PROCESSING = writer -> writer.write(ServerToClientModel.END_OF_PROCESSING);
 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (canNotify(instruction)) super.onClientData(instruction);
+    }
+
+    /**
+     * The terminal disabled the widget (or showed it loading) for this click: give it back once the click is
+     * processed, whatever the number of handlers, decided by the flags the terminal applied; also when a subclass
+     * filtered the click out (hidden or disabled meanwhile) or a handler threw.
+     */
+    @Override
+    public void onClientDataProcessed(final JsonObject instruction) {
+        super.onClientDataProcessed(instruction);
+        if ((showLoadingOnRequest || !enabledOnRequest) && isClick(instruction)) saveUpdate(END_OF_PROCESSING);
+    }
+
+    private static boolean isClick(final JsonObject instruction) {
+        if (!instruction.containsKey(DOM_HANDLER_TYPE_KEY)) return false;
+        final int type = instruction.getInt(DOM_HANDLER_TYPE_KEY);
+        return type == DomHandlerType.CLICK.getValue() || type == DomHandlerType.DOUBLE_CLICK.getValue();
     }
 
     @Override

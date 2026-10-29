@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -39,20 +39,8 @@ public final class FlexLayoutPanel implements IsPWidget {
         this.addon = new FlexLayoutAddon(modelJson, themeStr, bordersJson);
     }
 
-    // ─── Backward-compatible constructors (deprecated) ───────────
-
     public FlexLayoutPanel() {
-        this(null, null, (String) null);
-    }
-
-    @Deprecated
-    public FlexLayoutPanel(final String modelJson, final String theme) {
-        this(modelJson, theme, null);
-    }
-
-    @Deprecated
-    public FlexLayoutPanel(final String modelJson, final String theme, final String bordersJson) {
-        this.addon = new FlexLayoutAddon(modelJson, theme, bordersJson);
+        this(null, null);
     }
 
     @Override
@@ -160,7 +148,6 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     public void setWidgetFactory(final BiFunction<String, String, PWidget> factory) {
-        this.widgetFactory = component -> factory.apply(component, null);
         addon.setWidgetFactory(factory);
         addon.setOnExternalDrop((tabId, component, config) -> {
             final String instanceKey = config != null ? config : tabId;
@@ -227,20 +214,10 @@ public final class FlexLayoutPanel implements IsPWidget {
         addon.setKeymap(keymap.toJson());
     }
 
-    @Deprecated
-    public void setKeymap(final String keymapJson) {
-        addon.setKeymap(keymapJson);
-    }
-
     // ─── Typed getOpenTabs ───────────────────────────────────────
 
     public void getOpenTabs(final Consumer<List<FlexTabInfo>> callback) {
         addon.getOpenTabs(json -> callback.accept(FlexTabInfo.fromJson(json)));
-    }
-
-    @Deprecated
-    public void getOpenTabsRaw(final Consumer<String> callback) {
-        addon.getOpenTabs(callback);
     }
 
     public void getLayoutSummary(final Consumer<String> callback) {
@@ -253,11 +230,6 @@ public final class FlexLayoutPanel implements IsPWidget {
         final String[] keys = new String[actions.length];
         for (int i = 0; i < actions.length; i++) keys[i] = actions[i].getKey();
         addon.setBlockedActions(keys);
-    }
-
-    @Deprecated
-    public void setBlockedActions(final String... actions) {
-        addon.setBlockedActions(actions);
     }
 
     public void setBlockedTabs(final String... tabIds) {
@@ -371,7 +343,7 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     private static String buildTabDef(final String tabName, final String component, final String configJson) {
-        final javax.json.JsonObjectBuilder b = Json.createObjectBuilder()
+        final jakarta.json.JsonObjectBuilder b = Json.createObjectBuilder()
             .add("name", tabName)
             .add("component", component)
             .add("enableClose", true);
@@ -380,7 +352,7 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     private static String buildBordersJson(final FlexBorder[] borders) {
-        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        final jakarta.json.JsonArrayBuilder arr = Json.createArrayBuilder();
         for (final FlexBorder border : borders) {
             arr.add(Json.createReader(new java.io.StringReader(border.toJson())).readObject());
         }

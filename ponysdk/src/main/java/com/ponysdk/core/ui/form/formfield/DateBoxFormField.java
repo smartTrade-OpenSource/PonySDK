@@ -56,7 +56,7 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
     }
 
     public DateBoxFormField(final SimpleDateFormat dateFormat, final boolean dirtyMode) {
-        this(Element.newPDateBox(dateFormat), new DateConverter(dateFormat));
+        this(Element.newPDateBox(dateFormat), new DateConverter(dateFormat), dirtyMode);
     }
 
     public DateBoxFormField(final PDateBox dateBox) {

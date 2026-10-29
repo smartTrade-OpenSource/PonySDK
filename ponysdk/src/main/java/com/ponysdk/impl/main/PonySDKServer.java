@@ -23,28 +23,39 @@
 
 package com.ponysdk.impl.main;
 
+import org.eclipse.jetty.util.compression.CompressionPool;
+import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
+import java.time.Duration;
+import java.util.EnumSet;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.ee11.servlet.ErrorHandler;
+import org.eclipse.jetty.ee11.servlet.FilterHolder;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.compression.server.CompressionHandler;
+import org.eclipse.jetty.compression.server.CompressionConfig;
+import org.eclipse.jetty.compression.gzip.GzipCompression;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import jakarta.servlet.DispatcherType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.Drain;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
+import com.ponysdk.core.server.servlet.CrossOriginFilter;
+import com.ponysdk.core.server.servlet.HealthServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
 
@@ -54,6 +65,8 @@ public class PonySDKServer {
     public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
     public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
     public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
+    /** A load balancer's health check ({@link HealthServlet}). */
+    public static final String MAPPING_HEALTH = "/health";
 
     private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
@@ -72,6 +85,24 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
+    /**
+     * Secure flag of the session cookie. On by default, including when this server speaks plain http
+     * behind a TLS-terminating proxy. Turn it off only for plain-http development: WebKit/Safari never
+     * sends a Secure cookie over http, so every request would start a new HTTP session (and transparent
+     * reconnection could never find the suspended UIContext).
+     */
+    private boolean sessionCookieSecure = true;
+
+    /**
+     * When the JVM is asked to stop (SIGTERM: a rolling deployment, a scale-in, a spot interruption), the live pages
+     * move to the other servers over this time before the server stops ({@link Drain}); 0, the default: it stops at
+     * once and its pages reload as they find it gone.
+     */
+    private long drainMillis;
+    private Thread drainHook;
+
+    /** Servlet-context attribute Jetty reads its WebSocket DeflaterPool from (WebSocketServerComponents). */
+    static final String WEBSOCKET_DEFLATER_POOL_ATTRIBUTE = "jetty.websocket.deflater";
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
 
@@ -88,6 +119,11 @@ public class PonySDKServer {
         applicationManager.start();
 
         server.start();
+
+        if (drainMillis > 0) {
+            drainHook = Thread.ofPlatform().name("ponysdk-drain").unstarted(this::drainAndStop);
+            Runtime.getRuntime().addShutdownHook(drainHook);
+        }
 
         log.info("Webserver started on: {}:{}", InetAddress.getLocalHost().getHostAddress(), port);
     }
@@ -107,6 +143,10 @@ public class PonySDKServer {
 
     protected ServerConnector createHttpsConnector() {
         // HTTPS
+        if (sslKeyStoreFile == null) {
+            throw new IllegalStateException("HTTPS is on (setUseSSL) and no key store is set: call setSslKeyStoreFile, "
+                    + "or setUseSSL(false) for plain HTTP");
+        }
         URL keyStore = getClass().getResource(sslKeyStoreFile);
         if (keyStore == null) keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
 
@@ -147,9 +187,18 @@ public class PonySDKServer {
     }
 
     protected Handler createMainHandler() {
-        final GzipHandler gzip = new GzipHandler();
-        gzip.setHandler(addHandlers());
-        return gzip;
+        final CompressionHandler compression = new CompressionHandler();
+        compression.putCompression(new GzipCompression());
+        // Compress text assets (HTML, the terminal's JavaScript, JSON) but skip already-compressed
+        // content (images, fonts, archives) — restores the sensible GzipHandler defaults
+        // instead of wasting CPU re-compressing incompressible payloads.
+        // Request bodies are never decompressed: no PonySDK client sends one compressed, and decoding them hands
+        // any client a decompression bomb.
+        compression.putConfiguration("/", CompressionConfig.builder().defaults()
+            .decompressExcludeEncoding("gzip")
+            .build());
+        compression.setHandler(addHandlers());
+        return compression;
     }
 
     protected Handler addHandlers() {
@@ -170,16 +219,25 @@ public class PonySDKServer {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + configuration.getApplicationContextName());
         context.setErrorHandler(createErrorHandler());
-        context.getSessionHandler().getSessionCookieConfig().setSecure(true);
+        context.getSessionHandler().getSessionCookieConfig().setSecure(sessionCookieSecure);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
 
-        // Jetty 12: enable the Jetty-native WebSocket server so JettyWebSocketServlet can upgrade.
+        // permessage-deflate level: Jetty picks its DeflaterPool from this context attribute.
+        final int deflateLevel = configuration.getWsDeflateLevel();
+        if (deflateLevel >= 0) { // the configuration accepts -1 (Jetty's default) to 9
+            context.setAttribute(WEBSOCKET_DEFLATER_POOL_ATTRIBUTE,
+                new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, deflateLevel, true));
+        }
         JettyWebSocketServletContainerInitializer.configure(context, null);
 
+        // The pages allowed to embed the application in a <pony-app> element (ADR-0008)
+        context.addFilter(new FilterHolder(new CrossOriginFilter(configuration::getWsAllowedOrigins)), "/*",
+            EnumSet.of(DispatcherType.REQUEST));
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
+        context.addServlet(new ServletHolder(new HealthServlet()), MAPPING_HEALTH);
         return context;
     }
 
@@ -202,7 +260,28 @@ public class PonySDKServer {
     }
 
     public void stop() throws Exception {
+        if (drainHook != null) Runtime.getRuntime().removeShutdownHook(drainHook);
+        drainHook = null;
         server.stop();
+    }
+
+    /** What a SIGTERM runs with a drain time: the live pages moved to the other servers, then the server stopped. */
+    void drainAndStop() {
+        try {
+            Drain.run(Duration.ofMillis(drainMillis));
+            server.stop();
+        } catch (final Exception e) {
+            log.error("Drain interrupted, the server stops as it is", e);
+        }
+    }
+
+    /**
+     * Moves the live pages to the other servers over this time when the JVM is asked to stop: a little less than what
+     * the load balancer waits for a server it drains (an AWS target group's deregistration delay), and than what the
+     * platform waits after SIGTERM (an ECS task's stopTimeout).
+     */
+    public void setDrainMillis(final long drainMillis) {
+        this.drainMillis = drainMillis;
     }
 
     public void setHost(final String host) {
@@ -215,6 +294,14 @@ public class PonySDKServer {
 
     public void setUseSSL(final boolean useSSL) {
         this.useSSL = useSSL;
+    }
+
+    public void setSessionCookieSecure(final boolean sessionCookieSecure) {
+        this.sessionCookieSecure = sessionCookieSecure;
+    }
+
+    public boolean isSessionCookieSecure() {
+        return sessionCookieSecure;
     }
 
     public boolean isUseSSL() {

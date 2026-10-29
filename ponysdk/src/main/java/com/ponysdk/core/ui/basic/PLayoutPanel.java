@@ -117,6 +117,6 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, (int) duration.toMillis()));
     }
 }

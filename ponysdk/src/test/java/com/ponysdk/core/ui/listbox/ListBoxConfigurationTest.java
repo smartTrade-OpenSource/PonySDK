@@ -23,11 +23,44 @@
 package com.ponysdk.core.ui.listbox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ListBoxConfigurationTest {
+
+    @Test
+    public void defaults() {
+        final ListBoxConfiguration configuration = new ListBoxConfiguration();
+
+        assertTrue(configuration.isSearchEnabled());
+        assertNull(configuration.getNoMatchesLabel());
+        assertFalse(configuration.isMultiSelectionEnabled());
+        assertTrue(configuration.isSortingEnabled());
+        assertTrue(configuration.isSelectionSortingEnabled());
+        assertNull(configuration.getSelectionLimit());
+        assertNull(configuration.getDisplaySelectionLimit());
+        assertNull(configuration.getDisplaySelectionLabel());
+        assertFalse(configuration.isGroupEnabled());
+    }
+
+    @Test
+    public void settersAreFluent() {
+        final ListBoxConfiguration configuration = new ListBoxConfiguration();
+
+        assertSame(configuration, configuration.setNoMatchesLabel("none"));
+        assertSame(configuration, configuration.setTitleDisplayed(false));
+        assertSame(configuration, configuration.disableSearch());
+        assertSame(configuration, configuration.setSelectionLimit(3));
+
+        assertEquals("none", configuration.getNoMatchesLabel());
+        assertFalse(configuration.isTitleDisplayed());
+        assertFalse(configuration.isSearchEnabled());
+        assertEquals(3, configuration.getSelectionLimit());
+    }
 
     @Test
     public void bulkSelection_isDisabledByDefault() {

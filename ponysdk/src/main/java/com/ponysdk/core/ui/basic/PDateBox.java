@@ -33,7 +33,7 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -42,15 +42,13 @@ import java.util.*;
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-DateBox</dt>
- * <dd>default style name</dd>
- * <dt>.dateBoxPopup</dt>
- * <dd>Applied to the popup around the PDatePicker</dd>
- * <dt>.dateBoxFormatError</dt>
- * <dd>Default style for when the date box has bad input.</dd>
+ * <dt>.pony-DateBox</dt>
+ * <dd>the field (role combobox); <code>[aria-invalid=true]</code> when its text is no date</dd>
+ * <dt>.pony-DateBoxPopup</dt>
+ * <dd>the popup of its date picker</dd>
  * </dl>
  */
-public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PValueChangeHandler<Date> {
+public class PDateBox extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
@@ -89,6 +87,8 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         this.keepDayTimeNeeded = keepDayTimeNeeded;
+        // the picker's days are the box's: in the zone of its format
+        datePicker.setTimeZone(dateFormat.getTimeZone());
         saveAdd(datePicker.getID(), ID);
     }
 
@@ -117,11 +117,11 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             rawValue = jsonObject.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             Date date = null;
-            if (rawValue != null && !rawValue.isEmpty()) {
+            if (!rawValue.isEmpty()) { // getString: never null
                 try {
                     date = dateFormat.parse(rawValue);
                 } catch (final ParseException ex) {
-                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", rawValue);
+                    log.warn("Cannot parse the date #{}", rawValue);
                 }
             }
             onValueChange(new PValueChangeEvent<>(this, date));
@@ -159,6 +159,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         if (Objects.equals(this.dateFormat, dateFormat)) return;
         this.dateFormat = dateFormat;
+        datePicker.setTimeZone(dateFormat.getTimeZone());
         if (initialized) saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
@@ -186,17 +187,6 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
 
     public String getRawValue() {
         return rawValue;
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {

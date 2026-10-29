@@ -59,9 +59,12 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setContentWidget(final PWidget child) {
+        if (child == content) return;
         child.removeFromParent();
+        if (content != null) remove(content);
         adopt(child);
         content = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 1));
     }
 
@@ -70,9 +73,12 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setFooterWidget(final PWidget child) {
+        if (child == footer) return;
         child.removeFromParent();
+        if (footer != null) remove(footer);
         adopt(child);
         footer = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 2));
     }
 
@@ -81,9 +87,12 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void setHeaderWidget(final PWidget child) {
+        if (child == header) return;
         child.removeFromParent();
+        if (header != null) remove(header);
         adopt(child);
         header = child;
+        if (isInitialized()) child.attach(window, getFrame());
         saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, 0));
     }
 
@@ -93,21 +102,12 @@ public class PHeaderPanel extends PPanel {
 
         orphan(child);
 
-        if (child == content) {
-            content = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else if (child == header) {
-            header = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else if (child == footer) {
-            footer = null;
-            child.saveRemove(child.getID(), ID);
-            return true;
-        } else {
-            return false;
-        }
+        // A child is the content, the header or the footer: their setters adopt it
+        if (child == content) content = null;
+        else if (child == header) header = null;
+        else footer = null;
+        child.saveRemove(child.getID(), ID);
+        return true;
     }
 
     @Override
@@ -135,6 +135,7 @@ public class PHeaderPanel extends PPanel {
 
     @Override
     public String dumpDOM() {
-        return "<div pid=\"" + ID + "\">" + header.dumpDOM() + content.dumpDOM() + footer.dumpDOM() + "</div>";
+        return "<div pid=\"" + ID + "\">" + (header != null ? header.dumpDOM() : "") + (content != null ? content.dumpDOM() : "")
+                + (footer != null ? footer.dumpDOM() : "") + "</div>";
     }
 }

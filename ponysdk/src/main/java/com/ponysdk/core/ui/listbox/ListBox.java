@@ -417,11 +417,14 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
-        if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
+        if (!configuration.isMultiSelectionEnabled()) {
+            setSelected(selectedData);
+            return;
+        }
         final Collection<ListBoxItem<D>> selectedItems = getSelectedItems();
         for (final ListBoxItem<D> item : this.items) {
             if (item.getData() != null && item.getData().equals(selectedData)) {
-                selectedItems.add(item);
+                if (!selectedItems.contains(item)) selectedItems.add(item);
                 break;
             }
         }
@@ -501,7 +504,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 log.debug("Cannot select index {} ", index, e);
             }
         } else {
-            final List<ListBoxItem<D>> data = dataProvider.getData(index, 0, null);
+            final List<ListBoxItem<D>> data = dataProvider.getData(index, 1, null);
             if (data != null && !data.isEmpty()) {
                 if (configuration.isMultiSelectionEnabled()) {
                     setMultiSelected(List.of(data.get(0).data));
@@ -632,11 +635,13 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             defaultContainer.add(clearMultiButton);
         }
         itemContainer = buildInfiniteScrollAddon();
+        itemContainer.asWidget().setAttribute("role", "listbox");
+        if (configuration.isMultiSelectionEnabled()) itemContainer.asWidget().setAttribute("aria-multiselectable", "true");
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
-                final ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
-                if (currentItemIndex == null || !visibleItems.contains(currentItemIndex.item)) {
+                // the rows show visible items only: the index row, when it is shown, holds one
+                if (itemContainer.getCurrentItemIndex() == null) {
                     initIndex();
                     if (index < visibleItems.size()) itemContainer.showIndex(index);
                 }
@@ -853,11 +858,9 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 if (configuration.isGroupEnabled()) {
                     for (final ListBoxItem<D> item : items) {
                         if (ListBoxItemType.ITEM.equals(item.getType()) && filterPredicate.test(item, filter)) {
-                            if (configuration.isGroupEnabled()) {
-                                final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
-                                if (!this.visibleItems.contains(groupItem)) {
-                                    this.visibleItems.add(groupItem);
-                                }
+                            final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
+                            if (!this.visibleItems.contains(groupItem)) {
+                                this.visibleItems.add(groupItem);
                             }
                             this.visibleItems.add(item);
                         }
@@ -983,13 +986,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
         clearSelection();
-        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElse(null);
-        if (item != null) {
-            item.setSelected(true);
-            setClearTitleButtonVisible(true);
-        } else {
-            setClearTitleButtonVisible(false);
-        }
+        // selectedItem is one of the items: the first equal one is found
+        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElseThrow();
+        item.setSelected(true);
+        setClearTitleButtonVisible(true);
         updateTitle(List.of(selectedItem));
         updateVisibleItems();
     }
@@ -1022,7 +1022,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             case TRUE:
                 close();
                 break;
-            case FALSE:
+            default: // FALSE
                 if (!configuration.isMultiSelectionEnabled()) refresh();
                 break;
         }
@@ -1050,11 +1050,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             if (isIndexable(index)) {
                 return;
             }
-            if (itemContainer.getFullSize() > 0) {
-                updateWithNextIndex();
-            } else {
-                return;
-            }
+            if (itemContainer.getFullSize() > 0) updateWithNextIndex();
+            return;
         } else if (index >= itemContainer.getFullSize()) {
             index = itemContainer.getFullSize() - 1;
             updateWithNextIndex();
@@ -1257,6 +1254,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
         public ListBoxItemWidget() {
             panel = Element.newPFlowPanel();
+            panel.setAttribute("role", "option");
             if (configuration.isMultiSelectionEnabled()) {
                 checkBox = Element.newPCheckBox();
                 checkBox.setTabindex(TabindexMode.FOCUSABLE);
@@ -1284,7 +1282,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
 
         void select() {
-            if (checkBox != null) checkBox.setValue(!checkBox.getValue());
+            if (checkBox != null) {
+                checkBox.setValue(!checkBox.getValue());
+                panel.setAttribute("aria-selected", String.valueOf(checkBox.getValue())); // the row is not drawn again
+            }
             if (configuration.isEventOnlyEnabled()) {
                 onValueChange(List.of(item));
             } else {
@@ -1311,15 +1312,21 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 else checkBox.setValue(item.isSelected());
                 if (item.equals(lastSelectedItem)) panel.addStyleName(STYLE_LISTBOX_ITEM_LAST_SELECTED);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_LAST_SELECTED);
+                panel.setAttribute("aria-selected", String.valueOf(checkBox.getValue()));
             } else {
                 boolean selected;
                 if (dataProvider != null) selected = selectedDataItems.contains(item);
                 else selected = item.isSelected();
                 if (selected) panel.addStyleName(STYLE_LISTBOX_ITEM_SELECTED);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_SELECTED);
-                if (ListBoxItemType.GROUP.equals(item.getType())) panel.addStyleName(STYLE_LISTBOX_ITEM_GROUP);
+                panel.setAttribute("aria-selected", String.valueOf(selected));
+                final boolean group = ListBoxItemType.GROUP.equals(item.getType());
+                if (group) panel.addStyleName(STYLE_LISTBOX_ITEM_GROUP);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_GROUP);
+                panel.setAttribute("role", group ? "presentation" : "option"); // a group's title is no choice
             }
+            if (item.isEnabled()) panel.removeAttribute("aria-disabled");
+            else panel.setAttribute("aria-disabled", "true");
             itemRenderer.setItem(item);
         }
     }

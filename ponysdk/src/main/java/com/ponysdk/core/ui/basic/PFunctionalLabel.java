@@ -36,9 +36,10 @@ import com.ponysdk.core.writer.ModelWriter;
  * <code>setText(String)</code> or calculated using a <code>PFunction</code> and an array of arguments. This widget
  * uses a &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-Label { }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-FunctionalLabel</dt>
+ * <dd>the label</dd>
+ * </dl>
  */
 public class PFunctionalLabel extends PLabel {
 

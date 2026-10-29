@@ -34,11 +34,10 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -58,8 +57,8 @@ import java.util.Objects;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-Image</dt>
- * <dd>The outer element</dd>
+ * <dt>.pony-Image</dt>
+ * <dd>the image</dd>
  * </dl>
  * Transformations between clipped and unclipped state will result in a loss of any style names that
  * were set/added; the only style names that are preserved are those that are mentioned in the
@@ -108,8 +107,8 @@ public class PImage extends PWidget {
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
                 writer.write(ServerToClientModel.POSITION_LEFT, left);
                 writer.write(ServerToClientModel.POSITION_TOP, top);
-                writer.write(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
                 writer.write(ServerToClientModel.IMAGE_WIDTH, imageWidth);
+                writer.write(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
             }
         }
     }
@@ -129,8 +128,10 @@ public class PImage extends PWidget {
         if (initialized) saveUpdate(ServerToClientModel.URL, url);
     }
 
+    /** Before the image is added, the request waits for its creation: the terminal has no image to ask yet. */
     public void setStream(final StreamHandler streamListener) {
-        UIContext.get().stackEmbeddedStreamRequest(streamListener, this);
+        if (initialized) UIContext.get().stackEmbeddedStreamRequest(streamListener, this);
+        else addInitializeListener(image -> UIContext.get().stackEmbeddedStreamRequest(streamListener, this));
     }
 
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
@@ -149,13 +150,7 @@ public class PImage extends PWidget {
             String imageToBase64 = null;
 
             try (InputStream in = url.openStream()) {
-                final byte[] buffer = new byte[1024];
-                try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    while (in.read(buffer) != -1) {
-                        out.write(buffer);
-                    }
-                    imageToBase64 = new String(out.toByteArray(), StandardCharsets.UTF_8);
-                }
+                imageToBase64 = Base64.getEncoder().encodeToString(in.readAllBytes());
             } catch (final IOException e) {
                 log.error("Cannot load resource from " + this, e);
             }

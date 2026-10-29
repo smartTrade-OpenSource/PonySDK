@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrating PonySDK</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="app-url.js" defer></script>
+<script src="gallery.js" defer></script>
+</head>
+<body>
+<!--
+  The ways to integrate a PonySDK application in an existing system (docs/decisions/0008-embedded-application.md,
+  0009-embedding-limits.md). This server, ShowcaseMain's portal on port 8082, is another origin than the showcase's
+  (8081): it is the existing system, and has no PonySDK in it but what each page embeds.
+-->
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">Integrating PonySDK: the ways an existing system shows a PonySDK application.</div>
+</header>
+
+<main>
+  <section class="gallery-intro">
+    <h1>Nine ways in</h1>
+    <p>PonySDK applications are written in Java only: the screen's widgets live on the server, and a small terminal in
+      the browser draws them. Such an application can own its page, or be shown by another system.</p>
+    <p>The application is the PonySDK showcase, on <code data-text="app">http://this-host:8081/sample/</code>.
+      This portal is another origin: each page below is the system that shows it, from the application owning its
+      page to a page of another site holding applications of two PonySDK versions.</p>
+  </section>
+
+  <ol class="gallery">
+    <li class="case">
+      <span class="case-code">U1</span>
+      <h2>Alone in its page</h2>
+      <p>The application owns the page: the bootstrap page its server writes, the default.</p>
+      <p class="case-when">For a whole application, with its own URL.</p>
+      <a class="case-open" data-href="{app}">Open the showcase</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U2</span>
+      <h2>A custom page of the application</h2>
+      <p>The application's own HTML around it, served by the application under its path: a header, a layout, then
+        the widgets.</p>
+      <p class="case-when">For a branded page, with no other system involved.</p>
+      <a class="case-open" data-href="{app}desk.html">Open the custom page</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U3</span>
+      <h2>In an iframe</h2>
+      <p>Another document in a frame: nothing changes on either side, but the frame clips the popups, takes none of
+        the page's styles and is sized by hand.</p>
+      <p class="case-when">For a system that only knows frames.</p>
+      <a class="case-open" href="iframe.html">Open the frame</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U4</span>
+      <h2>An element of another page</h2>
+      <p><code>&lt;pony-app&gt;</code> in a page of another origin: two tickets and the showcase, each on its own
+        context, in a shadow root. Attributes in, events out, both ways.</p>
+      <p class="case-when">For a portal or a web application of the same site.</p>
+      <a class="case-open" href="portal.html">Open the portal</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U5</span>
+      <h2>In the page's document</h2>
+      <p><code>isolation="none"</code>: the application renders in the host's document, where addons that search it
+        find it. The page's styles reach the application.</p>
+      <p class="case-when">For an application whose addons use the document.</p>
+      <a class="case-open" href="light.html">Open the page</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U6</span>
+      <h2>From another site</h2>
+      <p>No session cookie comes from a page of another site: the context's key and the host's credential replace it.
+        Uploads, streams and reconnections work as on the same site.</p>
+      <p class="case-when">For a client's system, on its own domain.</p>
+      <a class="case-open" data-href="{other-site}">Open the portal on another site</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U7</span>
+      <h2>Several applications, one inside another</h2>
+      <p>A page holding several applications; and an application embedding another, which it drives from Java with
+        <code>PWebComponent</code>.</p>
+      <p class="case-when">For a dashboard of applications, or composing them.</p>
+      <a class="case-open" href="portal.html">Open the portal</a>
+      <a class="case-open" data-href="{app}#embedding">Open the Embedding page</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U8</span>
+      <h2>Windows and frames</h2>
+      <p>A ticket popped out in a window of its own, and a frame, from an embedded application: pages of the
+        application, talking to the element by <code>postMessage</code>.</p>
+      <p class="case-when">For a trader's detached ticket.</p>
+      <a class="case-open" href="windows.html">Open the page</a>
+    </li>
+    <li class="case">
+      <span class="case-code">U9</span>
+      <h2>Two versions on a page</h2>
+      <p>The page defines <code>&lt;pony-app&gt;</code> with its own copy of PonySDK; each application runs on its
+        server's terminal.</p>
+      <p class="case-when">For a portal of products on different PonySDK versions.</p>
+      <a class="case-open" href="versions.html">Open the page</a>
+    </li>
+  </ol>
+</main>
+</body>
+</html>

@@ -23,6 +23,15 @@
 
 package com.ponysdk.core.server.websocket;
 
+import com.ponysdk.core.server.metrics.PonySDKMetrics;
+import com.ponysdk.core.model.ClientToServerModel;
+
+import java.time.Duration;
+import java.util.Set;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.time.Duration;
 
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -44,10 +54,10 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
-    private static final long serialVersionUID = 1L;
     private int maxIdleTime = 1000000;
     private final ApplicationManager applicationManager;
     private WebsocketMonitor monitor;
+    private PonySDKMetrics metrics;
 
     public WebSocketServlet(final ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
@@ -55,17 +65,64 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     @Override
     protected void configure(final JettyWebSocketServletFactory factory) {
-        factory.setIdleTimeout(Duration.ofMillis(maxIdleTime));
-        // Jetty 12 negotiates the standard "permessage-deflate" extension automatically. The Jetty 9
-        // custom PonyPerMessageDeflateExtension is gone (Jetty 12 moved the deflate extension into
-        // non-public websocket.core.internal). The per-WebSocket-frame byte accounting it fed is
-        // reimplemented from the WebSocketConnection wire counters instead (see WebSocket#setListener).
-        factory.setCreator((request, response) -> createWebsocket(request, response));
+        final ApplicationConfiguration config = applicationManager.getConfiguration();
+
+        // #3 Idle timeout — configurable (falls back to the legacy field if unset).
+        final long idleMs = config != null && config.getWsIdleTimeoutMs() > 0 ? config.getWsIdleTimeoutMs() : maxIdleTime;
+        factory.setIdleTimeout(Duration.ofMillis(idleMs));
+
+        // #2 Bound inbound (client -> server) text messages to guard against memory abuse.
+        final int maxInbound = config != null ? config.getWsMaxInboundMessageSize() : 0;
+        if (maxInbound > 0) factory.setMaxTextMessageSize(maxInbound);
+
+        // Jetty allocates a text builder of inputBufferSize for every incoming message: keep it small
+        // for PonySDK's small upstream messages (see ApplicationConfiguration#setWsInputBufferSize).
+        final int inputBuffer = config != null ? config.getWsInputBufferSize() : 0;
+        if (inputBuffer > 0) factory.setInputBufferSize(inputBuffer);
+
+        // #5 permessage-deflate is negotiated and enabled by default in Jetty 12; PonySDK's binary
+        // protocol + string dictionary already compress heavily, so deflate is the final wire layer.
+        // The compression *level* is not exposed by this factory API, but it can be turned off per
+        // connection via config.wsPermessageDeflateEnabled (see createWebsocket).
+        factory.setCreator(this::createWebsocket);
     }
 
     protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
+        // #1 Anti-CSWSH: WebSocket upgrades are NOT subject to the same-origin policy, and the
+        // browser attaches the session cookie regardless of the calling page's origin. Validate
+        // the Origin before creating anything; reject cross-origin upgrades with a 403.
+        final ApplicationConfiguration config = applicationManager.getConfiguration();
+        if (config != null && config.isWsOriginCheckEnabled()) {
+            final String origin = request.getHeader("Origin");
+            // Prefer X-Forwarded-Host (set by reverse proxies to the host the browser used);
+            // browsers cannot set this header on a WS handshake, so it is safe for this check.
+            String host = request.getHeader("X-Forwarded-Host");
+            if (host == null || host.isEmpty()) host = request.getHeader("Host");
+            else {
+                final int comma = host.indexOf(',');
+                if (comma >= 0) host = host.substring(0, comma).trim();
+            }
+            if (!isOriginAllowed(origin, host, config.getWsAllowedOrigins())) {
+                log.warn("Rejected WebSocket upgrade from a disallowed Origin");
+                response.setStatusCode(HttpServletResponse.SC_FORBIDDEN);
+                return null;
+            }
+        }
+
+        // An embedded terminal offers the subprotocol "ponysdk" (ADR-0009): a browser that offers some fails an upgrade
+        // that accepts none
+        final String protocols = request.getHeader(Subprotocols.HEADER);
+        if (Subprotocols.offered(protocols)) response.setAcceptedSubProtocol(Subprotocols.PONYSDK);
+        final String reconnectKey = Subprotocols.key(protocols);
+
+        // Optionally disable permessage-deflate (frame compression) for this connection. Useful for
+        // CPU/latency-sensitive deployments, and required by clients that cannot decode compressed
+        // frames (e.g. the headless Pony driver).
+        if (config != null && !config.isWsPermessageDeflateEnabled()) {
+            response.setExtensions(java.util.List.of());
+        }
+
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
         // Capture request-derived data NOW, while the upgrade request is still live. Jetty 12 recycles
         // the underlying servlet request once the upgrade completes, so any later read (parameter map,
         // headers, session) throws NPE or returns another request's data. UIContext serves this snapshot.
@@ -73,17 +130,42 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         webSocket.setUpgradeRequestData(upgradeRequestData);
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
+        webSocket.setMetrics(metrics);
 
+        // Note: this TxnContext is orphaned on successful reconnection — the resumed UIContext
+        // keeps its original TxnContext. The orphan has no strong refs from long-lived objects
+        // and will be GC'd normally. Creating it unconditionally keeps the code simple.
         final TxnContext context = new TxnContext(webSocket);
         webSocket.setContext(context);
+
+        // Transparent reconnection: the client may request resuming a suspended UIContext by id.
+        // The resume is authorized by the caller's HTTP session (see WebSocket.onWebSocketOpen ->
+        // Application.getUIContext), or for an embedded terminal by its context's key, offered as a
+        // subprotocol, out of the URL (ADR-0009): the id alone grants nothing.
+        webSocket.setProtocolVersion(negotiateProtocolVersion(
+                request.getHttpServletRequest().getParameter(ClientToServerModel.PROTOCOL_VERSION.toStringValue()), config));
+
+        final String reconnectIdParam = request.getHttpServletRequest()
+                .getParameter(ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue());
+        if (reconnectIdParam != null && applicationManager.getConfiguration().getReconnectionTimeoutMs() > 0) {
+            try {
+                final int uiContextId = Integer.parseInt(reconnectIdParam);
+                webSocket.setReconnectContextId(uiContextId);
+                webSocket.setReconnectKey(reconnectKey);
+            } catch (final NumberFormatException e) {
+                // Do not echo the raw client-supplied value into the logs (log-injection vector).
+                log.warn("Ignoring malformed reconnect uiContextId parameter");
+            }
+        }
 
         if (hasSessionHandler(request)) {
             // The Application is keyed on the session of the snapshot, the one UIContext.getSession() serves. Asking the
             // request again could create another one if the first was invalidated in between (a page reload closing the
             // previous socket). Only an override of captureUpgradeData that did not create it falls back to the request.
+            // A reconnection by key without the cookie has none, and needs none: its context keeps its own (ADR-0009)
             final HttpSession session = upgradeRequestData.getSession() != null ? upgradeRequestData.getSession()
-                    : (HttpSession) request.getSession();
-            configureWithSession(session, context);
+                    : reconnectKey != null ? null : (HttpSession) request.getSession();
+            if (session != null) configureWithSession(session, context);
         }
 
         return webSocket;
@@ -91,7 +173,9 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     /**
      * Snapshots everything the application reads from the upgrade request while it is still live, and creates the
-     * HTTP session that the snapshot holds when the servlet context has a SessionHandler. Protected so that a subclass
+     * HTTP session that the snapshot holds when the servlet context has a SessionHandler, unless the upgrade is a
+     * reconnection by key that sends no cookie: that session would be left without a context (ADR-0009). Protected so
+     * that a subclass
      * can adjust the snapshot: an override should start from {@code super.captureUpgradeData(request)}, the step that
      * creates the session.
      * <p>
@@ -152,7 +236,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             // (12.1.13 delegates to HttpServletRequest.getSession(), which creates). A context without a
             // SessionHandler has no session to create: getSession(true) would only throw "No SessionManager".
             if (hasSessionHandler(request)) {
-                session = request.getHttpServletRequest().getSession(true);
+                session = request.getHttpServletRequest().getSession(Subprotocols.key(request.getHeader(Subprotocols.HEADER)) == null);
             }
         } catch (final Throwable t) {
             log.warn("Cannot read session from upgrade request", t);
@@ -183,12 +267,57 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         }
     }
 
+    /**
+     * min(version announced by the terminal, configured maximum); version 1 when the parameter is absent
+     * (terminals older than the negotiation) or malformed.
+     */
+    static int negotiateProtocolVersion(final String announced, final ApplicationConfiguration config) {
+        int version = com.ponysdk.core.model.ProtocolVersion.V1;
+        if (announced != null) {
+            try {
+                version = Math.max(com.ponysdk.core.model.ProtocolVersion.V1, Integer.parseInt(announced));
+            } catch (final NumberFormatException e) {
+                version = com.ponysdk.core.model.ProtocolVersion.V1;
+            }
+        }
+        final int max = config != null ? config.getMaxProtocolVersion() : com.ponysdk.core.model.ProtocolVersion.CURRENT;
+        return Math.min(version, Math.min(max, com.ponysdk.core.model.ProtocolVersion.CURRENT));
+    }
+
+    /**
+     * CSWSH guard. Returns {@code true} if the upgrade Origin is acceptable:
+     * <ul>
+     *   <li>no/empty Origin header (non-browser client — no ambient cookies to abuse) → allowed;</li>
+     *   <li>Origin explicitly present in {@code allowedOrigins} → allowed;</li>
+     *   <li>otherwise same-origin only: the Origin authority (host[:port]) must equal {@code host}.</li>
+     * </ul>
+     */
+    static boolean isOriginAllowed(final String origin, final String host, final Set<String> allowedOrigins) {
+        if (origin == null || origin.isEmpty()) return true;
+        if (allowedOrigins != null && allowedOrigins.contains(origin)) return true;
+        final String authority = originAuthority(origin);
+        return authority != null && host != null && authority.equalsIgnoreCase(host);
+    }
+
+    /** Extracts {@code host[:port]} from an Origin such as {@code "https://app.example.com:8443"}. */
+    private static String originAuthority(final String origin) {
+        final int scheme = origin.indexOf("://");
+        if (scheme < 0) return null;
+        final String rest = origin.substring(scheme + 3);
+        final int slash = rest.indexOf('/');
+        return slash >= 0 ? rest.substring(0, slash) : rest;
+    }
+
     public void setMaxIdleTime(final int maxIdleTime) {
         this.maxIdleTime = maxIdleTime;
     }
 
     public void setWebsocketMonitor(final WebsocketMonitor monitor) {
         this.monitor = monitor;
+    }
+
+    public void setMetrics(final PonySDKMetrics metrics) {
+        this.metrics = metrics;
     }
 
 }

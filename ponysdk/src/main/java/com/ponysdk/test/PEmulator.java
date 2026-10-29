@@ -1,13 +1,12 @@
 package com.ponysdk.test;
 
-import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 public class PEmulator {
 
@@ -35,8 +34,9 @@ public class PEmulator {
         object.onClientData(jsonObject);
     }
 
-    public static void addonData(PObject object, JSONObject value) {
-        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), "NATIVE").add("NATIVE", value.toString()).build();
+    public static void addonData(PObject object, JsonObject value) {
+        // As the terminal's sendDataToServer: the addon data is a JSON object under NATIVE
+        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), value).build();
         object.onClientData(jsonObject);
     }
 }

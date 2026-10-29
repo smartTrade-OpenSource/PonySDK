@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,9 +39,10 @@ import java.util.stream.Collectors;
  * A widget that presents a list of choices to the user, either as a list box or
  * as a drop-down list.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-ListBox { }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-ListBox</dt>
+ * <dd>the select</dd>
+ * </dl>
  */
 public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler, Iterable<ListItem> {
 
@@ -53,7 +54,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private final List<ListItem> items = new ArrayList<>();
 
-    private final Set<Integer> selectedIndexes = new TreeSet<>();
+    private final TreeSet<Integer> selectedIndexes = new TreeSet<>();
     private final boolean containsEmptyItem;
     protected int selectedIndex = -1;
     private boolean isMultipleSelect;
@@ -83,8 +84,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
             this.selectedIndex = Integer.parseInt(tokens[0]);
 
-            for (final String index : tokens) {
-                selectedItems.add(Integer.valueOf(index));
+            // -1 alone: nothing chosen
+            if (selectedIndex >= 0) {
+                for (final String index : tokens) {
+                    selectedItems.add(Integer.valueOf(index));
+                }
             }
 
             this.selectedIndexes.clear();
@@ -201,7 +205,17 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     private void sendRemoveItemInstruction(final int index) {
         saveUpdate(writer -> writer.write(ServerToClientModel.ITEM_REMOVED, index));
-        if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
+        // The terminal removes the option and its selection: the selection follows the items
+        final Set<Integer> after = selectedIndexes.tailSet(index, false);
+        if (!after.isEmpty()) {
+            final List<Integer> shifted = new ArrayList<>(after);
+            after.clear();
+            shifted.forEach(i -> selectedIndexes.add(i - 1));
+        }
+        // A single-select drop-down always shows an option: the browser then selects the first one left
+        if (selectedIndex == index) selectedIndex = !selectedIndexes.isEmpty() ? selectedIndexes.first()
+                : !isMultipleSelect && visibleItemCount <= 1 && !items.isEmpty() ? 0 : -1;
+        else if (selectedIndex > index) selectedIndex--;
     }
 
     public Object getValue(final int index) {
@@ -383,7 +397,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         String DOM = "<select pid=\"" + ID + "\">";
 
         for (int i = 0; i < items.size(); i++) {
-            ListItem item = items.get(0);
+            ListItem item = items.get(i);
             DOM += "<option value=\"" + i + "\" " + (selectedIndex == i ? "selected" : "") + ">" + item.label + "</option>";
         }
 

@@ -1,88 +1,104 @@
-ext {
-    java2htmlVersion = '5.0'
-    commonsBeanutilsVersion = '1.11.0'
-    commonsIoVersion = '2.6'
-    commonsFileuploadVersion = '2.0.0-M5'
-    gwtVersion = '2.8.2'
-    jettyVersion = '12.1.13'
-    springVersion = '7.0.9'
-    jakartaServletVersion = '6.1.0'
-    slf4jVersion = '2.0.16'
-    log4jVersion = '2.26.1'
-    jsonVersion = '1.1.6'
-}
-
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    testRuntimeOnly 'org.glassfish:jakarta.json:1.1.6'
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly libs.junit.platform.launcher
+    testRuntimeOnly libs.parsson // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
 
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
-            'org.springframework:spring-context:' + springVersion,
-            'jakarta.json:jakarta.json-api:' + jsonVersion,
-            'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
-            'org.slf4j:slf4j-api:' + slf4jVersion,
-            'de.java2html:java2html:' + java2htmlVersion,
-            'org.eclipse.jetty.websocket:jetty-websocket-jetty-client:' + jettyVersion,
-            'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
-            'commons-io:commons-io:' + commonsIoVersion,
-            'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileuploadVersion,
-            'com.google.code.gson:gson:2.8.8'
+            libs.jakarta.json.api,
+            libs.jakarta.servlet.api,
+            libs.slf4j.api,
+            libs.jetty.websocket.jetty.client,
+            libs.commons.io,
+            libs.commons.fileupload2.jakarta.servlet6
     )
+
+    // Spring kept for the runFlexLayoutDemo task (FlexLayout E2E suite) — uses ponysdk-spring module
+    implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
-            'com.google.gwt:gwt-codeserver:' + gwtVersion,
-            'de.java2html:java2html:' + java2htmlVersion,
-            'org.springframework:spring-aop:' + springVersion,
-            'org.springframework:spring-expression:' + springVersion,
-            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-slf4j2-impl:' + log4jVersion,
+            libs.parsson,
+            libs.spring.context,
+            libs.slf4j.jcl.over.slf4j,
+            libs.slf4j.jul.to.slf4j,
+            libs.log4j.api,
+            libs.log4j.core,
+            libs.log4j.slf4j2.impl
     )
 }
 
-task runCodeServer(type: JavaExec) {
-    dependsOn ':ponysdk:classes'
-    classpath = files({ project(':ponysdk').configurations.gwtdev })
-    classpath += sourceSets.main.runtimeClasspath
-    mainClass = 'com.google.gwt.dev.codeserver.CodeServer'
-    args = [
-            '-src', '../ponysdk/src/main/java',
-            '-generateJsInteropExports', '-noincremental',
-            '-style', 'DETAILED',
-            'com.ponysdk.core.PonyTerminal'
-    ]
-    jvmArgs = ['-server', '-Xmx1024m']
+// The classes of the sample's custom elements (script/webcomponents.js), from their manifest (ADR-0010)
+def webComponents = tasks.register('webComponents', JavaExec) {
+    description = 'Generates the Java classes of script/webcomponents.js from its Custom Elements Manifest'
+    classpath = configurations.runtimeClasspath
+    mainClass = 'com.ponysdk.core.tools.WebComponentGenerator'
+    def manifest = file('src/main/resources/script/custom-elements.json')
+    def output = layout.buildDirectory.dir('generated/sources/webcomponents')
+    inputs.file(manifest).withPropertyName('manifest')
+    outputs.dir(output)
+    doFirst { output.get().asFile.deleteDir() } // an element removed from the manifest leaves no class behind
+    argumentProviders.add({ [manifest.path, 'com.ponysdk.sample.client.wc', output.get().asFile.path] } as CommandLineArgumentProvider)
+}
+sourceSets.main.java.srcDir(webComponents)
+
+// The code the showcase and the portal show is the code that runs: the sources themselves, on the classpath
+processResources {
+    from('src/main/java/com/ponysdk/sample/client') {
+        include '*.java'
+        into 'source' // the showcase's Code panels (Source.java)
+    }
+    from('src/main/java/com/ponysdk/sample/quickstart') {
+        include '*.java'
+        into 'source'
+    }
+    from('src/main/java/com/ponysdk/impl/java') {
+        include 'ShowcaseMain.java' // its drain, shown by the Reconnection page
+        into 'source'
+    }
+    from('src/main/java/com/ponysdk/sample/client') {
+        include 'EmbeddedTicket.java', 'UISampleEntryPoint.java'
+        into 'portal/source' // served by the portal
+    }
 }
 
-task runSampleSpring(type: JavaExec) {
+def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
+
+task runShowcase(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/gwt')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/resources')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/resources/main')
-    mainClass = 'com.ponysdk.impl.spring.MainSpring'
-    jvmArgs = ['-Xmx2g', '-Dlog4j.configurationFile=etc/log4j2.xml']
+    classpath += files(buildDirPath + '/resources/main')
+    mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
+    jvmArgs = [
+        '-Xmx1g',
+        '-XX:+UseZGC',
+        '-Dlog4j.configurationFile=etc/log4j2.xml'
+    ]
+    // ./gradlew :sample:runShowcase -Pdebug: the debug mode, its inspector on every page (Alt+Shift+I)
+    if (project.hasProperty('debug')) systemProperty 'ponysdk.debug', 'true'
+    // ./gradlew :sample:runShowcase -PhotReload: a page recompiled (the IDE, or compileJava) reloads in the browser
+    if (project.hasProperty('hotReload')) systemProperty 'ponysdk.hotReload', 'true'
 }
 
+// The quick start of README.md and ARCHITECTURE.md: http://localhost:8080/hello/
+task runQuickStart(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.ponysdk.sample.quickstart.HelloWorldMain'
+    jvmArgs = ['-Dlog4j.configurationFile=etc/log4j2.xml']
+}
+
+// FlexLayout demo — activates the 'flexlayout' Spring profile (see etc/server_application.xml).
+// Used by the Playwright E2E suite (sample/tests/flexlayout.spec.js) on http://localhost:8081/sample/.
 task runFlexLayoutDemo(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/gwt')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/resources')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/resources/main')
+    classpath += files(buildDirPath + '/resources')
+    classpath += files(buildDirPath + '/resources/main')
     mainClass = 'com.ponysdk.impl.spring.MainSpring'
-    jvmArgs = ['-Xmx2g', '-Dlog4j.configurationFile=etc/log4j2.xml', '-Dspring.profiles.active=flexlayout']
+    jvmArgs = [
+        '-Xmx2g',
+        '-Dlog4j.configurationFile=etc/log4j2.xml',
+        '-Dspring.profiles.active=flexlayout'
+    ]
 }
 
-task runSampleTrading(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/debug/gwt')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/prod/gwt')
-    classpath += files(layout.buildDirectory.get().asFile.path + '/resources/etc')
-    mainClass = 'com.ponysdk.impl.java.Main'
-    jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
-               '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
-               '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less']
+test {
+    useJUnitPlatform()
 }

@@ -121,7 +121,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void setColumns(final int size) {
-        simpleListView.setColumns(size);
+        throw new UnsupportedOperationException(); // as its DefaultSimpleListView
     }
 
     @Override
@@ -232,12 +232,12 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void moveRow(final int index, final int beforeIndex) {
-        simpleListView.moveRow(index, beforeIndex);
+        throw new UnsupportedOperationException(); // as its DefaultSimpleListView
     }
 
     @Override
     public void moveColumn(final int index, final int beforeIndex) {
-        simpleListView.moveColumn(index, beforeIndex);
+        throw new UnsupportedOperationException(); // as its DefaultSimpleListView
     }
 
 }

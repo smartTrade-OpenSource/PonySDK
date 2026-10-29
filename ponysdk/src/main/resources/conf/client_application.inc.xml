@@ -5,7 +5,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     <context:annotation-config/>
 
-    <bean name="eventBus" class="com.ponysdk.core.ui.eventbus.SimpleEventBus"/>
+    <bean name="eventBus" class="com.ponysdk.core.ui.eventbus.EventBus"/>
     <bean name="history" class="com.ponysdk.core.ui.basic.PHistory"/>
     <bean name="placeController" class="com.ponysdk.core.ui.place.PlaceController">
         <constructor-arg ref="history"/>

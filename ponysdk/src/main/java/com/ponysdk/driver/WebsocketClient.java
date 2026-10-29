@@ -28,10 +28,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.websocket.ClientEndpointConfig;
 import jakarta.websocket.ClientEndpointConfig.Configurator;
@@ -91,20 +87,13 @@ class WebsocketClient implements AutoCloseable {
             .build();
         final ClientManager client = ClientManager.createClient();
         client.getProperties().put(ClientProperties.REDIRECT_ENABLED, true);
-        final Lock lock = new ReentrantLock();
-        final Condition condition = lock.newCondition();
+        // Synchronous: Tyrus calls onOpen before connectToServer returns, and throws if the handshake fails
         client.connectToServer(new Endpoint() {
 
             @Override
             public void onOpen(final Session session, final EndpointConfig config) {
-                lock.lock();
-                try {
-                    WebsocketClient.this.session = session;
-                    condition.signal();
-                    session.addMessageHandler(handler);
-                } finally {
-                    lock.unlock();
-                }
+                WebsocketClient.this.session = session;
+                session.addMessageHandler(handler);
                 sessionListener.onOpen(session);
             }
 
@@ -123,15 +112,6 @@ class WebsocketClient implements AutoCloseable {
             }
 
         }, cec, uri);
-        lock.lock();
-        try {
-            if (session == null && !condition.await(5, TimeUnit.MINUTES)) {
-                log.error("Connection to {} failed after 5 minutes timeout", uri);
-                return;
-            }
-        } finally {
-            lock.unlock();
-        }
         log.debug("Connected to {} with session ID {}", uri, session.getId());
     }
 

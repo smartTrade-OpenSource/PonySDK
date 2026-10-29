@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows and frames</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="portal.css">
+<script src="app-url.js" defer></script>
+<script src="gallery.js" defer></script>
+</head>
+<body data-embeds>
+<header class="portal-header">
+  <a class="portal-brand" href="./">Northwind Treasury</a>
+  <div class="portal-note">U8 · Windows and frames</div>
+</header>
+<main>
+  <section class="gallery-intro">
+    <h1>Windows and frames</h1>
+    <p>An embedded application opens a window (<code>PWindow</code>) or a frame (<code>PFrame</code>) as in its own
+      page. Their pages are the application's, on its origin: they talk to the element's terminal by
+      <code>postMessage</code>, and accept as their parent only a page the application lists in
+      <code>wsAllowedOrigins</code>.</p>
+  </section>
+  <div class="gallery-row">
+    <figure class="portal-ticket">
+      <figcaption>A ticket: <em>Pop out</em> opens it in a window of its own, priced and traded on the same context.</figcaption>
+      <pony-app id="ticket" view="ticket" instrument="EURUSD" data-src="{app}">Loading the ticket…</pony-app>
+    </figure>
+    <figure class="portal-ticket">
+      <figcaption>A frame of the application, running a terminal of its own, fed by the element's.</figcaption>
+      <pony-app id="framed" data-src="{app}#oracle-frame">Loading the frame…</pony-app>
+    </figure>
+  </div>
+</main>
+</body>
+</html>

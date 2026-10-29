@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,17 +57,14 @@ import com.ponysdk.core.writer.ModelWriter;
  * <p>
  * The PopupPanel can be optionally displayed with a "glass" element behind it, which is commonly
  * used to gray out the widgets behind it. It can be enabled using {@link #setGlassEnabled(boolean)}
- * . It has a default style name of "gwt-PopupPanelGlass", which can be changed using
- * {@link #setGlassStyleName(String)}.
+ * . Its class is pony-Glass, with the name given to {@link #setGlassStyleName(String)}.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-PopupPanel</dt>
- * <dd>the outside of the popup</dd>
- * <dt>.gwt-PopupPanel .popupContent</dt>
- * <dd>the wrapper around the content</dd>
- * <dt>.gwt-PopupPanelGlass</dt>
- * <dd>the glass background behind the popup</dd>
+ * <dt>.pony-PopupPanel</dt>
+ * <dd>the popup, a dialog element in the top layer</dd>
+ * <dt>.pony-Glass</dt>
+ * <dd>the glass behind the popup, with the glass style name</dd>
  * </dl>
  */
 public class PPopupPanel extends PSimplePanel {
@@ -149,15 +146,6 @@ public class PPopupPanel extends PSimplePanel {
 
     public void setGlassEnabled(final boolean glassEnabled) {
         saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
-    }
-
-    /**
-     * @deprecated Use {@link #isVisible()} directly
-     * @since v2.7.8
-     */
-    @Deprecated
-    public boolean isShowing() {
-        return isVisible();
     }
 
     @Override

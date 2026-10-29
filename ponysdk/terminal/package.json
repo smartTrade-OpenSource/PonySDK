@@ -1,0 +1,20 @@
+{
+  "name": "ponysdk-terminal",
+  "private": true,
+  "description": "The TypeScript terminal of PonySDK (docs/decisions/0002-javascript-terminal.md)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "imports": {
+    "#model": "./build/generated/model.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "bundle": "node build.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

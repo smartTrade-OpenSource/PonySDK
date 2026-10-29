@@ -59,7 +59,14 @@ public class StreamServiceServlet extends HttpServlet {
     private static void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            // Resolve within the caller's HTTP session, or by its key — guard against cross-session access (IDOR).
+            // The stream key S, a URL's, fetches a pending stream only: a GET, not an upload
+            final UIContext uiContext = SessionManager.get().getUIContext(req, uiContextID, "GET".equals(req.getMethod()));
+            if (uiContext == null) {
+                log.warn("UI Context #{} not found for the calling session", uiContextID);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "UI Context #" + uiContextID + " not found");
+                return;
+            }
             final StreamHandler streamHandler = uiContext
                     .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);

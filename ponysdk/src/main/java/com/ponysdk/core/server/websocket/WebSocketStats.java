@@ -110,17 +110,10 @@ public class WebSocketStats {
                 .flatMap(e -> e.getValue().entrySet().stream().map(ee -> new Pair<>(e.getKey(), ee)));
             if (valueFilter != null) s2 = s2.filter(p -> valueFilter.test(p.getSecond().getKey()));
 
-            s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).forEach(p -> {
-                try {
-                    writeCsvLine(separator, writer, p);
-                } catch (final IOException e) {
-                    throw new IllegalStateException(e);
-                }
-            });
-        } catch (final IllegalArgumentException e) {
-            final Throwable t = e.getCause();
-            if (t instanceof IOException) throw (IOException) t;
-            throw e;
+            // A loop, not forEach: a write failure leaves as the IOException it is
+            for (final var p : s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).toList()) {
+                writeCsvLine(separator, writer, p);
+            }
         }
     }
 
@@ -134,7 +127,7 @@ public class WebSocketStats {
         writer.write('\n');
         writer.write(Objects.toString(p.getFirst()));
         writer.write(separator);
-        writer.write(Objects.toString(modelToValueType(p.getFirst())));
+        writer.write(Objects.toString(p.getFirst().getTypeModel()));
         writer.write(separator);
         Object v = p.getSecond().getKey();
         if (isGrouped()) {
@@ -202,6 +195,8 @@ public class WebSocketStats {
                         final Pair<Object, String> pair = (Pair<Object, String>) value;
                         encodeValue(outputStream, pair.getFirst());
                         writeUTF(outputStream, pair.getSecond());
+                    } else {
+                        encodeValue(outputStream, value);
                     }
                     final Record record = recordEntry.getValue();
                     outputStream.writeInt(record.getMetaBytes());
@@ -215,23 +210,23 @@ public class WebSocketStats {
     private static void encodeValue(final DataOutputStream outputStream, final Object v) throws IOException {
         if (v == null) {
             outputStream.writeByte(NULL_VALUE);
-        } else if (v instanceof Boolean) {
-            outputStream.write(v.equals(Boolean.TRUE) ? TRUE_VALUE : FALSE_VALUE);
-        } else if (v instanceof Byte) {
+        } else if (v instanceof Boolean b) {
+            outputStream.write(b ? TRUE_VALUE : FALSE_VALUE);
+        } else if (v instanceof Byte b) {
             outputStream.write(BYTE_VALUE);
-            outputStream.writeByte((byte) v);
-        } else if (v instanceof Short) {
+            outputStream.writeByte(b);
+        } else if (v instanceof Short s) {
             outputStream.write(SHORT_VALUE);
-            outputStream.writeShort((short) v);
-        } else if (v instanceof Integer) {
+            outputStream.writeShort(s);
+        } else if (v instanceof Integer i) {
             outputStream.write(INT_VALUE);
-            outputStream.writeInt((int) v);
-        } else if (v instanceof Float) {
+            outputStream.writeInt(i);
+        } else if (v instanceof Float f) {
             outputStream.write(FLOAT_VALUE);
-            outputStream.writeFloat((float) v);
-        } else if (v instanceof Double) {
+            outputStream.writeFloat(f);
+        } else if (v instanceof Double d) {
             outputStream.write(DOUBLE_VALUE);
-            outputStream.writeDouble((double) v);
+            outputStream.writeDouble(d);
         } else {
             outputStream.write(STRING_VALUE);
             writeUTF(outputStream, v.toString());
@@ -280,7 +275,9 @@ public class WebSocketStats {
                     log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
                 }
                 final int nbRecords = inputStream.readInt();
-                final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
+                // The records of an unknown model are read past, not kept: an EnumMap has no null key
+                final Map<Object, Record> records = model != null ? stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords))
+                        : new HashMap<>();
                 for (int j = 0; j < nbRecords; j++) {
                     Object value = decodeValue(inputStream);
                     if (grouped) {
@@ -347,7 +344,7 @@ public class WebSocketStats {
         for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
             for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
                 final Record record = recordEntry.getValue();
-                final ValueTypeModel valueType = modelToValueType(entry.getKey());
+                final ValueTypeModel valueType = entry.getKey().getTypeModel();
                 map.computeIfAbsent(valueType, vt -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
                     (long) record.getCount() * record.getDataBytes());
             }
@@ -362,7 +359,7 @@ public class WebSocketStats {
             for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
                 final Record record = recordEntry.getValue();
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
-                final Pair<ValueTypeModel, String> pair = new Pair<>(modelToValueType(entry.getKey()), groupName);
+                final Pair<ValueTypeModel, String> pair = new Pair<>(entry.getKey().getTypeModel(), groupName);
                 map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
                     (long) record.getCount() * record.getDataBytes());
             }
@@ -412,10 +409,6 @@ public class WebSocketStats {
             }
         }
         return map;
-    }
-
-    private static ValueTypeModel modelToValueType(final ServerToClientModel model) {
-        return model == null ? null : model.getTypeModel();
     }
 
     public boolean isGrouped() {

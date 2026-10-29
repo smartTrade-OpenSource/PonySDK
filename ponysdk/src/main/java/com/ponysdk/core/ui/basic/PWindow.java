@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -37,7 +36,7 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 public class PWindow extends PObject {
@@ -55,7 +54,7 @@ public class PWindow extends PObject {
     private boolean relative = false;
     private final Location location;
 
-    private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
+    private Map<String, PRootPanel> panelByZone = new HashMap<>(4);
 
     private Map<TextFunction, PFunction> functions;
 
@@ -63,6 +62,17 @@ public class PWindow extends PObject {
 
     private List<PVisibilityHandler> visibilityHandlers;
     private boolean shown = true;
+
+    /**
+     * The context this window was created in. Lets the window's widgets reach their writer without a
+     * UIContext.get() ThreadLocal lookup per update (it was ~10% of the CPU of a busy push loop).
+     */
+    private final UIContext ownerContext = UIContext.get();
+
+    /** Writer of the owning context: never null, an object is only made in a context (its ID comes from it). */
+    final ModelWriter contextWriter() {
+        return ownerContext.getWriter();
+    }
 
     PWindow() {
         this.location = new Location(this);
@@ -96,14 +106,14 @@ public class PWindow extends PObject {
         if (initialized) return;
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.runAll();
             stackedInstructions = null;
         }
 
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this, null));
-        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+        fireInitializeListeners();
 
         UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
     }
@@ -287,6 +297,7 @@ public class PWindow extends PObject {
             }
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
+            PWindowManager.unregisterWindow(this);
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
             shown = event.getBoolean(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue());
@@ -379,6 +390,11 @@ public class PWindow extends PObject {
         return ensureRootPanel(zoneID);
     }
 
+    /** True for the main window of a UIContext (no lookup: safe while that window is being created). */
+    public boolean isMainWindow() {
+        return this instanceof PMainWindow;
+    }
+
     public static boolean isMain(final PWindow window) {
         return getMain() == window;
     }
@@ -389,7 +405,7 @@ public class PWindow extends PObject {
     }
 
     private Object removeWindow(final PWindow window) {
-        return subWindows != null && subWindows.remove(window);
+        return subWindows.remove(window); // a sub window was added at its creation
     }
     
     public Set<PWindow> getSubWindows() {
@@ -425,6 +441,7 @@ public class PWindow extends PObject {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
      */
     public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        // Nothing to register with the terminal: its root panel always sends HANDLER_DOCUMENT_VISIBILITY
         if (visibilityHandlers == null) visibilityHandlers = new ArrayList<>();
         visibilityHandlers.add(visibilityHandler);
     }
@@ -435,10 +452,7 @@ public class PWindow extends PObject {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
      */
     public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
-        if (visibilityHandlers != null) {
-            visibilityHandlers.remove(visibilityHandler);
-            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
-        }
+        if (visibilityHandlers != null) visibilityHandlers.remove(visibilityHandler);
     }
 
     /**
@@ -606,12 +620,12 @@ public class PWindow extends PObject {
     }
 
     protected String dumpDOM() {
-        String DOM = "<body>";
-        for (PRootPanel panel : panelByZone.values()) {
-            DOM += panel.dumpDOM();
+        final StringBuilder sb = new StringBuilder("<body>");
+        for (final PRootPanel panel : panelByZone.values()) {
+            sb.append(panel.dumpDOM());
         }
-        DOM += "</body>";
-        return DOM;
+        sb.append("</body>");
+        return sb.toString();
     }
 
 }

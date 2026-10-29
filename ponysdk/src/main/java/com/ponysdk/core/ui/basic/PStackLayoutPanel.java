@@ -51,14 +51,12 @@ import java.util.Objects;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-StackLayoutPanel
- * <dd>the panel itself
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader
- * <dd>applied to each header widget
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader-hovering
- * <dd>applied to each header widget on mouse hover
- * <dt>.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent
- * <dd>applied to each child widget
+ * <dt>.pony-StackLayoutPanel</dt>
+ * <dd>the panel</dd>
+ * <dt>.pony-StackLayoutPanel-header</dt>
+ * <dd>a header, a button; <code>[aria-expanded=true]</code> for the open one</dd>
+ * <dt>.pony-StackLayoutPanel-content</dt>
+ * <dd>the content of a header</dd>
  * </dl>
  */
 public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimatedLayout {
@@ -90,12 +88,19 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         return WidgetType.STACKLAYOUT_PANEL;
     }
 
+    /** Children added before this panel was attached are attached (hence created) with it, as in PPanel. */
+    @Override
+    void init0() {
+        super.init0();
+        children.forEach(widget -> widget.attach(window, getFrame()));
+    }
+
     public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
         child.removeFromParent();
         children.add(child);
         adopt(child);
 
-        child.attach(window, frame);
+        child.attach(window, getFrame());
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }
@@ -118,14 +123,18 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
     @Override
     public void add(final PWidget w) {
-        log.error("Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
-        throw new UnsupportedOperationException(
-                "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
+        throw unsupportedAdd();
     }
 
     @Override
     public void add(final IsPWidget w) {
-        add(w.asWidget());
+        throw unsupportedAdd();
+    }
+
+    private static UnsupportedOperationException unsupportedAdd() {
+        final String message = "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead";
+        log.error(message);
+        return new UnsupportedOperationException(message);
     }
 
     @Override
@@ -137,14 +146,14 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         }
     }
 
+    /** The child was just removed from its parent. */
     private void adopt(final PWidget child) {
-        if (child.getParent() == null) child.setParent(this);
-        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+        child.setParent(this);
     }
 
+    /** The child's parent is this panel. */
     private void orphan(final PWidget child) {
-        if (child.getParent() == this) child.setParent(null);
-        else throw new IllegalStateException("Can't adopt an widget attached to another parent");
+        child.setParent(null);
     }
 
     public void addBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
@@ -171,7 +180,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, (int) duration.toMillis()));
     }
 
     public Duration getAnimationDuration() {

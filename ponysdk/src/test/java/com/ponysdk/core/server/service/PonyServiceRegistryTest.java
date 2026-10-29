@@ -23,9 +23,10 @@
 
 package com.ponysdk.core.server.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class PonyServiceRegistryTest {
@@ -56,20 +57,23 @@ public class PonyServiceRegistryTest {
      * Test method for
      * {@link com.ponysdk.core.server.service.PonyServiceRegistry#registerPonyService(com.ponysdk.core.server.service.PonyService)}.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetNotUnregistedPonyService() {
-        PonyServiceRegistry.getPonyService(ServiceA.class);
+        assertThrows(IllegalArgumentException.class, () ->
+            PonyServiceRegistry.getPonyService(ServiceA.class));
     }
 
     /**
      * Test method for
      * {@link com.ponysdk.core.server.service.PonyServiceRegistry#registerPonyService(com.ponysdk.core.server.service.PonyService)}.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRegistedPonyServiceTwice() {
-        final PonyService service1 = Mockito.mock(ServiceA.class);
-        PonyServiceRegistry.registerPonyService(service1);
-        PonyServiceRegistry.registerPonyService(service1);
+        assertThrows(IllegalArgumentException.class, () -> {
+            final PonyService service1 = Mockito.mock(ServiceA.class);
+            PonyServiceRegistry.registerPonyService(service1);
+            PonyServiceRegistry.registerPonyService(service1);
+        });
     }
 
 }

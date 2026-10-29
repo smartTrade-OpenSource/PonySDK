@@ -30,11 +30,10 @@ import com.ponysdk.core.model.ServerToClientModel;
 /**
  * A standard single-line text box.
  * <h3>CSS Style Rules</h3>
- * <ul class='css'>
- * <li>.gwt-TextBox { primary style }</li>
- * <li>.gwt-TextBox-readonly { dependent style set when the text box is
- * read-only }</li>
- * </ul>
+ * <dl>
+ * <dt>.pony-TextBox</dt>
+ * <dd>the field; <code>:read-only</code> when read-only</dd>
+ * </dl>
  */
 public class PTextBox extends PTextBoxBase {
 

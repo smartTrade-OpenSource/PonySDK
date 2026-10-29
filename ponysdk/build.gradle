@@ -1,30 +1,18 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
     id 'jacoco'
+    alias(libs.plugins.node.gradle)
 }
 ext {
     resourcesCoreTest = "src/test/resources"
-    gwtOutputDirName = layout.buildDirectory.get().asFile.path + "/gwt"
-    jsinteropVersion = '1.0.2'
-    glassfishVersion = '1.1.6'
-    jakartaValidationVersion = '3.1.1'
-    seleniumVersion = '3.14.0'
-    junitVersion = '4.12'
-    tyrusVersion = '2.2.2'
-    mockitoVersion = '5.20.0'
-    gwtVersion = '2.9.0'
-    elemental2Version = '1.1.0'
-    jettyVersion = '12.1.13'
-    springVersion = '7.0.9'
-    jakartaServletVersion = '6.1.0'
-    jakartaWebsocketClientVersion = '2.2.0'
-    slf4jVersion = '2.0.16'
-    log4jVersion = '2.26.1'
-    jsonVersion = '1.1.6'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
+// Optional local qualifier, e.g. -PVERSION_QUALIFIER=LD -> 3.0.0-LD-SNAPSHOT
+def versionQualifier = project.hasProperty('VERSION_QUALIFIER') ? "-${project.property('VERSION_QUALIFIER')}" : ""
 group = 'com.ponysdk'
-version = '2.10.2' + versionSuffix
+version = '3.0.0' + versionQualifier + versionSuffix
 
 publishing {
     publications {
@@ -46,79 +34,162 @@ publishing {
     }
 }
 
+// Code excluded from coverage metrics & gate: the test harness shipped in main (com.ponysdk.test.*), test-support
+// code, not product logic
+def coverageExclusions = [
+        'com/ponysdk/test/**',
+]
+
 jacocoTestReport {
     reports {
         xml.required = true
-        xml.outputLocation = file("${layout.buildDirectory.get().asFile}/reports/jacoco/report.xml")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
         html.required = false
         csv.required = false
     }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
 }
 
-configurations {
-    gwt
-    gwtdev
-    implementation.extendsFrom gwt
+// Progressive coverage gate. Thresholds sit just below the current verified ratios so the build
+// passes today; raise them incrementally as coverage improves (ratchet — never lower them).
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
+    violationRules {
+        // Whole-module floor (over the testable code; the test harness is excluded above).
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.99
+            }
+        }
+        // Every package: at least 99% of its lines and branches (checked package by package).
+        rule {
+            element = 'PACKAGE'
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.99 }
+            limit { counter = 'BRANCH'; value = 'COVEREDRATIO'; minimum = 0.99 }
+        }
+    }
+}
+
+// TypeScript terminal (docs/decisions/0002-javascript-terminal.md): sources in terminal/, Node provisioned by Gradle.
+node {
+    version = '24.22.1'
+    download = true
+    nodeProjectDir = file('terminal')
+    npmInstallCommand = 'ci'
+}
+
+sourceSets {
+    // Build tooling, not shipped: writes the terminal's protocol model from com.ponysdk.core.model
+    generator {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+def terminalModel = tasks.register('terminalModel', JavaExec) {
+    description = 'Generates terminal/build/generated/model.ts from com.ponysdk.core.model'
+    classpath = sourceSets.generator.runtimeClasspath
+    mainClass = 'com.ponysdk.generator.TerminalModelGenerator'
+    def classes = sourceSets.main.java.destinationDirectory
+    def output = layout.projectDirectory.file('terminal/build/generated/model.ts')
+    inputs.files(classes.dir('com/ponysdk/core/model')).withPropertyName('modelClasses')
+    outputs.file(output)
+    argumentProviders.add({ [output.asFile.path, classes.get().asFile.path] } as CommandLineArgumentProvider)
+}
+
+def terminalSources = [file('terminal/src'), file('terminal/package.json'), file('terminal/package-lock.json'),
+                       file('terminal/tsconfig.json'), file('terminal/build.mjs')]
+
+def terminalCheck = tasks.register('terminalCheck', NpmTask) {
+    description = 'Type-checks the TypeScript terminal'
+    group = 'verification'
+    dependsOn tasks.named('npmInstall'), terminalModel
+    args = ['run', 'check']
+    inputs.files(terminalSources, file('terminal/test'), terminalModel)
+    def stamp = layout.buildDirectory.file('terminal/check.stamp')
+    outputs.file(stamp)
+    doLast { stamp.get().asFile.text = '' }
+}
+
+// Frames written by the real server write path, which the terminal's tests read (TerminalFixtures)
+def terminalFixtures = tasks.register('terminalFixtures', JavaExec) {
+    description = 'Writes terminal/build/fixtures: server frames for the tests of the TypeScript terminal'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ponysdk.core.server.websocket.TerminalFixtures'
+    def output = layout.projectDirectory.dir('terminal/build/fixtures')
+    inputs.files(sourceSets.main.output, sourceSets.test.output).withPropertyName('classes')
+    outputs.dir(output)
+    argumentProviders.add({ [output.asFile.path] } as CommandLineArgumentProvider)
+}
+
+def terminalTest = tasks.register('terminalTest', NpmTask) {
+    description = 'Runs the unit tests of the TypeScript terminal on Node'
+    group = 'verification'
+    dependsOn tasks.named('npmInstall'), terminalModel, terminalFixtures
+    args = ['run', 'test']
+    inputs.files(terminalSources, file('terminal/test'), terminalModel, terminalFixtures)
+    def stamp = layout.buildDirectory.file('terminal/test.stamp')
+    outputs.file(stamp)
+    doLast { stamp.get().asFile.text = '' }
+}
+
+def terminalBundle = tasks.register('terminalBundle', NpmTask) {
+    description = 'Bundles the TypeScript terminal into terminal/build/dist/terminal.js'
+    dependsOn tasks.named('npmInstall'), terminalModel
+    args = ['run', 'bundle']
+    inputs.files(terminalSources, terminalModel)
+    outputs.dir('terminal/build/dist')
 }
 
 dependencies {
-    gwt(
-            'com.google.gwt:gwt-user:' + gwtVersion,
-            'com.google.gwt:gwt-elemental:' + gwtVersion,
-            'com.google.elemental2:elemental2-dom:' + elemental2Version
-    )
-
-    gwtdev(
-            'com.google.gwt:gwt-dev:' + gwtVersion
-    )
-
     implementation(
-            'jakarta.validation:jakarta.validation-api:' + jakartaValidationVersion,
-            'com.google.jsinterop:jsinterop:' + jsinteropVersion,
-            'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
-            'org.eclipse.jetty:jetty-server:' + jettyVersion,
-            'org.eclipse.jetty.ee11:jetty-ee11-servlet:' + jettyVersion,
-            'org.eclipse.jetty.ee11:jetty-ee11-webapp:' + jettyVersion,
-            'org.eclipse.jetty:jetty-client:' + jettyVersion,
-            'org.eclipse.jetty:jetty-io:' + jettyVersion,
-            'org.eclipse.jetty:jetty-util:' + jettyVersion,
-            'org.eclipse.jetty:jetty-http:' + jettyVersion,
-            'org.eclipse.jetty:jetty-security:' + jettyVersion,
-            'org.eclipse.jetty.websocket:jetty-websocket-jetty-api:' + jettyVersion,
-            'org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jetty-server:' + jettyVersion,
-            'org.eclipse.jetty.websocket:jetty-websocket-core-common:' + jettyVersion,
-            'org.eclipse.jetty.websocket:jetty-websocket-core-server:' + jettyVersion,
-            'org.springframework:spring-core:' + springVersion,
-            'org.springframework:spring-web:' + springVersion,
-            'org.springframework:spring-beans:' + springVersion,
-            'org.springframework:spring-context:' + springVersion,
-            'org.slf4j:slf4j-api:' + slf4jVersion,
-            'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
-            'jakarta.json:jakarta.json-api:' + jsonVersion,
-            'org.glassfish:jakarta.json:' + glassfishVersion,
-            'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
-            'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
-            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
-            'junit:junit:' + junitVersion,
-            'org.mockito:mockito-core:' + mockitoVersion
+            libs.jakarta.validation.api,
+            // OpenTelemetry API — metrics + trace (no SDK, user brings their own)
+            libs.opentelemetry.api,
+            libs.bundles.jetty.server,
+            libs.slf4j.api,
+            libs.jakarta.servlet.api,
+            libs.jakarta.json.api,
+            libs.parsson,
+            libs.selenium.api,
+            libs.tyrus.client,
+            libs.tyrus.extension.deflate,
+            libs.junit.jupiter.api,
+            libs.mockito.core
     )
 
     testImplementation(
-            'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
-            'jakarta.websocket:jakarta.websocket-client-api:' + jakartaWebsocketClientVersion,
-            'org.jsoup:jsoup:1.14.3',
-            'org.junit.jupiter:junit-jupiter-api:5.8.1',
-            'org.junit.jupiter:junit-jupiter-engine:5.8.1',
-            'org.junit.platform:junit-platform-engine:1.8.1',
-            'org.junit.platform:junit-platform-launcher:1.8.1'
+            libs.junit.jupiter,
+            libs.selenium.java,
+            libs.jakarta.websocket.client.api,
+            libs.jsoup,
+            libs.log4j.core // LogLevel sets a logger's level for a test
     )
 
     testRuntimeOnly(
-            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-            'org.apache.logging.log4j:log4j-slf4j2-impl:' + log4jVersion,
-            'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
+            libs.junit.platform.launcher,
+            libs.bundles.log4j.slf4j,
+            libs.tyrus.container.grizzly.client
     )
 }
 
@@ -128,8 +199,6 @@ java {
 }
 
 javadoc {
-    classpath += configurations.gwtdev
-    exclude '**/terminal/**'
     options.addStringOption('Xdoclint:none', '-quiet')
     failOnError = false
 }
@@ -147,10 +216,8 @@ def buildTimestamp = providers.provider {
 
 jar {
     into('ponyterminal') {
-        from gwtOutputDirName + '/gwt/ponyterminal'
+        from terminalBundle
     }
-    exclude('*.devmode.js')
-    exclude('*compilation-mappings.txt')
 
     // Also expose the js/css as a webjar so servlet containers can serve them straight from the jar
     with(copySpec {
@@ -158,53 +225,58 @@ jar {
         from("src/main/resources/style").into("META-INF/resources/webjars/ponysdk/${project.version}")
     })
 
+    def builtBy = providers.systemProperty('user.name')
+    def javaVersion = providers.systemProperty('java.version')
+    def javaVendor = providers.systemProperty('java.vendor')
+    def javaVmVersion = providers.systemProperty('java.vm.version')
+    def osName = providers.systemProperty('os.name')
+    def osArch = providers.systemProperty('os.arch')
+    def osVersion = providers.systemProperty('os.version')
+    def gradleVer = GradleVersion.current().version
+
     manifest {
         attributes(
-                'Built-By': System.properties['user.name'],
+                'Built-By': builtBy,
                 'Build-Timestamp': buildTimestamp,
                 'Build-Revision': gitRevision,
-                'Created-By': "Gradle ${gradle.gradleVersion}",
-                'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'Created-By': "Gradle ${gradleVer}",
+                'Build-Jdk': javaVersion.map { v -> "${v} (${javaVendor.get()} ${javaVmVersion.get()})" },
+                'Build-OS': osName.map { n -> "${n} ${osArch.get()} ${osVersion.get()}" },
                 'License-Title': "Apache License 2.0"
         )
     }
 }
 
-task gwtc(type: JavaExec) {
-    inputs.dir('src/main/java/com/ponysdk/core/terminal')
-    outputs.dir(gwtOutputDirName + '/gwt/ponyterminal')
-    description = "GWT compile to JavaScript (production mode)"
-    mainClass = 'com.google.gwt.dev.Compiler'
-    workingDir = new File(gwtOutputDirName)
-    classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
-    maxHeapSize = '512M'
-    args = [
-            '-war',
-            'gwt',
-            '-localWorkers',
-            Runtime.getRuntime().availableProcessors(),
-            'com.ponysdk.core.PonyTerminal',
-            '-generateJsInteropExports'
-            // Debug Mode
-            // '-style', 'DETAILED',
-            // '-optimize', '0'
-    ]
+// Server write-path bench (protocol / wire bytes, CPU, allocations, heap): ./gradlew :ponysdk:bench [-Pbench.args=v1]
+tasks.register('bench', JavaExec) {
+    group = 'verification'
+    description = 'Runs the protocol bench (ProtocolBench) on the real write path'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ponysdk.core.server.websocket.ProtocolBench'
+    jvmArgs '-Xmx2g', '-XX:+UseParallelGC', '-Dorg.slf4j.simpleLogger.defaultLogLevel=warn'
+    if (project.hasProperty('bench.args')) args project.property('bench.args').toString().split(' ')
+    if (project.hasProperty('bench.jvm')) jvmArgs project.property('bench.jvm').toString().split(' ')
+    ['bench.stats', 'bench.debug', 'bench.histo'].each { k -> if (project.hasProperty(k)) systemProperty k, 'true' }
 }
 
 test {
-    classpath = files(resourcesCoreTest, layout.buildDirectory.get().asFile.path + "/gwt") + classpath
-    afterSuite { desc, result ->
-        if (!desc.parent) {
-            println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-        }
+    useJUnitPlatform()
+    classpath = files(resourcesCoreTest) + classpath
+    // Forward opt-in browser-test properties to the forked test JVM (see driver/BinaryAddonBrowserIT)
+    ['ponysdk.browserTest', 'ponysdk.browserUrl', 'ponysdk.chromeBinary', 'webdriver.chrome.driver'].each { k ->
+        if (System.getProperty(k) != null) systemProperty k, System.getProperty(k)
     }
+    addTestListener(new TestListener() {
+        @Override void beforeSuite(TestDescriptor descriptor) {}
+        @Override void beforeTest(TestDescriptor descriptor) {}
+        @Override void afterTest(TestDescriptor descriptor, TestResult result) {}
+        @Override void afterSuite(TestDescriptor descriptor, TestResult result) {
+            if (descriptor.parent == null) {
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            }
+        }
+    })
 }
 
-check.dependsOn jacocoTestReport
-gwtc.dependsOn classes
-jar.dependsOn gwtc
-// The test task adds the gwtc output dir (build/gwt) to its runtime classpath, so it consumes
-// gwtc's output. Gradle 8.14 requires that implicit input/output relationship to be explicit.
-test.dependsOn gwtc
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification, terminalCheck, terminalTest
 publish.dependsOn check

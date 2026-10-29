@@ -26,8 +26,8 @@ package com.ponysdk.core.ui.dropdown;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
@@ -45,7 +45,6 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private static final String PROPERTY_ABSOLUTE = "absolute";
     private static final String PROPERTY_TOP = "top";
     private static final String PROPERTY_LEFT = "left";
-    private static final String PROPERTY_RIGHT = "right";
     private static final String PROPERTY_0 = "0";
 
     private static final String PARENT_ID = "parentId";
@@ -86,14 +85,9 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         this.parent = parent;
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
-        if (stickLeft) {
-            if (!multilevel) {
-                // The multilevel dropdown is designed to open each new level next to the previous one, so it won't stick to the left of the container.
-                widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
-            }
-        } else {
-            widget.setStyleProperty(PROPERTY_RIGHT, PROPERTY_0);
-        }
+        // Both builders stick to the left. The multilevel dropdown is designed to open each new level next to the
+        // previous one, so it won't stick to the left of the container.
+        if (!multilevel) widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
         this.listeners = new HashSet<>();
         setTerminalHandler(event -> {
             final JsonObject jsonObject = event.getData();

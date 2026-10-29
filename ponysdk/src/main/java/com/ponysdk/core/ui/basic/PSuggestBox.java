@@ -33,7 +33,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -68,8 +68,12 @@ import java.util.Objects;
  *
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-SuggestBox</dt>
- * <dd>the suggest box itself</dd>
+ * <dt>.pony-SuggestBox</dt>
+ * <dd>the field (role combobox)</dd>
+ * <dt>.pony-SuggestPopup</dt>
+ * <dd>the list of suggestions (role listbox)</dd>
+ * <dt>.pony-SuggestPopup [role=option]</dt>
+ * <dd>a suggestion; <code>[aria-selected=true]</code> for the current one</dd>
  * </dl>
  * TODO(pdr): Add SafeHtml support to this and implementing classes.
  *
@@ -78,7 +82,7 @@ import java.util.Objects;
  * @see PTextBoxBase
  */
 public class PSuggestBox extends PWidget
-        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion> {
+        implements HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion> {
 
     private final PSuggestOracle suggestOracle;
     private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
@@ -92,6 +96,15 @@ public class PSuggestBox extends PWidget
 
     protected PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
+        this.textBox = Element.newPTextBox();
+    }
+
+    /** The oracle and the text box are created first: the creation of the suggest box names them. */
+    @Override
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        suggestOracle.attach(window, frame);
+        textBox.attach(window, frame);
+        return super.attach(window, frame);
     }
 
     @Override
@@ -105,14 +118,7 @@ public class PSuggestBox extends PWidget
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.ORACLE, suggestOracle.getID());
-
-        // TODO nciaravola
-
-        // if (textBox == null) {
-        // textBox = new PTextBox();
-        // }
-        //
-        // writer.parse(Model.TEXTBOX_ID, textBox.getID());
+        writer.write(ServerToClientModel.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
@@ -144,17 +150,6 @@ public class PSuggestBox extends PWidget
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SUGGESTBOX;
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     @Override
@@ -196,7 +191,7 @@ public class PSuggestBox extends PWidget
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handler == null && textBox.removeValueChangeHandler(handler);
+        return textBox.removeValueChangeHandler(handler);
     }
 
     @Override

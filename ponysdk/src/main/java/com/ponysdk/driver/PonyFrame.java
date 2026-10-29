@@ -23,6 +23,8 @@
 
 package com.ponysdk.driver;
 
+import java.util.Arrays;
+
 import com.ponysdk.core.model.ServerToClientModel;
 
 public class PonyFrame {
@@ -46,7 +48,7 @@ public class PonyFrame {
 
     @Override
     public String toString() {
-        return "model=" + model + ", value=" + value;
+        return "model=" + model + ", value=" + (value instanceof Object[] array ? Arrays.toString(array) : value);
     }
 
 }

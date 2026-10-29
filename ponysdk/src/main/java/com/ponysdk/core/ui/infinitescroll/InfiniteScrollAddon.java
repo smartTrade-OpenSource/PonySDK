@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -247,11 +247,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
                 fullDataIndex++;
             }
 
-            if (currentIndexWidget == null) {
-                currentIndex = 0;
-            }
-            updateCurrentIndexWidget();
-
             // create missing widget
             while (rows.size() < dataToDraw.size()) {
                 final W newWidget = dataProvider.handleUI(fullDataIndex, dataToDraw.get(index), null);
@@ -265,6 +260,12 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             while (dataToDraw.size() < rows.size()) {
                 removeWidgetFromContainer(rows.remove(index));
             }
+
+            if (currentIndexWidget == null) {
+                currentIndex = 0;
+            }
+            updateCurrentIndexWidget();
+
             callTerminalMethod(FUNCTION_ON_DRAW);
         } finally {
             widget.removeStyleName(STYLE_IS_LOADING);
@@ -279,11 +280,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         if (rows.isEmpty()) return;
         int index = Math.max(0, currentIndex - this.beginIndex);
         index = Math.min(index, rows.size() - 1);
-        final W w = rows.get(index);
-        if (w != null) {
-            currentIndexWidget = w;
-            currentIndexWidget.asWidget().addStyleName(STYLE_IS_ITEM_INDEX);
-        }
+        currentIndexWidget = rows.get(index); // never null: added to the container with it
+        currentIndexWidget.asWidget().addStyleName(STYLE_IS_ITEM_INDEX);
     }
 
     public interface InfiniteScrollAddonListener {

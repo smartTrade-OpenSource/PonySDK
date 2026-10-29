@@ -81,7 +81,7 @@ public enum Browser {
     IE5(Manufacturer.MICROSOFT, Browser.IE, 50, "Internet Explorer 5", new String[] { "MSIE 5" }, BrowserType.WEB_BROWSER,
             RenderingEngine.TRIDENT, null), // before MSIE
 
-    EDGE(Manufacturer.MICROSOFT, null, 1, "Edge", new String[] { "Edge" }, BrowserType.WEB_BROWSER, RenderingEngine.EDGE_HTML, null),
+    EDGE(Manufacturer.MICROSOFT, null, 2, "Edge", new String[] { "Edge" }, BrowserType.WEB_BROWSER, RenderingEngine.EDGE_HTML, null),
 
     /**
      * Google Chrome browser
@@ -192,7 +192,7 @@ public enum Browser {
             // only check top level objects
             if (browser.parent == null) {
                 final Browser match = browser.checkUserAgent(agentString);
-                if (match != null && !Browser.UNKNOWN.equals(match)) return match; // either current operatingSystem or a child object
+                if (!Browser.UNKNOWN.equals(match)) return match; // never null: either current browser or a child object
             }
         }
         return Browser.UNKNOWN;
@@ -240,7 +240,8 @@ public enum Browser {
                 final String fullVersionString = matcher.group(1);
                 final String majorVersion = matcher.group(2);
                 String minorVersion = "0";
-                if (matcher.groupCount() > 2) minorVersion = matcher.group(3); // usually but not always there is a minor version
+                // usually but not always there is a minor version
+                if (matcher.groupCount() > 2 && matcher.group(3) != null) minorVersion = matcher.group(3);
                 return new Version(fullVersionString, majorVersion, minorVersion);
             }
         }
@@ -282,7 +283,7 @@ public enum Browser {
             if (!children.isEmpty()) {
                 for (final Browser childBrowser : children) {
                     final Browser match = childBrowser.checkUserAgent(agentString);
-                    if (match != null && !Browser.UNKNOWN.equals(match)) return match;
+                    if (!Browser.UNKNOWN.equals(match)) return match;
                 }
             }
 

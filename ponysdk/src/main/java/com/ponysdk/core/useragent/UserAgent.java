@@ -132,28 +132,16 @@ public class UserAgent implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (browser == null ? 0 : browser.hashCode());
-        result = prime * result + id;
-        result = prime * result + (operatingSystem == null ? 0 : operatingSystem.hashCode());
-        return result;
+        return 31 * (31 * (31 + browser.hashCode()) + id) + operatingSystem.hashCode();
     }
 
+    /** Browser and system are never null (both constructors read their ids) and the id derives from them. */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (obj == null || getClass() != obj.getClass()) return false;
         final UserAgent other = (UserAgent) obj;
-        if (browser == null) {
-            if (other.browser != null) return false;
-        } else if (browser != other.browser) return false;
-        if (id != other.id) return false;
-        if (operatingSystem == null) {
-            if (other.operatingSystem != null) return false;
-        } else if (operatingSystem != other.operatingSystem) return false;
-        return true;
+        return browser == other.browser && operatingSystem == other.operatingSystem;
     }
 
 }

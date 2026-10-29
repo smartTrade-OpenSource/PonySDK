@@ -27,25 +27,25 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class allows to execute native Java-script code.
+ * Calls a JavaScript function of the terminal's window by name: a function the application's own scripts define
+ * ({@link #call(PWindow, String, Object...)}). No JavaScript source travels: the page needs no {@code 'unsafe-eval'}
+ * (ADR-0015).
  */
 public class PScript extends PObject {
 
-    private static final Logger log = LoggerFactory.getLogger(PScript.class);
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
 
     private Map<Long, ExecutionCallback> callbacksByID;
     private long executionID = 0;
     private String key;
+    private UIContext uiContext;
 
     private PScript() {
     }
@@ -58,6 +58,7 @@ public class PScript extends PObject {
             if (script == null) {
                 final PScript newScript = new PScript();
                 newScript.key = key;
+                newScript.uiContext = uiContext;
                 uiContext.setAttribute(key, newScript);
                 newScript.attach(window, null);
                 return newScript;
@@ -78,28 +79,28 @@ public class PScript extends PObject {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        try {
-            UIContext.get().removeAttribute(key);
-        } catch (Exception e) {
-            log.error("An error occurred while trying to process the destroy event", e);
-        }
-
+        uiContext.removeAttribute(key); // its own context: the calling thread may hold another, or none
     }
 
-    public static void execute(final PWindow window, final String js) {
-        execute(window, js, null, null);
+    /**
+     * Calls {@code window[functionName](args...)} in the terminal.
+     *
+     * @param args strings, numbers, booleans or null
+     */
+    public static void call(final PWindow window, final String functionName, final Object... args) {
+        call(window, functionName, args, null, null);
     }
 
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
-        execute(window, js, callback, null);
-    }
-
-    public static void execute(final PWindow window, final String js, final Duration period) {
-        execute(window, js, null, period);
-    }
-
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
-        get(window).executeScript(js, callback, period);
+    /**
+     * Calls {@code window[functionName](args...)} in the terminal.
+     *
+     * @param args     strings, numbers, booleans or null; may be null
+     * @param callback receives the returned string or number, "" for anything else, or the error; may be null
+     * @param period   the call waits this long in the terminal; may be null
+     */
+    public static void call(final PWindow window, final String functionName, final Object[] args, final ExecutionCallback callback,
+                            final Duration period) {
+        get(window).send(functionName, args, callback, period);
     }
 
     @Override
@@ -107,9 +108,10 @@ public class PScript extends PObject {
         return WidgetType.SCRIPT;
     }
 
-    private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
+    private void send(final String functionName, final Object[] args, final ExecutionCallback callback, final Duration period) {
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.EVAL, js);
+            writer.write(ServerToClientModel.FUNCTION_NAME, functionName);
+            if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
             if (callback != null) {
                 if (callbacksByID == null) callbacksByID = new HashMap<>(4);
                 callbacksByID.put(++executionID, callback);

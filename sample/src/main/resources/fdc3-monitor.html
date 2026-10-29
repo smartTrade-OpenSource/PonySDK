@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-fdc3-app="fdc3-monitor">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FDC3 monitor</title>
+<!--
+  A plain JavaScript application of the desktop, no PonySDK (docs/decisions/0014-fdc3.md): it follows the contexts of
+  its channel, broadcasts one, and raises ViewInstrument, which the showcase's FDC3 page handles. It talks to the
+  showcase through the sample's demonstration desktop agent, as two applications of a desktop do through theirs.
+-->
+<link rel="icon" href="data:,">
+<style>
+  :root { --bg: #ffffff; --text: #0f172a; --muted: #64748b; --line: #e2e8f0; --accent: #4f46e5; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8; --line: #1e293b; --accent: #818cf8; color-scheme: dark; }
+  }
+  body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--text);
+         font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { color: var(--muted); margin: 0 0 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 16px; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: transparent;
+           color: var(--text); cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  ol { margin: 0; padding: 0 0 0 20px; font-variant-numeric: tabular-nums; }
+  #result { min-height: 1.5em; }
+</style>
+<script src="script/fdc3-agent.js"></script>
+</head>
+<body>
+<main>
+  <h1>FDC3 monitor</h1>
+  <p id="agent">Looking for the desktop agent…</p>
+  <div class="row" id="channels"></div>
+  <div class="row">
+    <button id="broadcast" type="button">Broadcast GOOG</button>
+    <button id="raise" type="button">Raise ViewInstrument for TSLA</button>
+  </div>
+  <div id="result" role="status"></div>
+  <h2>Contexts received on the channel</h2>
+  <ol id="contexts"></ol>
+</main>
+<script>
+  function whenAgent() {
+    return window.fdc3 ? Promise.resolve(window.fdc3)
+      : new Promise(function (resolve) { window.addEventListener('fdc3Ready', function () { resolve(window.fdc3); }, { once: true }); });
+  }
+
+  whenAgent().then(async function (fdc3) {
+    var info = await fdc3.getInfo();
+    document.getElementById('agent').textContent = info.provider + ' ' + info.providerVersion + ', FDC3 ' + info.fdc3Version;
+
+    var channels = document.getElementById('channels');
+    function showChannel(id) {
+      channels.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.channel === id)); });
+    }
+    (await fdc3.getUserChannels()).forEach(function (channel) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.channel = channel.id;
+      button.textContent = channel.displayMetadata.name;
+      button.addEventListener('click', function () { fdc3.joinUserChannel(channel.id).then(function () { showChannel(channel.id); }); });
+      channels.append(button);
+    });
+
+    var list = document.getElementById('contexts');
+    await fdc3.addContextListener(null, function (context, metadata) {
+      var item = document.createElement('li');
+      var ticker = context.id && context.id.ticker ? ' ' + context.id.ticker : '';
+      item.textContent = context.type + ticker + (metadata && metadata.source && metadata.source.appId ? ' from ' + metadata.source.appId : '');
+      list.prepend(item);
+    });
+    await fdc3.joinUserChannel('fdc3.channel.1');
+    showChannel('fdc3.channel.1');
+
+    document.getElementById('broadcast').addEventListener('click', function () {
+      fdc3.broadcast({ type: 'fdc3.instrument', name: 'Alphabet', id: { ticker: 'GOOG' } });
+    });
+
+    var result = document.getElementById('result');
+    document.getElementById('raise').addEventListener('click', async function () {
+      try {
+        var resolution = await fdc3.raiseIntent('ViewInstrument', { type: 'fdc3.instrument', name: 'Tesla', id: { ticker: 'TSLA' } });
+        var value = await resolution.getResult();
+        result.textContent = 'Handled by ' + resolution.source.appId + ', result ' + JSON.stringify(value);
+      } catch (e) {
+        result.textContent = 'Not handled: ' + e.message;
+      }
+    });
+  });
+</script>
+</body>
+</html>

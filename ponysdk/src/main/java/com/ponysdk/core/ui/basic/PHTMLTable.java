@@ -35,8 +35,13 @@ import java.util.Map.Entry;
  */
 public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
-    private final TreeMap<Row, TreeMap<Integer, PWidget>> columnByRow = new TreeMap<>();
-    private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
+    /**
+     * Widgets of the cells: {@code rows.get(r)[c]}, null where a cell holds no widget, a null row when none of its
+     * cells does, and no trailing null row. Was a TreeMap of TreeMaps plus a HashMap: about 100 bytes per cell.
+     */
+    private final ArrayList<PWidget[]> rows = new ArrayList<>();
+    /** Position of each cell widget, kept up to date when rows shift: removing a widget does not scan the table. */
+    private final IdentityHashMap<PWidget, Cell> cellByWidget = new IdentityHashMap<>();
     private final PColumnFormatter columnFormatter = new PColumnFormatter();
     private final PRowFormatter rowFormatter = new PRowFormatter();
 
@@ -48,21 +53,16 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     protected PHTMLTable() {
     }
 
-    @Override
-    void init0() {
-        super.init0();
-        cellByWidget.keySet().forEach(widget -> widget.attach(window, frame));
-    }
-
     public int getRowCount() {
-        if (columnByRow.isEmpty()) return 0;
-        else return columnByRow.lastKey().value + 1;
+        return rows.size();
     }
 
     public int getCellCount(final int row) {
-        final TreeMap<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn == null || cellByColumn.isEmpty()) return 0;
-        return cellByColumn.lastKey() + 1;
+        final PWidget[] cells = row < rows.size() ? rows.get(row) : null;
+        if (cells == null) return 0;
+        int last = cells.length - 1;
+        while (cells[last] == null) last--; // a stored row holds a widget: an emptied row is set to null
+        return last + 1;
     }
 
     public void clearCell(final int row, final int col) {
@@ -120,49 +120,52 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     @Override
     public void clear() {
-        final List<PWidget> values = new ArrayList<>();
-        columnByRow.values().forEach(widgetByColumn -> values.addAll(widgetByColumn.values()));
-
-        values.forEach(widget -> remove(widget, false));
+        forEach(widget -> remove(widget, false));
 
         saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
 
     public void removeRow(final int row) {
-        final TreeMap<Integer, PWidget> widgetByColumn = columnByRow.remove(new Row(row));
-        if (widgetByColumn == null) return;
         getRowFormatter().removeRowStyle(row);
 
-        final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
-        values.forEach(widget -> remove(widget, false));
-
-        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            final Row irow = entry.getKey();
-            if (irow.value > row) {
-                for (final PWidget widget : entry.getValue().values()) {
-                    final Cell cell = cellByWidget.get(widget);
-                    cell.row = cell.row - 1;
-                }
-                irow.value = irow.value - 1;
+        // A row past the last widget is the terminal's only (inserted, or emptied): its removal is sent all the same
+        final PWidget[] cells = row < rows.size() ? rows.get(row) : null;
+        if (cells != null) {
+            for (final PWidget widget : cells) {
+                if (widget != null) remove(widget, false);
             }
+        }
+        if (row < rows.size()) { // the last row is trimmed with its last widget
+            rows.remove(row);
+            shiftRows(row, -1);
+            trimTrailingEmptyRows();
         }
 
         saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR_ROW, row));
     }
 
     public void insertRow(final int row) {
-        for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            final Row irow = entry.getKey();
-            if (irow.value >= row) {
-                for (final PWidget widget : entry.getValue().values()) {
-                    final Cell cell = cellByWidget.get(widget);
-                    cell.row = cell.row + 1;
-                }
-                irow.value = irow.value + 1;
-            }
+        if (row < rows.size()) {
+            rows.add(row, null);
+            shiftRows(row + 1, 1);
         }
         rowFormatter.insertRowStyle(row);
         saveUpdate(writer -> writer.write(ServerToClientModel.INSERT_ROW, row));
+    }
+
+    /** Moves the recorded position of the widgets of the rows from {@code from} on (they already moved in the list). */
+    private void shiftRows(final int from, final int delta) {
+        for (int r = from; r < rows.size(); r++) {
+            final PWidget[] cells = rows.get(r);
+            if (cells == null) continue;
+            for (final PWidget widget : cells) {
+                if (widget != null) cellByWidget.get(widget).row += delta;
+            }
+        }
+    }
+
+    private void trimTrailingEmptyRows() {
+        while (!rows.isEmpty() && rows.get(rows.size() - 1) == null) rows.remove(rows.size() - 1);
     }
 
     @Override
@@ -181,11 +184,13 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             orphan(widget);
         } finally {
             // Logical detach.
-            if (removeWidgetFromMap(widget) != null) {
-                // Physical detach.
-                if (physicalDetach) {
-                    widget.saveRemove(widget.getID(), ID);
-                }
+            removeWidgetFromMap(widget);
+            // Physical detach.
+            if (physicalDetach) {
+                if (isInitialized()) widget.saveRemove(widget.getID(), ID);
+                else safeStackedInstructions().append(() -> { // in order with the adds (setWidget)
+                    if (widget.isInitialized() && widget.getParent() != this) widget.saveRemove(widget.getID(), ID);
+                });
             }
         }
         return true;
@@ -208,91 +213,75 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             addWidgetToMap(row, column, widget);
             adopt(widget);
 
-            // Physical attach.
-            widget.attach(window, frame);
-            widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-
+            // Physical attach. Before the table is on the terminal, the add waits in the table's queue, in order with
+            // its rows and styles (insertRow, removeRow, formatters): on the widget's own queue, it would overtake
+            // them. A widget moved to another parent meanwhile is that parent's.
+            if (isInitialized()) addToTerminal(widget, row, column);
+            else safeStackedInstructions().append(() -> {
+                if (widget.getParent() == this || widget.getParent() == null) addToTerminal(widget, row, column);
+            });
         }
+    }
+
+    private void addToTerminal(final PWidget widget, final int row, final int column) {
+        widget.attach(window, getFrame());
+        widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
+            new ServerBinaryModel(ServerToClientModel.COLUMN, column));
     }
 
     private PWidget getWidgetFromMap(final int row, final int column) {
-        final Map<Integer, PWidget> cellByColumn = columnByRow.get(new Row(row));
-        if (cellByColumn != null) {
-            return cellByColumn.get(column);
-        }
-        return null;
+        final PWidget[] cells = row >= 0 && row < rows.size() ? rows.get(row) : null;
+        return cells != null && column >= 0 && column < cells.length ? cells[column] : null;
     }
 
-    private PWidget removeWidgetFromMap(final PWidget widget) {
+    /** A child of this table: setWidget recorded its cell, kept up to date when rows shift. */
+    private void removeWidgetFromMap(final PWidget widget) {
         final Cell cell = cellByWidget.remove(widget);
-        if (cell == null) return null; // already removed
-        final Row row = new Row(cell.row);
-        final Map<Integer, PWidget> cellByColumn = columnByRow.get(row);
-        if (cellByColumn != null) {
-            final PWidget w = cellByColumn.remove(cell.column);
-            if (cellByColumn.isEmpty()) {
-                columnByRow.remove(row);
-            }
-            return w;
+        final PWidget[] cells = rows.get(cell.row);
+        cells[cell.column] = null;
+        for (final PWidget w : cells) {
+            if (w != null) return;
         }
-        return null;
+        rows.set(cell.row, null); // its last widget
+        trimTrailingEmptyRows();
     }
 
     private void addWidgetToMap(final int row, final int column, final PWidget widget) {
-        final Row irow = new Row(row);
-        final Cell cell = new Cell(row, column);
-        cellByWidget.put(widget, cell);
-        TreeMap<Integer, PWidget> cellByColumn = columnByRow.computeIfAbsent(irow, k -> new TreeMap<>());
-        cellByColumn.put(column, widget);
+        cellByWidget.put(widget, new Cell(row, column));
+        while (rows.size() <= row) rows.add(null);
+        PWidget[] cells = rows.get(row);
+        if (cells == null) rows.set(row, cells = new PWidget[column + 1]);
+        else if (cells.length <= column) rows.set(row, cells = Arrays.copyOf(cells, Math.max(column + 1, cells.length * 2)));
+        cells[column] = widget;
     }
 
+    /** The widgets of the cells, row by row: a snapshot, iterating (attach, destroy) may remove cells. */
     @Override
     public Iterator<PWidget> iterator() {
-        return Collections.emptyIterator();
+        final List<PWidget> widgets = new ArrayList<>(cellByWidget.size());
+        for (final PWidget[] cells : rows) {
+            if (cells == null) continue;
+            for (final PWidget widget : cells) {
+                if (widget != null) widgets.add(widget);
+            }
+        }
+        return Collections.unmodifiableList(widgets).iterator();
     }
 
     public PRowFormatter getRowFormatter() {
         return rowFormatter;
     }
 
-    static class Row implements Comparable<Row> {
-
-        private int value;
-
-        protected Row(final int value) {
-            this.value = value;
-        }
-
-        public void setValue(final int value) {
-            this.value = value;
-        }
-
-        @Override
-        public int compareTo(final Row row) {
-            return value >= row.value ? value != row.value ? 1 : 0 : -1;
-        }
-    }
-
-    protected static class Cell {
+    /** Where a widget sits; the table moves it when rows are inserted or removed. */
+    private static final class Cell {
 
         private int row;
+        private final int column;
 
-        private int column;
-
-        protected Cell(final int rowIndex, final int cellIndex) {
+        private Cell(final int rowIndex, final int cellIndex) {
             this.column = cellIndex;
             this.row = rowIndex;
         }
-
-        public void setRow(final int row) {
-            this.row = row;
-        }
-
-        public void setColumn(final int column) {
-            this.column = column;
-        }
-
     }
 
     public class PRowFormatter {
@@ -407,10 +396,12 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     public String dumpDOM() {
         String DOM = "<table pid=\"" + ID + "\">";
 
-        for (Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            DOM += "<tr row = \"" + entry.getKey().value + "\">";
-            for (Entry<Integer, PWidget> td : entry.getValue().entrySet()) {
-                DOM += "<td col = \"" + td.getKey() + "\">" + td.getValue().dumpDOM() + "</td>";
+        for (int r = 0; r < rows.size(); r++) {
+            final PWidget[] cells = rows.get(r);
+            if (cells == null) continue;
+            DOM += "<tr row = \"" + r + "\">";
+            for (int c = 0; c < cells.length; c++) {
+                if (cells[c] != null) DOM += "<td col = \"" + c + "\">" + cells[c].dumpDOM() + "</td>";
             }
             DOM += "</tr>";
         }

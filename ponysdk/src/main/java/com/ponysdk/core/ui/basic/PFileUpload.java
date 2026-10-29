@@ -34,7 +34,7 @@ import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,8 +77,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers {
     public void onClientData(final JsonObject jsonObject) {
         if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
-            final String fName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
-            if (fName != null) setFileName(fName);
+            setFileName(jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue())); // never null
             setFileSize(jsonObject.getInt(ClientToServerModel.SIZE.toStringValue()));
 
             final PChangeEvent event = new PChangeEvent(this);

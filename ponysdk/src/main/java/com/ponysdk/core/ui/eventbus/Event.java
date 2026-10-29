@@ -55,15 +55,6 @@ public abstract class Event<H extends EventHandler> {
         return getClass().getSimpleName() + " with data : " + data;
     }
 
-    /**
-     * @deprecated Useless
-     * @since v2.7.3
-     */
-    @Deprecated
-    public long getEventID() {
-        return 0;
-    }
-
     public abstract Type getAssociatedType();
 
     protected abstract void dispatch(H handler);
@@ -85,12 +76,7 @@ public abstract class Event<H extends EventHandler> {
 
         @Override
         public boolean equals(final Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            final Type other = (Type) obj;
-            if (index != other.index) return false;
-            return true;
+            return this == obj; // each type has its own index: another instance is another type
         }
 
         @Override

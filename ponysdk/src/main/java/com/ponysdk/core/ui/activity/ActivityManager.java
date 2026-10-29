@@ -67,7 +67,7 @@ public class ActivityManager implements PlaceChangeHandler {
     @Override
     public void onPlaceChange(final PlaceChangeEvent event) {
         if (world == null) {
-            if (log.isDebugEnabled()) log.debug("No world to display this place #{}", event);
+            log.debug("No world to display this place #{}", event);
             return;
         }
 

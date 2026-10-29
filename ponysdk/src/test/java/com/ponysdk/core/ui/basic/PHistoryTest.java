@@ -26,12 +26,13 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PHistoryTest extends PSuite {
 
@@ -58,6 +59,24 @@ public class PHistoryTest extends PSuite {
         UIContext.get().getHistory().newItem("token3");
         assertEquals(2, handlerFiredCount.get());
         assertEquals("token3", UIContext.get().getHistory().getToken());
+    }
+
+    @Test
+    public void aRemovedHandlerIsNoLongerCalledAndFiringWithoutHandlersOnlyStoresTheToken() {
+        final PHistory history = new PHistory();
+        history.removeValueChangeHandler(e -> {
+        });
+        history.fireHistoryChanged("alone");
+        assertEquals("alone", history.getToken());
+
+        final AtomicInteger calls = new AtomicInteger();
+        final PValueChangeHandler<String> handler = e -> calls.incrementAndGet();
+        history.addValueChangeHandler(handler);
+        history.fireHistoryChanged("t1");
+        history.removeValueChangeHandler(handler);
+        history.fireHistoryChanged("t2");
+        assertEquals(1, calls.get());
+        assertEquals("t2", history.getToken());
     }
 
 }

@@ -38,8 +38,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -457,7 +457,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
             } catch (final Exception e) {
                 log.error("Problem occured while updating the view for result {}, row nb {}", result.getFirst(), rows.size(), e);
-                showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+                showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(e));
             } finally {
                 from = Integer.MAX_VALUE;
                 to = 0;
@@ -918,6 +918,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private void setColumnConfig(final ColumnDefinition<V> column, State state, final int width) {
         if (state == null) state = column.getDefaultState();
         final ColumnView columnView = getColumnView(column);
+        final boolean resized = columnView.width != width;
         columnView.width = width;
         if (state.isShown()) {
             final Table table = state.isPinned() ? pinnedTable : unpinnedTable;
@@ -927,10 +928,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             columnView.state = state;
             columnView.notifyStateChangedListeners();
         }
-        if (columnView.width != width) {
-            columnView.width = width;
-            columnView.notifyResizedListeners();
-        }
+        if (resized) columnView.notifyResizedListeners();
 
     }
 
@@ -961,8 +959,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
             final int relativeIndex = row.getRelativeIndex();
-            final V data = rows.get(relativeIndex).getData();
-            if (data == null || !rowAction.testRow(data, absoluteIndex)) continue;
+            final V data = rows.get(relativeIndex).getData(); // a row with a key has its data
+            if (!rowAction.testRow(data, absoluteIndex)) continue;
             rowAction.apply(row.pinnedRow);
             rowAction.apply(row.unpinnedRow);
         }
@@ -979,8 +977,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
             final int relativeIndex = row.getRelativeIndex();
-            final V data = rows.get(relativeIndex).getData();
-            if (data == null || !old.testRow(data, absoluteIndex)) continue;
+            final V data = rows.get(relativeIndex).getData(); // a row with a key has its data
+            if (!old.testRow(data, absoluteIndex)) continue;
             old.cancel(row.pinnedRow);
             old.cancel(row.unpinnedRow);
         }
@@ -1100,8 +1098,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.setWidth(table.width + "px");
         }
 
+        /** Destroys the last row. */
         void destroy() {
-            if (relativeIndex != rows.size() - 1) return;
             rows.remove(relativeIndex);
             pinnedTable.body.remove(relativeIndex);
             unpinnedTable.body.remove(relativeIndex);
@@ -1159,12 +1157,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                     keys.add(r.key);
                 }
             }
-            if (!keys.isEmpty()) {
-                if (controller.isSelected(key)) {
-                    controller.unselectKeys(keys);
-                } else {
-                    controller.selectKeys(keys);
-                }
+            // keys holds at least this row's: both callers (the click handler, the cell controller) check it is selectable
+            if (controller.isSelected(key)) {
+                controller.unselectKeys(keys);
+            } else {
+                controller.selectKeys(keys);
             }
         }
 
@@ -1173,11 +1170,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             controller.unselect(key);
             pinnedCells.forEach(CellManager::unselect);
             unpinnedCells.forEach(CellManager::unselect);
-        }
-
-        @Override
-        public String toString() {
-            return "Row [relativeIndex=" + relativeIndex + ", key=" + key + ", data=" + data + ", extended=" + extended + "]";
         }
 
     }
@@ -1357,14 +1349,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void setExtendedMode() {
             if (row.key == null) return;
-            cell.extendedMode = true;
+            cell.setExtendedMode(true);
             updateRowCell(row, cell, column, getController().isSelected(row.key));
         }
 
         @Override
         public void setPrimaryMode() {
             if (row.key == null) return;
-            cell.extendedMode = false;
+            cell.setExtendedMode(false);
             updateRowCell(row, cell, column, getController().isSelected(row.key));
         }
 
@@ -1487,18 +1479,17 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setState(final State state) {
             if (columnView.state == state) return;
 
+            // show and hide work on the unpinned table: unpin before hiding, pin after showing
+            if (!state.isPinned() && columnView.state.isPinned()) unpin(columnView);
+
             if (state.isShown() && !columnView.state.isShown()) {
                 show(columnView);
-            } else if (!state.isShown() && columnView.state.isShown()) {
+            } else if (!state.isShown()) { // one hidden state: the column was shown
                 hide(columnView);
                 clearSort();
             }
 
-            if (state.isPinned() && !columnView.state.isPinned()) {
-                pin(columnView);
-            } else if (!state.isPinned() && columnView.state.isPinned()) {
-                unpin(columnView);
-            }
+            if (state.isPinned()) pin(columnView); // one pinned state: the column was not
 
             columnView.state = state;
             columnView.notifyStateChangedListeners();
@@ -1522,8 +1513,16 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             this.state = column.getDefaultState();
         }
 
+        /** Shared by the column's cells (each would otherwise keep its own copy of the same string). */
+        private String widthAsString;
+        private int widthOfString = -1;
+
         String getWidthAsString() {
-            return width + "px";
+            if (widthOfString != width) {
+                widthAsString = width + "px";
+                widthOfString = width;
+            }
+            return widthAsString;
         }
 
         void notifyStateChangedListeners() {
@@ -1555,12 +1554,31 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private static class CellManager<V> {
 
         private final PrimaryCell<V> primary;
-        private final ExtendedCell<V> extended;
+        /**
+         * Generated when the cell enters the extended mode (e.g. its editor, then showing the current value) and
+         * dropped when it leaves it: most cells are never edited, and an editor per cell is a widget per cell.
+         */
+        private ExtendedCell<V> extended;
         private boolean extendedMode;
+        private ExtendedCellController<V> controller;
 
         public CellManager(final PrimaryCell<V> primary) {
             this.primary = primary;
-            this.extended = primary.genExtended().orElse(null);
+        }
+
+        void setExtendedMode(final boolean extendedMode) {
+            this.extendedMode = extendedMode;
+            if (extendedMode && extended == null) {
+                extended = primary.genExtended().orElse(null);
+                if (extended == null) return;
+                extended.setController(controller); // set at the cell's creation
+                getTableCell().add(extended);
+            } else if (!extendedMode && extended != null) {
+                final PWidget widget = extended.asWidget();
+                extended = null;
+                widget.removeFromParent();
+                widget.onDestroy();
+            }
         }
 
         public PComplexPanel getTableCell() {
@@ -1570,13 +1588,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setTableCell(final PComplexPanel td) {
             td.add(primary.asPendingWidget());
             td.add(primary);
-            if (extended != null) td.add(extended);
         }
 
         public void setVisibility(final boolean columnVisible) {
             primary.asPendingWidget().setVisible(!columnVisible);
             primary.asWidget().setVisible(columnVisible && !extendedMode);
-            if (extended != null) extended.asWidget().setVisible(columnVisible && extendedMode);
+            if (extended != null) extended.asWidget().setVisible(columnVisible); // only in the extended mode
 
             final PComplexPanel td = getTableCell();
             if (!columnVisible) {
@@ -1589,9 +1606,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             }
         }
 
+        /** Called once, at the cell's creation: before any extended cell. */
         public <T extends PrimaryCellController<V> & ExtendedCellController<V>> void setController(final T controller) {
+            this.controller = controller;
             primary.setController(controller);
-            if (extended != null) extended.setController(controller);
         }
 
         public void select() {
@@ -1660,10 +1678,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         public void checkPosition() {
             callTerminalMethod("checkPosition");
-        }
-
-        public void showLoadingPanel() {
-            callTerminalMethod("showLoading");
         }
 
         public void hideLoadingPanel() {
