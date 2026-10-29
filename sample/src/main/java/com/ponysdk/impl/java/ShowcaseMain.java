@@ -49,6 +49,10 @@ public class ShowcaseMain {
         configuration.setWsAllowedOrigins(Set.of("http://[::1]:" + PORTAL_PORT, "http://localhost:" + PORTAL_PORT,
             "http://127.0.0.1:" + PORTAL_PORT));
         configuration.setEntryPointClass(UISampleEntryPoint.class);
+        // The languages of the i18n page (docs/decisions/0022-locale.md): British English first, which is also the
+        // week that starts on Monday as the date picker's default; Arabic turns the page right to left
+        configuration.setSupportedLocales(java.util.List.of(java.util.Locale.UK, java.util.Locale.FRENCH,
+            java.util.Locale.forLanguageTag("ar")));
         // -Dponysdk.debug (runShowcase -Pdebug): each widget tells the terminal its class and creation line, and the
         // inspector shows over the page. Off by default: the Costs page measures the bytes of the normal mode
         configuration.setDebugMode(Boolean.getBoolean("ponysdk.debug"));

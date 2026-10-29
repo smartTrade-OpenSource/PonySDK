@@ -166,6 +166,15 @@ specificity.
 - `WebComponentGenerator` ends a usage error with status 1 (it was 2): it throws instead of exiting the JVM.
 - A path the server does not have is logged at DEBUG ("Resource not found"), and a send that fails because the
   connection is closing too; they were ERRORs. A send that fails on an open connection stays an ERROR.
+- `UIContext.getLocale()` ([ADR-0022](docs/decisions/0022-locale.md), [internationalisation](docs/guide/i18n.md)):
+  the JVM's default locale unless the application sets `setSupportedLocales`. `PString` reads the framework's
+  messages in it (they exist in French and Arabic now: a JVM whose default locale is one of them shows them in that
+  language), and `PString.switchLocal` no longer falls back to the JVM's locale before the base file; the context `PSuite`
+  builds is in English, so that a test reads the same texts on any machine. With
+  supported locales, the page's root carries `lang` and `dir`. The date picker and the date box follow the `lang` of
+  their page, whoever wrote it (your own `<html lang="fr">` counts): the names of that language, the week from its
+  first day, and only its names are read (a `PDateBox` takes `Formats.current().dateFormat(...)`). Without a `lang`,
+  they are as before: English, Monday.
 - Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others
   average the last 10 probes received, not 10 slots counting the empty ones as 0. `getTerminalLatency()` is the time
   the probe waited in the terminal (it was always 0), and `getNetworkLatency()` the roundtrip minus that time.

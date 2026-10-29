@@ -27,6 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.ui.i18n.Locales;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
@@ -45,6 +46,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -185,6 +187,7 @@ public class BootstrapServlet extends HttpServlet {
         } else {
             if (path.equals(INDEX_URL)) {
                 response.setHeader("Cache-Control", REVALIDATE);
+                if (!configuration.getSupportedLocales().isEmpty()) response.setHeader("Vary", "Accept-Language, Cookie");
                 if (configuration.isContentSecurityPolicyEnabled())
                     response.setHeader("Content-Security-Policy", buildContentSecurityPolicy());
                 try (OutputStream out = response.getOutputStream()) {
@@ -266,8 +269,7 @@ public class BootstrapServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("<!doctype html>").append(NEW_LINE);
-        // The theme's stylesheet applies where the class pony-theme is: on the page's root, to the whole page
-        sb.append(configuration.getTheme() == null ? "<html>" : "<html class=\"pony-theme\">").append(NEW_LINE);
+        sb.append(htmlTag(request)).append(NEW_LINE);
         sb.append("<head>").append(NEW_LINE);
         sb.append(addHeader(request));
         sb.append("</head>").append(NEW_LINE);
@@ -277,6 +279,26 @@ public class BootstrapServlet extends HttpServlet {
         sb.append("</html>").append(NEW_LINE);
 
         return sb.toString();
+    }
+
+    /**
+     * {@code <html>}, with the {@code lang} and {@code dir} of the visitor's locale when the application has supported
+     * locales (docs/decisions/0022-locale.md): the first paint is already in the right direction. The negotiation is
+     * the context's, from the same cookie and header.
+     */
+    protected String htmlTag(final HttpServletRequest request) {
+        // The theme's stylesheet applies where the class pony-theme is: on the page's root, to the whole page
+        final String theme = configuration.getTheme() == null ? "" : " class=\"pony-theme\"";
+        final List<Locale> supported = configuration.getSupportedLocales();
+        if (supported.isEmpty()) return "<html" + theme + ">";
+        String cookie = null;
+        if (request.getCookies() != null) {
+            for (final jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if (c.getName().equals(Locales.COOKIE)) cookie = c.getValue();
+            }
+        }
+        final Locale locale = Locales.negotiate(supported, cookie, request.getHeader("Accept-Language"));
+        return "<html" + theme + " lang=\"" + locale.toLanguageTag() + "\" dir=\"" + (Locales.isRightToLeft(locale) ? "rtl" : "ltr") + "\">";
     }
 
     /**

@@ -40,6 +40,7 @@ import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.i18n.Locales;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
@@ -74,6 +75,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UIContext {
 
     private static final int INITIAL_STREAM_MAP_CAPACITY = 2;
+    /** How long an embedded context waits for its terminal's cookie request before a locale change reloads it. */
+    private static final long EMBEDDED_COOKIE_GRACE_MS = 500;
 
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
@@ -149,6 +152,9 @@ public class UIContext {
 
     private final StringDictionary stringDictionary;
 
+    /** What the visitor reads and writes in: negotiated at the handshake, changed by {@link #setLocale(Locale)}. */
+    private volatile Locale locale;
+
     /** Optional OTel metrics — null if not configured. */
     private PonySDKMetrics metrics;
 
@@ -185,6 +191,8 @@ public class UIContext {
                 && Subprotocols.offered(this.upgradeRequestData.getHeader(Subprotocols.HEADER)) ? ContextKeys.create() : null;
         this.movedState = openMovedState();
 
+        this.locale = negotiatedLocale(configuration.getSupportedLocales());
+
         // Initialize StringDictionary based on configuration
         if (configuration.isStringDictionaryEnabled()) {
             this.stringDictionary = new StringDictionary(
@@ -198,6 +206,48 @@ public class UIContext {
         } else {
             this.stringDictionary = null;
         }
+    }
+
+    /** The visitor's choice (cookie), else the best match of Accept-Language, else the first; the JVM's without i18n. */
+    private Locale negotiatedLocale(final List<Locale> supported) {
+        if (supported.isEmpty()) return Locale.getDefault();
+        String cookie = null;
+        for (final java.net.HttpCookie c : upgradeRequestData.getCookies()) {
+            if (c.getName().equals(Locales.COOKIE)) cookie = c.getValue();
+        }
+        return Locales.negotiate(supported, cookie, upgradeRequestData.getHeader("Accept-Language"));
+    }
+
+    /**
+     * The locale of this context: the one the visitor chose, else the best match of the browser's Accept-Language among
+     * {@link ApplicationConfiguration#getSupportedLocales()}, else the first of them (docs/decisions/0022-locale.md).
+     * The JVM's default locale when the application supports none.
+     */
+    public Locale getLocale() {
+        return locale;
+    }
+
+    /**
+     * Changes the visitor's locale to the supported locale that fits, keeps the choice in a cookie, and reloads the page
+     * at its history token, which comes back in that locale: the context's screens are built again. Nothing happens
+     * for the current locale, so that an entry point may call it at each start.
+     *
+     * @throws IllegalStateException    when the application supports no locale
+     * @throws IllegalArgumentException when none of the supported locales fits
+     */
+    public void setLocale(final Locale locale) {
+        final List<Locale> supported = configuration.getSupportedLocales();
+        if (supported.isEmpty()) throw new IllegalStateException("No supported locales: ApplicationConfiguration.setSupportedLocales");
+        final Locale match = Locales.match(supported, locale.toLanguageTag());
+        if (match == null) throw new IllegalArgumentException(locale.toLanguageTag() + " is not one of " + supported);
+        if (match.equals(this.locale)) return;
+        this.locale = match;
+        execute(() -> cookies.setCookie(Locales.COOKIE, match.toLanguageTag(), PCookies.CookieOptions
+            .expires(java.time.Instant.now().plus(java.time.Duration.ofDays(365))).withPath("/").sameSite(PCookies.SameSite.LAX)));
+        // An embedded page's cookie is set by a request its terminal makes: the context stays for it to find it
+        if (isEmbedded()) CompletableFuture.delayedExecutor(EMBEDDED_COOKIE_GRACE_MS, TimeUnit.MILLISECONDS, task -> Thread.ofVirtual().start(task))
+            .execute(this::destroyByAdministrator);
+        else destroyByAdministrator();
     }
 
     /**

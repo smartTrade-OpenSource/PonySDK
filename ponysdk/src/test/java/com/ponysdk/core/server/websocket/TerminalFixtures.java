@@ -55,7 +55,8 @@ import com.ponysdk.core.ui.chart.PChart;
  * UIContext, in each protocol version. The terminal must apply the same operations whatever the version.</li>
  * <li>{@code chart}: a chart created, fed and cleared, whose points the terminal must decode (ADR-0026).</li>
  * <li>{@code dates.json}: dates formatted by {@link SimpleDateFormat} in English, and texts it parses, which the
- * terminal's date patterns must format and parse alike (ADR-0002, R3).</li>
+ * terminal's date patterns must format and parse alike (ADR-0002, R3); and in other languages, whose names the
+ * terminal takes from the browser and the server reads back with the JDK's (ADR-0022).</li>
  * </ul>
  * Argument: the output directory.
  */
@@ -93,6 +94,10 @@ public final class TerminalFixtures {
         {"MM/dd/yyyy", "13/01/2026"}, {"d MMM yyyy", "5 march 2026"}, {"d MMM yyyy", "5 Mar 2026"}, {"dd/MM/yy", "05/03/26"},
         {"dd/MM/yy", "05/03/70"}, {"dd/MM/yyyy HH:mm", "05/03/2026 7:05"}, {"h:mm a", "12:30 AM"}, {"h:mm a", "1:30 pm"}};
 
+    /** The languages of the showcase, and patterns with names; digits as the terminal writes them. */
+    private static final String[] LOCALES = {"fr", "ar"};
+    private static final String[] LOCALIZED_PATTERNS = {"EEEE d MMMM yyyy", "EEE d MMM yyyy", "MMMM yyyy", "h:mm a"};
+
     private static void dates(final Path dir) throws IOException {
         final JsonArrayBuilder formatted = Json.createArrayBuilder();
         for (final String pattern : PATTERNS) {
@@ -121,8 +126,22 @@ public final class TerminalFixtures {
                 calendar.get(Calendar.MILLISECOND)};
             typed.add(Json.createObjectBuilder().add("pattern", t[0]).add("text", t[1]).add("date", fields(d)));
         }
-        Files.writeString(dir.resolve("dates.json"),
-            Json.createObjectBuilder().add("formatted", formatted).add("typed", typed).build().toString());
+        final JsonArrayBuilder localized = Json.createArrayBuilder();
+        for (final String tag : LOCALES) {
+            final Locale locale = new Locale.Builder().setLanguageTag(tag).setUnicodeLocaleKeyword("nu", "latn").build();
+            for (final String pattern : LOCALIZED_PATTERNS) {
+                final SimpleDateFormat format = new SimpleDateFormat(pattern, locale);
+                for (final int[] d : DATES) {
+                    final Calendar calendar = Calendar.getInstance();
+                    calendar.clear();
+                    calendar.set(d[0], d[1] - 1, d[2], d[3], d[4], d[5]);
+                    localized.add(Json.createObjectBuilder().add("locale", tag).add("pattern", pattern).add("date", fields(d))
+                        .add("text", format.format(calendar.getTime())));
+                }
+            }
+        }
+        Files.writeString(dir.resolve("dates.json"), Json.createObjectBuilder().add("formatted", formatted).add("typed", typed)
+            .add("localized", localized).build().toString());
     }
 
     private static JsonArrayBuilder fields(final int[] date) {

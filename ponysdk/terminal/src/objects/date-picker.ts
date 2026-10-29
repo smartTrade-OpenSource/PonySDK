@@ -5,16 +5,14 @@
 import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
 import { about, FLAG } from '../protocol/messages.ts';
 import type { Reader } from '../protocol/reader.ts';
-import { DateFormat, MONTHS, WEEKDAYS } from '../runtime/date-format.ts';
+import { DateFormat } from '../runtime/date-format.ts';
+import { isRightToLeft, localeOf, type Names, namesOf, type Week, weekOf } from '../runtime/locale.ts';
 import type { Context, TerminalObject } from '../runtime/object.ts';
 import { Widget } from '../runtime/widget.ts';
 import { POPUP_CLASS } from './popup.ts';
 
-/** Monday, then the weekend on Saturday and Sunday: GWT's default locale. */
-const FIRST_DAY_OF_WEEK = 1;
 const WEEKS = 6;
 const DAY_FORMAT = new DateFormat('yyyy-MM-dd');
-const MONTH_FORMAT = new DateFormat('MMMM yyyy');
 
 function day(year: number, month: number, date: number): Date {
     const d = new Date(year, month, date);
@@ -56,7 +54,8 @@ let gridIds = 0;
 /**
  * PDatePicker, on the WAI-ARIA date grid pattern: the month (previous and next buttons, and the year's when
  * YEAR_ARROWS_VISIBLE) over a grid of six weeks from Monday, as GWT's DatePicker. A month starting on a Monday shows
- * the week before it.
+ * the week before it. In a page with a `lang` (docs/decisions/0022-locale.md), the names are that language's, the week
+ * starts on its first day (where the browser tells it), and Left and Right follow the page's direction.
  *
  * A click on a day, or Enter or Space on it, makes it the value and sends HANDLER_DATE_VALUE_CHANGE (yyyy-MM-dd), when it
  * changed; a day of the month before or after shows that month. Each month shown sends HANDLER_SHOW_RANGE with the
@@ -76,6 +75,9 @@ export class DatePicker extends Widget {
     private readonly disabled = new Set<string>();
     private readonly title: HTMLDivElement;
     private readonly yearButtons: HTMLButtonElement[];
+    private readonly names: Names;
+    private readonly week: Week;
+    private readonly monthFormat: DateFormat;
     private readonly cells: HTMLTableCellElement[] = [];
     /** The day that has the tab stop. */
     private active: Date | null = null;
@@ -89,6 +91,11 @@ export class DatePicker extends Widget {
     private constructor(context: Context, id: number, type: number) {
         const element = document.createElement('div');
         super(context, id, type, element, 'pony-DatePicker');
+        // From the page's root, not the element: it is not in the page yet
+        const locale = localeOf(context.session.body);
+        this.names = namesOf(locale);
+        this.week = weekOf(locale);
+        this.monthFormat = new DateFormat('MMMM yyyy', locale);
         const today = new Date();
         this.month = day(today.getFullYear(), today.getMonth(), 1);
         this.first = this.month;
@@ -113,11 +120,11 @@ export class DatePicker extends Widget {
         grid.className = 'pony-DatePicker-days';
         const head = grid.createTHead().insertRow();
         for (let i = 0; i < 7; i++) {
-            const name = WEEKDAYS[(i + FIRST_DAY_OF_WEEK) % 7]!;
+            const weekday = (i + this.week.first) % 7;
             const th = document.createElement('th');
             th.scope = 'col';
-            th.abbr = name;
-            th.textContent = name.charAt(0);
+            th.abbr = this.names.weekdays[weekday]!;
+            th.textContent = this.names.weekdaysNarrow[weekday]!;
             head.append(th);
         }
         const body = grid.createTBody();
@@ -128,7 +135,7 @@ export class DatePicker extends Widget {
                 cell.setAttribute('role', 'gridcell');
                 cell.className = 'pony-DatePicker-day';
                 cell.dataset['index'] = String(this.cells.length);
-                if ((d + FIRST_DAY_OF_WEEK) % 7 === 0 || (d + FIRST_DAY_OF_WEEK) % 7 === 6) cell.dataset['weekend'] = '';
+                if (this.week.weekend.includes((d + this.week.first) % 7)) cell.dataset['weekend'] = '';
                 this.cells.push(cell);
             }
         }
@@ -228,11 +235,16 @@ export class DatePicker extends Widget {
     private refresh(): void {
         this.disabled.clear();
         let first = day(this.month.getFullYear(), this.month.getMonth(), 1);
-        first = addDays(first, -((first.getDay() - FIRST_DAY_OF_WEEK + 7) % 7));
-        if (first.getDate() === 1) first = addDays(first, -7); // a month starting on Monday shows the week before
+        first = addDays(first, -this.daysSinceWeekStart(first));
+        if (first.getDate() === 1) first = addDays(first, -7); // a month starting on the first day of the week shows the week before
         this.first = first;
-        this.title.textContent = MONTH_FORMAT.format(this.month);
+        this.title.textContent = this.monthFormat.format(this.month);
         this.render();
+    }
+
+    /** 0 on the first day of the week. */
+    private daysSinceWeekStart(date: Date): number {
+        return (date.getDay() - this.week.first + 7) % 7;
     }
 
     private dateAt(index: number): Date {
@@ -282,7 +294,7 @@ export class DatePicker extends Widget {
             const k = key(date);
             const filler = !this.inMonth(date);
             cell.textContent = String(date.getDate());
-            cell.setAttribute('aria-label', `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`);
+            cell.setAttribute('aria-label', `${this.names.weekdays[date.getDay()]} ${date.getDate()} ${this.names.months[date.getMonth()]} ${date.getFullYear()}`);
             cell.setAttribute('aria-selected', String(k === value));
             cell.tabIndex = k === stop ? 0 : -1;
             toggle(cell, 'filler', filler);
@@ -318,10 +330,10 @@ export class DatePicker extends Widget {
         let target: Date;
         switch (event.key) {
             case 'ArrowLeft':
-                target = addDays(current, -1);
+                target = addDays(current, isRightToLeft(cell) ? 1 : -1); // the next day is on the left in a right-to-left page
                 break;
             case 'ArrowRight':
-                target = addDays(current, 1);
+                target = addDays(current, isRightToLeft(cell) ? -1 : 1);
                 break;
             case 'ArrowUp':
                 target = addDays(current, -7);
@@ -330,10 +342,10 @@ export class DatePicker extends Widget {
                 target = addDays(current, 7);
                 break;
             case 'Home':
-                target = addDays(current, -((current.getDay() - FIRST_DAY_OF_WEEK + 7) % 7));
+                target = addDays(current, -this.daysSinceWeekStart(current));
                 break;
             case 'End':
-                target = addDays(current, 6 - ((current.getDay() - FIRST_DAY_OF_WEEK + 7) % 7));
+                target = addDays(current, 6 - this.daysSinceWeekStart(current));
                 break;
             case 'PageUp':
             case 'PageDown': {
@@ -408,7 +420,7 @@ export class DateBox extends Widget {
         reader.read(); // PICKER
         const picker = context.object(reader.int);
         reader.read(); // DATE_FORMAT_PATTERN
-        const format = new DateFormat(reader.str);
+        const format = new DateFormat(reader.str, localeOf(context.session.body));
         let value: string | null = null;
         if (reader.read() === K.VALUE) value = reader.str;
         else reader.rewind();
@@ -477,7 +489,7 @@ export class DateBox extends Widget {
                 return true;
             case K.DATE_FORMAT_PATTERN: {
                 const date = this.parse(true);
-                this.format = new DateFormat(reader.str);
+                this.format = new DateFormat(reader.str, localeOf(this.context.session.body));
                 this.setDate(date);
                 return true;
             }
@@ -530,9 +542,13 @@ export class DateBox extends Widget {
         const r = this.input.getBoundingClientRect();
         this.popup.style.left = `${r.left + window.scrollX}px`;
         this.popup.style.top = `${r.bottom + window.scrollY}px`;
-        if (this.showingPicker) return;
+        if (this.showingPicker) {
+            this.alignToEnd(r);
+            return;
+        }
         if (!this.popup.isConnected) this.context.session.body.append(this.popup);
         this.popup.showPopover();
+        this.alignToEnd(r);
         const below = this.popup.getBoundingClientRect();
         if (below.bottom > document.documentElement.clientHeight && r.top >= below.height) {
             this.popup.style.top = `${r.top + window.scrollY - below.height}px`; // above, as GWT's showRelativeTo
@@ -545,6 +561,12 @@ export class DateBox extends Widget {
             if (!this.popup.contains(target)) this.hide();
         }), { capture: true, signal: this.whileShown.signal });
         this.picker.showing();
+    }
+
+    /** Right to left: under the field's right edge, where its text starts, and not out of the window on the left. */
+    private alignToEnd(field: DOMRect): void {
+        if (!isRightToLeft(this.input)) return;
+        this.popup.style.left = `${Math.max(window.scrollX, field.right + window.scrollX - this.popup.getBoundingClientRect().width)}px`;
     }
 
     /** Hides the picker; the field's date goes to the picker, as when GWT's popup closes. */

@@ -11,6 +11,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Custom JavaScript](addons.md) | `PAddOn`: a JavaScript library behind a Java class |
 | [Forms](forms.md) | Binding fields to a bean: converters, validators, Bean Validation, errors a screen reader reads |
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |
+| [Internationalisation](i18n.md) | The visitor's locale, translated texts, numbers and dates, right-to-left pages |
 | [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
 | [Signals](signals.md) | A value shown in several places, computed from others, bound to widgets: `Signal`, `Bind` |
 | [Routing](routing.md) | `@Route` views, a `Router` on the history token, guards and access |

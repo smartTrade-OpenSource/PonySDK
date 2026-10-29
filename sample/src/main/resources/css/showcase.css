@@ -1143,3 +1143,9 @@ input[type=checkbox][aria-invalid="true"] { outline: 2px solid var(--bad); outli
 .forms-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .forms-status { margin-left: auto; font-size: 12.5px; color: var(--text-3); }
 .forms-saved { max-width: 560px; margin: 14px 0 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12.5px; color: var(--text-2); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); white-space: pre-wrap; }
+/* ── i18n page: a small screen the language switch changes (docs/decisions/0022-locale.md) ──────────────── */
+.i18n-screen { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 420px; margin: 0 0 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.i18n-title { font-weight: 600; font-size: 16px; color: var(--text); }
+.i18n-greeting, .i18n-volume, .i18n-amount, .i18n-today, .i18n-date-label, .i18n-picked { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.i18n-stepper { display: flex; align-items: center; gap: 8px; }
+.i18n-orders { color: var(--text); min-width: 11em; text-align: center; }

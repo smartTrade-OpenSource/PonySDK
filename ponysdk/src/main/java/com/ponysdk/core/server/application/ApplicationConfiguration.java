@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -109,6 +110,7 @@ public class ApplicationConfiguration {
         "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "avif", "woff", "woff2", "ttf", "otf"));
     /** See {@link #setContentSecurityPolicyEnabled(boolean)}. */
     private boolean contentSecurityPolicyEnabled = true;
+    private List<Locale> supportedLocales = List.of();
     /** See {@link #addScriptSources(String...)}. */
     private final Set<String> scriptSources = new LinkedHashSet<>();
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
@@ -455,6 +457,7 @@ public class ApplicationConfiguration {
         public Builder heartBeatPeriod(final long v, final TimeUnit u) { config.setHeartBeatPeriod(v, u); return this; }
         public Builder enableClientToServerHeartBeat(final boolean v) { config.setEnableClientToServerHeartBeat(v); return this; }
         public Builder reconnectionTimeoutMs(final long v)         { config.setReconnectionTimeoutMs(v); return this; }
+        public Builder supportedLocales(final java.util.List<Locale> v) { config.setSupportedLocales(v); return this; }
         public Builder maxRecordingEntries(final int v)            { config.setMaxRecordingEntries(v); return this; }
         public Builder reconnectionListener(final ReconnectionListener v) { config.setReconnectionListener(v); return this; }
         public Builder javascript(final Set<String> v)             { config.setJavascript(v); return this; }
@@ -689,6 +692,20 @@ public class ApplicationConfiguration {
         for (final String extension : extensions) {
             servedResourceExtensions.add(extension.toLowerCase(Locale.ROOT).replaceFirst("^\\.", ""));
         }
+    }
+
+    /** The locales the application is translated in, the first being the default; empty, the default, for no i18n. */
+    public List<Locale> getSupportedLocales() {
+        return supportedLocales;
+    }
+
+    /**
+     * Turns on the locale of each context (docs/decisions/0022-locale.md): from the visitor's cookie, else the
+     * browser's {@code Accept-Language} matched against these, else the first; written as {@code lang} and {@code dir}
+     * on the page's root. Without any, the contexts have the JVM's default locale and the page's root is left alone.
+     */
+    public void setSupportedLocales(final List<Locale> supportedLocales) {
+        this.supportedLocales = List.copyOf(supportedLocales);
     }
 
     public boolean isContentSecurityPolicyEnabled() {
