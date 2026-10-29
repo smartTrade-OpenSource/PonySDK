@@ -37,12 +37,22 @@ public class PStringTest extends PSuite {
 
     @Test
     public void testMessages() {
-        assertEquals("Ok", PString.get("dialog.ok"));
-        assertEquals("3 chars minimum", PString.get("validator.error.minlength", 3));
-
         final ResourceBundle bundle = PString.switchLocal(Locale.ENGLISH);
         assertNotNull(bundle);
         assertEquals("Cancel", bundle.getString("dialog.cancel"));
         assertEquals("Cancel", PString.get("dialog.cancel"));
+        assertEquals("Ok", PString.get("dialog.ok"));
+        assertEquals("3 chars minimum", PString.get("validator.error.minlength", 3));
+    }
+
+    @Test
+    public void theMessagesAreInTheLocaleOfTheContextOrTheOneSwitchedTo() {
+        PString.switchLocal(Locale.FRENCH);
+        assertEquals("Annuler", PString.get("dialog.cancel"));
+        assertEquals("3 caractères minimum", PString.get("validator.error.minlength", 3));
+        PString.switchLocal(Locale.forLanguageTag("ar"));
+        assertEquals("إلغاء", PString.get("dialog.cancel"));
+        PString.switchLocal(Locale.GERMAN);
+        assertEquals("Cancel", PString.get("dialog.cancel"), "no German: the base file, not the JVM's language");
     }
 }

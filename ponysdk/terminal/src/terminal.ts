@@ -88,7 +88,7 @@ export class Terminal implements Session, Host {
         window.addEventListener('pagehide', event => this.close(!event.persisted), signal === undefined ? undefined : { signal });
         this.reconnection = new Reconnection(() => this.hostPageBaseURL, () => this.reconnectSocket(this.buildReconnectUrl()),
             this.mount);
-        const url = this.socketUrl('');
+        const url = this.socketUrl(this.movedState());
         // The early socket of the bootstrap page is its own terminal's, never a <pony-app> element's
         this.socket = embedded ? new Socket(new WebSocket(url, this.subprotocols(false)), this.socketListener())
             : Socket.connect(url, this.socketListener());
@@ -194,6 +194,27 @@ export class Terminal implements Session, Host {
     }
 
     /** At the page's directory: a page may have a file name (index.html, a custom page), the socket is the application's. */
+    /**
+     * The state a move left for this page (ADR-0018), taken once: the early socket of the bootstrap page takes it first,
+     * with the same storage key.
+     */
+    private movedState(): string {
+        const key = this.movedStateKey();
+        try {
+            const state = sessionStorage.getItem(key);
+            sessionStorage.removeItem(key);
+            return state === null ? '' : `&${C.MOVED_STATE}=${state}`;
+        } catch {
+            return ''; // storage refused (a sandboxed frame)
+        }
+    }
+
+    /** Per document address: a frame of the application in the page, a session of its own, keeps its state apart. */
+    private movedStateKey(): string {
+        const l = this.mount.url;
+        return `ponyMovedState:${l.host}${l.pathname}${l.search}${l.hash}`;
+    }
+
     private socketUrl(parameters: string): string {
         const l = this.mount.url;
         const directory = l.pathname.substring(0, l.pathname.lastIndexOf('/') + 1);
@@ -248,6 +269,14 @@ export class Terminal implements Session, Host {
     contextResumed(): void {
         this.reconnection?.succeeded();
         this.onReconnected();
+    }
+
+    stateCarried(state: string): void {
+        try {
+            sessionStorage.setItem(this.movedStateKey(), state);
+        } catch (e) {
+            log.warn(`The state of this page could not be kept for its next server: ${String(e)}`);
+        }
     }
 
     contextDestroyed(): void {

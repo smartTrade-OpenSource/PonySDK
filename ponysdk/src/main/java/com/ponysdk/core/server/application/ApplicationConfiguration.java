@@ -27,11 +27,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -44,6 +46,9 @@ public class ApplicationConfiguration {
     public static final String STYLESHEETS = "ponysdk.application.stylesheets";
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
+    private static final String THEME_PONY = "pony";
+    /** A BCP 47 tag as the {@code lang} attribute takes it: subtags of letters and digits; nothing that closes an attribute. */
+    private static final Pattern LANGUAGE_TAG = Pattern.compile("[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*");
 
     private String applicationID;
     private String applicationName;
@@ -66,11 +71,17 @@ public class ApplicationConfiguration {
     private boolean debugMode;
 
     private boolean hotReload;
+    private byte[] stateTransferKey;
 
     private boolean tabindexOnlyFormField;
 
     /** See {@link #setLegacyClassNames(boolean)}. */
     private boolean legacyClassNames;
+
+    /** See {@link #setTheme(String)}. */
+    private String theme;
+    /** See {@link #setLanguage(String)}. */
+    private String language = "en";
 
     // String Dictionary configuration for protocol optimization
     private boolean stringDictionaryEnabled = true;
@@ -104,6 +115,7 @@ public class ApplicationConfiguration {
         "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "avif", "woff", "woff2", "ttf", "otf"));
     /** See {@link #setContentSecurityPolicyEnabled(boolean)}. */
     private boolean contentSecurityPolicyEnabled = true;
+    private List<Locale> supportedLocales = List.of();
     /** See {@link #addScriptSources(String...)}. */
     private final Set<String> scriptSources = new LinkedHashSet<>();
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
@@ -257,6 +269,20 @@ public class ApplicationConfiguration {
         this.hotReload = hotReload;
     }
 
+    byte[] getStateTransferKey() {
+        return stateTransferKey;
+    }
+
+    /**
+     * Turns on the transfer of the state a moved page's application declares ({@link UIContext#onMove}), to the next
+     * server (ADR-0018): an AES key of 32 bytes, the same on every server of the application, read from a secret
+     * store or the environment, never written in a repository. Null, the default, turns it off.
+     */
+    public void setStateTransferKey(final byte[] key) {
+        if (key != null && key.length != 32) throw new IllegalArgumentException("A state transfer key has 32 bytes, not " + key.length);
+        this.stateTransferKey = key == null ? null : key.clone();
+    }
+
     public boolean isTabindexOnlyFormField() {
         return tabindexOnlyFormField;
     }
@@ -276,6 +302,42 @@ public class ApplicationConfiguration {
      */
     public void setLegacyClassNames(final boolean legacyClassNames) {
         this.legacyClassNames = legacyClassNames;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    /**
+     * Loads the default theme ({@code style/pony-theme.css}, docs/decisions/0024-default-theme.md) in the bootstrap page,
+     * before the application's own {@link #setStyle(Map) stylesheets}, so that these win over it, and gives the page's
+     * {@code <html>} the class {@code pony-theme}, which is where the theme applies. {@code "pony"} is the
+     * only theme; {@code null} (the default) loads none: an application that styles the {@code pony-*} classes itself
+     * keeps its look.
+     *
+     * @throws IllegalArgumentException for another name
+     */
+    public void setTheme(final String theme) {
+        if (theme != null && !THEME_PONY.equals(theme)) throw new IllegalArgumentException("No theme named " + theme);
+        this.theme = theme;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * The language of the bootstrap page, the {@code lang} of its {@code <html>}: a screen reader reads the page with
+     * the voice of that language (WCAG 3.1.1). A BCP 47 tag ({@code "fr"}, {@code "pt-BR"}); {@code "en"} by default,
+     * the language of the texts PonySDK itself writes.
+     *
+     * @throws IllegalArgumentException for a value that is no language tag
+     */
+    public void setLanguage(final String language) {
+        if (language == null || !LANGUAGE_TAG.matcher(language).matches()) {
+            throw new IllegalArgumentException("Not a language tag: " + language);
+        }
+        this.language = language;
     }
 
     // Web Component shared stylesheets — injected into every PonyElement shadow root
@@ -418,6 +480,7 @@ public class ApplicationConfiguration {
         public Builder heartBeatPeriod(final long v, final TimeUnit u) { config.setHeartBeatPeriod(v, u); return this; }
         public Builder enableClientToServerHeartBeat(final boolean v) { config.setEnableClientToServerHeartBeat(v); return this; }
         public Builder reconnectionTimeoutMs(final long v)         { config.setReconnectionTimeoutMs(v); return this; }
+        public Builder supportedLocales(final java.util.List<Locale> v) { config.setSupportedLocales(v); return this; }
         public Builder maxRecordingEntries(final int v)            { config.setMaxRecordingEntries(v); return this; }
         public Builder reconnectionListener(final ReconnectionListener v) { config.setReconnectionListener(v); return this; }
         public Builder javascript(final Set<String> v)             { config.setJavascript(v); return this; }
@@ -431,6 +494,8 @@ public class ApplicationConfiguration {
         public Builder hotReload(final boolean v)                  { config.setHotReload(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
+        public Builder theme(final String v)                       { config.setTheme(v); return this; }
+        public Builder language(final String v)                    { config.setLanguage(v); return this; }
         public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }
         public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
         public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }
@@ -651,6 +716,20 @@ public class ApplicationConfiguration {
         for (final String extension : extensions) {
             servedResourceExtensions.add(extension.toLowerCase(Locale.ROOT).replaceFirst("^\\.", ""));
         }
+    }
+
+    /** The locales the application is translated in, the first being the default; empty, the default, for no i18n. */
+    public List<Locale> getSupportedLocales() {
+        return supportedLocales;
+    }
+
+    /**
+     * Turns on the locale of each context (docs/decisions/0022-locale.md): from the visitor's cookie, else the
+     * browser's {@code Accept-Language} matched against these, else the first; written as {@code lang} and {@code dir}
+     * on the page's root. Without any, the contexts have the JVM's default locale and the page's root is left alone.
+     */
+    public void setSupportedLocales(final List<Locale> supportedLocales) {
+        this.supportedLocales = List.copyOf(supportedLocales);
     }
 
     public boolean isContentSecurityPolicyEnabled() {

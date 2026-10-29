@@ -45,6 +45,7 @@ import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.ui.signal.Bind;
 
 public class UISampleEntryPoint implements EntryPoint {
 
@@ -58,6 +59,7 @@ public class UISampleEntryPoint implements EntryPoint {
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
+        Bind.configure(Duration.ofMillis(50), null); // what the Signals page binds reaches the browser every 50 ms at most
 
         final String token = uiContext.getHistory().getToken();
         if (token != null && token.startsWith(ReconnectionPage.CLIENT_TOKEN)) {
@@ -66,6 +68,10 @@ public class UISampleEntryPoint implements EntryPoint {
         }
         if (token != null && token.startsWith(OraclePages.TOKEN)) {
             OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
+            return;
+        }
+        if (token != null && token.startsWith(ThemePage.PREVIEW_TOKEN)) {
+            ThemePage.buildPreview(); // the frame of the Theme page
             return;
         }
         if (token != null && token.startsWith(TerminalPages.TOKEN)) {
@@ -158,13 +164,13 @@ public class UISampleEntryPoint implements EntryPoint {
         // Sidebar entries, by group: { icon, label }
         final String[][] tabs = {
             {"◎", "Overview"}, {"</>", "Code"},
-            {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
-            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
-            {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
-            {"⧉", "Embedding"}, {"⇄", "FDC3"}
+            {"⌨", "Inputs"}, {"☑", "Forms"}, {"⊞", "Layouts"}, {"◈", "Data"},
+            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"∿", "Charts"}, {"⋯", "Misc"}, {"◐", "Theme"},
+            {"⚡", "Performance"}, {"≋", "Streams"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}, {"Aa", "i18n"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
-        final int[] groupStarts = {0, 2, 9};
+        final int[] groupStarts = {0, 2, 12};
         tabNames = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabNames[i] = tabs[i][1];
 
@@ -176,7 +182,7 @@ public class UISampleEntryPoint implements EntryPoint {
         // Deep links: each tab has its URL token (#component-costs); a reload or a shared link opens that tab
         final String[] slugs = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) slugs[i] = tabs[i][1].toLowerCase(java.util.Locale.ROOT).replace(' ', '-');
-        final int first = Math.max(0, java.util.Arrays.asList(slugs).indexOf(uiContext.getHistory().getToken()));
+        final int first = Math.max(0, java.util.Arrays.asList(slugs).indexOf(slugOf(uiContext.getHistory().getToken())));
 
         // Only the opened tab is built eagerly: the others are built (and their schedulers started) on activation
         final PFlowPanel[] tabPanels = new PFlowPanel[tabs.length];
@@ -230,7 +236,7 @@ public class UISampleEntryPoint implements EntryPoint {
         };
         // back / forward buttons of the browser
         uiContext.getHistory().addValueChangeHandler(e -> {
-            final int idx = java.util.Arrays.asList(slugs).indexOf(e.getData());
+            final int idx = java.util.Arrays.asList(slugs).indexOf(slugOf(e.getData()));
             navigate.accept(idx >= 0 ? idx : 0);
         });
 
@@ -251,6 +257,11 @@ public class UISampleEntryPoint implements EntryPoint {
         PWindow.getMain().add(shell);
     }
 
+    /** A tab's slug is the first segment of the token: a page with routes of its own keeps the rest (#routing/orders/42). */
+    private static String slugOf(final String token) {
+        return token == null ? null : token.split("[/?]", 2)[0];
+    }
+
     @SuppressWarnings("unchecked")
     private PFlowPanel buildTabWithSchedulers(final int idx, final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
         return switch (tabNames[idx]) {
@@ -258,19 +269,25 @@ public class UISampleEntryPoint implements EntryPoint {
                 name -> navigate.accept(java.util.Arrays.asList(tabNames).indexOf(name)));
             case "Code" -> CodePage.build(schedulers);
             case "Inputs" -> InputsPage.build(schedulers);
+            case "Forms" -> FormsPage.build();
             case "Layouts" -> LayoutsPage.build(schedulers);
             case "Data" -> DataPage.build(schedulers);
             case "DataGrid" -> DataGridPage.build(schedulers);
             case "Web Components" -> WebComponentsPage.build(schedulers);
             case "FlexLayout" -> FlexLayoutPage.build();
+            case "Charts" -> ChartsPage.build(uiContext, schedulers);
             case "Misc" -> MiscPage.build(schedulers);
+            case "Theme" -> ThemePage.build();
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
             case "Streams" -> StreamsPage.build(uiContext, schedulers);
+            case "Signals" -> SignalsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
             case "Binary protocol" -> BinaryProtocolPage.build(schedulers);
             case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);
             case "Embedding" -> EmbeddingPage.build(uiContext, schedulers);
             case "FDC3" -> Fdc3Page.build();
+            case "Routing" -> RoutingPage.build(uiContext);
+            case "i18n" -> I18nPage.build(uiContext);
             default -> throw new IllegalArgumentException("No page " + tabNames[idx]);
         };
     }

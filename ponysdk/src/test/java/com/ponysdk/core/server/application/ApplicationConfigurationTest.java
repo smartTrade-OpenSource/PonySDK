@@ -166,6 +166,33 @@ public class ApplicationConfigurationTest {
         assertEquals(expected, config.getStyle());
     }
 
+    /** The default theme is off, "pony" turns it on, null off again, and a name that is no theme is refused. */
+    @Test
+    public void testTheme() {
+        assertNull(config.getTheme());
+        config.setTheme("pony");
+        assertEquals("pony", config.getTheme());
+        config.setTheme(null);
+        assertNull(config.getTheme());
+        assertThrows(IllegalArgumentException.class, () -> config.setTheme("lumo"));
+        assertNull(config.getTheme(), "a refused name leaves the setting as it was");
+    }
+
+    /** The page is in English unless the application says another language; a value that is no language tag is refused. */
+    @Test
+    public void testLanguage() {
+        assertEquals("en", config.getLanguage());
+        config.setLanguage("fr");
+        assertEquals("fr", config.getLanguage());
+        config.setLanguage("zh-Hant-TW");
+        assertEquals("zh-Hant-TW", config.getLanguage());
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage("fr\" onload=\"x"));
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage(""));
+        assertThrows(IllegalArgumentException.class, () -> config.setLanguage(null));
+        assertEquals("zh-Hant-TW", config.getLanguage(), "a refused value leaves the setting as it was");
+        assertEquals("de", ApplicationConfiguration.builder().language("de").build().getLanguage());
+    }
+
     /**
      * Test method for {@link com.ponysdk.core.server.application.ApplicationConfiguration#getMeta()}.
      */
@@ -242,6 +269,7 @@ public class ApplicationConfigurationTest {
             .hotReload(true)
             .tabindexOnlyFormField(true)
             .legacyClassNames(true)
+            .theme("pony")
             .stringDictionaryEnabled(false)
             .stringDictionaryMaxSize(128)
             .stringDictionaryMinLength(2)
@@ -260,6 +288,7 @@ public class ApplicationConfigurationTest {
             .wsIdleTimeoutMs(30_000)
             .wsSendTimeoutMs(1_000)
             .wsPermessageDeflateEnabled(false)
+            .supportedLocales(java.util.List.of(java.util.Locale.FRENCH))
             .build();
 
         assertEquals("id", built.getApplicationID());
@@ -285,6 +314,7 @@ public class ApplicationConfigurationTest {
         assertTrue(built.isHotReload());
         assertTrue(built.isTabindexOnlyFormField());
         assertTrue(built.isLegacyClassNames());
+        assertEquals("pony", built.getTheme());
         assertFalse(built.isStringDictionaryEnabled());
         assertEquals(128, built.getStringDictionaryMaxSize());
         assertEquals(2, built.getStringDictionaryMinLength());
@@ -298,6 +328,7 @@ public class ApplicationConfigurationTest {
         assertEquals(2048, built.getWsMaxInboundMessageSize());
         assertEquals(512, built.getWsInputBufferSize());
         assertEquals(-1, built.getWsDeflateLevel());
+        assertEquals(java.util.List.of(java.util.Locale.FRENCH), built.getSupportedLocales());
         assertEquals(ProtocolVersion.V1, built.getMaxProtocolVersion());
         assertFalse(built.isUpdateCoalescingEnabled());
         assertEquals(30_000, built.getWsIdleTimeoutMs());
@@ -367,5 +398,14 @@ public class ApplicationConfigurationTest {
         assertTrue(policy.allows(caller, sibling, null));
         assertFalse(policy.allows(caller, stranger, null));
         assertFalse(policy.allows(orphan, sibling, null), "no application: only itself");
+    }
+
+    @Test
+    public void testSupportedLocalesAreNoneByDefaultAndCopied() {
+        assertTrue(new ApplicationConfiguration().getSupportedLocales().isEmpty());
+        final java.util.List<java.util.Locale> locales = new java.util.ArrayList<>(java.util.List.of(java.util.Locale.ENGLISH));
+        config.setSupportedLocales(locales);
+        locales.add(java.util.Locale.FRENCH);
+        assertEquals(java.util.List.of(java.util.Locale.ENGLISH), config.getSupportedLocales());
     }
 }

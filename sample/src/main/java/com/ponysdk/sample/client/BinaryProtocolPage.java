@@ -36,6 +36,7 @@ import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.sample.client.page.addon.BinaryArgsAddOn;
 
 /** Binary protocol: typed arrays streamed in pure binary. */
@@ -180,6 +181,7 @@ final class BinaryProtocolPage {
         table.addStyleName("anat-table");
         final PFlowPanel scroll = Element.newPFlowPanel();
         scroll.addStyleName("table-scroll");
+        scroll.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         scroll.add(table);
         box.add(scroll);
         final PElement total = el("ov-note", "");

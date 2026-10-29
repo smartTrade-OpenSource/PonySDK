@@ -119,6 +119,14 @@ public class SessionAdminTest {
         assertTrue(SessionAdmin.of(tab1).session(tab2.getID()).isEmpty());
     }
 
+    @Test
+    public void moveEndsTheSession() throws InterruptedException {
+        SessionAdmin.of(tab1).move(tab2.getID());
+        final long deadline = System.currentTimeMillis() + 5_000; // moved on a thread of its own
+        while (tab2.isAlive() && System.currentTimeMillis() < deadline) Thread.sleep(10);
+        assertFalse(tab2.isAlive());
+    }
+
     private Application application(final String id) {
         final Application application = new Application(id, Mockito.mock(HttpSession.class), config);
         SessionManager.get().registerApplication(application);

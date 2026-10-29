@@ -27,6 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.ui.i18n.Locales;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
@@ -43,7 +44,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,6 +63,8 @@ public class BootstrapServlet extends HttpServlet {
     /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
     private static final String REVALIDATE = "no-cache";
     protected static final String NEW_LINE = "\n";
+    /** The id of the theme's link (ApplicationConfiguration.setTheme). */
+    private static final String THEME_ID = "pony-theme";
 
     protected static final String TITLE_PATTERN = "<title>%s</title>";
     protected static final String META_PATTERN = "<meta %s>";
@@ -182,6 +187,7 @@ public class BootstrapServlet extends HttpServlet {
         } else {
             if (path.equals(INDEX_URL)) {
                 response.setHeader("Cache-Control", REVALIDATE);
+                if (!configuration.getSupportedLocales().isEmpty()) response.setHeader("Vary", "Accept-Language, Cookie");
                 if (configuration.isContentSecurityPolicyEnabled())
                     response.setHeader("Content-Security-Policy", buildContentSecurityPolicy());
                 try (OutputStream out = response.getOutputStream()) {
@@ -263,7 +269,7 @@ public class BootstrapServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("<!doctype html>").append(NEW_LINE);
-        sb.append("<html>").append(NEW_LINE);
+        sb.append(htmlTag(request)).append(NEW_LINE);
         sb.append("<head>").append(NEW_LINE);
         sb.append(addHeader(request));
         sb.append("</head>").append(NEW_LINE);
@@ -276,16 +282,34 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     /**
+     * {@code <html>}, with the {@code lang} and {@code dir} of the visitor's locale when the application has supported
+     * locales (docs/decisions/0022-locale.md): the first paint is already in the right direction. The negotiation is
+     * the context's, from the same cookie and header.
+     */
+    protected String htmlTag(final HttpServletRequest request) {
+        // The language is the page's (WCAG 3.1.1); the theme's stylesheet applies where the class pony-theme is: on
+        // the page's root, to the whole page
+        final String theme = configuration.getTheme() == null ? "" : " class=\"pony-theme\"";
+        final List<Locale> supported = configuration.getSupportedLocales();
+        if (supported.isEmpty()) return "<html lang=\"" + configuration.getLanguage() + "\"" + theme + ">";
+        String cookie = null;
+        if (request.getCookies() != null) {
+            for (final jakarta.servlet.http.Cookie c : request.getCookies()) {
+                if (c.getName().equals(Locales.COOKIE)) cookie = c.getValue();
+            }
+        }
+        final Locale locale = Locales.negotiate(supported, cookie, request.getHeader("Accept-Language"));
+        return "<html lang=\"" + locale.toLanguageTag() + "\" dir=\"" + (Locales.isRightToLeft(locale) ? "rtl" : "ltr") + "\"" + theme + ">";
+    }
+
+    /**
      * What a {@code <pony-app>} element of another page loads before it connects, as the bootstrap page loads it
      * (docs/decisions/0008-embedded-application.md): the stylesheets, the scripts with ponysdk.js first, the shared
      * web-component sheets, paths relative to the application; and whether transparent reconnection is on.
      */
     protected String buildManifest(final HttpServletRequest request) {
         final JsonArrayBuilder styles = Json.createArrayBuilder();
-        final Map<String, String> configuredStyles = configuration.getStyle();
-        if (configuredStyles != null) {
-            configuredStyles.forEach((id, href) -> styles.add(Json.createObjectBuilder().add("id", id).add("href", href)));
-        }
+        stylesheets().forEach((id, href) -> styles.add(Json.createObjectBuilder().add("id", id).add("href", href)));
         final JsonArrayBuilder scripts = Json.createArrayBuilder().add(rootPath + "script/ponysdk.js");
         final Set<String> configuredScripts = configuration.getJavascript();
         if (configuredScripts != null) configuredScripts.forEach(scripts::add);
@@ -415,17 +439,24 @@ public class BootstrapServlet extends HttpServlet {
     protected String addStyle(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        final Map<String, String> styles = configuration.getStyle();
-        if (styles != null && !styles.isEmpty()) {
-            for (final Entry<String, String> style : styles.entrySet()) {
-                final String id = style.getKey();
-                final String url = style.getValue();
-                final String contentType = getServletContext().getMimeType(url);
-                sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
-            }
+        for (final Entry<String, String> style : stylesheets().entrySet()) {
+            final String id = style.getKey();
+            final String url = style.getValue();
+            final String contentType = getServletContext().getMimeType(url);
+            sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
         }
 
         return sb.toString();
+    }
+
+    /** The stylesheets of the page: the theme when asked for, then the application's, which win over it. */
+    private Map<String, String> stylesheets() {
+        final Map<String, String> configured = configuration.getStyle();
+        if (configuration.getTheme() == null) return configured == null ? Map.of() : configured;
+        final Map<String, String> all = new LinkedHashMap<>();
+        all.put(THEME_ID, rootPath + "style/pony-theme.css");
+        if (configured != null) all.putAll(configured);
+        return all;
     }
 
     /**
@@ -436,10 +467,14 @@ public class BootstrapServlet extends HttpServlet {
      */
     static final String EARLY_SOCKET_SOURCE = "(function(){"
             + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
-            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
+            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),d=l.pathname.replace(/[^/]*$/,''),"
+            + "k='ponyMovedState:'+l.host+l.pathname+l.search+l.hash,m='',"
             + "e={opened:false,messages:[],times:[],closeEvent:null};"
-            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname.replace(/[^/]*$/,'')+'" + MappingPath.WEBSOCKET + "?"
-            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
+            // the state a move left for this page (ADR-0018), taken once; the terminal reads the same key
+            + "try{var s=sessionStorage.getItem(k);sessionStorage.removeItem(k);if(s!==null)m='&"
+            + ClientToServerModel.MOVED_STATE.toStringValue() + "='+s;}catch(x){}"
+            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+d+'" + MappingPath.WEBSOCKET + "?"
+            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+m+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
             + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
             + "e.socket.binaryType='arraybuffer';"
             + "e.socket.onopen=function(){e.opened=true;};"
@@ -451,7 +486,7 @@ public class BootstrapServlet extends HttpServlet {
      * The source expression that allows it in the Content-Security-Policy: the SHA-256 of EARLY_SOCKET_SOURCE, which is
      * a constant. BootstrapServletTest recomputes it: a change of the source fails the build until this is updated.
      */
-    static final String EARLY_SOCKET_HASH = "'sha256-wkE9zbB3hs1FkKelJA+IUwnnwoSxVWT5v3T70BxzjPM='";
+    static final String EARLY_SOCKET_HASH = "'sha256-OhNJKbDiayJAmhrxR51A/GfuQ8nw82ySywAFDh3OmKI='";
 
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();

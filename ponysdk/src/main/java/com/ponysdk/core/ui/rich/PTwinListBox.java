@@ -75,10 +75,13 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
         leftListBox = Element.newPListBox(containsEmptyItem);
         leftListBox.setMultipleSelect(true);
         leftListBox.addStyleName("pony-TwinListBox-Left-ListBox");
+        // the captions are labels beside the lists, not of them: they name the lists for a screen reader
+        if (leftCaption != null) leftListBox.setAttribute("aria-label", leftCaption);
 
         rightListBox = Element.newPListBox(containsEmptyItem);
         rightListBox.setMultipleSelect(true);
         rightListBox.addStyleName("pony-TwinListBox-Right-ListBox");
+        if (rightCaption != null) rightListBox.setAttribute("aria-label", rightCaption);
 
         setWidget(1, 0, leftListBox);
         setWidget(1, 2, rightListBox);

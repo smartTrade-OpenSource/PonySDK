@@ -34,7 +34,8 @@ import { Browser, PopupWindow } from '../objects/windows.ts';
 import type { Reader } from '../protocol/reader.ts';
 import { log } from './log.ts';
 import { nameOf } from './names.ts';
-import type { Context, ObjectFactory, TerminalObject } from './object.ts';
+import { registerAddOnFactory } from './dispatcher.ts';
+import type { AddOnFactory, Context, ObjectFactory, TerminalObject } from './object.ts';
 
 type Creator = (context: Context, id: number, type: number, reader: Reader) => TerminalObject;
 
@@ -143,7 +144,8 @@ function load(module: () => Promise<Creators>): Promise<void> {
  * The loading of a type's module, or null when there is nothing to wait for: the type is loaded, unknown, or its
  * module failed to load (the factory then reports it).
  */
-export function loadingOf(type: number): Promise<void> | null {
+export function loadingOf(type: number, reader: Reader): Promise<void> | null {
+    if (type === W.ADDON || type === W.ADDON_COMPOSITE) return loadingOfAddOn(reader);
     if (CREATORS.has(type)) return null;
     const module = ON_DEMAND.find(([types]) => types.includes(type))?.[1];
     if (module === undefined) return null;
@@ -155,6 +157,33 @@ export function loadingOf(type: number): Promise<void> | null {
 }
 
 const failed = new Set<() => Promise<Creators>>();
+
+/**
+ * The addons PonySDK ships whose code is a chunk of its own: loaded when the first one is created, not by loadAll, so
+ * that a page without one never fetches it. The factory joins the page's table, where the other addons are.
+ */
+const ADDONS: Record<string, () => Promise<AddOnFactory>> = {
+    'com.ponysdk.core.ui.chart.PChart': async () => (await import('../chart.ts')).createChart,
+};
+
+/** The loading of each of them, null once it ended: a module that failed is not tried again, the create reports it. */
+const addOnLoadings = new Map<string, Promise<void> | null>();
+
+/** The loading of the module of the addon a block creates, null when it needs none or has it. */
+function loadingOfAddOn(reader: Reader): Promise<void> | null {
+    reader.read(); // FACTORY
+    const signature = reader.str;
+    reader.rewind();
+    const module = ADDONS[signature];
+    if (module === undefined) return null;
+    const known = addOnLoadings.get(signature);
+    if (known !== undefined) return known;
+    const loading = module().then(factory => registerAddOnFactory(signature, factory));
+    addOnLoadings.set(signature, loading);
+    const ended = (): void => void addOnLoadings.set(signature, null);
+    loading.then(ended, ended);
+    return loading;
+}
 
 /**
  * Loads the modules not loaded yet: when the browser is idle, so that a first rare widget does not wait. With them,

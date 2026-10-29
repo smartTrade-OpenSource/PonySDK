@@ -27,6 +27,8 @@ export interface Host {
     contextResumed(): void;
     /** DESTROY_CONTEXT: the server ended this context. */
     contextDestroyed(): void;
+    /** CONTEXT_STATE, before DESTROY_CONTEXT: the context moves, the next handshake carries this state (ADR-0018). */
+    stateCarried(state: string): void;
     /** HANDLER_STREAM_REQUEST: the server has a file for this page. */
     streamRequested(requestId: number): void;
     /** HANDLER_COOKIE_REQUEST: a cookie of an embedded application, set by the response to this request (ADR-0009). */
@@ -98,8 +100,11 @@ export class Dispatcher implements Context {
     private readonly objects = new Map<number, TerminalObject>();
     private readonly host: Host;
     private readonly factory: ObjectFactory;
-    /** The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md). */
-    private readonly loader: (type: number) => Promise<void> | null;
+    /**
+     * The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md); for an addon,
+     * the reader is at its FACTORY, where the module of a built-in addon is named.
+     */
+    private readonly loader: (type: number, reader: Reader) => Promise<void> | null;
     /** Set while a block waits for a module: the blocks that come meanwhile wait in the reader. */
     private paused = false;
     readonly session: Session;
@@ -118,7 +123,8 @@ export class Dispatcher implements Context {
     private frameBytes = 0;
 
     constructor(host: Host, factory: ObjectFactory, session: Session, history: HistoryPort,
-                dictionaryFallback?: (id: number) => string | undefined, loader: (type: number) => Promise<void> | null = () => null) {
+                dictionaryFallback?: (id: number) => string | undefined,
+                loader: (type: number, reader: Reader) => Promise<void> | null = () => null) {
         this.host = host;
         this.factory = factory;
         this.loader = loader;
@@ -183,6 +189,11 @@ export class Dispatcher implements Context {
         } else if (key === K.RECONNECT_CONTEXT) {
             for (const object of this.objects.values()) object.contextResumed?.();
             this.host.contextResumed();
+            r.read(); // END
+        } else if (key === K.CONTEXT_STATE) {
+            this.host.stateCarried(r.str);
+            r.read(); // DESTROY_CONTEXT
+            this.host.contextDestroyed();
             r.read(); // END
         } else if (key === K.DESTROY_CONTEXT) {
             this.host.contextDestroyed();
@@ -272,7 +283,7 @@ export class Dispatcher implements Context {
             if (blockEnd === INCOMPLETE) break;
             const first = r.read();
             if (first === K.WINDOW_ID || first === K.ROUNDTRIP_LATENCY || first === K.CREATE_CONTEXT
-                || first === K.RECONNECT_CONTEXT || first === K.DESTROY_CONTEXT) break;
+                || first === K.RECONNECT_CONTEXT || first === K.DESTROY_CONTEXT || first === K.CONTEXT_STATE) break;
             end = blockEnd;
             r.offset = end;
         }
@@ -348,7 +359,7 @@ export class Dispatcher implements Context {
         const r = this.reader;
         r.read(); // WIDGET_TYPE
         const type = r.int;
-        const loading = this.loader(type);
+        const loading = this.loader(type, r);
         if (loading !== null) throw new Pending(loading); // before any effect of the block
         const object = this.factory(type, this, id, r);
         if (object === null) {

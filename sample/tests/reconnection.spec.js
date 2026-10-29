@@ -227,7 +227,7 @@ test.describe('a page of terminal objects', () => {
   });
 });
 
-test('Move server: the frame reloads into a new session, its watched price back from its address', async ({ page }) => {
+test('Move server: the frame reloads into a new session, its watched price back from its address, its note carried', async ({ page }) => {
   await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
   const log = page.locator('.rc-log');
   const frame = page.frameLocator('.rc-frame');
@@ -236,12 +236,17 @@ test('Move server: the frame reloads into a new session, its watched price back 
 
   await frame.locator('.rc-cell').nth(6).click();
   await expect(frame.locator('.rc-watching')).toHaveText("Watching price 7: kept in the page's address");
+  await frame.locator('.rc-note-box').fill('Buy 10M EUR/USD at 1.0845');
+  await frame.locator('.rc-note-box').press('Tab'); // the text reaches the server on change
   await page.getByRole('button', { name: 'Move server', exact: true }).click();
   await expect(log).toContainText('moved, as a server being drained moves each of its pages', { timeout: 10000 });
   await expect(frame.locator('.rc-watching')).toHaveText(/^Watching price 7: restored from the page's address by session #\d+$/,
     { timeout: 15000 });
   await expect(frame.locator('.rc-client-title')).not.toHaveText(`Session #${first}`);
   await expect(frame.locator('.rc-cell').nth(6)).toHaveClass(/rc-watched/);
+  // what the address cannot hold, the move carried, sealed (ADR-0018)
+  await expect(frame.locator('.rc-note-box')).toHaveValue('Buy 10M EUR/USD at 1.0845');
+  await expect(frame.locator('.rc-carried')).toHaveText('Note carried from the previous server, sealed, through the page');
 });
 
 test("the health check the Reconnection page links to answers UP, not cached", async ({ page }) => {

@@ -14,5 +14,7 @@ public enum SessionAction {
     /** Refuse, or allow again, its reconnection attempts. */
     HOLD,
     /** Destroy it: the client is told and reloads. */
-    DESTROY
+    DESTROY,
+    /** Move it: destroyed as by DESTROY, its client carrying the state its application declares (ADR-0018). */
+    MOVE
 }

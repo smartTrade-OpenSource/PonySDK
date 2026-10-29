@@ -49,11 +49,21 @@ public class ShowcaseMain {
         configuration.setWsAllowedOrigins(Set.of("http://[::1]:" + PORTAL_PORT, "http://localhost:" + PORTAL_PORT,
             "http://127.0.0.1:" + PORTAL_PORT));
         configuration.setEntryPointClass(UISampleEntryPoint.class);
+        // The languages of the i18n page (docs/decisions/0022-locale.md): British English first, which is also the
+        // week that starts on Monday as the date picker's default; Arabic turns the page right to left
+        configuration.setSupportedLocales(java.util.List.of(java.util.Locale.UK, java.util.Locale.FRENCH,
+            java.util.Locale.forLanguageTag("ar")));
         // -Dponysdk.debug (runShowcase -Pdebug): each widget tells the terminal its class and creation line, and the
         // inspector shows over the page. Off by default: the Costs page measures the bytes of the normal mode
         configuration.setDebugMode(Boolean.getBoolean("ponysdk.debug"));
         // -Dponysdk.hotReload (runShowcase -PhotReload): the showcase's classes reload once compiled again, and its pages
         configuration.setHotReload(Boolean.getBoolean("ponysdk.hotReload"));
+        // region stateKey
+        // The state a moved page carries to the next server (ADR-0018): a key every server shares, from the environment
+        // (a secret store in production; runTwoServers gives both servers one), else one for this server alone
+        final String stateKey = System.getenv("PONYSDK_STATE_KEY");
+        configuration.setStateTransferKey(stateKey != null ? java.util.Base64.getDecoder().decode(stateKey) : randomKey());
+        // endregion
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
         // Map.of have no defined iteration order.
@@ -70,6 +80,8 @@ public class ShowcaseMain {
         final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();
         styles.put("ponysdk", "style/ponysdk.css");
         styles.put("flexlayout", "style/flexlayout.css");
+        // the frame of the Theme page: its layout (the theme itself is loaded by that page, script/sample.js)
+        styles.put("theme-preview", "css/theme-preview.css");
         styles.put("showcase", "css/showcase.css"); // last: the showcase theme wins over the defaults
         configuration.setStyle(styles);
 
@@ -100,6 +112,12 @@ public class ShowcaseMain {
         // endregion
         server.start();
         startPortal();
+    }
+
+    private static byte[] randomKey() {
+        final byte[] key = new byte[32];
+        new java.security.SecureRandom().nextBytes(key);
+        return key;
     }
 
     /**

@@ -34,8 +34,9 @@ import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.chart.PChart;
 
-/** Performance: live JVM and network metrics, 60-second charts. */
+/** Performance: live JVM and network metrics, 60-second charts (PChart, docs/decisions/0026-chart.md). */
 final class PerformancePage {
 
     private PerformancePage() {
@@ -46,18 +47,20 @@ final class PerformancePage {
     static PFlowPanel build(final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
         pageTitle(p, "Performance", "Live JVM and network metrics of this server and this session, sampled every "
-            + "second. The charts are plain PonySDK widgets: 60 bars whose heights are set from Java.");
+            + "second. The charts are PChart widgets: a point is appended from Java every second, the terminal draws "
+            + "them on a canvas.");
         final Runtime rt = Runtime.getRuntime();
         final long maxMem = rt.maxMemory();
 
         p.add(sectionTitle("Last 60 seconds"));
         final PFlowPanel charts = Element.newPFlowPanel();
         charts.addStyleName("spark-grid");
-        final Sparkline heapChart = new Sparkline("Live heap", "MB", "%.0f");
-        heapChart.fill(java.util.Arrays.stream(LiveHeap.lastMinute()).mapToDouble(b -> b / 1024 / 1024).toArray());
-        final Sparkline wireChart = new Sparkline("Sent on the wire", "KB/s", "%.1f");
-        final Sparkline latChart = new Sparkline("Roundtrip latency", "ms", "%.0f");
-        charts.add(heapChart.card, wireChart.card, latChart.card);
+        final PChart heapChart = metric(charts, PChart.Type.AREA, "Live heap", "MB", 0);
+        final long[] heapHistory = LiveHeap.lastMinute(); // a chart opened now starts filled
+        final long start = System.currentTimeMillis() - heapHistory.length * 1_000L;
+        for (int i = 0; i < heapHistory.length; i++) heapChart.append(start + i * 1_000L, heapHistory[i] / 1024.0 / 1024);
+        final PChart wireChart = metric(charts, PChart.Type.BAR, "Sent on the wire", "KB/s", 1);
+        final PChart latChart = metric(charts, PChart.Type.LINE, "Roundtrip latency", "ms", 0);
         p.add(charts);
 
         p.add(sectionTitle("JVM"));
@@ -184,11 +187,12 @@ final class PerformancePage {
             final long curRcv = uiContext.getWireBytesReceived();
             if (curSent >= 0 && prevSent[0] > 0) sentVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curSent - prevSent[0]) / 1024.0));
             if (curRcv >= 0 && prevRcv[0] > 0) rcvVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curRcv - prevRcv[0]) / 1024.0));
-            if (curSent >= 0 && prevSent[0] > 0) wireChart.push((curSent - prevSent[0]) / 1024.0);
+            final long sampled = System.currentTimeMillis();
+            if (curSent >= 0 && prevSent[0] > 0) wireChart.append(sampled, (curSent - prevSent[0]) / 1024.0);
             prevSent[0] = curSent;
             prevRcv[0] = curRcv;
-            heapChart.push(used);
-            latChart.push(lat);
+            heapChart.append(sampled, used);
+            latChart.append(sampled, lat);
 
             // Dictionary stats
             final com.ponysdk.core.server.application.StringDictionary dict = uiContext.getStringDictionary();
@@ -206,67 +210,16 @@ final class PerformancePage {
         return p;
     }
 
-    /** A 60-sample bar chart: one div per sample, heights set from Java (coalesced style updates). */
-    static final class Sparkline {
-        private static final int N = 60;
+    /** A card with a chart of the last 60 seconds of one metric. */
+    private static PChart metric(final PFlowPanel grid, final PChart.Type type, final String label, final String unit,
+                                 final int decimals) {
+        final PChart chart = PChart.builder(type, label + ", " + unit).title(label + ", last 60 seconds")
+            .decimals(decimals).window(Duration.ofSeconds(60)).build();
+        chart.asWidget().setHeight("150px");
         final PFlowPanel card = Element.newPFlowPanel();
-        private final PElement value = el("spark-value", "—");
-        private final PElement range = el("spark-range", "");
-        private final PElement[] bars = new PElement[N];
-        private final double[] samples = new double[N];
-        private final String unit;
-        private final String format;
-        private int count;
-
-        Sparkline(final String label, final String unit, final String format) {
-            this.unit = unit;
-            this.format = format;
-            card.addStyleName("spark-card");
-            final PFlowPanel head = Element.newPFlowPanel();
-            head.addStyleName("spark-head");
-            head.add(el("spark-label", label), value);
-            final PFlowPanel plot = Element.newPFlowPanel();
-            plot.addStyleName("spark-plot");
-            for (int i = 0; i < N; i++) {
-                bars[i] = el("spark-bar", "");
-                bars[i].setStyleProperty("height", "0%");
-                plot.add(bars[i]);
-            }
-            card.add(head, plot, range);
-        }
-
-        void push(final double v) {
-            System.arraycopy(samples, 1, samples, 0, N - 1);
-            samples[N - 1] = v;
-            count = Math.min(N, count + 1);
-            render(v);
-        }
-
-        /** Starts with values already known, oldest first: drawn once. */
-        void fill(final double[] values) {
-            final int n = Math.min(N, values.length);
-            if (n == 0) return;
-            System.arraycopy(values, values.length - n, samples, N - n, n);
-            count = n;
-            render(values[values.length - 1]);
-        }
-
-        private void render(final double v) {
-            double max = 0, min = Double.MAX_VALUE, sum = 0;
-            for (int i = N - count; i < N; i++) {
-                max = Math.max(max, samples[i]);
-                min = Math.min(min, samples[i]);
-                sum += samples[i];
-            }
-            final double top = max > 0 ? max * 1.1 : 1;
-            for (int i = 0; i < N; i++) {
-                // whole percents: unchanged heights are not sent again
-                final int h = i < N - count ? 0 : (int) Math.max(2, Math.round(samples[i] * 100 / top));
-                bars[i].setStyleProperty("height", h + "%");
-            }
-            value.setInnerText(String.format(java.util.Locale.ROOT, format, v) + " " + unit);
-            range.setInnerText(String.format(java.util.Locale.ROOT, "min " + format + " · avg " + format + " · max " + format + " "
-                + unit, min, sum / count, max));
-        }
+        card.addStyleName("spark-card");
+        card.add(el("spark-label", label), chart.asWidget());
+        grid.add(card);
+        return chart;
     }
 }

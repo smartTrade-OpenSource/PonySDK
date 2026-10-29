@@ -15,8 +15,8 @@
     --border-strong: #cbd5e1;
     --text: #0f172a;
     --text-2: #334155;
-    --text-3: #64748b;
-    --text-4: #94a3b8;
+    --text-3: #586579;
+    --text-4: #5b6b80;
     --accent: #4f46e5;
     --accent-strong: #4338ca;
     --accent-soft: #eef2ff;
@@ -33,7 +33,7 @@
     --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     /* legacy names still used by inline styles / scripts */
     --accent2: #047857;
-    --text2: #64748b;
+    --text2: #586579;
     /* surfaces and states, redefined by the dark theme below */
     --surface: #ffffff;
     --header-bg: rgba(255, 255, 255, .92);
@@ -60,7 +60,7 @@
         --text: #e5e7eb;
         --text-2: #cbd5e1;
         --text-3: #94a3b8;
-        --text-4: #64748b;
+        --text-4: #8190a5;
         --accent: #818cf8;
         --accent-strong: #a5b4fc;
         --accent-soft: #1e1b4b;
@@ -515,7 +515,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .pony-DatePicker-day:hover, .pony-DatePicker-day:focus-visible { background: var(--bg-muted); }
 .pony-DatePicker-day[aria-current=date] { box-shadow: inset 0 0 0 1px var(--accent-line); }
 .pony-DatePicker-day[aria-selected=true]:not([data-filler]) { background: var(--accent); color: #fff; }
-.pony-DatePicker-day[data-filler] { color: var(--border-strong); }
+.pony-DatePicker-day[data-filler] { color: var(--text-4); opacity: 1; }
 
 .pony-Tree .pony-TreeItem-row {
     padding: 4px 8px;
@@ -603,7 +603,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .code-kw { color: #f472b6; }
 .code-type { color: #7dd3fc; }
 .code-str { color: #86efac; }
-.code-comment { color: #64748b; font-style: italic; }
+.code-comment { color: #8190a5; font-style: italic; }
 .code-method { color: #c4b5fd; }
 .code-num { color: #fdba74; }
 .code-ann { color: #7dd3fc; }
@@ -936,6 +936,8 @@ div.selected-row { background-color: var(--selected-row); }
 .rc-cell { cursor: pointer; }
 .rc-cell.rc-watched { background: var(--accent-soft); border-color: var(--accent); color: var(--text); font-weight: 600; }
 .rc-watching { font-size: 12.5px; color: var(--text-2); }
+.rc-note-box { max-width: 280px; }
+.rc-carried { font-size: 12.5px; color: var(--text-2); }
 .rc-rows-head { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--text-3); }
 .rc-rows-head .pony-Button { padding: 2px 10px; font-size: 12px; }
 .rc-rows {
@@ -951,6 +953,21 @@ div.selected-row { background-color: var(--selected-row); }
 .stream-tile { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 8px 10px; }
 .stream-name { display: block; font-size: 12px; color: var(--text-3); }
 .stream-price { display: block; font: 600 16px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ── Signals page: tiles and rows bound to signals (docs/decisions/0019-signals.md) ──────────────────────── */
+.signal-price { color: var(--bad); }
+.signal-price.signal-up { color: var(--good); }
+.signal-position { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 0 16px; }
+.signal-field { display: flex; align-items: center; gap: 12px; }
+.signal-field-label { width: 80px; font-size: 12.5px; color: var(--text-3); }
+.signal-invalid { font-size: 12.5px; color: var(--bad); }
+.signal-held { font: 12.5px var(--mono); color: var(--text-3); }
+.signal-total { font: 600 16px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
+.signal-rows { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; }
+.signal-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; max-width: 320px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.signal-row-name { font-size: 12.5px; color: var(--text-3); }
+.signal-made { display: block; font-size: 12.5px; color: var(--text-3); margin: 0 0 12px; }
 
 /* ── FDC3 page: channels, instruments, what came from the others (docs/decisions/0014-fdc3.md) ──────────── */
 .fdc3-agent { display: block; color: var(--text-2); margin: 0 0 8px; }
@@ -995,14 +1012,9 @@ div.selected-row { background-color: var(--selected-row); }
 
 /* Performance: 60-second charts */
 .spark-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 12px; }
 .spark-card { padding: 16px 18px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
-.spark-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-.spark-label { font-size: 13px; font-weight: 500; color: var(--text-3); }
-.spark-value { font-size: 20px; font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
-.spark-plot { display: flex; align-items: flex-end; gap: 2px; height: 72px; padding-bottom: 1px; border-bottom: 1px solid var(--border); contain: strict; }
-.spark-bar { flex: 1; min-width: 2px; background: var(--accent-line); border-radius: 2px 2px 0 0; }
-.spark-bar:last-child { background: var(--accent); }
-.spark-range { font-size: 12px; color: var(--text-3); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.spark-label { font-size: 13px; font-weight: 500; color: var(--text-3); margin-bottom: 8px; }
 .pony-DatePicker-header button {
     border: 0; background: none; font-size: 15px;
     color: var(--text-3) !important; cursor: pointer; padding: 0 6px; border-radius: 6px;
@@ -1077,3 +1089,63 @@ div.selected-row { background-color: var(--selected-row); }
 @media (max-width: 760px) { .pony-embedding-live { grid-template-columns: minmax(0, 1fr); } }
 .pony-embedding-trades { font: 12.5px/1.6 var(--mono); color: var(--text-2); max-height: 180px; overflow-y: auto; }
 .pony-embedding-trade { border-bottom: 1px solid var(--border); padding: 2px 0; }
+
+/* ── Routing page: a small application whose screens are routes (docs/decisions/0020-routing.md) ──────────── */
+.route-app { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin: 0 0 16px; }
+.route-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.route-nav .route-role { margin-left: auto; }
+.route-body { display: block; padding: 14px; min-height: 180px; }
+.route-view { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.route-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.route-note { color: var(--text-2); font-size: 13px; }
+.route-filters { display: flex; gap: 8px; }
+.route-filters .pony-Button.route-filter { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); }
+.route-filters .pony-Button.route-filter-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.route-row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.route-cell { flex: 1 1 0; min-width: 0; color: var(--text); }
+.route-status { color: var(--text-3); }
+.route-confirm { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--accent-line); border-radius: var(--radius); background: var(--accent-soft); }
+/* The Theme page: the frame that shows the widgets under the default theme, and the table of its tokens */
+.th-scheme { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.th-scheme-label { font-size: 13px; color: var(--text-3); }
+.th-frame { width: 100%; height: 640px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); }
+.th-tokens { max-width: 860px; margin: 12px 0 28px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.th-token, .th-token-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+}
+.th-token:last-child { border-bottom: 0; }
+.th-token-head { background: var(--bg-subtle); font-weight: 600; color: var(--text); }
+.th-token-name { font-family: var(--mono); color: var(--text); }
+.th-token-value { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.th-token-text { font-family: var(--mono); color: var(--text-3); overflow-wrap: anywhere; }
+.th-swatch { flex: none; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border-strong); }
+/* Forms: an order ticket bound to a bean (FormsPage). An error is aria-invalid on the field and a message after it. */
+.forms-card { max-width: 560px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.forms-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 14px; align-items: center; margin-bottom: 12px; }
+.forms-row > label { font-size: 13px; font-weight: 600; color: var(--text); }
+.forms-row > .pony-TextBox, .forms-row > .pony-TextArea, .forms-row > .pony-DateBox, .forms-row > .pony-ListBox { width: 100%; }
+.forms-row > .pony-TextArea { min-height: 56px; resize: vertical; }
+.forms-row-check > :first-child { grid-column: 2; }
+.forms-row > .pony-FieldError { grid-column: 2; margin-top: -2px; }
+.pony-FieldError { color: var(--bad); font-size: 12.5px; font-weight: 500; }
+/* A symbol as well as the colour; the empty alternative keeps it out of what a screen reader reads (a browser without it shows none) */
+.pony-FieldError::before { content: "\26A0\FE0E\00a0" / ""; }
+[aria-invalid="true"], .pony-TextBox[aria-invalid="true"]:focus, .pony-ListBox[aria-invalid="true"]:focus { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-soft); }
+input[type=checkbox][aria-invalid="true"] { outline: 2px solid var(--bad); outline-offset: 1px; }
+.forms-problems { color: var(--bad); font-size: 13px; font-weight: 600; margin: 4px 0 10px; }
+.forms-problems:empty { display: none; }
+.forms-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.forms-status { margin-left: auto; font-size: 12.5px; color: var(--text-3); }
+.forms-saved { max-width: 560px; margin: 14px 0 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12.5px; color: var(--text-2); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); white-space: pre-wrap; }
+/* ── i18n page: a small screen the language switch changes (docs/decisions/0022-locale.md) ──────────────── */
+.i18n-screen { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 420px; margin: 0 0 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.i18n-title { font-weight: 600; font-size: 16px; color: var(--text); }
+.i18n-greeting, .i18n-volume, .i18n-amount, .i18n-today, .i18n-date-label, .i18n-picked { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.i18n-stepper { display: flex; align-items: center; gap: 8px; }
+.i18n-orders { color: var(--text); min-width: 11em; text-align: center; }

@@ -156,6 +156,9 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             stateButton = Element.newPButton();
             stateButton.addStyleName(STYLE_CONTAINER_STATE);
             stateButton.setTabindex(TabindexMode.FOCUSABLE);
+            // the chevron of the main button, which already opens the list: a second button with no text would be one
+            // to a screen reader, with no name
+            stateButton.setAttribute("aria-hidden", "true");
             widget.add(stateButton);
 
             if (configuration.isClearTitleButtonEnabled()) {

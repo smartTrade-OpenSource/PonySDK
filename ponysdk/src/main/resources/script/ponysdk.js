@@ -111,6 +111,29 @@ function ponyDebounce(delay, fn) {
     };
 }
 
+// Parts of an add-on that most pages do not need are fetched beside this script: same origin as it, so the
+// Content-Security-Policy's 'self' (ADR-0015) and a <pony-app> element (ADR-0008) are served alike
+var ponyScriptURL = document.currentScript ? document.currentScript.src : null;
+var ponyParts = {};
+
+// Loads one, once per page; the promise ends when it ran, or fails (the next call tries again)
+function ponyLoadPart(name) {
+    if (!ponyParts[name]) {
+        ponyParts[name] = new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = new URL(name, ponyScriptURL || document.baseURI).href;
+            script.onload = function () { resolve(); };
+            script.onerror = function () {
+                delete ponyParts[name];
+                script.remove();
+                reject(new Error(script.src + ' did not load'));
+            };
+            document.head.appendChild(script);
+        });
+    }
+    return ponyParts[name];
+}
+
 function AbstractAddon(id, args, widgetID, element) {
     this.id = id;
     this.widgetID = widgetID;
@@ -385,6 +408,13 @@ else window['AbstractAddon'] = AbstractAddon;
             $(this.pinnedBody).on('mouseleave', '.pony-grid-row', this.onRowMouseLeave.bind(this));
             $(this.unpinnedBody).on('mouseenter', '.pony-grid-row', this.onRowMouseEnter.bind(this));
             $(this.unpinnedBody).on('mouseleave', '.pony-grid-row', this.onRowMouseLeave.bind(this));
+
+            // Roles, indexes and the keyboard: a script fetched when the first grid is created (ADR-0025)
+            ponyLoadPart('datagrid-a11y.js').then(function () {
+                if (!this.destroyed) this.installAria();
+            }.bind(this), function (e) {
+                console.error('The accessibility of the DataGrid is not available: ' + e.message);
+            });
         },
 
         listenOnColumnVisibility: function (value) {
@@ -414,6 +444,7 @@ else window['AbstractAddon'] = AbstractAddon;
         },
 
         destroy: function () {
+            this.destroyed = true;
             clearInterval(this.resizeChecker);
             if ('IntersectionObserver' in window) {
                 if (this.intersectionObserver) this.intersectionObserver.disconnect();
@@ -546,6 +577,7 @@ else window['AbstractAddon'] = AbstractAddon;
                 this.absRowCount = absRowCount;
                 this.firstRowIndex = firstRowIndex;
                 this.refreshVerticalMargins();
+                this.onWindowMoved();
             }
             this.refreshScrollBarMargins();
         },
@@ -584,6 +616,8 @@ else window['AbstractAddon'] = AbstractAddon;
                 var draggableElement = e.getElementsByClassName('pony-grid-draggable-col')[0];
                 if (draggableElement) {
                     draggableElement.draggable = true;
+                    // Chrome makes a group of a draggable element, and a group gives nothing to the name of the column
+                    draggableElement.setAttribute('role', 'presentation');
                     draggableElement.ondragover = function (event) {
                         event.preventDefault();
                     };
@@ -663,9 +697,24 @@ else window['AbstractAddon'] = AbstractAddon;
                 this.loadingData.classList.remove("pony-grid-loading-data-bottom");
             }
             this.loadingData.style.display = null;
+            this.element.setAttribute('aria-busy', 'true');
         },
         hideLoading: function () {
             this.loadingData.style.display = "none";
+            this.element.removeAttribute('aria-busy');
+        },
+
+        // datagrid-a11y.js replaces these two once it is here; its first layout reads the page as it is
+        updateAria: function () { },
+        onWindowMoved: function () { },
+
+        installAria: function () {
+            var methods = AbstractAddon.dataGridAria;
+            for (var name in methods) {
+                Object.defineProperty(this, name, { value: methods[name], writable: true, configurable: true });
+            }
+            this.initAria();
+            this.layoutAria();
         }
 
     });
@@ -721,7 +770,7 @@ else window['AbstractAddon'] = AbstractAddon;
             this.observer = new ResizeObserver(e => {
                 window.requestAnimationFrame(() => {
                     if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
-                    this.resizeTimeout = setTimeout(this.updateView(), 150);
+                    this.resizeTimeout = setTimeout(() => this.updateView(), 150);
                 });
             });
             this.observer.observe(this.element);

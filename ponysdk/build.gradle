@@ -162,8 +162,11 @@ def terminalBundle = tasks.register('terminalBundle', NpmTask) {
 }
 
 dependencies {
+    // Optional: the Binder applies the constraints of a bean when Bean Validation is on the application's classpath
+    // (docs/decisions/0021-forms-binder.md); nothing here needs it to run
+    compileOnly libs.jakarta.validation.api
+
     implementation(
-            libs.jakarta.validation.api,
             // OpenTelemetry API — metrics + trace (no SDK, user brings their own)
             libs.opentelemetry.api,
             libs.bundles.jetty.server,
@@ -179,6 +182,9 @@ dependencies {
     )
 
     testImplementation(
+            libs.jakarta.validation.api,
+            libs.hibernate.validator, // the Binder's Bean Validation tests; jakarta.el below is its message interpolation
+            libs.expressly,
             libs.junit.jupiter,
             libs.selenium.java,
             libs.jakarta.websocket.client.api,

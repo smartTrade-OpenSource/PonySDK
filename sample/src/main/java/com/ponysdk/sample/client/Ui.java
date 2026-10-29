@@ -30,8 +30,14 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PValueBoxBase;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import org.slf4j.Logger;
@@ -143,6 +149,7 @@ final class Ui {
         hdr.add(d1, d2, d3, t, l);
         final PElement body = Element.newDiv();
         body.addStyleName("code-body");
+        body.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         body.setInnerHTML(html);
         wrap.add(hdr, body);
         return wrap;
@@ -200,6 +207,7 @@ final class Ui {
         codeBody.addStyleName("pony-ex-code");
         final PElement body = Element.newDiv();
         body.addStyleName("code-body");
+        body.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         body.setInnerHTML(codeHtml);
         codeBody.add(body);
         codeBody.setVisible(false);
@@ -293,6 +301,7 @@ final class Ui {
         final PButton show = Element.newPButton("Show the code: " + what);
         final PElement code = Element.newDiv();
         code.addStyleName("code-body");
+        code.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         code.setInnerHTML(codeHtml);
         code.setVisible(false);
         show.addClickHandler(e -> {
@@ -311,6 +320,11 @@ final class Ui {
         lbl.addStyleName("pony-label");
         lbl.setInnerText(label);
         row.add(lbl);
+        // a screen reader names the field as the label beside it does
+        if ((widget instanceof PValueBoxBase || widget instanceof PListBox || widget instanceof PDateBox
+            || widget instanceof PRichTextArea || widget instanceof PFrame) && widget.getAttribute("aria-label") == null) {
+            widget.setAttribute("aria-label", label);
+        }
         row.add(widget);
         final String costName = ROW_COSTS.get(label);
         final PFlowPanel actions = costName != null ? rowCost(costSpec(costName)) : Element.newPFlowPanel();
@@ -322,6 +336,7 @@ final class Ui {
             actions.add(show);
             final PElement code = Element.newDiv();
             code.addStyleName("code-body");
+            code.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
             code.addStyleName("row-code");
             code.setInnerHTML(codeHtml);
             code.setVisible(false);

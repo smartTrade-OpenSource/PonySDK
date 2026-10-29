@@ -81,6 +81,14 @@ public final class SessionAdmin {
         act(id, SessionAction.DESTROY, "", UIContext::destroyByAdministrator);
     }
 
+    /**
+     * Moves the session as a drain does (ADR-0017): destroyed, its client reloads, carrying the state its application
+     * declares for a move (ADR-0018); a balancer sends it to another server.
+     */
+    public void move(final int id) {
+        act(id, SessionAction.MOVE, "", UIContext::moveByAdministrator);
+    }
+
     private void act(final int id, final SessionAction action, final String detail, final Consumer<UIContext> effect) {
         final UIContext target = find(id).orElseThrow(() -> new NoSuchElementException("No session #" + id));
         if (!policy.allows(caller, target, action)) {

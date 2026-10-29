@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,25 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.Conflator;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.route.Route;
+import com.ponysdk.core.ui.route.RouteParameters;
+import com.ponysdk.core.ui.route.Router;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PEventOptions;
+import com.ponysdk.core.ui.chart.PChart;
+import com.ponysdk.core.ui.signal.Bind;
+import com.ponysdk.core.ui.signal.MutableSignal;
+import com.ponysdk.core.ui.signal.Signal;
+import com.ponysdk.core.ui.binder.Binder;
+import com.ponysdk.core.ui.binder.Converters;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}
@@ -188,6 +201,42 @@ public final class ProtocolBench {
         return row;
     }
 
+    /** A screen of a few rows, as the views of the router scenario. */
+    private abstract static class BenchView implements IsPWidget {
+
+        private final PFlowPanel panel = Element.newPFlowPanel();
+
+        BenchView(final int rows) {
+            for (int r = 0; r < rows; r++) panel.add(row(r));
+        }
+
+        @Override
+        public PFlowPanel asWidget() {
+            return panel;
+        }
+    }
+
+    @Route("orders")
+    static final class BenchList extends BenchView {
+        BenchList() {
+            super(5);
+        }
+    }
+
+    @Route("orders/:id")
+    static final class BenchDetail extends BenchView {
+        BenchDetail(final RouteParameters parameters) {
+            super(5 + parameters.getInt("id") % 2);
+        }
+    }
+
+    @Route("orders/:id/edit")
+    static final class BenchEdit extends BenchView {
+        BenchEdit() {
+            super(2);
+        }
+    }
+
     private interface Op {
         void run(Bench b, int iteration);
     }
@@ -302,6 +351,128 @@ public final class ProtocolBench {
             b.ctx.destroy();
         }
         result.print();
+    }
+
+    private enum Update {
+        DIRECT("direct setters"), SIGNAL("bound signals"), COMPUTED("bound computed");
+
+        final String label;
+
+        Update(final String label) {
+            this.label = label;
+        }
+    }
+
+    /**
+     * ADR-0019: 60 of 240 cells get a new text in each flush, per cell. The setters of the labels in one transaction, or
+     * a signal set per cell (the feed's thread, here this one), each label bound to its signal (or to a computed signal
+     * of it), the drain run on this thread to be measured. The same texts in the same order: the wire must be the same.
+     */
+    private static void signals(final int protocolVersion, final Update update) {
+        final String name = "signals: 60 of 240 cells, " + update.label;
+        if (!name.startsWith(only)) return;
+        final int cellCount = 240, perFlush = 60;
+        final int warmup = 3_000 * repeat, ops = 5_000 * repeat;
+        final String[] texts = new String[4_096];
+        for (int t = 0; t < texts.length; t++) texts[t] = "1." + (10_000 + t * 7_919 % 90_000);
+        Result result = null;
+        for (final int rounds : new int[] {warmup, ops}) {
+            final Bench b = new Bench(protocolVersion);
+            final List<PLabel> cells = new ArrayList<>(cellCount);
+            final List<MutableSignal<String>> sources = new ArrayList<>(cellCount);
+            final ArrayDeque<Runnable> drains = new ArrayDeque<>();
+            b.ctx.execute(() -> {
+                if (update != Update.DIRECT) Bind.configure(Duration.ZERO, drains::add);
+                for (int c = 0; c < cellCount; c++) {
+                    final PLabel label = Element.newPLabel("1.00000");
+                    b.root.add(label);
+                    cells.add(label);
+                    if (update == Update.DIRECT) continue;
+                    final MutableSignal<String> source = Signal.of("1.00000");
+                    sources.add(source);
+                    Bind.text(label, update == Update.SIGNAL ? source : Signal.computed(source::get));
+                }
+            });
+            b.capture.clear();
+            final long cpu0 = THREADS.getCurrentThreadCpuTime();
+            final long alloc0 = THREADS.getCurrentThreadAllocatedBytes();
+            for (int op = 0; op < rounds; op++) {
+                final int first = op * perFlush;
+                if (update == Update.DIRECT) {
+                    b.ctx.execute(() -> {
+                        for (int k = 0; k < perFlush; k++) cells.get((first + k) % cellCount).setText(texts[(first + k) * 31 % texts.length]);
+                    });
+                } else {
+                    for (int k = 0; k < perFlush; k++) sources.get((first + k) % cellCount).set(texts[(first + k) * 31 % texts.length]);
+                    Runnable drain;
+                    while ((drain = drains.poll()) != null) drain.run();
+                }
+            }
+            final long cpu = THREADS.getCurrentThreadCpuTime() - cpu0;
+            final long alloc = THREADS.getCurrentThreadAllocatedBytes() - alloc0;
+            result = new Result(name, rounds * perFlush, b.capture.size, b.capture.wire(), cpu, alloc);
+            if (rounds == ops) System.out.printf("   frames per flush %.3f, cpu %.1f ns, alloc %.2f B per cell%n",
+                (double) b.capture.frames / rounds, (double) cpu / (rounds * perFlush), (double) alloc / (rounds * perFlush));
+            b.ctx.destroy();
+        }
+        result.print();
+    }
+
+    /** A chart's addon sent as absolute doubles, what PChart's typed array is compared to. */
+    private static final class DoublesAddOn extends PAddOn {
+        void append(final Object... point) {
+            callTerminalMethod("append", point);
+        }
+    }
+
+    /**
+     * ADR-0026: one point of a chart (a flush of its conflator sends one), prices moving by up to 20 units of 10^-5 a
+     * point, 100 ms apart. PChart's change in units against a time and doubles, which is what a typed array of values
+     * would carry without it.
+     */
+    private static void chart(final int protocolVersion, final int series) {
+        final String[] names = new String[series];
+        for (int s = 0; s < series; s++) names[s] = "Series " + s;
+        final long[] units = new long[series];
+        final Random rnd = new Random(5);
+        final long t0 = 1_761_700_000_000L;
+        final PChart[] chart = new PChart[1];
+        final DoublesAddOn[] doubles = new DoublesAddOn[1];
+        final Op reset = (b, i) -> {
+            java.util.Arrays.fill(units, 108_500);
+            chart[0] = PChart.builder(PChart.Type.LINE, names).decimals(5).build();
+            b.root.add(chart[0].asWidget());
+            doubles[0] = new DoublesAddOn();
+            doubles[0].attach(PWindow.getMain());
+        };
+        run("chart: " + series + " series, units", protocolVersion, reset, (b, i) -> {
+            final double[] values = new double[series];
+            for (int s = 0; s < series; s++) {
+                units[s] += rnd.nextInt(41) - 20;
+                values[s] = units[s] / 100_000.0;
+            }
+            chart[0].append(t0 + i * 100L, values);
+        }, 5_000, 20_000);
+        if (series > 1) {
+            // what a tick sent as it comes costs: one series moved, the others leave NaN and cost a byte
+            run("chart: " + series + " series, 1 moved", protocolVersion, reset, (b, i) -> {
+                final double[] values = new double[series];
+                java.util.Arrays.fill(values, Double.NaN);
+                final int moved = i % series;
+                units[moved] += rnd.nextInt(41) - 20;
+                values[moved] = units[moved] / 100_000.0;
+                chart[0].append(t0 + i * 100L, values);
+            }, 5_000, 20_000);
+        }
+        run("chart: " + series + " series, doubles", protocolVersion, reset, (b, i) -> {
+            final Object[] point = new Object[series + 1];
+            point[0] = t0 + i * 100L;
+            for (int s = 0; s < series; s++) {
+                units[s] += rnd.nextInt(41) - 20;
+                point[s + 1] = units[s] / 100_000.0;
+            }
+            doubles[0].append(point);
+        }, 5_000, 20_000);
     }
 
     /** Retained heap per row of {@link #row}: 5 widgets, 1 handler, styles. */
@@ -466,10 +637,40 @@ public final class ProtocolBench {
             }
         }, 1_000, 2_000);
 
+        // ADR-0020: a navigation between two views of a router (match, build, swap, destroy, the token), against the
+        // same swap written by hand: what the router adds
+        final Router[] router = new Router[1];
+        run("route: navigate between 2 views", v, (b, i) -> {
+            final PSimplePanel panel = Element.newPSimplePanel();
+            b.root.add(panel);
+            router[0] = Router.builder(panel).views(BenchList.class, BenchDetail.class, BenchEdit.class).start();
+        }, (b, i) -> router[0].navigate(i % 2 == 0 ? "orders/7" : "orders"), 2_000, 5_000);
+
+        final PSimplePanel[] panel = new PSimplePanel[1];
+        final PWidget[] shown = new PWidget[1];
+        run("route: the same swap by hand", v, (b, i) -> {
+            panel[0] = Element.newPSimplePanel();
+            b.root.add(panel[0]);
+            shown[0] = null;
+        }, (b, i) -> {
+            final PFlowPanel view = new BenchView(i % 2 == 0 ? 6 : 5) { }.asWidget(); // what the two views above build
+            panel[0].setWidget(view);
+            if (shown[0] != null) shown[0].onDestroy();
+            shown[0] = view;
+            UIContext.get().getHistory().newItem(i % 2 == 0 ? "orders/7" : "orders", false);
+        }, 2_000, 5_000);
+
+        // ADR-0026: a point of a chart, per series count: a change in units of 10^-5 against the values as doubles
+        for (final int series : new int[] {1, 10}) chart(v, series);
+
         for (final int quotes : new int[] {100, 1_000}) {
             stream(v, quotes, false);
             stream(v, quotes, true);
         }
+
+        for (final Update update : Update.values()) signals(v, update);
+        forms(v, false);
+        forms(v, true);
 
         // The pending buffer is pooled per thread: one 3 000-update burst (op 0, warm-up included) leaves it grown
         // for every later small transaction on this thread. Last on purpose, it would skew the scenarios after it.
@@ -480,6 +681,71 @@ public final class ProtocolBench {
 
         if ("heap".startsWith(only) || only.isEmpty()) heap(v);
         if ("inbound".startsWith(only) || only.isEmpty()) inbound(v);
+    }
+
+    /** ADR-0021: a form of 6 text fields bound to a bean (3 texts, 3 numbers), with or without Bean Validation. */
+    public static final class FormBean {
+        @jakarta.validation.constraints.Size(max = 20) String a = "a", b = "b", c = "c";
+        @jakarta.validation.constraints.Min(0) @jakarta.validation.constraints.Max(1_000_000) Integer x = 1, y = 2, z = 3;
+
+        public String getA() { return a; }
+        public void setA(final String v) { a = v; }
+        public String getB() { return b; }
+        public void setB(final String v) { b = v; }
+        public String getC() { return c; }
+        public void setC(final String v) { c = v; }
+        public Integer getX() { return x; }
+        public void setX(final Integer v) { x = v; }
+        public Integer getY() { return y; }
+        public void setY(final Integer v) { y = v; }
+        public Integer getZ() { return z; }
+        public void setZ(final Integer v) { z = v; }
+    }
+
+    private static void forms(final int v, final boolean beanValidation) {
+        final String suffix = beanValidation ? " (Bean Validation)" : "";
+        final Binder<FormBean>[] binder = new Binder[1];
+        final Binder.Binding<FormBean, Integer>[] first = new Binder.Binding[1];
+        final boolean[] fine = { true };
+        final Op setup = (b, i) -> {
+            b.root.clear();
+            binder[0] = beanValidation ? new Binder<>(FormBean.class) : new Binder<>();
+            final PFlowPanel form = Element.newPFlowPanel();
+            b.root.add(form);
+            final java.util.function.Supplier<PTextBox> box = () -> {
+                final PTextBox t = Element.newPTextBox();
+                form.add(t);
+                return t;
+            };
+            binder[0].forField(box.get()).bind(FormBean::getA, FormBean::setA);
+            binder[0].forField(box.get()).bind(FormBean::getB, FormBean::setB);
+            binder[0].forField(box.get()).bind(FormBean::getC, FormBean::setC);
+            first[0] = binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number"))
+                .withValidator(n -> fine[0], "Not allowed").bind(FormBean::getX, FormBean::setX);
+            binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number")).bind(FormBean::getY, FormBean::setY);
+            binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number")).bind(FormBean::getZ, FormBean::setZ);
+            binder[0].readBean(new FormBean());
+        };
+        // A form shown, with or without a first error (its message element is created then)
+        run("form: shown, 6 fields" + suffix, v, (b, i) -> {}, (b, i) -> {
+            setup.run(b, i);
+            binder[0].readBean(new FormBean());
+        }, 2_000, 5_000);
+        run("form: shown, 1 first error" + suffix, v, (b, i) -> {}, (b, i) -> {
+            setup.run(b, i);
+            binder[0].readBean(new FormBean());
+            fine[0] = false;
+            first[0].validate();
+            fine[0] = true;
+        }, 2_000, 5_000);
+        run("form: validate 6 valid fields" + suffix, v, setup, (b, i) -> binder[0].validate(), 20_000, 50_000);
+        // One field goes invalid then valid again: its message is created on the first error, then only toggled
+        run("form: 1 error shown, then cleared" + suffix, v, setup, (b, i) -> {
+            fine[0] = false;
+            first[0].validate();
+            fine[0] = true;
+            first[0].validate();
+        }, 20_000, 50_000);
     }
 
     // ---- from the terminal ----------------------------------------------------------------------------------

@@ -1,0 +1,111 @@
+# Accessibility
+
+What a screen reader hears and what the keyboard reaches in the widgets PonySDK draws from plain elements. The
+widgets the terminal draws itself (buttons, text boxes, trees) carry their roles and states already; these are the
+ones built in Java.
+
+| Widget | A screen reader hears | From the keyboard |
+|---|---|---|
+| `ListBox`, `DropDownContainer` | A button that opens a list (`aria-haspopup`, `aria-expanded`); a `listbox` of `option`s with `aria-selected`, `aria-disabled`, `aria-multiselectable` | The widget's own keys |
+| `DataGrid2` | A `grid`: its rows, columns, selection and sort ([below](#datagrid2)) | One tab stop; arrows, `Home`, `End`, `PageUp`, `PageDown`, `Space`, `Enter` |
+
+## Name what the application shows
+
+A grid has no name of its own: the application gives it one, as it does to an icon button.
+
+```java
+gridView.asWidget().setAttribute("aria-label", "Open orders");
+```
+
+The same for every widget that shows no text of its own. `setAttribute` puts the attribute on the widget's element, which
+is the control for these:
+
+| Widget | Name |
+|---|---|
+| `PTextBox`, `PTextArea`, `PPasswordTextBox`, `PListBox`, `PDateBox`, `PSuggestBox`, `PRichTextArea`, `PFrame` | `setAttribute("aria-label", "Quantity")`, or a `<label for>` with `forceDomId()` (as the forms page of the showcase does) |
+| `PImage` | `setAttribute("alt", "...")`; `""` when the image is decoration (the face of a button that has a text) |
+| `PFileUpload` | `setLabel("Upload a file")`: the text is what names the input |
+| `PCheckBox` | Its text; with none, `setInputAttribute("aria-label", "...")`: the label element is the root of the widget, the input is not |
+| `PScrollPanel` and any scrolled panel with no focusable content | `setTabindex(TabindexMode.TABULABLE)`: a keyboard user can scroll it. Chrome and Firefox do it when there is no focusable content; WebKit does not |
+
+The page's language is `ApplicationConfiguration.setLanguage("fr")` (`ponysdk.language` with Spring Boot): the `lang` of
+the bootstrap page, `en` by default, which is the language of the texts PonySDK writes (WCAG 3.1.1).
+
+## DataGrid2
+
+A screen reader reads a `grid` of `row`s of `gridcell`s, headed by `columnheader`s, however the grid is drawn:
+
+- `aria-rowcount` is the whole live data (with the header and the footer), not the rows drawn: the grid draws a
+  window of rows, the rest stays on the server. Each row says its place with `aria-rowindex`, which follows the
+  scrolling.
+- `aria-colcount` and `aria-colindex` count the columns shown: a hidden column is not in the page, so not in the
+  grid. A pinned column is read before the scrolled ones, as it is drawn.
+- A selected row is `aria-selected="true"`, an unselected one `false`, a row that cannot be selected (`isSelectable`)
+  has none; `aria-multiselectable` is set when `DataGridAdapter.isSelectionEnabled()`.
+- The column a sort is on has `aria-sort="ascending"` or `"descending"` on its header.
+- While rows are fetched, `aria-busy` is on the grid.
+
+The pinned columns and the scrolled columns of a row are two elements, drawn side by side; the terminal links them so
+that a screen reader hears one row, whatever the columns are pinned ([ADR-0025](../decisions/0025-datagrid-accessibility.md)).
+A test or a style that looks for the cells of a row under its element finds the pinned ones only: the cells of the
+scrolled part are in the element next to it, which has the same index in its part.
+
+The terminal's part (roles and indexes of the cells, the keyboard) is `script/datagrid-a11y.js`, which `ponysdk.js`
+fetches from its own directory when the first grid is created: a page without a grid does not load it, and a page
+with a Content-Security-Policy needs nothing more than `'self'` (an embedded application's origin is listed as
+[embedding](embedding.md) says). A grid is usable before the script arrives and gets its roles when it has.
+
+### Keyboard
+
+The grid is one tab stop: `Tab` enters it on one cell (the first at the start), `Tab` again leaves it. In it:
+
+| Key | Effect |
+|---|---|
+| Arrows | Move the active cell by one |
+| `Home`, `End` | Move it to the first and the last cell of the row |
+| `Ctrl+Home`, `Ctrl+End` | Move it to the first and the last cell of the grid (the header, the footer) |
+| `PageUp`, `PageDown` | Move it a page up or down: the grid scrolls by a page, the rows asked for are fetched |
+| `Space`, `Enter` | Selects the row as a click does; with `Shift`, as `Shift`+click: the rows from the last one. On a header: sorts the column, ascending then descending |
+| `F2` | Goes to the widget in the cell (a filter, a check box); `Escape` comes back to the cell |
+
+The active cell is scrolled into view, in the scrolled columns too. A mouse click on a cell makes it the active one.
+The widgets in the cells (the check box of a row, a filter) are not tab stops: the cells are. `.pony-grid [role=gridcell]:focus-visible`
+and `.pony-grid [role=columnheader]:focus-visible` draw the active cell's outline (`ponysdk.css`); a theme restyles
+them.
+
+### What to know
+
+- The columns scrolled out of the view are not drawn until they come in: a screen reader that moves to one hears
+  `...` first. `setRefreshOnColumnVisibilityChanged(false)` draws every column, at the price of every cell of every
+  row on the wire.
+- The grid takes the keys when a cell has the focus; a widget in a cell (an editor) keeps its own.
+
+## The audit
+
+`sample/tests/a11y-audit.spec.js` runs axe-core 4.13 (the WCAG 2.1 A and AA rules) on each of the 21 tabs of the
+showcase, on the themed widgets (`#theme-preview`) in the light and the dark scheme: 23 pages in all. A violation that is not
+in the spec's allow-list fails the test; each entry of the list says why it stays.
+
+| Rule | Before | After | What |
+|---|---|---|---|
+| `html-has-lang` | 23 | 0 | PonySDK: the bootstrap page has a `lang` (`setLanguage`, `en` by default) |
+| `label` | 148 | 0 | PonySDK, 116: the selection check boxes of the grid are named (`RowSelectorColumnDataGridView.selectRowLabel()`, `selectAllLabel()`), the filters of its footer by the name of their column (`datagrid-a11y.js`). Showcase, 32: text fields, text areas, date boxes, a file upload with no name |
+| `select-name` | 11 | 0 | PonySDK, 2: the captions of a `PTwinListBox` name its lists. Showcase, 9: drop-down lists named |
+| `button-name` | 6 | 0 | PonySDK: the chevron of a `DropDownContainer` repeats its main button: `aria-hidden` |
+| `nested-interactive` | 11 | 0 | PonySDK: a FlexLayout border tab (`role="tab"`) held a close button; it is a `span` now, and `Delete` on a closable tab closes it |
+| `color-contrast` | 36 | 0 | Showcase: the grey text tokens, the code comments, the filler days of the date picker, three badge colours. The default theme had none |
+| `scrollable-region-focusable` | 18 | 10 | Showcase, 8: code blocks, the ticker, tables, scroll panels and a FlexLayout panel take `tabindex="0"`. DataGrid2, 10: stays, see below |
+| `aria-required-children` | 5 | 5 | DataGrid2: stays, see below |
+| `aria-input-field-name` | 4 | 0 | Showcase: the rich text area is named |
+| `image-alt` | 4 | 0 | Showcase: the image of a push button is decoration (`alt=""`) |
+| `frame-title` | 1 | 0 | Showcase: the `PFrame` is named |
+
+What stays, in DataGrid2: the scrolled parts of a grid (the pinned and the scrolled columns are two elements, ADR-0025)
+are scroll containers, and Chrome and Firefox make a scroller with no tabbable child a tab stop of its own. The grid is
+one tab stop, so these parts carry `tabindex="-1"`. axe then finds no tabbable content in them
+(`scrollable-region-focusable`) and takes them, focusable and between the grid and its rows, for children that are not
+rows (`aria-required-children`). Neither is a barrier: the arrows scroll the active cell into view, and Chrome's own
+accessibility tree has every row with its cells in order (`datagrid-a11y.spec.js` reads it). Both are allow-listed.
+
+What axe does not check: the order and the sense of what a screen reader says, the focus order of a page, the target
+size, the names that are present but wrong. No screen reader was run on the showcase.

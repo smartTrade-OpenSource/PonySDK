@@ -6,6 +6,9 @@
 - JSON-P: `javax.json` becomes `jakarta.json` (API 2.1, Eclipse Parsson). Imports in application code change;
   `PEmulator.addonData` takes a `jakarta.json.JsonObject`.
 - Jetty 12.1 (EE 11), Jakarta Servlet 6.1 and Spring 7, as in 2.10.
+- `ponysdk` no longer brings `jakarta.validation-api`: it is optional, for the [Binder](docs/guide/forms.md), which applies
+  the constraints of a bean when Bean Validation is on the classpath. An application that used the API through `ponysdk`
+  declares it.
 - `ponysdk` no longer brings `jetty-client`, and `ponysdk-spring` no longer brings `spring-web`: an application that
   uses them declares them.
 - Browsers: current Chrome, Edge, Firefox, and Safari 17 or later. The terminal uses `<dialog>`, the popover API,
@@ -106,8 +109,20 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `legacy.js` loaded with `data-pony-legacy="element"` does not start on the document; `window.ponyLegacy.observe(root)`
   decorates a root it is given.
 
+## Default theme
+
+`ApplicationConfiguration.setTheme("pony")` (new, off by default) loads `style/pony-theme.css` before the application's
+`style` entries and writes `<html class="pony-theme">`: a look for every widget, light and dark, in `--pony-` custom
+properties ([theme](docs/guide/theme.md), [ADR-0024](docs/decisions/0024-default-theme.md)). An application that
+styles the `pony-*` classes itself changes nothing until it asks. Once on, its own rules still win: the theme adds no
+specificity.
+
 ## Behaviour changes
 
+- The bootstrap page's root carries a language, `<html lang="en">` by default (WCAG 3.1.1):
+  `configuration.setLanguage("fr")` sets another one; with `setSupportedLocales`, the context's locale gives it.
+- FlexLayout's close mark on a border tab is a `span`, no longer a `button` nested in the tab; Delete on a focused tab
+  closes it. A stylesheet or a test that selected it as a button selects `.fl-sidebar-tab-x` instead.
 - From the classpath, the server serves web files only (`html`, `js`, `mjs`, `css`, `map`, images, fonts). 2.x served
   any file of the classpath, classes and configuration included. An application that serves another type from its
   jars adds it: `configuration.addServedResourceExtensions("json")`.
@@ -155,6 +170,15 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `WebComponentGenerator` ends a usage error with status 1 (it was 2): it throws instead of exiting the JVM.
 - A path the server does not have is logged at DEBUG ("Resource not found"), and a send that fails because the
   connection is closing too; they were ERRORs. A send that fails on an open connection stays an ERROR.
+- `UIContext.getLocale()` ([ADR-0022](docs/decisions/0022-locale.md), [internationalisation](docs/guide/i18n.md)):
+  the JVM's default locale unless the application sets `setSupportedLocales`. `PString` reads the framework's
+  messages in it (they exist in French and Arabic now: a JVM whose default locale is one of them shows them in that
+  language), and `PString.switchLocal` no longer falls back to the JVM's locale before the base file; the context `PSuite`
+  builds is in English, so that a test reads the same texts on any machine. With
+  supported locales, the page's root carries `lang` and `dir`. The date picker and the date box follow the `lang` of
+  their page, whoever wrote it (your own `<html lang="fr">` counts): the names of that language, the week from its
+  first day, and only its names are read (a `PDateBox` takes `Formats.current().dateFormat(...)`). Without a `lang`,
+  they are as before: English, Monday.
 - Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others
   average the last 10 probes received, not 10 slots counting the empty ones as 0. `getTerminalLatency()` is the time
   the probe waited in the terminal (it was always 0), and `getNetworkLatency()` the roundtrip minus that time.
@@ -166,4 +190,5 @@ format, and `setMaxProtocolVersion` caps it for everyone. The server's keys keep
 `PWidget.addEventListener` needs protocol 4: below it, it throws `IllegalStateException`
 ([ADR-0011](docs/decisions/0011-one-way-to-listen.md)). Protocol 4 also has `EVENT_HANDLED`, the answer to an event
 listened to with `PEventOptions.lock()`, and `DEBUG_INFO`, sent in debug mode only
-([ADR-0016](docs/decisions/0016-development-tools.md)).
+([ADR-0016](docs/decisions/0016-development-tools.md)). `CONTEXT_STATE` and the handshake parameter `ms` carry a moved
+page's state when `setStateTransferKey` turns the transfer on ([ADR-0018](docs/decisions/0018-state-transfer.md)).

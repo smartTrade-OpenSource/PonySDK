@@ -23,3 +23,12 @@ what was measured once it was built. They are written for the people who change 
 | [0015](0015-content-security-policy.md) | A Content Security Policy built by PonySDK, and JavaScript called by name | Accepted |
 | [0016](0016-development-tools.md) | The inspector and hot reload, for development | Accepted |
 | [0017](0017-drain.md) | A server that stops moves its pages to the others | Accepted |
+| [0018](0018-state-transfer.md) | A moved page carries the state its application declares | Accepted |
+| [0019](0019-signals.md) | Signals, reactive state bound to widgets | Accepted |
+| [0020](0020-routing.md) | Routes by annotation, on the browser history | Accepted |
+| [0021](0021-forms-binder.md) | A binder between the fields of a screen and a bean, with Bean Validation | Accepted |
+| [0022](0022-locale.md) | A locale per context: the visitor's language, texts, formats and direction | Accepted |
+| [0023](0023-spring-boot-starter.md) | A Spring Boot starter, PonySDK's servlets in Boot's own Jetty | Accepted |
+| [0024](0024-default-theme.md) | A default theme for the widgets: tokens, light and dark, scoped by a class | Accepted |
+| [0025](0025-datagrid-accessibility.md) | DataGrid2 read as a grid by a screen reader, and driven from the keyboard | Accepted |
+| [0026](0026-chart.md) | A chart drawn by the terminal, fed by typed arrays | Accepted |

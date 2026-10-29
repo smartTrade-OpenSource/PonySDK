@@ -62,7 +62,9 @@ final class DataGridPage {
     static PFlowPanel build(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
         pageTitle(p, "DataGrid", "52 columns, up to 10 000 rows. Sort, filter, resize, pin and select: the data and "
-            + "the logic stay on the server, only the visible window of rows is sent to the browser.");
+            + "the logic stay on the server, only the visible window of rows is sent to the browser. A screen reader "
+            + "hears a grid; from the keyboard, the arrows, Home, End, PageUp and PageDown move through the cells and "
+            + "Space or Enter selects the row.");
         buildDataGridInto(p);
         return p;
     }
@@ -118,6 +120,7 @@ final class DataGridPage {
         gridView.asWidget().setStyleProperty("resize", "vertical");
         gridView.asWidget().addStyleName("dg-frame");
         gridView.asWidget().setStyleProperty("overflow", "hidden");
+        gridView.asWidget().setAttribute("aria-label", "Sample data"); // the grid's name, for a screen reader
 
         // Controls row
         final PFlowPanel controls = Element.newPFlowPanel();

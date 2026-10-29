@@ -27,6 +27,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -112,6 +113,10 @@ final class ReconnectionPage {
         p.add(health);
         p.add(codeSnippet("The watched price, in the page's address: ReconnectionPage.java", "java",
             Source.code(ReconnectionPage.class, "watch")));
+        p.add(el("ov-note", "What the address cannot hold, the application declares for a move: the frame's note goes to "
+            + "the next server sealed (AES-GCM under a key every server shares), carried by the page itself. No shared "
+            + "store; the key turns it on (ApplicationConfiguration.setStateTransferKey)."));
+        p.add(codeSnippet("The note, carried by a move: ReconnectionPage.java", "java", Source.code(ReconnectionPage.class, "carry")));
 
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
@@ -182,9 +187,9 @@ final class ReconnectionPage {
             });
             move.addClickHandler(e -> act(id -> {
                 moving = true;
-                admin.destroy(id); // what Drain does to each page of a server that stops
+                admin.move(id); // what Drain does to each page of a server that stops
                 event("Move server: destroyed as a draining server destroys its pages; the frame reloads, and gets its "
-                    + "watched price back from its address");
+                    + "watched price back from its address, its note from the state the move carried");
             }));
             end.addClickHandler(e -> act(id -> {
                 ending = true;
@@ -387,7 +392,15 @@ final class ReconnectionPage {
                 + uiContext.getID());
         }
         // endregion
-        root.add(watching);
+        // region carry: a note typed in the frame, carried to the next server by a move (ADR-0018)
+        final PTextBox note = Element.newPTextBox(uiContext.getMovedState().getString("note", ""));
+        note.setPlaceholder("A note: Move server carries it");
+        uiContext.onMove(state -> state.putString("note", note.getText()));
+        // endregion
+        note.addStyleName("rc-note-box");
+        final PElement carried = el("rc-carried", uiContext.getMovedState().has("note")
+            ? "Note carried from the previous server, sealed, through the page" : "");
+        root.add(watching, note, carried);
         final PFlowPanel rowsHead = Element.newPFlowPanel();
         rowsHead.addStyleName("rc-rows-head");
         final PLabel rowCount = Element.newPLabel("0 rows");

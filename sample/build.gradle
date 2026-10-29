@@ -7,6 +7,7 @@ dependencies {
             project(path: ':ponysdk', configuration: 'default'),
             libs.jakarta.json.api,
             libs.jakarta.servlet.api,
+            libs.jakarta.validation.api, // the constraints of the Forms page's order
             libs.slf4j.api,
             libs.jetty.websocket.jetty.client,
             libs.commons.io,
@@ -17,6 +18,8 @@ dependencies {
     implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
+            libs.hibernate.validator, // Bean Validation for the Forms page, with its message interpolation
+            libs.expressly,
             libs.parsson,
             libs.spring.context,
             libs.slf4j.jcl.over.slf4j,
@@ -95,6 +98,26 @@ task runQuickStart(type: JavaExec) {
     mainClass = 'com.ponysdk.sample.quickstart.HelloWorldMain'
     jvmArgs = ['-Dlog4j.configurationFile=etc/log4j2.xml']
 }
+
+// The Spring Boot example (docs/guide/spring-boot.md): a source set and a classpath of its own, so that Boot's logging and
+// its Jetty stay out of the showcase's. http://localhost:8185/hello/, or -Pport=<port>
+sourceSets {
+    springBoot
+}
+dependencies {
+    springBootImplementation project(':ponysdk-spring-boot-starter')
+    // The actuator over HTTP needs Spring MVC; PonySDK needs Jetty, so MVC comes without its Tomcat
+    springBootImplementation libs.spring.boot.starter.actuator
+    springBootImplementation(libs.spring.boot.starter.webmvc) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+}
+tasks.register('runSpringBoot', JavaExec) {
+    classpath = sourceSets.springBoot.runtimeClasspath
+    mainClass = 'com.ponysdk.sample.springboot.SpringBootSample'
+    args "--server.port=${project.findProperty('port') ?: 8185}"
+}
+tasks.named('check') { dependsOn 'springBootClasses' } // the example compiles with the rest
 
 // FlexLayout demo — activates the 'flexlayout' Spring profile (see etc/server_application.xml).
 // Used by the Playwright E2E suite (sample/tests/flexlayout.spec.js) on http://localhost:8081/sample/.

@@ -14,6 +14,7 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `debugMode` | Each element names its Java class and creation line; the inspector over the page ([development tools](development.md)). Not for production | false |
 | `hotReload` | A recompiled screen reloads in the browser, without restarting ([development tools](development.md)) | false |
 | `style`, `javascript` | Stylesheets and scripts of the bootstrap page | none |
+| `theme` | `"pony"` loads the default theme and gives the page the class `pony-theme` ([theme](theme.md)) | none |
 | `stringDictionaryEnabled` | Strings sent once, then by index | true |
 | `stringDictionaryMaxSize` | Max dictionary entries | 4096 |
 | `stringDictionaryMinLength` | Shorter strings are always sent inline | 8 |
@@ -30,6 +31,8 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `servedResourceExtensions` | File types served from the classpath (`addServedResourceExtensions("json")` adds one); the servlet context's files are all served ([security](security.md)) | web files: `html`, `js`, `mjs`, `css`, `map`, images, fonts |
 | `contentSecurityPolicyEnabled` | The bootstrap page carries a Content-Security-Policy ([security](security.md)) | true |
 | `scriptSources` | More script origins the policy allows (`addScriptSources("https://cdn.example.com")`) | none |
+| `supportedLocales` | The languages of the application, the first the default: the locale of each context, `lang` and `dir` on the page ([internationalisation](i18n.md)) | none: no i18n |
+| `language` | The `lang` of the bootstrap page, a BCP 47 tag: a screen reader reads with its voice ([accessibility](accessibility.md)); with `supportedLocales`, the context's locale gives it | en |
 | `legacyClassNames` | Adds the GWT class names the 2.x CSS used ([UPGRADING.md](../../UPGRADING.md)) | false |
 | `reconnectionTimeoutMs` | Transparent WebSocket reconnection window (ms); 0 = disabled (destroy on close) | 0 |
 | `maxRecordingEntries` | Max buffered protocol entries during a suspension; exceeded, the context is destroyed | 10 000 |

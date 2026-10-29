@@ -12,6 +12,7 @@
 // another one. Arguments, given by Gradle: java, the showcase's classpath, its JVM options.
 
 import { spawn } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
@@ -20,6 +21,8 @@ const [java, classpath, ...jvmArgs] = process.argv.slice(2);
 const PORT = 8090;
 const LOGS = 'build/two-servers';
 const HEALTH = '/sample/health';
+// One state transfer key for both servers, as a secret store gives every server of an application (ADR-0018)
+const STATE_KEY = randomBytes(32).toString('base64');
 
 /** @type {Record<string, {name: string, port: number, process: import('node:child_process').ChildProcess | null,
  *   state: 'stopped' | 'starting' | 'up' | 'draining', sockets: number}>} */
@@ -33,7 +36,7 @@ function start(server) {
     if (server.process) return;
     const log = fs.openSync(`${LOGS}/${server.name}.log`, 'a');
     server.process = spawn(java, [...jvmArgs, `-Dponysdk.port=${server.port}`, '-cp', classpath,
-        'com.ponysdk.impl.java.ShowcaseMain'], { stdio: ['ignore', log, log] });
+        'com.ponysdk.impl.java.ShowcaseMain'], { stdio: ['ignore', log, log], env: { ...process.env, PONYSDK_STATE_KEY: STATE_KEY } });
     server.state = 'starting';
     console.log(`server ${server.name}: starting on ${server.port} (pid ${server.process.pid}, ${LOGS}/${server.name}.log)`);
     server.process.on('exit', code => {

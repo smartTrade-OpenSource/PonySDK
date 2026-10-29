@@ -98,6 +98,16 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         });
     }
 
+    /** What a screen reader says of the check box of the header: it has no text to be named by. */
+    protected String selectAllLabel() {
+        return "Select all rows";
+    }
+
+    /** What a screen reader says of the check box of a row. */
+    protected String selectRowLabel() {
+        return "Select row";
+    }
+
     private class RowSelectorColumnDataGridAdapter extends DecoratorDataGridAdapter<K, V> {
 
         private final List<ColumnDefinition<V>> columns;
@@ -135,6 +145,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             header = adapter.hasHeader() ? Element.newPCheckBox() : null;
             if (header != null) {
                 header.addValueChangeHandler(this::onValueChange);
+                header.setInputAttribute("aria-label", selectAllLabel());
             }
 
             footer = adapter.hasFooter() ? Element.newPCheckBox() : null;
@@ -281,6 +292,10 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
 
             private final PCheckBox checkBox = Element.newPCheckBox();
             private final PWidget pending = Element.newSpan();
+
+            RowSelectorColumnCell() {
+                checkBox.setInputAttribute("aria-label", selectRowLabel());
+            }
 
             @Override
             public PWidget asWidget() {

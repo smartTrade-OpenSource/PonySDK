@@ -40,6 +40,19 @@ test('the showcase calls its JavaScript by name, with nothing blocked', async ({
   expect(await page.evaluate(() => window.__violations)).toEqual([]);
 });
 
+// The drop-down list scrolls its items as an infinite scroll (ponysdk.js): a resize schedules its next view
+test('an open drop-down list evaluates no string when it resizes', async ({ page }) => {
+  await recordViolations(page);
+  await page.goto(BASE_URL + '#theme-preview', { waitUntil: 'domcontentloaded' });
+  const currency = page.getByRole('button', { name: /Currency/ });
+  await expect(currency).toBeVisible({ timeout: 10000 });
+  await currency.click();
+  await page.setViewportSize({ width: 1000, height: 600 }); // the list resizes
+  await page.waitForTimeout(500); // past the 150 ms after a resize
+
+  expect(await page.evaluate(() => window.__violations)).toEqual([]);
+});
+
 test('a script the policy does not list is refused', async ({ page }) => {
   await recordViolations(page);
   await page.goto(BASE_URL + '#misc', { waitUntil: 'domcontentloaded' });

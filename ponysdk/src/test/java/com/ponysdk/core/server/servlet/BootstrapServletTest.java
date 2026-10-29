@@ -49,6 +49,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.ui.i18n.Locales;
 
 /**
  * Tests for {@link BootstrapServlet} path handling — context-path stripping and the
@@ -359,6 +360,60 @@ public class BootstrapServletTest {
         assertTrue(manifest.isNull("legacy"));
         assertEquals("ctx/ponyterminal/terminal.js", manifest.getString("terminal"), "under the root path, as ponysdk.js");
         assertEquals(1, manifest.getInt("mount"));
+    }
+
+    // ---- the default theme (ADR-0024) ----
+
+    @Test
+    public void theThemeIsLoadedBeforeTheApplicationsStylesheets() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        Mockito.when(config.getTheme()).thenReturn("pony");
+        Mockito.when(config.getStyle()).thenReturn(Map.of("main", "css/app.css"));
+        final TestableBootstrapServlet servlet = servletWith(config);
+        servlet.setRootPath("ctx/");
+
+        final String html = servlet.buildIndexHTML(request("", "/index.html"));
+
+        final String theme = "<link id=\"pony-theme\" rel=\"stylesheet\" type=\"text/css\" href=\"ctx/style/pony-theme.css\"/>";
+        final String main = "<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>";
+        assertTrue(html.contains(theme), html);
+        assertTrue(html.indexOf(theme) < html.indexOf(main), "the application's stylesheet comes after, so it wins");
+
+        final jakarta.json.JsonObject manifest = jakarta.json.Json.createReader(
+            new java.io.StringReader(servlet.buildManifest(request("", "/ponyapp.json")))).readObject();
+        assertEquals("[{\"id\":\"pony-theme\",\"href\":\"ctx/style/pony-theme.css\"},{\"id\":\"main\",\"href\":\"css/app.css\"}]",
+            manifest.getJsonArray("styles").toString(), "an embedded application loads it as the page does");
+    }
+
+    @Test
+    public void theThemeAloneIsLoadedWithoutOtherStylesheets() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setTheme("pony");
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("href=\"style/pony-theme.css\""), html);
+        assertTrue(html.contains("<html lang=\"en\" class=\"pony-theme\">"), "the theme applies to the whole page: the class is on its root");
+    }
+
+    // ---- the language of the page (WCAG 3.1.1, docs/guide/accessibility.md) ----
+
+    @Test
+    public void thePageHasALanguageEnglishUnlessTheApplicationSaysOtherwise() {
+        String html = servletWith(new ApplicationConfiguration()).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("<html lang=\"en\">"), html);
+
+        final ApplicationConfiguration french = new ApplicationConfiguration();
+        french.setLanguage("fr-CA");
+        french.setTheme("pony");
+        html = servletWith(french).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("<html lang=\"fr-CA\" class=\"pony-theme\">"), html);
+    }
+
+    @Test
+    public void withoutAThemeNoStylesheetIsAdded() {
+        final String html = servletWith(new ApplicationConfiguration()).buildIndexHTML(request("", "/index.html"));
+        assertFalse(html.contains("pony-theme"), html);
+        assertTrue(html.contains("<html lang=\"en\">"), html);
     }
 
     @Test
@@ -794,5 +849,64 @@ public class BootstrapServletTest {
         assertEquals("[]", manifest.getJsonArray("styles").toString());
         assertEquals("[\"script/ponysdk.js\"]", manifest.getJsonArray("scripts").toString());
         assertEquals("[]", manifest.getJsonArray("sharedSheets").toString());
+    }
+
+    // ---- the visitor's locale on the page's root (docs/decisions/0022-locale.md) ----
+
+    private static HttpServletRequest requestFrom(final String acceptLanguage, final String localeCookie) {
+        final HttpServletRequest request = request("", "/");
+        Mockito.when(request.getHeader("Accept-Language")).thenReturn(acceptLanguage);
+        if (localeCookie != null) {
+            Mockito.when(request.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {
+                new jakarta.servlet.http.Cookie("theme", "dark"), new jakarta.servlet.http.Cookie(Locales.COOKIE, localeCookie)});
+        }
+        return request;
+    }
+
+    private static ApplicationConfiguration translated() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+        config.setSupportedLocales(List.of(java.util.Locale.ENGLISH, java.util.Locale.FRENCH, java.util.Locale.forLanguageTag("ar")));
+        return config;
+    }
+
+    @Test
+    public void theRootOfAPageWithoutSupportedLocalesHasTheConfiguredLanguageNotTheVisitors() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+
+        assertTrue(servletWith(config).buildIndexHTML(requestFrom("fr", null)).contains("\n<html lang=\"en\">\n"));
+    }
+
+    @Test
+    public void theRootCarriesTheLanguageAndTheDirectionOfTheVisitor() {
+        final BootstrapServlet servlet = servletWith(translated());
+
+        assertTrue(servlet.buildIndexHTML(requestFrom("fr-CH,fr;q=0.9", null)).contains("<html lang=\"fr\" dir=\"ltr\">"));
+        assertTrue(servlet.buildIndexHTML(requestFrom("ar", null)).contains("<html lang=\"ar\" dir=\"rtl\">"));
+        assertTrue(servlet.buildIndexHTML(requestFrom(null, null)).contains("<html lang=\"en\" dir=\"ltr\">"), "the first supported");
+    }
+
+    @Test
+    public void theVisitorsChoiceIsTheCookiesAndTheCookiesOfOtherNamesAreIgnored() {
+        final BootstrapServlet servlet = servletWith(translated());
+
+        assertTrue(servlet.buildIndexHTML(requestFrom("fr", "ar")).contains("<html lang=\"ar\" dir=\"rtl\">"));
+        final HttpServletRequest others = request("", "/");
+        Mockito.when(others.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {new jakarta.servlet.http.Cookie("a", "b")});
+        assertTrue(servlet.buildIndexHTML(others).contains("<html lang=\"en\" dir=\"ltr\">"));
+    }
+
+    @Test
+    public void thePageVariesWithTheHeaderAndTheCookieItIsNegotiatedFrom() throws IOException {
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+        servletWith(translated()).handleRequest(requestFrom("fr", null), response, "/index.html");
+        Mockito.verify(response).setHeader("Vary", "Accept-Language, Cookie");
+
+        final HttpServletResponse plain = response(new ByteArrayOutputStream());
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+        servletWith(config).handleRequest(requestFrom("fr", null), plain, "/index.html");
+        Mockito.verify(plain, Mockito.never()).setHeader(Mockito.eq("Vary"), Mockito.anyString());
     }
 }

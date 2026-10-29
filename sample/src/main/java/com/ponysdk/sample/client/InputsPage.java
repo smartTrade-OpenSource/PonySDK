@@ -38,6 +38,7 @@ import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDatePicker;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PImage;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PRadioButton;
@@ -73,6 +74,7 @@ final class InputsPage {
 
         // region textbox
         final PTextBox box = Element.newPTextBox();
+        box.setAttribute("aria-label", "Text field"); // no label beside it: a screen reader needs a name
         final PElement boxEcho = echoIdle("server: waiting for input… (type, then press Enter)");
         // fires when the value changes: Enter or leaving the field
         box.addValueChangeHandler(e -> echoSet(boxEcho, "server received → \"" + e.getData() + "\""));
@@ -132,7 +134,9 @@ final class InputsPage {
         p.add(labeled("Password", password, Source.code(InputsPage.class, "password")));
         p.add(labeled("RichText editor", buildRichText(), Source.code(InputsPage.class, "richtext")));
         // region pushbutton
-        final PPushButton push = Element.newPPushButton(Element.newPImage());
+        final PImage icon = Element.newPImage();
+        icon.setAttribute("alt", ""); // decorative: the button's text says it
+        final PPushButton push = Element.newPPushButton(icon);
         push.setText("Push me");
         // endregion
         p.add(labeled("PushButton", push, Source.code(InputsPage.class, "pushbutton")));
@@ -176,6 +180,7 @@ final class InputsPage {
         // region richtext
         final PFlowPanel editor = Element.newPFlowPanel();
         final PRichTextArea area = Element.newPRichTextArea();
+        area.setAttribute("aria-label", "RichText editor");
         // the toolbar links to the area: the area is created first, the toolbar is still shown above it
         editor.setStyleProperty("display", "flex");
         editor.setStyleProperty("flex-direction", "column-reverse");
@@ -239,6 +244,7 @@ final class InputsPage {
         });
 
         final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
+        dateBox.setAttribute("aria-label", "Date");
         final PButton reset = Element.newPButton("Reset");
         reset.addClickHandler(event -> dateBox.setValue(null));
         flowPanel.add(dateBox);

@@ -50,7 +50,7 @@ public class DrainTest {
             }
             if (!lingers) alive.set(false);
             return null;
-        }).when(context).destroyByAdministrator();
+        }).when(context).moveByAdministrator();
         application.registerUIContext(context);
         return context;
     }

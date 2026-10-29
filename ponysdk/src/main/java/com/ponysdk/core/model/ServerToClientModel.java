@@ -313,7 +313,11 @@ public enum ServerToClientModel {
     EVENT_HANDLED(ValueTypeModel.STRING),
 
     // In debug mode, at a widget's creation: its class and where the application created it, "PButton Page.java:87"
-    DEBUG_INFO(ValueTypeModel.STRING);
+    DEBUG_INFO(ValueTypeModel.STRING),
+
+    // Before DESTROY_CONTEXT, when the context moves to another server: its sealed state, which the terminal keeps
+    // for the next handshake (ADR-0018)
+    CONTEXT_STATE(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

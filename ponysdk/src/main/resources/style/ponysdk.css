@@ -1,4 +1,11 @@
 /* DATAGRID */
+/* the active cell, reached by the keyboard: inside the cell, the grid clips what is outside */
+.pony-grid [role="gridcell"]:focus-visible,
+.pony-grid [role="columnheader"]:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+}
+
 .pony-grid .pony-grid-error-msg {
     position: absolute;
     top: 0px;
