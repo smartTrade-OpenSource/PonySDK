@@ -45,6 +45,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - A server that stops (a deployment, a scale-in, a spot interruption) moves its pages to the other servers first:
   `setDrainMillis`, in waves, each page reloaded where it was; `/health` for the balancer. Behind an ALB on ECS or
   EC2, no shared store ([deployment](docs/guide/deployment.md)). On one machine: `./gradlew :sample:runTwoServers`
+- A moved page carries the state its application declares (`uiContext.onMove`), sealed with AES-GCM under a key
+  every server shares, through the page itself: no session store ([ADR-0018](docs/decisions/0018-state-transfer.md))
 
 **Observability**
 - OpenTelemetry instrumentation via `PonySDKMetrics` (OTel API only, SDK goes in your app)
@@ -56,6 +58,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
   InputsPage.java:85"`); an inspector over the page shows the bytes by class and by object, and picks an element
   ([guide](docs/guide/development.md))
 - Hot reload: a recompiled screen reloads in the open browser, where it was, without restarting the server
+- Spring Boot starter: `ponysdk-spring-boot-starter` registers PonySDK in Boot's own Jetty, `ponysdk.*` properties,
+  the drain on graceful shutdown, a health indicator ([guide](docs/guide/spring-boot.md))
 
 **UI**
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
@@ -64,13 +68,24 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
   [ADR-0003](docs/decisions/0003-protocol-v4-listeners.md))
 - `PEventOptions.lock()`: an event sent once until the server answers it, the element `aria-busy` meanwhile, as a
   button's click is by default
+- Signals: a value set once from any thread, shown by every widget bound to it, computed values, keyed lists;
+  the same bytes on the wire as direct setters ([guide](docs/guide/signals.md))
+- Routing: `@Route("orders/:id")` views, typed parameters, guards, access control, on the browser history
+  ([guide](docs/guide/routing.md))
+- Forms: `Binder` between fields and a bean, converters, validators, Jakarta Bean Validation when present, errors
+  read by screen readers ([guide](docs/guide/forms.md))
+- Charts: `PChart`, live time series drawn by the terminal from typed arrays, conflated feeds, a 5 KB chunk loaded
+  only when a chart exists ([guide](docs/guide/charts.md))
+- A default theme: `setTheme("pony")`, CSS tokens, light and dark, WCAG AA contrast ([guide](docs/guide/theme.md))
 - `PAddOn` for integrating any JavaScript library — typed creation args and method calls sent in pure binary (no JSON) via `PAddOn(Object...)`
 - Virtual threads (Java 25) for scalable concurrent `UIContext`s
 - TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's
   top layer; 27 KB gzipped before the first widget, the rarely shown ones loaded on demand
   ([ADR-0004](docs/decisions/0004-terminal-chunks.md))
 - `ListBox` and the dropdowns built in Java say their state to a screen reader too: `listbox` and `option` roles,
-  `aria-selected`, `aria-disabled`, `aria-multiselectable`, `aria-expanded` on the button that opens them
+  `aria-selected`, `aria-disabled`, `aria-multiselectable`, `aria-expanded` on the button that opens them;
+  `DataGrid2` follows the WAI-ARIA grid pattern, one row heard per row, driven from the keyboard
+  ([guide](docs/guide/accessibility.md))
 - Stylesheets select `pony-<Type>` classes and native or ARIA states; [ADR-0002](docs/decisions/0002-javascript-terminal.md)
   maps each widget to its elements, the guide for stylesheets written on GWT's `gwt-*` classes.
   `ApplicationConfiguration.setLegacyClassNames(true)` adds GWT's class names to the DOM meanwhile
