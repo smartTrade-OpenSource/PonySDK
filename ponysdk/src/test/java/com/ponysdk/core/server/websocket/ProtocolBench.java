@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,9 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PEventOptions;
+import com.ponysdk.core.ui.signal.Bind;
+import com.ponysdk.core.ui.signal.MutableSignal;
+import com.ponysdk.core.ui.signal.Signal;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}
@@ -304,6 +308,71 @@ public final class ProtocolBench {
         result.print();
     }
 
+    private enum Update {
+        DIRECT("direct setters"), SIGNAL("bound signals"), COMPUTED("bound computed");
+
+        final String label;
+
+        Update(final String label) {
+            this.label = label;
+        }
+    }
+
+    /**
+     * ADR-0019: 60 of 240 cells get a new text in each flush, per cell. The setters of the labels in one transaction, or
+     * a signal set per cell (the feed's thread, here this one), each label bound to its signal (or to a computed signal
+     * of it), the drain run on this thread to be measured. The same texts in the same order: the wire must be the same.
+     */
+    private static void signals(final int protocolVersion, final Update update) {
+        final String name = "signals: 60 of 240 cells, " + update.label;
+        if (!name.startsWith(only)) return;
+        final int cellCount = 240, perFlush = 60;
+        final int warmup = 3_000 * repeat, ops = 5_000 * repeat;
+        final String[] texts = new String[4_096];
+        for (int t = 0; t < texts.length; t++) texts[t] = "1." + (10_000 + t * 7_919 % 90_000);
+        Result result = null;
+        for (final int rounds : new int[] {warmup, ops}) {
+            final Bench b = new Bench(protocolVersion);
+            final List<PLabel> cells = new ArrayList<>(cellCount);
+            final List<MutableSignal<String>> sources = new ArrayList<>(cellCount);
+            final ArrayDeque<Runnable> drains = new ArrayDeque<>();
+            b.ctx.execute(() -> {
+                if (update != Update.DIRECT) Bind.configure(Duration.ZERO, drains::add);
+                for (int c = 0; c < cellCount; c++) {
+                    final PLabel label = Element.newPLabel("1.00000");
+                    b.root.add(label);
+                    cells.add(label);
+                    if (update == Update.DIRECT) continue;
+                    final MutableSignal<String> source = Signal.of("1.00000");
+                    sources.add(source);
+                    Bind.text(label, update == Update.SIGNAL ? source : Signal.computed(source::get));
+                }
+            });
+            b.capture.clear();
+            final long cpu0 = THREADS.getCurrentThreadCpuTime();
+            final long alloc0 = THREADS.getCurrentThreadAllocatedBytes();
+            for (int op = 0; op < rounds; op++) {
+                final int first = op * perFlush;
+                if (update == Update.DIRECT) {
+                    b.ctx.execute(() -> {
+                        for (int k = 0; k < perFlush; k++) cells.get((first + k) % cellCount).setText(texts[(first + k) * 31 % texts.length]);
+                    });
+                } else {
+                    for (int k = 0; k < perFlush; k++) sources.get((first + k) % cellCount).set(texts[(first + k) * 31 % texts.length]);
+                    Runnable drain;
+                    while ((drain = drains.poll()) != null) drain.run();
+                }
+            }
+            final long cpu = THREADS.getCurrentThreadCpuTime() - cpu0;
+            final long alloc = THREADS.getCurrentThreadAllocatedBytes() - alloc0;
+            result = new Result(name, rounds * perFlush, b.capture.size, b.capture.wire(), cpu, alloc);
+            if (rounds == ops) System.out.printf("   frames per flush %.3f, cpu %.1f ns, alloc %.2f B per cell%n",
+                (double) b.capture.frames / rounds, (double) cpu / (rounds * perFlush), (double) alloc / (rounds * perFlush));
+            b.ctx.destroy();
+        }
+        result.print();
+    }
+
     /** Retained heap per row of {@link #row}: 5 widgets, 1 handler, styles. */
     private static void heap(final int protocolVersion) {
         final int rows = 5_000;
@@ -470,6 +539,8 @@ public final class ProtocolBench {
             stream(v, quotes, false);
             stream(v, quotes, true);
         }
+
+        for (final Update update : Update.values()) signals(v, update);
 
         // The pending buffer is pooled per thread: one 3 000-update burst (op 0, warm-up included) leaves it grown
         // for every later small transaction on this thread. Last on purpose, it would skew the scenarios after it.
