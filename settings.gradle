@@ -3,4 +3,4 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-include 'ponysdk','ponysdk-spring','sample'
+include 'ponysdk','ponysdk-spring','ponysdk-spring-boot-starter','sample'

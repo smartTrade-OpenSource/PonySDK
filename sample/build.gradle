@@ -96,6 +96,26 @@ task runQuickStart(type: JavaExec) {
     jvmArgs = ['-Dlog4j.configurationFile=etc/log4j2.xml']
 }
 
+// The Spring Boot example (docs/guide/spring-boot.md): a source set and a classpath of its own, so that Boot's logging and
+// its Jetty stay out of the showcase's. http://localhost:8185/hello/, or -Pport=<port>
+sourceSets {
+    springBoot
+}
+dependencies {
+    springBootImplementation project(':ponysdk-spring-boot-starter')
+    // The actuator over HTTP needs Spring MVC; PonySDK needs Jetty, so MVC comes without its Tomcat
+    springBootImplementation libs.spring.boot.starter.actuator
+    springBootImplementation(libs.spring.boot.starter.webmvc) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+}
+tasks.register('runSpringBoot', JavaExec) {
+    classpath = sourceSets.springBoot.runtimeClasspath
+    mainClass = 'com.ponysdk.sample.springboot.SpringBootSample'
+    args "--server.port=${project.findProperty('port') ?: 8185}"
+}
+tasks.named('check') { dependsOn 'springBootClasses' } // the example compiles with the rest
+
 // FlexLayout demo — activates the 'flexlayout' Spring profile (see etc/server_application.xml).
 // Used by the Playwright E2E suite (sample/tests/flexlayout.spec.js) on http://localhost:8081/sample/.
 task runFlexLayoutDemo(type: JavaExec) {

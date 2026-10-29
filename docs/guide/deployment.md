@@ -48,6 +48,9 @@ With Spring, the property of the server bean:
 </bean>
 ```
 
+In a Spring Boot application the drain runs on Boot's graceful shutdown, from `ponysdk.drain-timeout`
+([Spring Boot](spring-boot.md)).
+
 On SIGTERM the server destroys its contexts one by one over four fifths of that time: each page is told, reloads at
 its address, and the balancer, which no longer sends anything to a server it drains, sends it to another one. Then
 the server stops. Set it below both:

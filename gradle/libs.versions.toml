@@ -18,6 +18,7 @@ parsson = "1.1.9"
 selenium = "4.51.0"
 slf4j = "2.0.20"
 spring = "7.0.10"
+spring-boot = "4.1.2" # built on Spring Framework 7.0.10 and Jetty 12.1.14, the versions above
 tyrus = "2.2.2"
 
 [libraries]
@@ -54,6 +55,14 @@ slf4j-jcl-over-slf4j = { module = "org.slf4j:jcl-over-slf4j", version.ref = "slf
 slf4j-jul-to-slf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "slf4j" }
 spring-beans = { module = "org.springframework:spring-beans", version.ref = "spring" }
 spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
+spring-boot-actuator-autoconfigure = { module = "org.springframework.boot:spring-boot-actuator-autoconfigure", version.ref = "spring-boot" }
+spring-boot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor", version.ref = "spring-boot" }
+spring-boot-health = { module = "org.springframework.boot:spring-boot-health", version.ref = "spring-boot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty", version.ref = "spring-boot" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc", version.ref = "spring-boot" }
 spring-core = { module = "org.springframework:spring-core", version.ref = "spring" }
 tyrus-client = { module = "org.glassfish.tyrus:tyrus-client", version.ref = "tyrus" }
 tyrus-container-grizzly-client = { module = "org.glassfish.tyrus:tyrus-container-grizzly-client", version.ref = "tyrus" }
