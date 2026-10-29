@@ -97,7 +97,7 @@ jobs:
           BASE_URL: http://localhost:8081/sample/
         run: >-
           npx playwright test showcase-smoke webcomponents reconnection oracle typescript-terminal legacy fdc3
-          terminal-pages csp embedding integration-gallery --reporter=line --workers=1
+          terminal-pages chart csp embedding integration-gallery --reporter=line --workers=1
 
       # The inspector loads only when the server is in debug mode: the showcase again, with -Pdebug
       - name: Restart the showcase server in debug mode (background)
