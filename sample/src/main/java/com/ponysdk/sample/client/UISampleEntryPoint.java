@@ -158,13 +158,13 @@ public class UISampleEntryPoint implements EntryPoint {
         // Sidebar entries, by group: { icon, label }
         final String[][] tabs = {
             {"◎", "Overview"}, {"</>", "Code"},
-            {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
+            {"⌨", "Inputs"}, {"☑", "Forms"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
             {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
-        final int[] groupStarts = {0, 2, 9};
+        final int[] groupStarts = {0, 2, 10};
         tabNames = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabNames[i] = tabs[i][1];
 
@@ -258,6 +258,7 @@ public class UISampleEntryPoint implements EntryPoint {
                 name -> navigate.accept(java.util.Arrays.asList(tabNames).indexOf(name)));
             case "Code" -> CodePage.build(schedulers);
             case "Inputs" -> InputsPage.build(schedulers);
+            case "Forms" -> FormsPage.build();
             case "Layouts" -> LayoutsPage.build(schedulers);
             case "Data" -> DataPage.build(schedulers);
             case "DataGrid" -> DataGridPage.build(schedulers);
