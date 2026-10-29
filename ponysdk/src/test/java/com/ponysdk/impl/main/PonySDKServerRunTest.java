@@ -238,6 +238,40 @@ public class PonySDKServerRunTest {
     }
 
     @Test
+    public void theHealthCheckSaysUpThenDrainingWhileThePagesMove() throws Exception {
+        final PonySDKServer server = server();
+        server.setDrainMillis(3_000);
+        server.start();
+        final Application application = new Application("health", Mockito.mock(HttpSession.class), new ApplicationConfiguration());
+        final UIContext lingering = Mockito.mock(UIContext.class); // a client that does not go: the drain lasts its window
+        Mockito.when(lingering.isAlive()).thenReturn(true);
+        application.registerUIContext(lingering);
+        try (HttpClient http = HttpClient.newHttpClient()) {
+            final HttpRequest health = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port(server) + "/app/health")).build();
+            final HttpResponse<String> up = http.send(health, HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, up.statusCode());
+            assertEquals("UP", up.body());
+            assertEquals("no-store", up.headers().firstValue("Cache-Control").orElse(null));
+            assertTrue(up.headers().firstValue("Set-Cookie").isEmpty(), "no session for a health check");
+
+            SessionManager.get().registerApplication(application);
+            final Thread sigterm = Thread.ofVirtual().start(server::drainAndStop);
+            HttpResponse<String> draining = http.send(health, HttpResponse.BodyHandlers.ofString());
+            final long deadline = System.currentTimeMillis() + 2_000;
+            while (draining.statusCode() != 503 && System.currentTimeMillis() < deadline) {
+                Thread.sleep(20);
+                draining = http.send(health, HttpResponse.BodyHandlers.ofString());
+            }
+            assertEquals(503, draining.statusCode());
+            assertEquals("DRAINING", draining.body());
+            sigterm.join();
+        } finally {
+            SessionManager.get().unregisterApplication(application);
+            server.stop();
+        }
+    }
+
+    @Test
     public void anInterruptedDrainLeavesTheServerAsItIs() throws Exception {
         final PonySDKServer server = server();
         server.setDrainMillis(5_000);

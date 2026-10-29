@@ -55,6 +55,7 @@ import com.ponysdk.core.server.application.Drain;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.CrossOriginFilter;
+import com.ponysdk.core.server.servlet.HealthServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
 
@@ -64,6 +65,8 @@ public class PonySDKServer {
     public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
     public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
     public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
+    /** A load balancer's health check ({@link HealthServlet}). */
+    public static final String MAPPING_HEALTH = "/health";
 
     private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
@@ -234,6 +237,7 @@ public class PonySDKServer {
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
+        context.addServlet(new ServletHolder(new HealthServlet()), MAPPING_HEALTH);
         return context;
     }
 

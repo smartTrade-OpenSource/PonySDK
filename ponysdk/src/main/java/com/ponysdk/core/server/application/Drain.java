@@ -29,7 +29,14 @@ public final class Drain {
 
     private static final Logger log = LoggerFactory.getLogger(Drain.class);
 
+    private static volatile boolean draining;
+
     private Drain() {
+    }
+
+    /** True while a drain moves this server's pages: its health check answers 503 ({@code HealthServlet}). */
+    public static boolean isDraining() {
+        return draining;
     }
 
     /**
@@ -38,6 +45,15 @@ public final class Drain {
      * @return how many contexts were moved
      */
     public static int run(final Duration window) throws InterruptedException {
+        draining = true;
+        try {
+            return move(window);
+        } finally {
+            draining = false; // the server stops next
+        }
+    }
+
+    private static int move(final Duration window) throws InterruptedException {
         final long start = System.nanoTime();
         final long deadline = start + window.toNanos();
         final Set<UIContext> moved = Collections.newSetFromMap(new IdentityHashMap<>());
