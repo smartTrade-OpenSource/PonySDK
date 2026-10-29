@@ -54,6 +54,12 @@ public class ShowcaseMain {
         configuration.setDebugMode(Boolean.getBoolean("ponysdk.debug"));
         // -Dponysdk.hotReload (runShowcase -PhotReload): the showcase's classes reload once compiled again, and its pages
         configuration.setHotReload(Boolean.getBoolean("ponysdk.hotReload"));
+        // region stateKey
+        // The state a moved page carries to the next server (ADR-0018): a key every server shares, from the environment
+        // (a secret store in production; runTwoServers gives both servers one), else one for this server alone
+        final String stateKey = System.getenv("PONYSDK_STATE_KEY");
+        configuration.setStateTransferKey(stateKey != null ? java.util.Base64.getDecoder().decode(stateKey) : randomKey());
+        // endregion
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
         // Map.of have no defined iteration order.
@@ -100,6 +106,12 @@ public class ShowcaseMain {
         // endregion
         server.start();
         startPortal();
+    }
+
+    private static byte[] randomKey() {
+        final byte[] key = new byte[32];
+        new java.security.SecureRandom().nextBytes(key);
+        return key;
     }
 
     /**
