@@ -33,6 +33,8 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
@@ -84,11 +86,15 @@ public class UIContextTest {
     }
 
     private UIContext liveContext(final ApplicationConfiguration config) {
+        return liveContext(config, Map.of());
+    }
+
+    private UIContext liveContext(final ApplicationConfiguration config, final Map<String, List<String>> parameters) {
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
         config.setStringDictionaryEnabled(false);
         application = new Application("ui-context-test", Mockito.mock(HttpSession.class), config);
         SessionManager.get().registerApplication(application);
-        Mockito.when(socket.getUpgradeRequestData()).thenReturn(new UpgradeRequestData(Map.of(), "Mozilla/5.0 (X11; Linux x86_64) Firefox/120.0",
+        Mockito.when(socket.getUpgradeRequestData()).thenReturn(new UpgradeRequestData(parameters, "Mozilla/5.0 (X11; Linux x86_64) Firefox/120.0",
             Mockito.mock(HttpSession.class)));
         final TxnContext txnContext = new TxnContext(socket);
         txnContext.setApplication(application);
@@ -318,6 +324,89 @@ public class UIContextTest {
         assertTrue(destroyed.await(5, TimeUnit.SECONDS));
         Mockito.verify(socket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.DESTROY_CONTEXT), Mockito.any());
         assertEquals(SessionInfo.State.DESTROYED, uiContext.snapshot().state());
+    }
+
+    // ---- A move carries the state the application declares (ADR-0018) ----
+
+    private static final byte[] STATE_KEY = new byte[32];
+
+    private UIContext transferring(final byte[] key, final Map<String, List<String>> parameters) {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationID("moves");
+        config.setStateTransferKey(key);
+        return liveContext(config, parameters);
+    }
+
+    private void moved(final UIContext uiContext) throws InterruptedException {
+        final CountDownLatch destroyed = new CountDownLatch(1);
+        uiContext.addContextDestroyListener(context -> destroyed.countDown());
+        uiContext.moveByAdministrator();
+        assertTrue(destroyed.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testAMoveGivesTheClientTheDeclaredStateThenTheNextServerReadsIt() throws Exception {
+        final UIContext uiContext = transferring(STATE_KEY, Map.of());
+        uiContext.onMove(state -> state.putString("draft", "10M EUR/USD"));
+
+        moved(uiContext);
+
+        final ArgumentCaptor<Object> token = ArgumentCaptor.forClass(Object.class);
+        final InOrder order = Mockito.inOrder(socket);
+        order.verify(socket).encode(Mockito.eq(ServerToClientModel.CONTEXT_STATE), token.capture());
+        order.verify(socket).encode(ServerToClientModel.DESTROY_CONTEXT, null);
+        final UIContext next = transferring(STATE_KEY,
+            Map.of(ClientToServerModel.MOVED_STATE.toStringValue(), List.of((String) token.getValue())));
+        assertEquals("10M EUR/USD", next.getMovedState().getString("draft", null));
+    }
+
+    @Test
+    public void testAMoveWithoutKeyCarriesNothing() throws Exception {
+        final UIContext uiContext = transferring(null, Map.of());
+        uiContext.onMove(state -> state.putString("draft", "x"));
+        moved(uiContext);
+        Mockito.verify(socket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.CONTEXT_STATE), Mockito.any());
+        Mockito.verify(socket).encode(ServerToClientModel.DESTROY_CONTEXT, null);
+    }
+
+    @Test
+    public void testAMoveWithoutListenerOrWithAnEmptyStateCarriesNothing() throws Exception {
+        moved(transferring(STATE_KEY, Map.of()));
+        final UIContext empty = transferring(STATE_KEY, Map.of());
+        empty.onMove(state -> {});
+        moved(empty);
+        Mockito.verify(socket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.CONTEXT_STATE), Mockito.any());
+        Mockito.verify(socket, Mockito.times(2)).encode(ServerToClientModel.DESTROY_CONTEXT, null);
+    }
+
+    @Test
+    public void testAListenerThatFailsOrAStateTooLargeCarriesNothing() throws Exception {
+        final UIContext failing = transferring(STATE_KEY, Map.of());
+        failing.onMove(state -> {
+            throw new IllegalStateException("the application's bug");
+        });
+        moved(failing);
+        final UIContext large = transferring(STATE_KEY, Map.of());
+        large.onMove(state -> state.putBytes("big", new byte[3100]));
+        moved(large);
+        Mockito.verify(socket, Mockito.never()).encode(Mockito.eq(ServerToClientModel.CONTEXT_STATE), Mockito.any());
+        Mockito.verify(socket, Mockito.times(2)).encode(ServerToClientModel.DESTROY_CONTEXT, null);
+    }
+
+    @Test
+    public void testACarriedStateThatDoesNotOpenOrWithoutKeyIsEmpty() {
+        final Map<String, List<String>> carried = Map.of(ClientToServerModel.MOVED_STATE.toStringValue(), List.of("AAAA"));
+        assertTrue(transferring(STATE_KEY, carried).getMovedState().isEmpty());
+        assertTrue(transferring(null, carried).getMovedState().isEmpty());
+        assertTrue(transferring(STATE_KEY, Map.of()).getMovedState().isEmpty());
+    }
+
+    @Test
+    public void testAStateTransferKeyHas32Bytes() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        assertThrows(IllegalArgumentException.class, () -> config.setStateTransferKey(new byte[16]));
+        config.setStateTransferKey(null);
+        assertNull(config.getStateTransferKey());
     }
 
     // ---- A destroyed context, a context without socket ----

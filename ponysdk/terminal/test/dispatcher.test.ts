@@ -19,6 +19,7 @@ import { Reader } from '../src/protocol/reader.ts';
 import { Dispatcher, type HistoryPort, type Host } from '../src/runtime/dispatcher.ts';
 import { BaseObject, type Context, type ObjectFactory, type Session, type TerminalObject } from '../src/runtime/object.ts';
 import { fixture } from './fixtures.ts';
+import { encode } from './frames.ts';
 
 /** A page's session, without a document: the tests create no element. */
 const SESSION: Session = {
@@ -89,6 +90,7 @@ function run(name: string): Run {
         contextCreated: () => true,
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: () => undefined,
         cookieRequested: () => undefined,
     };
@@ -143,6 +145,7 @@ test('a block creating a type whose module loads later waits, and the blocks aft
         contextCreated: () => true,
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: () => undefined,
         cookieRequested: () => undefined,
     };
@@ -184,6 +187,7 @@ test('the answer to the probe tells how long it waited in the terminal (ADR-0005
         contextCreated: () => true,
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: () => undefined,
         cookieRequested: () => undefined,
     };
@@ -201,4 +205,25 @@ test('the answer to the probe tells how long it waited in the terminal (ADR-0005
     assert.equal(sent[0]![C.TERMINAL_LATENCY], 123);
     const waited = sent[0]![C.TERMINAL_TIME] as number;
     assert.ok(waited >= 30 && waited < 1000, `waited ${waited} ms`);
+});
+
+test('a context that moves hands its state to the terminal, then is destroyed (ADR-0018)', () => {
+    const calls: string[] = [];
+    const host: Host = {
+        send: () => undefined,
+        contextCreated: () => true,
+        contextResumed: () => undefined,
+        contextDestroyed: () => calls.push('destroyed'),
+        stateCarried: state => calls.push(`state ${state}`),
+        streamRequested: () => undefined,
+        cookieRequested: () => undefined,
+    };
+    const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
+    const dispatcher = new Dispatcher(host, () => {
+        throw new Error('no object in this message');
+    }, SESSION, history);
+
+    dispatcher.receive(encode([K.CONTEXT_STATE, 'sealed-state'], [K.DESTROY_CONTEXT], [K.END]));
+
+    assert.deepEqual(calls, ['state sealed-state', 'destroyed']);
 });

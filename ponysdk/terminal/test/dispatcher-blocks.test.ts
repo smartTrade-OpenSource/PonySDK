@@ -84,6 +84,7 @@ function terminal(t: TestContext, loader?: (type: number) => Promise<void> | nul
         contextCreated: () => true,
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: id => log.push(`stream ${id}`),
         cookieRequested: id => log.push(`cookie ${id}`),
     };

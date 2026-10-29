@@ -17,13 +17,14 @@ import com.ponysdk.core.server.servlet.SessionManager;
 
 /**
  * Moves the pages of a server that is about to stop to the other servers: each live context is destroyed as
- * {@link SessionAdmin#destroy} does, its client told; the page reloads at its history token, and the load balancer,
+ * {@link SessionAdmin#move} does, its client told; the page reloads at its history token, and the load balancer,
  * which no longer sends anything to a server it drains, sends it to another one. The contexts go one by one over
  * most of a window, so that the other servers take them in waves rather than all at once; one created meanwhile
  * goes too.
  * <p>
  * What survives a move is what a reload keeps: the history token (the page's address), the browser's cookies and
- * storage. {@code PonySDKServer.setDrainMillis} runs it when the JVM is asked to stop (SIGTERM).
+ * storage, and the state its application declares for a move when the transfer is on (ADR-0018).
+ * {@code PonySDKServer.setDrainMillis} runs it when the JVM is asked to stop (SIGTERM).
  */
 public final class Drain {
 
@@ -64,7 +65,7 @@ public final class Drain {
         UIContext context;
         while ((context = unmoved(moved)) != null && System.nanoTime() < deadline) {
             moved.add(context);
-            context.destroyByAdministrator();
+            context.moveByAdministrator();
             next += pace;
             if (unmoved(moved) != null) sleepUntil(Math.min(next, deadline)); // a pace between two, none after the last
         }

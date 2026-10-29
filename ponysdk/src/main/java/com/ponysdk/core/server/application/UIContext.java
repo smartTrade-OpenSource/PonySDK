@@ -143,6 +143,9 @@ public class UIContext {
      * offers "ponysdk": a page's link can carry the attributes, not the subprotocol.
      */
     private final ContextKeys keys;
+    /** What the page carried from the server it moved from (ADR-0018). */
+    private final MovedState movedState;
+    private java.util.function.Consumer<MovedState> moveListener;
 
     private final StringDictionary stringDictionary;
 
@@ -180,6 +183,7 @@ public class UIContext {
         }
         this.keys = this.upgradeRequestData.getParameterMap().containsKey(ClientToServerModel.HOST_ATTRIBUTES.toStringValue())
                 && Subprotocols.offered(this.upgradeRequestData.getHeader(Subprotocols.HEADER)) ? ContextKeys.create() : null;
+        this.movedState = openMovedState();
 
         // Initialize StringDictionary based on configuration
         if (configuration.isStringDictionaryEnabled()) {
@@ -548,10 +552,62 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
+        close(null);
+    }
+
+    /** With the sealed state of a move, which the terminal keeps for its next handshake (ADR-0018). */
+    private void close(final String movedStateToken) {
         context.getWriter().drainPendingUpdates(); // a block held back by the writer comes first
         socket.beginObject();
+        if (movedStateToken != null) socket.encode(ServerToClientModel.CONTEXT_STATE, movedStateToken);
         socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         socket.endObject();
+    }
+
+    /**
+     * The state the page carried from the server it moved from (ADR-0018), to read before building the screen: empty
+     * when it carried none, when it did not open (altered, too old, another key) or when the transfer is off.
+     */
+    public MovedState getMovedState() {
+        return movedState;
+    }
+
+    /**
+     * What a move of this context to another server carries (a drain, {@link SessionAdmin#move}): the listener fills
+     * the state, on the context's thread, as the context moves. Needs
+     * {@link ApplicationConfiguration#setStateTransferKey}. One listener: another replaces it.
+     */
+    public void onMove(final java.util.function.Consumer<MovedState> listener) {
+        this.moveListener = listener;
+    }
+
+    private MovedState openMovedState() {
+        final byte[] key = configuration.getStateTransferKey();
+        final List<String> carried = upgradeRequestData.getParameterMap().get(ClientToServerModel.MOVED_STATE.toStringValue());
+        if (key == null || carried == null) return new MovedState();
+        try {
+            return new StateSeal(key, configuration.getApplicationID(), java.time.Clock.systemUTC()).open(carried.getFirst());
+        } catch (final IllegalArgumentException e) {
+            log.warn("UIContext #{}: the state its page carried is refused: {}", ID, e.getMessage());
+            return new MovedState();
+        }
+    }
+
+    private String sealMovedState() {
+        final byte[] key = configuration.getStateTransferKey();
+        if (key == null || moveListener == null) return null;
+        try {
+            final MovedState state = new MovedState();
+            moveListener.accept(state);
+            if (state.isEmpty()) return null;
+            final String token = new StateSeal(key, configuration.getApplicationID(), java.time.Clock.systemUTC()).seal(state);
+            if (token == null) log.warn("UIContext #{}: its moved state, sealed, is over {} characters: not carried", ID,
+                StateSeal.MAX_TOKEN_LENGTH);
+            return token;
+        } catch (final Exception e) { // the application's listener, or the cipher
+            log.error("UIContext #{}: its moved state is not carried", ID, e);
+            return null;
+        }
     }
 
     /**
@@ -1036,6 +1092,14 @@ public class UIContext {
     void destroyByAdministrator() {
         Thread.ofVirtual().start(() -> {
             if (!suspended) execute(this::close);
+            destroy();
+        });
+    }
+
+    /** As {@link #destroyByAdministrator}, the client given the state the application declares for a move. */
+    void moveByAdministrator() {
+        Thread.ofVirtual().start(() -> {
+            if (!suspended) execute(() -> close(sealMovedState()));
             destroy();
         });
     }

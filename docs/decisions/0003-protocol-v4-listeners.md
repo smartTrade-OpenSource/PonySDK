@@ -57,7 +57,7 @@ Protocol version 4, `ProtocolVersion.LISTENERS`.
 - The terminal stops sending the events of a handler the server removed.
 - A Java application listens to any DOM event of any widget, with its fields, and a rate limit in the browser: less
   traffic for scrolling, pointer moves and typing.
-- 2 of the 6 keys left are spent.
+- 2 of the 6 keys left are spent; a third by `CONTEXT_STATE` (ADR-0018): 3 are left.
 - A page loaded before an upgrade keeps protocol 3 until it is reloaded: it gets neither change.
 
 ## Update (2026-10-21)

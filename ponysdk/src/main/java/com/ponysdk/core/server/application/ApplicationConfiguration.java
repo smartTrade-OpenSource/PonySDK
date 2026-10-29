@@ -66,6 +66,7 @@ public class ApplicationConfiguration {
     private boolean debugMode;
 
     private boolean hotReload;
+    private byte[] stateTransferKey;
 
     private boolean tabindexOnlyFormField;
 
@@ -255,6 +256,20 @@ public class ApplicationConfiguration {
      */
     public void setHotReload(final boolean hotReload) {
         this.hotReload = hotReload;
+    }
+
+    byte[] getStateTransferKey() {
+        return stateTransferKey;
+    }
+
+    /**
+     * Turns on the transfer of the state a moved page's application declares ({@link UIContext#onMove}), to the next
+     * server (ADR-0018): an AES key of 32 bytes, the same on every server of the application, read from a secret
+     * store or the environment, never written in a repository. Null, the default, turns it off.
+     */
+    public void setStateTransferKey(final byte[] key) {
+        if (key != null && key.length != 32) throw new IllegalArgumentException("A state transfer key has 32 bytes, not " + key.length);
+        this.stateTransferKey = key == null ? null : key.clone();
     }
 
     public boolean isTabindexOnlyFormField() {

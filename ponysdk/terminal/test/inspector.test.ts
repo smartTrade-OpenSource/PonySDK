@@ -32,7 +32,7 @@ class Plain extends BaseObject {
 function watched(): { dispatcher: Dispatcher; stats: Stats } {
     const host: Host = {
         send: () => undefined, contextCreated: () => true, contextResumed: () => undefined, contextDestroyed: () => undefined,
-        streamRequested: () => undefined, cookieRequested: () => undefined,
+        stateCarried: () => undefined, streamRequested: () => undefined, cookieRequested: () => undefined,
     };
     const history: HistoryPort = { token: '', newItem: () => undefined, fireCurrent: () => undefined };
     const dispatcher = new Dispatcher(host, (type, context, id): TerminalObject => new Plain(context, id, type), SESSION, history);

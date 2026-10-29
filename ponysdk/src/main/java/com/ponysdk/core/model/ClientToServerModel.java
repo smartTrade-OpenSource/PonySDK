@@ -120,7 +120,10 @@ public enum ClientToServerModel {
 
     // In the URL of a window or a frame of an embedded terminal (ADR-0009): its parent talks to it by postMessage
     // only. Read by the child terminal, never by the server
-    BRIDGED("br");
+    BRIDGED("br"),
+
+    // In the handshake of a page moved from another server: the sealed state it carries (ADR-0018)
+    MOVED_STATE("ms");
 
     private final String key;
 

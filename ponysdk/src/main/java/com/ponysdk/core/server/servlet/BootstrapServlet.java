@@ -436,10 +436,14 @@ public class BootstrapServlet extends HttpServlet {
      */
     static final String EARLY_SOCKET_SOURCE = "(function(){"
             + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
-            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
+            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),d=l.pathname.replace(/[^/]*$/,''),"
+            + "k='ponyMovedState:'+l.host+l.pathname+l.search+l.hash,m='',"
             + "e={opened:false,messages:[],times:[],closeEvent:null};"
-            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname.replace(/[^/]*$/,'')+'" + MappingPath.WEBSOCKET + "?"
-            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
+            // the state a move left for this page (ADR-0018), taken once; the terminal reads the same key
+            + "try{var s=sessionStorage.getItem(k);sessionStorage.removeItem(k);if(s!==null)m='&"
+            + ClientToServerModel.MOVED_STATE.toStringValue() + "='+s;}catch(x){}"
+            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+d+'" + MappingPath.WEBSOCKET + "?"
+            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+m+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
             + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
             + "e.socket.binaryType='arraybuffer';"
             + "e.socket.onopen=function(){e.opened=true;};"
@@ -451,7 +455,7 @@ public class BootstrapServlet extends HttpServlet {
      * The source expression that allows it in the Content-Security-Policy: the SHA-256 of EARLY_SOCKET_SOURCE, which is
      * a constant. BootstrapServletTest recomputes it: a change of the source fails the build until this is updated.
      */
-    static final String EARLY_SOCKET_HASH = "'sha256-wkE9zbB3hs1FkKelJA+IUwnnwoSxVWT5v3T70BxzjPM='";
+    static final String EARLY_SOCKET_HASH = "'sha256-OhNJKbDiayJAmhrxR51A/GfuQ8nw82ySywAFDh3OmKI='";
 
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();

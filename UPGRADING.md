@@ -166,4 +166,5 @@ format, and `setMaxProtocolVersion` caps it for everyone. The server's keys keep
 `PWidget.addEventListener` needs protocol 4: below it, it throws `IllegalStateException`
 ([ADR-0011](docs/decisions/0011-one-way-to-listen.md)). Protocol 4 also has `EVENT_HANDLED`, the answer to an event
 listened to with `PEventOptions.lock()`, and `DEBUG_INFO`, sent in debug mode only
-([ADR-0016](docs/decisions/0016-development-tools.md)).
+([ADR-0016](docs/decisions/0016-development-tools.md)). `CONTEXT_STATE` and the handshake parameter `ms` carry a moved
+page's state when `setStateTransferKey` turns the transfer on ([ADR-0018](docs/decisions/0018-state-transfer.md)).

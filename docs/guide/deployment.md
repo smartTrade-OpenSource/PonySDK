@@ -91,9 +91,35 @@ held in the JVM does not.
 |---|---|
 | The history token (`uiContext.getHistory().newItem(token, false)`): a selection, a tab, a filter of this tab | What a user typed and did not send |
 | Cookies: preferences of the browser, written with `uiContext.getCookies().setCookie`, read at the start from `uiContext.getRequestCookies()` (those of the WebSocket handshake) | The objects of the screen, its subscriptions |
+| What the application declares for a move, when the transfer is on (below) | What it does not declare |
 
-The Reconnection page of the showcase shows it: click a price in its frame, then Move server; the new session
-restores the price from its address. The same page links to the showcase's own health check.
+The Reconnection page of the showcase shows it: click a price in its frame, type a note, then Move server; the new
+session restores the price from its address and the note from the state the move carried. The same page links to
+the showcase's own health check.
+
+### Carrying the screen's state
+
+What the address cannot hold (a draft, rows selected, a filter not in the URL) the application can declare for a move
+([ADR-0018](../decisions/0018-state-transfer.md)). The page carries it to the next server: no shared store, nothing
+written while the screen lives.
+
+```java
+// every server of the application: one key of 32 bytes, from the secret store
+configuration.setStateTransferKey(Base64.getDecoder().decode(System.getenv("PONYSDK_STATE_KEY")));
+
+// in the entry point
+final PTextBox draft = Element.newPTextBox(uiContext.getMovedState().getString("draft", ""));
+uiContext.onMove(state -> state.putString("draft", draft.getText()));
+```
+
+- `onMove` runs on the context's thread when a drain or `SessionAdmin.move(id)` moves it;
+  `SessionAdmin.destroy(id)` carries nothing.
+- The values are the protocol's types: boolean, int, long, double, string, bytes. Sealed, they must stay under 4 KB
+  (they travel in the handshake's URL); a larger state is not carried and logged at WARN.
+- The state is sealed with AES-256-GCM under the key and the application's id: the browser can neither read nor
+  change it. It opens for two minutes after the move; an altered or late state is refused (WARN) and the page starts
+  as after a reload.
+- The browser keeps it in the tab's `sessionStorage`, under the page's address, until the next handshake takes it.
 
 A server that crashes has no time to drain: its pages reconnect, the balancer sends them to another server, which
 does not know their context, and they reload as after a move.

@@ -27,6 +27,8 @@ export interface Host {
     contextResumed(): void;
     /** DESTROY_CONTEXT: the server ended this context. */
     contextDestroyed(): void;
+    /** CONTEXT_STATE, before DESTROY_CONTEXT: the context moves, the next handshake carries this state (ADR-0018). */
+    stateCarried(state: string): void;
     /** HANDLER_STREAM_REQUEST: the server has a file for this page. */
     streamRequested(requestId: number): void;
     /** HANDLER_COOKIE_REQUEST: a cookie of an embedded application, set by the response to this request (ADR-0009). */
@@ -184,6 +186,11 @@ export class Dispatcher implements Context {
             for (const object of this.objects.values()) object.contextResumed?.();
             this.host.contextResumed();
             r.read(); // END
+        } else if (key === K.CONTEXT_STATE) {
+            this.host.stateCarried(r.str);
+            r.read(); // DESTROY_CONTEXT
+            this.host.contextDestroyed();
+            r.read(); // END
         } else if (key === K.DESTROY_CONTEXT) {
             this.host.contextDestroyed();
             r.read(); // END
@@ -272,7 +279,7 @@ export class Dispatcher implements Context {
             if (blockEnd === INCOMPLETE) break;
             const first = r.read();
             if (first === K.WINDOW_ID || first === K.ROUNDTRIP_LATENCY || first === K.CREATE_CONTEXT
-                || first === K.RECONNECT_CONTEXT || first === K.DESTROY_CONTEXT) break;
+                || first === K.RECONNECT_CONTEXT || first === K.DESTROY_CONTEXT || first === K.CONTEXT_STATE) break;
             end = blockEnd;
             r.offset = end;
         }

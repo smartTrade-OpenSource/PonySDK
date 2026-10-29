@@ -37,6 +37,7 @@ function terminal(t: TestContext): Run {
         contextCreated: () => true,
         contextResumed: () => undefined,
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: () => undefined,
         cookieRequested: () => undefined,
     };
@@ -144,6 +145,7 @@ test('a resumed context tells each object, before its host: what was sent while 
         contextCreated: () => true,
         contextResumed: () => calls.push('host'),
         contextDestroyed: () => undefined,
+        stateCarried: () => undefined,
         streamRequested: () => undefined,
         cookieRequested: () => undefined,
     };
