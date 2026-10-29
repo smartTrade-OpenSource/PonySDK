@@ -32,7 +32,12 @@ import com.ponysdk.core.server.concurrent.Conflator;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.route.Route;
+import com.ponysdk.core.ui.route.RouteParameters;
+import com.ponysdk.core.ui.route.Router;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -186,6 +191,42 @@ public final class ProtocolBench {
         row.add(buy);
         row.add(alert);
         return row;
+    }
+
+    /** A screen of a few rows, as the views of the router scenario. */
+    private abstract static class BenchView implements IsPWidget {
+
+        private final PFlowPanel panel = Element.newPFlowPanel();
+
+        BenchView(final int rows) {
+            for (int r = 0; r < rows; r++) panel.add(row(r));
+        }
+
+        @Override
+        public PFlowPanel asWidget() {
+            return panel;
+        }
+    }
+
+    @Route("orders")
+    static final class BenchList extends BenchView {
+        BenchList() {
+            super(5);
+        }
+    }
+
+    @Route("orders/:id")
+    static final class BenchDetail extends BenchView {
+        BenchDetail(final RouteParameters parameters) {
+            super(5 + parameters.getInt("id") % 2);
+        }
+    }
+
+    @Route("orders/:id/edit")
+    static final class BenchEdit extends BenchView {
+        BenchEdit() {
+            super(2);
+        }
     }
 
     private interface Op {
@@ -465,6 +506,29 @@ public final class ProtocolBench {
                 list.add(row);
             }
         }, 1_000, 2_000);
+
+        // ADR-0020: a navigation between two views of a router (match, build, swap, destroy, the token), against the
+        // same swap written by hand: what the router adds
+        final Router[] router = new Router[1];
+        run("route: navigate between 2 views", v, (b, i) -> {
+            final PSimplePanel panel = Element.newPSimplePanel();
+            b.root.add(panel);
+            router[0] = Router.builder(panel).views(BenchList.class, BenchDetail.class, BenchEdit.class).start();
+        }, (b, i) -> router[0].navigate(i % 2 == 0 ? "orders/7" : "orders"), 2_000, 5_000);
+
+        final PSimplePanel[] panel = new PSimplePanel[1];
+        final PWidget[] shown = new PWidget[1];
+        run("route: the same swap by hand", v, (b, i) -> {
+            panel[0] = Element.newPSimplePanel();
+            b.root.add(panel[0]);
+            shown[0] = null;
+        }, (b, i) -> {
+            final PFlowPanel view = new BenchView(i % 2 == 0 ? 6 : 5) { }.asWidget(); // what the two views above build
+            panel[0].setWidget(view);
+            if (shown[0] != null) shown[0].onDestroy();
+            shown[0] = view;
+            UIContext.get().getHistory().newItem(i % 2 == 0 ? "orders/7" : "orders", false);
+        }, 2_000, 5_000);
 
         for (final int quotes : new int[] {100, 1_000}) {
             stream(v, quotes, false);
