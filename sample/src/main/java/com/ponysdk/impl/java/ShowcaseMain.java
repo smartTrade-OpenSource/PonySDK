@@ -76,6 +76,8 @@ public class ShowcaseMain {
         final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();
         styles.put("ponysdk", "style/ponysdk.css");
         styles.put("flexlayout", "style/flexlayout.css");
+        // the frame of the Theme page: its layout (the theme itself is loaded by that page, script/sample.js)
+        styles.put("theme-preview", "css/theme-preview.css");
         styles.put("showcase", "css/showcase.css"); // last: the showcase theme wins over the defaults
         configuration.setStyle(styles);
 

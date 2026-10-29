@@ -1,0 +1,741 @@
+/*
+ * PonySDK default theme (docs/decisions/0024-default-theme.md, docs/guide/theme.md).
+ *
+ * A small design system for the widgets of the terminal: colours, spacing, radius, type, focus ring and shadows are
+ * custom properties prefixed --pony-; light by default, dark with the system's preference or [data-theme=dark].
+ * Off unless asked for (ApplicationConfiguration.setTheme("pony")).
+ *
+ * Scope: nothing applies without the class pony-theme. On <html> (ApplicationConfiguration.setTheme("pony") writes it)
+ * the theme is the page's; on another element, it is that element's and what it holds; on a <pony-app> element,
+ * :host(.pony-theme), the embedded application's. A rule is written under :where(), which adds no specificity: a rule
+ * of the application with one class wins over any rule here, whatever the order of the stylesheets.
+ * Popups, dialogs and the lists of drop-downs are children of the page's body, outside a scoped container: they take
+ * the class pony-theme themselves (addStyleName("pony-theme") on the popup, setGlassStyleName for its glass).
+ */
+
+/* ── Tokens ──────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+/* tokens:shared */
+:where(.pony-theme,:host(.pony-theme)) {
+    --pony-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --pony-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --pony-font-size: .875rem;
+    --pony-font-size-sm: .75rem;
+    --pony-font-size-lg: 1rem;
+    --pony-line-height: 1.5;
+    --pony-space-1: 4px;
+    --pony-space-2: 8px;
+    --pony-space-3: 12px;
+    --pony-space-4: 16px;
+    --pony-space-5: 24px;
+    --pony-space-6: 32px;
+    --pony-radius-sm: 4px;
+    --pony-radius: 6px;
+    --pony-radius-lg: 10px;
+    --pony-control-height: 32px;
+    --pony-focus-width: 2px;
+    --pony-focus-offset: 2px;
+    --pony-duration: .12s;
+}
+
+/* tokens:light */
+:where(.pony-theme,:host(.pony-theme)) {
+    --pony-bg: #ffffff;
+    --pony-surface: #ffffff;
+    --pony-surface-2: #f1f5f9;
+    --pony-text: #0f172a;
+    --pony-muted: #475569;
+    --pony-border: #e2e8f0;
+    --pony-border-strong: #7b8799;
+    --pony-accent: #2563eb;
+    --pony-accent-hover: #1d4ed8;
+    --pony-accent-soft: #dbeafe;
+    --pony-on-accent: #ffffff;
+    --pony-danger: #b91c1c;
+    --pony-danger-soft: #fee2e2;
+    --pony-success: #047857;
+    --pony-success-soft: #d1fae5;
+    --pony-warning: #92400e;
+    --pony-warning-soft: #fef3c7;
+    --pony-focus: #2563eb;
+    --pony-overlay: rgb(15 23 42 / .45);
+    --pony-shadow-sm: 0 1px 2px rgb(15 23 42 / .08);
+    --pony-shadow: 0 2px 8px rgb(15 23 42 / .12);
+    --pony-shadow-lg: 0 12px 32px rgb(15 23 42 / .18);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    /* tokens:dark */
+    :where(.pony-theme:not([data-theme=light]), :host(.pony-theme:not([data-theme=light]))) {
+        --pony-bg: #0b1120;
+        --pony-surface: #111827;
+        --pony-surface-2: #1e293b;
+        --pony-text: #e5e7eb;
+        --pony-muted: #a1aec2;
+        --pony-border: #263247;
+        --pony-border-strong: #7385a0;
+        --pony-accent: #60a5fa;
+        --pony-accent-hover: #93c5fd;
+        --pony-accent-soft: #1e3a5f;
+        --pony-on-accent: #0b1120;
+        --pony-danger: #f87171;
+        --pony-danger-soft: #3b1218;
+        --pony-success: #34d399;
+        --pony-success-soft: #0b3b2a;
+        --pony-warning: #fbbf24;
+        --pony-warning-soft: #3a2a07;
+        --pony-focus: #93c5fd;
+        --pony-overlay: rgb(0 0 0 / .6);
+        --pony-shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+        --pony-shadow: 0 2px 8px rgb(0 0 0 / .45);
+        --pony-shadow-lg: 0 12px 32px rgb(0 0 0 / .6);
+        color-scheme: dark;
+    }
+}
+
+/* tokens:dark-forced */
+:where(.pony-theme[data-theme=dark], :host(.pony-theme[data-theme=dark])) {
+    --pony-bg: #0b1120;
+    --pony-surface: #111827;
+    --pony-surface-2: #1e293b;
+    --pony-text: #e5e7eb;
+    --pony-muted: #a1aec2;
+    --pony-border: #263247;
+    --pony-border-strong: #7385a0;
+    --pony-accent: #60a5fa;
+    --pony-accent-hover: #93c5fd;
+    --pony-accent-soft: #1e3a5f;
+    --pony-on-accent: #0b1120;
+    --pony-danger: #f87171;
+    --pony-danger-soft: #3b1218;
+    --pony-success: #34d399;
+    --pony-success-soft: #0b3b2a;
+    --pony-warning: #fbbf24;
+    --pony-warning-soft: #3a2a07;
+    --pony-focus: #93c5fd;
+    --pony-overlay: rgb(0 0 0 / .6);
+    --pony-shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+    --pony-shadow: 0 2px 8px rgb(0 0 0 / .45);
+    --pony-shadow-lg: 0 12px 32px rgb(0 0 0 / .6);
+    color-scheme: dark;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) {
+    background-color: var(--pony-bg);
+    color: var(--pony-text);
+    font: var(--pony-font-size) / var(--pony-line-height) var(--pony-font-family);
+}
+
+/* One focus ring for the keyboard, on every element; items inside a list or a bar draw it inside (see below) */
+:where(.pony-theme,:host(.pony-theme)) :focus-visible {
+    outline: var(--pony-focus-width) solid var(--pony-focus);
+    outline-offset: var(--pony-focus-offset);
+}
+
+:where(.pony-theme,:host(.pony-theme)) ::selection { background: var(--pony-accent-soft); }
+
+/* ── Buttons and anchors ─────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-Button, :where(.pony-theme,:host(.pony-theme)) .pony-PushButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pony-space-2);
+    box-sizing: border-box;
+    min-height: var(--pony-control-height);
+    padding: 0 var(--pony-space-4);
+    font: inherit;
+    font-weight: 500;
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius);
+    cursor: pointer;
+    transition: background-color var(--pony-duration), border-color var(--pony-duration);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-Button:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Button:active,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton:active { background: var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Button:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton:disabled {
+    color: var(--pony-muted);
+    background: var(--pony-surface-2);
+    border-color: var(--pony-border);
+    cursor: not-allowed;
+    opacity: .7;
+}
+/* A request in flight: the button is disabled by the terminal; a spinner replaces the wait */
+:where(.pony-theme,:host(.pony-theme)) .pony-Button[aria-busy=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton[aria-busy=true] { cursor: progress; }
+:where(.pony-theme,:host(.pony-theme)) .pony-Button[aria-busy=true]::after,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton[aria-busy=true]::after {
+    content: "";
+    width: 1em;
+    height: 1em;
+    box-sizing: border-box;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: pony-spin .8s linear infinite;
+}
+@keyframes pony-spin { to { transform: rotate(360deg); } }
+
+/* Variants: addStyleName("pony-primary") or "pony-danger" */
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-primary,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-primary {
+    color: var(--pony-on-accent);
+    background: var(--pony-accent);
+    border-color: var(--pony-accent);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-primary:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-primary:hover {
+    background: var(--pony-accent-hover);
+    border-color: var(--pony-accent-hover);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-danger,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-danger {
+    color: var(--pony-on-accent);
+    background: var(--pony-danger);
+    border-color: var(--pony-danger);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-danger:hover:not(:disabled),
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-danger:hover:not(:disabled) { filter: brightness(1.1); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-primary:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-primary:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-Button.pony-danger:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton.pony-danger:disabled {
+    color: var(--pony-muted);
+    background: var(--pony-surface-2);
+    border-color: var(--pony-border);
+}
+
+:where(.pony-theme,:host(.pony-theme)) .pony-Anchor { color: var(--pony-accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .pony-Anchor:hover { color: var(--pony-accent-hover); }
+
+/* ── Text fields, lists, check boxes, upload ─────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox,
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox,
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea,
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox,
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox,
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox {
+    box-sizing: border-box;
+    min-height: var(--pony-control-height);
+    padding: 0 var(--pony-space-3);
+    font: inherit;
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius);
+    transition: border-color var(--pony-duration);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea { padding: var(--pony-space-2) var(--pony-space-3); resize: vertical; }
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox { padding: 0 var(--pony-space-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox[multiple] { padding: var(--pony-space-1); }
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox[multiple] option { padding: var(--pony-space-1) var(--pony-space-2); border-radius: var(--pony-radius-sm); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox::placeholder,
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox::placeholder,
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea::placeholder,
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox::placeholder,
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox::placeholder { color: var(--pony-muted); opacity: 1; }
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox:hover { border-color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox:focus { border-color: var(--pony-focus); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox:disabled,
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox:disabled {
+    color: var(--pony-muted);
+    background: var(--pony-surface-2);
+    border-color: var(--pony-border);
+    cursor: not-allowed;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox[readonly],
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox[readonly],
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea[readonly],
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox[readonly] {
+    background: var(--pony-surface-2);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TextBox[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-PasswordTextBox[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-TextArea[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBox[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestBox[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-ListBox[aria-invalid=true] {
+    border-color: var(--pony-danger);
+    box-shadow: inset 0 0 0 1px var(--pony-danger);
+}
+
+:where(.pony-theme,:host(.pony-theme)) .pony-CheckBox,
+:where(.pony-theme,:host(.pony-theme)) .pony-RadioButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pony-space-2);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-CheckBox input,
+:where(.pony-theme,:host(.pony-theme)) .pony-RadioButton input {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--pony-accent);
+    cursor: inherit;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-CheckBox:has(> input:disabled),
+:where(.pony-theme,:host(.pony-theme)) .pony-RadioButton:has(> input:disabled) {
+    color: var(--pony-muted);
+    cursor: not-allowed;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-CheckBox input[aria-invalid=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-RadioButton input[aria-invalid=true] { outline: 2px solid var(--pony-danger); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-FileUpload { display: inline-flex; align-items: center; gap: var(--pony-space-3); }
+:where(.pony-theme,:host(.pony-theme)) .pony-FileUpload input::file-selector-button {
+    min-height: var(--pony-control-height);
+    margin-right: var(--pony-space-3);
+    padding: 0 var(--pony-space-4);
+    font: inherit;
+    font-weight: 500;
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-FileUpload input:hover::file-selector-button { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-FileUpload input:disabled::file-selector-button { color: var(--pony-muted); cursor: not-allowed; opacity: .7; }
+
+/* ── Tabs, stacks, disclosure ────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tablist],
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tablist] {
+    display: flex;
+    gap: var(--pony-space-1);
+    border-bottom: 1px solid var(--pony-border);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tablist] > [role=tab],
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tablist] > [role=tab] {
+    margin-bottom: -1px;
+    padding: var(--pony-space-2) var(--pony-space-4);
+    font: inherit;
+    font-weight: 500;
+    color: var(--pony-muted);
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: var(--pony-radius) var(--pony-radius) 0 0;
+    cursor: pointer;
+    transition: color var(--pony-duration), background-color var(--pony-duration);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tablist] > [role=tab]:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tablist] > [role=tab]:hover {
+    color: var(--pony-text);
+    background: var(--pony-surface-2);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tablist] > [role=tab][aria-selected=true],
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tablist] > [role=tab][aria-selected=true] {
+    color: var(--pony-accent);
+    border-bottom-color: var(--pony-accent);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tablist] > [role=tab]:focus-visible,
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tablist] > [role=tab]:focus-visible { outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-TabPanel > [role=tabpanel],
+:where(.pony-theme,:host(.pony-theme)) .pony-TabLayoutPanel > [role=tabpanel] { padding: var(--pony-space-4); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel { border: 1px solid var(--pony-border); border-radius: var(--pony-radius); }
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-header {
+    box-sizing: border-box;
+    padding: var(--pony-space-2) var(--pony-space-3);
+    font: inherit;
+    font-weight: 600;
+    color: var(--pony-text);
+    background: var(--pony-surface-2);
+    border: 0;
+    border-bottom: 1px solid var(--pony-border);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-header::before {
+    content: "\203A";
+    display: inline-block;
+    width: 1em;
+    transition: transform var(--pony-duration);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-header[aria-expanded=true]::before { transform: rotate(90deg); }
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-header:hover { background: var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-header:focus-visible { outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-StackLayoutPanel-content { background: var(--pony-surface); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel { border: 1px solid var(--pony-border); border-radius: var(--pony-radius); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel > summary {
+    padding: var(--pony-space-2) var(--pony-space-3);
+    font-weight: 500;
+    border-radius: var(--pony-radius);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel > summary:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel > summary:focus-visible { outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel[open] > summary { border-bottom: 1px solid var(--pony-border); border-radius: var(--pony-radius) var(--pony-radius) 0 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DisclosurePanel > div { padding: var(--pony-space-3); }
+
+/* ── Panels and layouts ──────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-ScrollPanel { scrollbar-width: thin; scrollbar-color: var(--pony-border-strong) transparent; }
+:where(.pony-theme,:host(.pony-theme)) .pony-Splitter { background: var(--pony-border); transition: background-color var(--pony-duration); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Splitter:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-Splitter:active { background: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Splitter:focus-visible { background: var(--pony-accent); outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-HeaderPanel-header { background: var(--pony-surface-2); border-bottom: 1px solid var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-HeaderPanel-footer { background: var(--pony-surface-2); border-top: 1px solid var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DecoratorPanel { border: 1px solid var(--pony-border); border-radius: var(--pony-radius); padding: var(--pony-space-3); }
+
+/* FlexLayout: the skin that follows the theme (new FlexLayoutPanel(model, "fl-theme-pony")) */
+.fl-theme-pony {
+    --fl-bg: var(--pony-bg);
+    --fl-panel: var(--pony-surface);
+    --fl-strip: var(--pony-surface-2);
+    --fl-border: var(--pony-border);
+    --fl-accent: var(--pony-accent);
+    --fl-accent2: var(--pony-accent-hover);
+    --fl-text: var(--pony-text);
+    --fl-text-dim: var(--pony-muted);
+    --fl-tab-hover: var(--pony-border);
+    --fl-tab-active-bg: var(--pony-surface);
+    --fl-tab-active-ind: var(--pony-accent);
+    --fl-close-hover: var(--pony-danger);
+    --fl-sp: var(--pony-border);
+    --fl-sp-hover: var(--pony-accent);
+    --fl-drop-border: var(--pony-accent);
+    --fl-drop-fill: var(--pony-accent-soft);
+    --fl-font: var(--pony-font-family);
+    --fl-radius: var(--pony-radius-sm);
+}
+
+/* ── Popups, dialogs, menus ──────────────────────────────────────────────────────────────────────────────────── */
+
+/* The popup itself: a child of the body, so a scoped theme reaches it by its own class */
+:where(.pony-theme,:host(.pony-theme)) :is(.pony-PopupPanel, .pony-DecoratedPopupPanel, .pony-DialogBox, .pony-closable-dialog-box, .pony-MenuPopup, .pony-DateBoxPopup, .pony-SuggestPopup, .dd-container-addon),
+:is(.pony-PopupPanel, .pony-DecoratedPopupPanel, .pony-DialogBox, .pony-closable-dialog-box, .pony-MenuPopup, .pony-DateBoxPopup, .pony-SuggestPopup, .dd-container-addon).pony-theme {
+    box-sizing: border-box;
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    font: var(--pony-font-size) / var(--pony-line-height) var(--pony-font-family);
+    border: 1px solid var(--pony-border);
+    border-radius: var(--pony-radius-lg);
+    box-shadow: var(--pony-shadow-lg);
+}
+:where(.pony-theme,:host(.pony-theme)) :is(.pony-PopupPanel, .pony-DecoratedPopupPanel),
+:is(.pony-PopupPanel, .pony-DecoratedPopupPanel).pony-theme { padding: var(--pony-space-3); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DialogBox, .pony-DialogBox.pony-theme { padding: 0; min-width: 240px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DialogBox > .pony-Caption {
+    padding: var(--pony-space-3) var(--pony-space-4);
+    font-weight: 600;
+    background: var(--pony-surface-2);
+    border-bottom: 1px solid var(--pony-border);
+    border-radius: var(--pony-radius-lg) var(--pony-radius-lg) 0 0;
+    cursor: move;
+    user-select: none;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-DialogBox > .pony-Content { padding: var(--pony-space-4); }
+:where(.pony-theme,:host(.pony-theme)) .dialogControls { display: flex; justify-content: flex-end; gap: var(--pony-space-2); margin-top: var(--pony-space-4); }
+
+/* Only a modal dialog dims the page: a popover has a ::backdrop too */
+:where(.pony-theme,:host(.pony-theme)) .pony-Popup:modal::backdrop, .pony-Popup.pony-theme:modal::backdrop { background: var(--pony-overlay); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Glass, .pony-Glass.pony-theme { background: var(--pony-overlay); }
+
+/* Notifications: PNotificationManager's popups, by the kind of message */
+:where(.pony-theme,:host(.pony-theme)) .pony-notification, .pony-notification.pony-theme {
+    max-width: min(24rem, 90vw);
+    padding: var(--pony-space-3) var(--pony-space-4);
+    border-left-width: 4px;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-notification.humanized, .pony-notification.humanized.pony-theme { border-left-color: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-notification.tray, .pony-notification.tray.pony-theme { border-left-color: var(--pony-border-strong); }
+:where(.pony-theme,:host(.pony-theme)) .pony-notification.warning, .pony-notification.warning.pony-theme {
+    color: var(--pony-text);
+    background: var(--pony-warning-soft);
+    border-color: var(--pony-warning);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-notification.error, .pony-notification.error.pony-theme {
+    color: var(--pony-text);
+    background: var(--pony-danger-soft);
+    border-color: var(--pony-danger);
+}
+
+/* Closable dialog (PClosableDialogBox): a header row of caption and close, then the content */
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box, .pony-closable-dialog-box.pony-theme { padding: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box .layout { border-collapse: collapse; width: 100%; }
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box .header { background: var(--pony-surface-2); border-bottom: 1px solid var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box .caption { padding: var(--pony-space-2) var(--pony-space-4); font-weight: 600; }
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box .close { padding: var(--pony-space-2); cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .pony-closable-dialog-box .content { padding: var(--pony-space-4); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuBar {
+    box-sizing: border-box;
+    gap: var(--pony-space-1);
+    padding: var(--pony-space-1);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border);
+    border-radius: var(--pony-radius);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuBar[aria-orientation=vertical] { display: flex; flex-direction: column; }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuPopup > .pony-MenuBar { padding: 0; background: none; border: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuPopup, .pony-MenuPopup.pony-theme { padding: var(--pony-space-1); min-width: 160px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--pony-space-4);
+    padding: var(--pony-space-1) var(--pony-space-3);
+    border-radius: var(--pony-radius-sm);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem:focus,
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem[aria-expanded=true] { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem:focus-visible { outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItem[aria-disabled=true] { color: var(--pony-muted); background: none; cursor: not-allowed; }
+:where(.pony-theme,:host(.pony-theme)) [aria-orientation=vertical] > .pony-MenuItem[aria-haspopup]::after { content: "\203A"; color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestPopup, .pony-SuggestPopup.pony-theme { padding: var(--pony-space-1); }
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestPopup [role=option] { padding: var(--pony-space-1) var(--pony-space-3); border-radius: var(--pony-radius-sm); }
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestPopup [role=option]:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-SuggestPopup [role=option][aria-selected=true] { background: var(--pony-accent-soft); }
+:where(.pony-theme,:host(.pony-theme)) .pony-MenuItemSeparator { height: 1px; margin: var(--pony-space-1) 0; background: var(--pony-border); }
+
+/* ── Tree ────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem-row {
+    display: flex;
+    align-items: center;
+    gap: var(--pony-space-1);
+    padding: 2px var(--pony-space-2);
+    border-radius: var(--pony-radius-sm);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem-row:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem[aria-selected=true] > .pony-TreeItem-row { background: var(--pony-accent-soft); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem:focus-visible { outline: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem:focus-visible > .pony-TreeItem-row { outline: var(--pony-focus-width) solid var(--pony-focus); outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-TreeItem-toggle { color: var(--pony-muted); }
+
+/* ── Dates ───────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker {
+    display: inline-block;
+    box-sizing: border-box;
+    padding: var(--pony-space-3);
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border);
+    border-radius: var(--pony-radius-lg);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBoxPopup .pony-DatePicker { padding: var(--pony-space-2); border: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DateBoxPopup, .pony-DateBoxPopup.pony-theme { padding: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-header { gap: var(--pony-space-1); margin-bottom: var(--pony-space-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-header button {
+    width: var(--pony-control-height);
+    height: var(--pony-control-height);
+    padding: 0;
+    font: inherit;
+    color: var(--pony-text);
+    background: none;
+    border: 0;
+    border-radius: var(--pony-radius);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-header button:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-month { font-weight: 600; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-days { border-collapse: separate; border-spacing: 2px; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-days th { padding: var(--pony-space-1); font-size: var(--pony-font-size-sm); font-weight: 500; color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--pony-radius);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day[data-filler] { color: var(--pony-muted); opacity: 1; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day[aria-current=date] { box-shadow: inset 0 0 0 1px var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day[aria-selected=true]:not([data-filler]) { color: var(--pony-on-accent); background: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day[aria-disabled=true] { color: var(--pony-muted); background: none; opacity: .5; cursor: not-allowed; }
+:where(.pony-theme,:host(.pony-theme)) .pony-DatePicker-day:focus-visible { outline-offset: -2px; }
+
+/* ── Rich text ───────────────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextArea {
+    box-sizing: border-box;
+    padding: var(--pony-space-2) var(--pony-space-3);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextArea[aria-disabled=true] { color: var(--pony-muted); background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar {
+    box-sizing: border-box;
+    padding: var(--pony-space-1);
+    background: var(--pony-surface-2);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius) var(--pony-radius) 0 0;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar-row { gap: var(--pony-space-1); align-items: center; }
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar button {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 var(--pony-space-1);
+    font: inherit;
+    color: var(--pony-text);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--pony-radius-sm);
+    cursor: pointer;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar button:hover { background: var(--pony-surface); border-color: var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar button[aria-pressed=true] {
+    background: var(--pony-accent-soft);
+    border-color: var(--pony-accent);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-RichTextToolbar select {
+    height: 28px;
+    font: inherit;
+    font-size: var(--pony-font-size-sm);
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius-sm);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-hasRichTextToolbar { border-top: 0; border-radius: 0 0 var(--pony-radius) var(--pony-radius); }
+
+/* ── Tables and DataGrid ─────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .pony-FlexTable, :where(.pony-theme,:host(.pony-theme)) .pony-Grid { border-collapse: collapse; }
+:where(.pony-theme,:host(.pony-theme)) .ptc { padding: var(--pony-space-1) var(--pony-space-2); vertical-align: middle; }
+:where(.pony-theme,:host(.pony-theme)) .pony-FlexTable th,
+:where(.pony-theme,:host(.pony-theme)) .pony-Grid th {
+    padding: var(--pony-space-2);
+    font-weight: 600;
+    text-align: left;
+    background: var(--pony-surface-2);
+    border-bottom: 1px solid var(--pony-border-strong);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-FlexTable tr:hover > .ptc,
+:where(.pony-theme,:host(.pony-theme)) .pony-Grid tr:hover > .ptc { background: var(--pony-surface-2); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-grid {
+    box-sizing: border-box;
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border);
+    border-radius: var(--pony-radius);
+    font-variant-numeric: tabular-nums;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-header,
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-footer {
+    font-weight: 600;
+    background: var(--pony-surface-2);
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-header { border-bottom: 1px solid var(--pony-border-strong); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-footer { border-top: 1px solid var(--pony-border-strong); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-row { border-bottom: 1px solid var(--pony-border); }
+/* The addon marks both halves of a row (pinned and scrolling) with [pony-hovered]; a selected row has [pony-selected] */
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-row:hover,
+:where(.pony-theme,:host(.pony-theme)) .pony-grid [pony-hovered] { background-color: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-row[pony-selected] { background-color: var(--pony-accent-soft); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid [pony-pinned] { box-shadow: 1px 0 0 var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-col-resizer { width: 6px; background: transparent; transition: background-color var(--pony-duration); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-col-resizer:hover { background: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-draggable-col { cursor: grab; }
+:where(.pony-theme,:host(.pony-theme)) .dg-col-head { display: flex; align-items: baseline; gap: var(--pony-space-2); padding: 2px var(--pony-space-3) 2px var(--pony-space-2); }
+:where(.pony-theme,:host(.pony-theme)) .dg-col-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .dg-col-action { font-size: var(--pony-font-size-sm); font-weight: 500; color: var(--pony-muted); cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .dg-col-action:hover { color: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-loading-data {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--pony-accent);
+    animation: pony-pulse 1s ease-in-out infinite alternate;
+}
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-loading-data-top { top: 0; }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-loading-data-bottom { bottom: 0; }
+@keyframes pony-pulse { from { opacity: .3; } to { opacity: 1; } }
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-error-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pony-danger);
+    background: var(--pony-danger-soft);
+}
+
+/* ── Lists and drop-downs ────────────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .dd-container-widget {
+    box-sizing: border-box;
+    min-width: 10rem;
+    min-height: var(--pony-control-height);
+    color: var(--pony-text);
+    background: var(--pony-surface);
+    border: 1px solid var(--pony-border-strong);
+    border-radius: var(--pony-radius);
+    transition: border-color var(--pony-duration);
+}
+:where(.pony-theme,:host(.pony-theme)) .dd-container-widget:hover { border-color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-widget.dd-container-opened { border-color: var(--pony-focus); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-widget.dd-container-disabled { color: var(--pony-muted); background: var(--pony-surface-2); border-color: var(--pony-border); cursor: not-allowed; }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-button { font: inherit; color: inherit; padding-left: var(--pony-space-3); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-button-placeholder { color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-state,
+:where(.pony-theme,:host(.pony-theme)) .dd-container-clear { color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-clear:hover { color: var(--pony-danger); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-widget :is(.dd-container-button, .dd-container-state, .dd-container-clear):focus-visible { outline-offset: -2px; }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-addon, .dd-container-addon.pony-theme { margin-top: 2px; border-color: var(--pony-border-strong); border-radius: var(--pony-radius); box-shadow: var(--pony-shadow); }
+:where(.pony-theme,:host(.pony-theme)) .dd-container-addon .dd-container-default { border-radius: var(--pony-radius); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-filter { border-bottom: 1px solid var(--pony-border); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-selected { background: var(--pony-accent-soft); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-last-selected { box-shadow: inset 2px 0 0 var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-group { color: var(--pony-muted); font-size: var(--pony-font-size-sm); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-clear-multi,
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-select-all { color: var(--pony-accent); cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .multi-level-dropdown-container { border-color: var(--pony-border-strong); }
+:where(.pony-theme,:host(.pony-theme)) .is-loading { color: var(--pony-muted); }
+
+:where(.pony-theme,:host(.pony-theme)) .pony-TwinListBox { gap: var(--pony-space-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-TwinListBox select { min-height: 8em; }
+
+/* ── Toolbars, navigation, forms ─────────────────────────────────────────────────────────────────────────────── */
+
+:where(.pony-theme,:host(.pony-theme)) .ptoolbar { gap: var(--pony-space-2); padding: var(--pony-space-2); background: var(--pony-surface-2); border: 1px solid var(--pony-border); border-radius: var(--pony-radius); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Toolbar-Separator { width: 1px; align-self: stretch; margin: 0 var(--pony-space-1); background: var(--pony-border-strong); }
+:where(.pony-theme,:host(.pony-theme)) .pony-BreadCrumbs { color: var(--pony-muted); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Page-Navigation { display: flex; gap: var(--pony-space-1); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Page-Navigation > * { padding: var(--pony-space-1) var(--pony-space-2); border-radius: var(--pony-radius-sm); cursor: pointer; }
+:where(.pony-theme,:host(.pony-theme)) .pony-Page-Navigation > *:hover { background: var(--pony-surface-2); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Page-Navigation-selectedItem { color: var(--pony-on-accent); background: var(--pony-accent); }
+:where(.pony-theme,:host(.pony-theme)) .pony-Form-FormField-Component > .caption { font-weight: 500; }
+:where(.pony-theme,:host(.pony-theme)) .pony-Form-FormField-Component.error input,
+:where(.pony-theme,:host(.pony-theme)) .validation-error { border-color: var(--pony-danger); }
+:where(.pony-theme,:host(.pony-theme)) .error-label { color: var(--pony-danger); font-size: var(--pony-font-size-sm); }
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    :where(.pony-theme,:host(.pony-theme)) { --pony-duration: 0s; }
+    :where(.pony-theme,:host(.pony-theme)) .pony-Button[aria-busy=true]::after,
+:where(.pony-theme,:host(.pony-theme)) .pony-PushButton[aria-busy=true]::after,
+:where(.pony-theme,:host(.pony-theme)) .pony-grid-loading-data { animation: none; }
+}

@@ -106,6 +106,14 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 - `legacy.js` loaded with `data-pony-legacy="element"` does not start on the document; `window.ponyLegacy.observe(root)`
   decorates a root it is given.
 
+## Default theme
+
+`ApplicationConfiguration.setTheme("pony")` (new, off by default) loads `style/pony-theme.css` before the application's
+`style` entries and writes `<html class="pony-theme">`: a look for every widget, light and dark, in `--pony-` custom
+properties ([theme](docs/guide/theme.md), [ADR-0024](docs/decisions/0024-default-theme.md)). An application that
+styles the `pony-*` classes itself changes nothing until it asks. Once on, its own rules still win: the theme adds no
+specificity.
+
 ## Behaviour changes
 
 - From the classpath, the server serves web files only (`html`, `js`, `mjs`, `css`, `map`, images, fonts). 2.x served

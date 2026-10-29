@@ -361,6 +361,46 @@ public class BootstrapServletTest {
         assertEquals(1, manifest.getInt("mount"));
     }
 
+    // ---- the default theme (ADR-0024) ----
+
+    @Test
+    public void theThemeIsLoadedBeforeTheApplicationsStylesheets() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        Mockito.when(config.getTheme()).thenReturn("pony");
+        Mockito.when(config.getStyle()).thenReturn(Map.of("main", "css/app.css"));
+        final TestableBootstrapServlet servlet = servletWith(config);
+        servlet.setRootPath("ctx/");
+
+        final String html = servlet.buildIndexHTML(request("", "/index.html"));
+
+        final String theme = "<link id=\"pony-theme\" rel=\"stylesheet\" type=\"text/css\" href=\"ctx/style/pony-theme.css\"/>";
+        final String main = "<link id=\"main\" rel=\"stylesheet\" type=\"text/css\" href=\"css/app.css\"/>";
+        assertTrue(html.contains(theme), html);
+        assertTrue(html.indexOf(theme) < html.indexOf(main), "the application's stylesheet comes after, so it wins");
+
+        final jakarta.json.JsonObject manifest = jakarta.json.Json.createReader(
+            new java.io.StringReader(servlet.buildManifest(request("", "/ponyapp.json")))).readObject();
+        assertEquals("[{\"id\":\"pony-theme\",\"href\":\"ctx/style/pony-theme.css\"},{\"id\":\"main\",\"href\":\"css/app.css\"}]",
+            manifest.getJsonArray("styles").toString(), "an embedded application loads it as the page does");
+    }
+
+    @Test
+    public void theThemeAloneIsLoadedWithoutOtherStylesheets() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setTheme("pony");
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+        assertTrue(html.contains("href=\"style/pony-theme.css\""), html);
+        assertTrue(html.contains("<html class=\"pony-theme\">"), "the theme applies to the whole page: the class is on its root");
+    }
+
+    @Test
+    public void withoutAThemeNoStylesheetIsAdded() {
+        final String html = servletWith(new ApplicationConfiguration()).buildIndexHTML(request("", "/index.html"));
+        assertFalse(html.contains("pony-theme"), html);
+        assertTrue(html.contains("<html>"), html);
+    }
+
     @Test
     public void theManifestIsServedAsJsonAndRevalidated() throws IOException {
         final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);

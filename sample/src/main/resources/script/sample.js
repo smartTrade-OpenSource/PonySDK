@@ -229,6 +229,30 @@ function showcaseFavicon() {
   document.head.appendChild(l);
 }
 
+/**
+ * The Theme page's frame (ThemePage): the default theme loaded in this page, after the framework's stylesheets, and the
+ * showcase's own stylesheet left out, so that the widgets show the theme and nothing else.
+ */
+function showcaseTheme() {
+  var showcase = document.getElementById('showcase');
+  if (showcase) showcase.disabled = true;
+  var link = document.createElement('link');
+  link.id = 'pony-theme';
+  link.rel = 'stylesheet';
+  link.href = 'style/pony-theme.css';
+  document.head.appendChild(link);
+  document.documentElement.classList.add('pony-theme'); // where the theme applies: the whole page
+}
+
+/** The colour scheme of the Theme page's frame: "light" or "dark" sets [data-theme] on its page, "system" removes it. */
+function showcaseThemeScheme(scheme) {
+  var frame = document.querySelector('.th-frame');
+  if (!frame || !frame.contentDocument) return;
+  var root = frame.contentDocument.documentElement;
+  if (scheme === 'system') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', scheme);
+}
+
 /** The text of the oracle's functional label: the same as its Java function. */
 function ponies(args) {
   return args[0] + ' ponies';

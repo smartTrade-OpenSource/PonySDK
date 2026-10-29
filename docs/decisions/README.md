@@ -27,3 +27,4 @@ what was measured once it was built. They are written for the people who change 
 | [0019](0019-signals.md) | Signals, reactive state bound to widgets | Accepted |
 | [0020](0020-routing.md) | Routes by annotation, on the browser history | Accepted |
 | [0023](0023-spring-boot-starter.md) | A Spring Boot starter, PonySDK's servlets in Boot's own Jetty | Accepted |
+| [0024](0024-default-theme.md) | A default theme for the widgets: tokens, light and dark, scoped by a class | Accepted |

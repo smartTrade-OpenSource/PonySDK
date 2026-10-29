@@ -44,6 +44,7 @@ public class ApplicationConfiguration {
     public static final String STYLESHEETS = "ponysdk.application.stylesheets";
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
+    private static final String THEME_PONY = "pony";
 
     private String applicationID;
     private String applicationName;
@@ -72,6 +73,9 @@ public class ApplicationConfiguration {
 
     /** See {@link #setLegacyClassNames(boolean)}. */
     private boolean legacyClassNames;
+
+    /** See {@link #setTheme(String)}. */
+    private String theme;
 
     // String Dictionary configuration for protocol optimization
     private boolean stringDictionaryEnabled = true;
@@ -293,6 +297,24 @@ public class ApplicationConfiguration {
         this.legacyClassNames = legacyClassNames;
     }
 
+    public String getTheme() {
+        return theme;
+    }
+
+    /**
+     * Loads the default theme ({@code style/pony-theme.css}, docs/decisions/0024-default-theme.md) in the bootstrap page,
+     * before the application's own {@link #setStyle(Map) stylesheets}, so that these win over it, and gives the page's
+     * {@code <html>} the class {@code pony-theme}, which is where the theme applies. {@code "pony"} is the
+     * only theme; {@code null} (the default) loads none: an application that styles the {@code pony-*} classes itself
+     * keeps its look.
+     *
+     * @throws IllegalArgumentException for another name
+     */
+    public void setTheme(final String theme) {
+        if (theme != null && !THEME_PONY.equals(theme)) throw new IllegalArgumentException("No theme named " + theme);
+        this.theme = theme;
+    }
+
     // Web Component shared stylesheets — injected into every PonyElement shadow root
     private Set<String> wcSharedSheets;
 
@@ -446,6 +468,7 @@ public class ApplicationConfiguration {
         public Builder hotReload(final boolean v)                  { config.setHotReload(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
+        public Builder theme(final String v)                       { config.setTheme(v); return this; }
         public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }
         public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
         public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }

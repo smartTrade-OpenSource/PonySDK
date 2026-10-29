@@ -1,0 +1,17 @@
+/*
+ * The page of the Theme page's frame (ThemePage.buildPreview): only the layout of the groups of widgets; the widgets,
+ * the page and its colours come from style/pony-theme.css, which that page loads. Its classes, th-*, are its own.
+ */
+body { margin: 0; }
+.th-page { display: flex; flex-direction: column; gap: var(--pony-space-5, 24px); padding: var(--pony-space-5, 24px); }
+.th-group { display: flex; flex-direction: column; gap: var(--pony-space-2, 8px); }
+.th-title {
+    padding-bottom: var(--pony-space-1, 4px);
+    font-size: var(--pony-font-size-sm, 12px);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--pony-muted, inherit);
+    border-bottom: 1px solid var(--pony-border, currentColor);
+}
+.th-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--pony-space-3, 12px); }

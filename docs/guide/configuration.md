@@ -14,6 +14,7 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `debugMode` | Each element names its Java class and creation line; the inspector over the page ([development tools](development.md)). Not for production | false |
 | `hotReload` | A recompiled screen reloads in the browser, without restarting ([development tools](development.md)) | false |
 | `style`, `javascript` | Stylesheets and scripts of the bootstrap page | none |
+| `theme` | `"pony"` loads the default theme and gives the page the class `pony-theme` ([theme](theme.md)) | none |
 | `stringDictionaryEnabled` | Strings sent once, then by index | true |
 | `stringDictionaryMaxSize` | Max dictionary entries | 4096 |
 | `stringDictionaryMinLength` | Shorter strings are always sent inline | 8 |

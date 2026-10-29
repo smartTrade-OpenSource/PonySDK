@@ -1110,3 +1110,23 @@ div.selected-row { background-color: var(--selected-row); }
 .route-cell { flex: 1 1 0; min-width: 0; color: var(--text); }
 .route-status { color: var(--text-3); }
 .route-confirm { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--accent-line); border-radius: var(--radius); background: var(--accent-soft); }
+/* The Theme page: the frame that shows the widgets under the default theme, and the table of its tokens */
+.th-scheme { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.th-scheme-label { font-size: 13px; color: var(--text-3); }
+.th-frame { width: 100%; height: 640px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); }
+.th-tokens { max-width: 860px; margin: 12px 0 28px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.th-token, .th-token-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+}
+.th-token:last-child { border-bottom: 0; }
+.th-token-head { background: var(--bg-subtle); font-weight: 600; color: var(--text); }
+.th-token-name { font-family: var(--mono); color: var(--text); }
+.th-token-value { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.th-token-text { font-family: var(--mono); color: var(--text-3); overflow-wrap: anywhere; }
+.th-swatch { flex: none; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border-strong); }
