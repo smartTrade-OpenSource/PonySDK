@@ -913,7 +913,8 @@ public class WebSocketPusher implements Closeable {
         boolean send(final ByteBuffer buffer) throws IOException {
             lock.lock();
             try {
-                if (inFlight != null) {
+                long nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
+                while (inFlight != null) { // checked again after each wait
                     final ByteBuffer last = queue.peekLast();
                     if (last != null && last.capacity() - last.limit() >= buffer.remaining()) {
                         final int end = last.limit();
@@ -922,24 +923,21 @@ public class WebSocketPusher implements Closeable {
                         bufferPool.release(buffer);
                         return true;
                     }
-                    long nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
-                    while (inFlight != null && queue.size() >= QUEUE_LIMIT) {
-                        if (nanos <= 0) {
-                            bufferPool.release(buffer);
-                            return false;
-                        }
-                        nanos = room.awaitNanos(nanos);
-                    }
-                    if (inFlight != null) {
+                    if (queue.size() < QUEUE_LIMIT) {
                         queue.addLast(buffer);
                         return true;
                     }
-                    if (asyncError != null) { // a send failed while this one waited: the connection is gone
+                    if (nanos <= 0) {
                         bufferPool.release(buffer);
                         return false;
                     }
-                    // else the client caught up and the queue drained: this buffer goes out now
+                    nanos = room.awaitNanos(nanos);
                 }
+                if (asyncError != null) { // a send failed meanwhile: the connection is gone
+                    bufferPool.release(buffer);
+                    return false;
+                }
+                // idle, or the client caught up while this one waited: this buffer goes out now
                 inFlight = buffer;
             } catch (final InterruptedException e) {
                 bufferPool.release(buffer);

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
@@ -87,6 +88,37 @@ public class SlowClientTest {
         expected.writeBytes(bytes(100, 1));
         expected.writeBytes(bytes(100, 2));
         assertArrayEquals(expected.toByteArray(), s.wire.toByteArray());
+    }
+
+    @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void aSendThatFailsWhileAFlushWaitsForRoomEndsThatFlushWithItsError() throws Exception {
+        final ManualSession s = new ManualSession();
+        final WebSocketPusher p = new WebSocketPusher(s.session, 1 << 15, 10_000, new ByteBufferPool(1 << 12, 8));
+        for (int i = 0; i <= WebSocketPusher.QUEUE_LIMIT; i++) { // one in flight, then a full queue: 3 000 B do not fit together
+            p.put(bytes(3000, i));
+            p.flush();
+        }
+        assertEquals(1, s.sends());
+
+        final AtomicReference<IOException> failure = new AtomicReference<>();
+        final Thread writer = Thread.ofPlatform().start(() -> {
+            try {
+                p.put(bytes(3000, 9));
+                p.flush();
+            } catch (final IOException e) {
+                failure.set(e);
+            }
+        });
+        while (writer.getState() != Thread.State.TIMED_WAITING) Thread.sleep(1); // it waits for room in the queue
+        final Callback inFlight;
+        synchronized (s) {
+            inFlight = s.pending.remove(0);
+        }
+        inFlight.fail(new IOException("reset"));
+        writer.join();
+
+        assertEquals("reset", failure.get().getCause().getMessage(), "the send's error, not a timeout");
+        assertEquals(1, s.sends(), "nothing more sent to a gone connection");
     }
 
     @Test @Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
