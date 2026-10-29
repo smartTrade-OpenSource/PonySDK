@@ -1077,3 +1077,19 @@ div.selected-row { background-color: var(--selected-row); }
 @media (max-width: 760px) { .pony-embedding-live { grid-template-columns: minmax(0, 1fr); } }
 .pony-embedding-trades { font: 12.5px/1.6 var(--mono); color: var(--text-2); max-height: 180px; overflow-y: auto; }
 .pony-embedding-trade { border-bottom: 1px solid var(--border); padding: 2px 0; }
+
+/* ── Routing page: a small application whose screens are routes (docs/decisions/0020-routing.md) ──────────── */
+.route-app { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin: 0 0 16px; }
+.route-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.route-nav .route-role { margin-left: auto; }
+.route-body { display: block; padding: 14px; min-height: 180px; }
+.route-view { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.route-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.route-note { color: var(--text-2); font-size: 13px; }
+.route-filters { display: flex; gap: 8px; }
+.route-filters .pony-Button.route-filter { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); }
+.route-filters .pony-Button.route-filter-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.route-row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.route-cell { flex: 1 1 0; min-width: 0; color: var(--text); }
+.route-status { color: var(--text-3); }
+.route-confirm { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--accent-line); border-radius: var(--radius); background: var(--accent-soft); }
