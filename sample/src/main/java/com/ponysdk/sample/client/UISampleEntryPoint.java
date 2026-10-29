@@ -68,6 +68,10 @@ public class UISampleEntryPoint implements EntryPoint {
             OraclePages.build(token); // a page of the behaviour oracle (sample/tests/oracle.spec.js)
             return;
         }
+        if (token != null && token.startsWith(ThemePage.PREVIEW_TOKEN)) {
+            ThemePage.buildPreview(); // the frame of the Theme page
+            return;
+        }
         if (token != null && token.startsWith(TerminalPages.TOKEN)) {
             TerminalPages.build(token); // a page of the terminal's features (sample/tests/terminal-pages.spec.js)
             return;
@@ -159,12 +163,12 @@ public class UISampleEntryPoint implements EntryPoint {
         final String[][] tabs = {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
-            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
+            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"}, {"◐", "Theme"},
             {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
-        final int[] groupStarts = {0, 2, 9};
+        final int[] groupStarts = {0, 2, 10};
         tabNames = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabNames[i] = tabs[i][1];
 
@@ -264,6 +268,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Web Components" -> WebComponentsPage.build(schedulers);
             case "FlexLayout" -> FlexLayoutPage.build();
             case "Misc" -> MiscPage.build(schedulers);
+            case "Theme" -> ThemePage.build();
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
             case "Streams" -> StreamsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
