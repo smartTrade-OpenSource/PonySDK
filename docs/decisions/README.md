@@ -23,3 +23,4 @@ what was measured once it was built. They are written for the people who change 
 | [0015](0015-content-security-policy.md) | A Content Security Policy built by PonySDK, and JavaScript called by name | Accepted |
 | [0016](0016-development-tools.md) | The inspector and hot reload, for development | Accepted |
 | [0017](0017-drain.md) | A server that stops moves its pages to the others | Accepted |
+| [0021](0021-forms-binder.md) | A binder between the fields of a screen and a bean, with Bean Validation | Accepted |
