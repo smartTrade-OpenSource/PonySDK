@@ -91,6 +91,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.test.PSuite;
+import com.ponysdk.testutil.ApplicationCode;
 import com.ponysdk.testutil.CapturingModelWriter;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -401,6 +402,23 @@ public class PWidgetTest extends PSuite {
             label.ensureDebugId("dbg");
             assertEquals("dbg", label.getDebugID());
             assertEquals(List.of("dbg"), writer.valuesOf(ServerToClientModel.ENSURE_DEBUG_ID));
+        } finally {
+            Mockito.when(UIContext.get().getConfiguration().isDebugMode()).thenReturn(false);
+        }
+    }
+
+    @Test
+    public void inDebugModeAWidgetTellsItsClassAndWhereTheApplicationCreatedIt() {
+        PWindow.getMain().add(ApplicationCode.newLabel());
+        assertEquals(0, writer.count(ServerToClientModel.DEBUG_INFO), "not in debug mode");
+
+        Mockito.when(UIContext.get().getConfiguration().isDebugMode()).thenReturn(true);
+        try {
+            writer.clear();
+            PWindow.getMain().add(ApplicationCode.newLabel());
+            final List<Object> infos = writer.valuesOf(ServerToClientModel.DEBUG_INFO);
+            assertEquals(1, infos.size());
+            assertTrue(((String) infos.get(0)).matches("PLabel ApplicationCode\\.java:\\d+"), String.valueOf(infos));
         } finally {
             Mockito.when(UIContext.get().getConfiguration().isDebugMode()).thenReturn(false);
         }

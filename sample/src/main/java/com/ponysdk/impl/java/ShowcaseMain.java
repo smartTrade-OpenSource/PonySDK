@@ -47,6 +47,9 @@ public class ShowcaseMain {
         configuration.setWsAllowedOrigins(Set.of("http://[::1]:" + PORTAL_PORT, "http://localhost:" + PORTAL_PORT,
             "http://127.0.0.1:" + PORTAL_PORT));
         configuration.setEntryPointClass(UISampleEntryPoint.class);
+        // -Dponysdk.debug (runShowcase -Pdebug): each widget tells the terminal its class and creation line, and the
+        // inspector shows over the page. Off by default: the Costs page measures the bytes of the normal mode
+        configuration.setDebugMode(Boolean.getBoolean("ponysdk.debug"));
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
         // Map.of have no defined iteration order.

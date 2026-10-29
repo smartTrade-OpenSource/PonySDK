@@ -69,6 +69,8 @@ export interface Context {
     error(error: unknown): void;
     /** Runs a callback of the browser (an event, a timer), reporting what it throws. */
     guard(action: () => void): void;
+    /** DEBUG_INFO came: the server is in debug mode, the inspector loads. */
+    debugging(): void;
 }
 
 /** An object the server creates, updates and collects: a widget, an addon, the cookies... */

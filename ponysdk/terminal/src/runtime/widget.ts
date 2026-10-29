@@ -512,4 +512,10 @@ const WIDGET: Setters<Widget> = new Map<number, (w: Widget, r: Reader) => void>(
     [K.LISTEN_EVENT, (w, r) => w.listenEvent(r.str)],
     [K.UNLISTEN_EVENT, (w, r) => w.unlistenEvent(r.str)],
     [K.EVENT_HANDLED, (w, r) => w.eventHandled(r.str)],
+    // debug mode: the Java class and where the application created it, and the id, for the browser's tools
+    [K.DEBUG_INFO, (w, r) => {
+        w.element.setAttribute('data-pony', r.str);
+        w.element.setAttribute('data-pony-id', String(w.id));
+        w.context.debugging();
+    }],
 ]);

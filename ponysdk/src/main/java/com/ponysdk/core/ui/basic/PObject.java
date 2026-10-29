@@ -61,7 +61,10 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
     private static final Logger log = LoggerFactory.getLogger(PObject.class);
 
-    protected final int ID = UIContext.get().nextID();
+    /** The first frame of a stack that is not the framework's: where an application created an object. */
+    private static final StackWalker STACK = StackWalker.getInstance();
+
+    protected final int ID;
     protected PWindow window;
 
     /**
@@ -79,6 +82,8 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         private AjaxHandler ajaxHandler;
         /** The frame the object lives in, when not directly in its window (rare: iframes). */
         private PFrame frame;
+        /** In debug mode only: its class and where the application created it, for the terminal's inspector. */
+        private String debugInfo;
     }
 
     private Extras extras;
@@ -110,6 +115,22 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     protected boolean destroy = false;
 
     PObject() {
+        final UIContext context = UIContext.get();
+        ID = context.nextID();
+        if (context.getConfiguration().isDebugMode()) extras().debugInfo = describe();
+    }
+
+    /** "PButton MainPage.java:87": the class, and the first line of the application on the stack. */
+    private String describe() {
+        final String type = getClass().getName();
+        final String site = STACK.walk(frames -> frames.filter(f -> !f.getClassName().startsWith("com.ponysdk.core."))
+            .findFirst().map(f -> " " + f.getFileName() + ":" + f.getLineNumber()).orElse(""));
+        return type.substring(type.lastIndexOf('.') + 1) + site;
+    }
+
+    /** In debug mode, the class and creation site the terminal shows ({@code DEBUG_INFO}); null otherwise. */
+    String getDebugInfo() {
+        return extras != null ? extras.debugInfo : null;
     }
 
 

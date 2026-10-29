@@ -310,7 +310,10 @@ public enum ServerToClientModel {
     FUNCTION_NAME(ValueTypeModel.STRING),
 
     // A DOM event listened to by name with PEventOptions.lock(): the server ran its listeners, the name's lock goes
-    EVENT_HANDLED(ValueTypeModel.STRING);
+    EVENT_HANDLED(ValueTypeModel.STRING),
+
+    // In debug mode, at a widget's creation: its class and where the application created it, "PButton Page.java:87"
+    DEBUG_INFO(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

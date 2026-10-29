@@ -15,7 +15,7 @@ import { basename, resolve } from 'node:path';
 
 const OUT = 'build/dist';
 const ON_DEMAND = ['date-picker', 'rich-text', 'layout', 'stack-layout-panel', 'tree', 'menu', 'suggest']
-    .map(name => `src/objects/${name}.ts`).concat('src/pony-app.ts', 'src/child-bridge.ts');
+    .map(name => `src/objects/${name}.ts`).concat('src/pony-app.ts', 'src/child-bridge.ts', 'src/inspector.ts');
 /** Modules a chunk keeps for itself: no other module uses them. */
 const OWNED = new Set(['src/runtime/date-format.ts', 'src/objects/host.ts', 'src/runtime/embedding.ts', 'src/runtime/memory-history.ts', 'src/embedded-styles.ts',
     'src/parent-bridge.ts']

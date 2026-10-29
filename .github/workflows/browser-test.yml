@@ -99,6 +99,25 @@ jobs:
           npx playwright test showcase-smoke webcomponents reconnection oracle typescript-terminal legacy fdc3
           terminal-pages csp embedding integration-gallery --reporter=line --workers=1
 
+      # The inspector loads only when the server is in debug mode: the showcase again, with -Pdebug
+      - name: Restart the showcase server in debug mode (background)
+        run: |
+          pkill -f com.ponysdk.impl.java.ShowcaseMain || true
+          for i in $(seq 1 30); do curl -sf http://localhost:8081/sample/ >/dev/null 2>&1 || break; sleep 1; done
+          nohup ./gradlew :sample:runShowcase -Pdebug > showcase-debug.log 2>&1 &
+          for i in $(seq 1 180); do
+            curl -sf http://localhost:8081/sample/ >/dev/null 2>&1 && { echo "server up after ${i}s"; break; }
+            sleep 1
+          done
+
+      - name: Inspector tests with coverage
+        working-directory: sample
+        env:
+          PW_COVERAGE: ${{ github.workspace }}/terminal-coverage
+          BASE_URL: http://localhost:8081/sample/
+          PONY_DEBUG: '1'
+        run: npx playwright test inspector --reporter=line --workers=1
+
       - name: Terminal coverage, 99% of lines and branches
         working-directory: sample
         env:

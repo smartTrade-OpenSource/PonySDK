@@ -204,6 +204,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (x0 != null && x0.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, x0.height);
         if (x0 != null && x0.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, x0.width);
         if (wx != null && wx.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, wx.debugID);
+        final String debugInfo = getDebugInfo();
+        if (debugInfo != null) writer.write(ServerToClientModel.DEBUG_INFO, debugInfo);
         final String[] styleProperties0 = styleProperties;
         if (styleProperties0 != null) {
             for (int i = 0; i < styleProperties0.length; i += 2) {

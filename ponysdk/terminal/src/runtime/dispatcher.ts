@@ -57,6 +57,33 @@ class Pending {
 
 const NOTHING = new Uint8Array(0);
 
+/** What the inspector watches, in debug mode (src/inspector.ts); the dispatcher's watcher is null otherwise. */
+export interface Watcher {
+    /** A message of the server: its bytes. */
+    frame(bytes: number): void;
+    /** The bytes an instruction (TYPE_CREATE, TYPE_UPDATE...) spent on an object: an update run counts each object. */
+    block(instruction: number, id: number, bytes: number): void;
+    /** A message this terminal sends to the server. */
+    sent(message: Message): void;
+}
+
+/** What happens from the first DEBUG_INFO until the inspector is loaded: it replays it. */
+export class Recording implements Watcher {
+    readonly events: (readonly [number, number, number] | Message)[] = [];
+
+    frame(bytes: number): void {
+        this.events.push([-1, 0, bytes]);
+    }
+
+    block(instruction: number, id: number, bytes: number): void {
+        this.events.push([instruction, id, bytes]);
+    }
+
+    sent(message: Message): void {
+        this.events.push(message);
+    }
+}
+
 /**
  * Applies the server's instructions to the terminal objects and sends their messages back. An
  * instruction is a block: its first model says what to do (TYPE_CREATE, TYPE_UPDATE...) to which
@@ -78,6 +105,14 @@ export class Dispatcher implements Context {
     private currentWindowId = -1;
     /** When the message being read arrived (performance.now()): a probe answers how long it waited here (ADR-0005). */
     private arrivedAt = 0;
+    /** In debug mode, what the inspector watches; null otherwise: one test per block. */
+    watcher: Watcher | null = null;
+    /** Where the block being run starts: the inspector counts its bytes. */
+    private blockStart = 0;
+    /** What the inspector counts the next bytes of a create or an update block as: TYPE_CREATE, then TYPE_UPDATE. */
+    private counted = 0;
+    /** The bytes of the last message of the server: the one being read when the inspector starts counts. */
+    private frameBytes = 0;
 
     constructor(host: Host, factory: ObjectFactory, session: Session, history: HistoryPort,
                 dictionaryFallback?: (id: number) => string | undefined, loader: (type: number) => Promise<void> | null = () => null) {
@@ -96,6 +131,10 @@ export class Dispatcher implements Context {
      * arrivedAt is when it arrived; while a module loads, the messages that come wait and count from the one that waits.
      */
     receive(message: Uint8Array, arrivedAt = performance.now()): void {
+        if (message.byteLength > 0) {
+            this.frameBytes = message.byteLength;
+            if (this.watcher !== null) this.watcher.frame(message.byteLength);
+        }
         const r = this.reader;
         r.feed(message);
         if (this.paused) return;
@@ -104,6 +143,7 @@ export class Dispatcher implements Context {
             const next = r.blockEnd();
             if (next === INCOMPLETE) return;
             const start = r.offset;
+            this.blockStart = start;
             try {
                 if (!this.receiveBlock(next)) return;
             } catch (e) {
@@ -157,6 +197,7 @@ export class Dispatcher implements Context {
         if (this.paused) return;
         while (r.hasKey()) {
             const start = r.offset;
+            this.blockStart = start;
             try {
                 if (r.read() === K.FRAME_ID) this.forwardToFrame(r.int, r.blockEnd());
                 else this.instruction();
@@ -175,6 +216,7 @@ export class Dispatcher implements Context {
         if (this.paused) return;
         while (r.hasKey()) {
             const start = r.offset;
+            this.blockStart = start;
             try {
                 r.read();
                 this.instruction();
@@ -246,12 +288,14 @@ export class Dispatcher implements Context {
     private instruction(): void {
         const r = this.reader;
         const key = r.key;
+        const id = r.int; // the object of every instruction but TYPE_HISTORY
         try {
             switch (key) {
                 case K.TYPE_CREATE:
                     this.create(r.int);
                     break;
                 case K.TYPE_UPDATE:
+                    this.counted = K.TYPE_UPDATE;
                     this.updateObjects(r.int);
                     break;
                 case K.TYPE_ADD:
@@ -289,6 +333,10 @@ export class Dispatcher implements Context {
             if (key !== K.END) r.skipBlock();
             this.error(e);
         }
+        // a create or an update counted its objects one by one
+        if (this.watcher !== null && key !== K.TYPE_CREATE && key !== K.TYPE_UPDATE && key !== K.TYPE_HISTORY) {
+            this.watcher.block(key, id, r.offset - this.blockStart);
+        }
     }
 
     private create(id: number): void {
@@ -304,6 +352,7 @@ export class Dispatcher implements Context {
             return;
         }
         this.objects.set(id, object);
+        this.counted = K.TYPE_CREATE;
         this.updateObjects(id);
     }
 
@@ -320,16 +369,20 @@ export class Dispatcher implements Context {
             const key = r.read();
             switch (key) {
                 case K.END:
+                    if (this.watcher !== null) this.count(id, false);
                     return;
                 case K.UPDATE_NEXT:
+                    if (this.watcher !== null) this.count(id, true);
                     id += 1;
                     object = this.updated(id);
                     break;
                 case K.UPDATE_NEXT_DELTA:
+                    if (this.watcher !== null) this.count(id, true);
                     id += 2 + (r.int & 0xff);
                     object = this.updated(id);
                     break;
                 case K.UPDATE_NEXT_ID:
+                    if (this.watcher !== null) this.count(id, true);
                     id = r.int;
                     object = this.updated(id);
                     break;
@@ -347,6 +400,19 @@ export class Dispatcher implements Context {
                     }
             }
         }
+    }
+
+    /**
+     * Debug mode: the bytes of an object in a create or an update block, from where its models start to the key just
+     * read, which is the next object's when next is set (read again: the hot path keeps no offset).
+     */
+    private count(id: number, next: boolean): void {
+        const r = this.reader;
+        if (next) r.rewind();
+        this.watcher!.block(this.counted, id, r.offset - this.blockStart);
+        this.counted = K.TYPE_UPDATE;
+        this.blockStart = r.offset;
+        if (next) r.read();
     }
 
     private updated(id: number): TerminalObject | undefined {
@@ -454,6 +520,11 @@ export class Dispatcher implements Context {
         this.objects.set(object.id, object);
     }
 
+    /** The object with this id, or undefined, unreported: the inspector's. */
+    peek(id: number): TerminalObject | undefined {
+        return this.objects.get(id);
+    }
+
     object(id: number): TerminalObject | undefined {
         const object = this.objects.get(id);
         if (object === undefined) this.warn(`PTObject #${id} not found`, id);
@@ -489,11 +560,23 @@ export class Dispatcher implements Context {
     // ---- messages ----------------------------------------------------------------------------------------------------
 
     send(message: Message): void {
+        if (this.watcher !== null) this.watcher.sent(message);
         this.host.send({ [C.APPLICATION_INSTRUCTIONS]: [message] });
     }
 
     sendRaw(message: Message): void {
+        if (this.watcher !== null) this.watcher.sent(message);
         this.host.send(message);
+    }
+
+    /** DEBUG_INFO: the server is in debug mode. The first time, the inspector loads; what happens meanwhile is kept. */
+    debugging(): void {
+        if (this.watcher !== null) return;
+        const recording = new Recording();
+        recording.frame(this.frameBytes); // the message being read, whose first blocks went uncounted
+        this.watcher = recording;
+        import('../inspector.ts').then(m => m.install(this, recording))
+            .catch((e: unknown) => log.error('The inspector did not start', e));
     }
 
     warn(message: string, objectId?: number): void {
