@@ -25,14 +25,16 @@ opens its panel; `Alt+Shift+I` too.
 
 | Panel | What it shows |
 |---|---|
-| Totals | Messages and bytes received, the rate over the last 5 s, messages and bytes sent, live objects |
+| Totals | Messages and bytes received, the rate over the last 5 s, messages and bytes sent, live objects, for the page and the applications it embeds |
+| Terminals | With embedded applications (`<pony-app>`): the page's terminal and each embedded one, their objects and bytes |
 | Bytes by class | Per class: objects, updates, bytes received |
 | Busiest objects | The ten objects that received the most bytes, with their updates and the events they sent |
 | Pick | The element under the pointer, outlined, with its class, line, id, bytes and events; a click selects it, logs it to the console (`[pony] #64 PButton InputsPage.java:85`) and does not reach the application; `Escape` stops picking |
 | Reset | Counts from now |
 
 Counts start with the first widget: a few blocks before it (the context, the window) are not counted. The bytes of
-an update run go to each object in turn.
+an update run go to each object in turn; what the page forwards to a window it opened or a frame goes to that window
+or frame. An object that is no widget on the server (a tree item, a window, an addon) is named by its type.
 
 What it costs: nothing when debug mode is off. On, each widget's creation carries one string more, and the server
 walks the stack of each creation. Leave it off in production: the strings name the application's classes, and the
@@ -46,8 +48,17 @@ The showcase: `./gradlew :sample:runShowcase -Pdebug`.
 configuration.setHotReload(true);
 ```
 
-With a `JavaApplicationManager`, and the entry point's classes in a directory (`build/classes/java/main`, an IDE's
-output), not a jar. The server scans that directory twice a second. Once class files changed and stayed still for
+The same with `JavaApplicationManager` and `SpringApplicationManager`, the entry point's classes in a directory
+(`build/classes/java/main`, an IDE's output), not a jar. With Spring, the property of the configuration bean:
+
+```xml
+<bean name="configuration" class="com.ponysdk.core.server.application.ApplicationConfiguration">
+    <property name="hotReload" value="true" />
+</bean>
+```
+
+The first entry point bean says where the classes are; each session's Spring context then loads its beans' classes
+as last compiled. The server scans that directory twice a second. Once class files changed and stayed still for
 300 ms, so that a compilation is taken whole:
 
 1. a new class loader defines again the classes of the entry point's package, and of its subpackages, found there;

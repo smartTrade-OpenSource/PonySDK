@@ -33,8 +33,9 @@ to the users is what they see of a deployment.
 - Carrying the screens' state to another server (serialised objects, a shared store): every widget and handler
   serialisable, and each update paid twice; a lambda cannot be carried. Rejected.
 - Replaying the client's events on another server: needs a deterministic application; a market feed is not.
-- A health check that turns unhealthy while draining: the platforms that stop a server (ECS, Kubernetes, spot) take
-  it out of the balancer themselves; a health check would add a delay of its own.
+- The health check alone to take the server out: the platforms that stop a server (ECS, Kubernetes, spot) take it
+  out of the balancer themselves, faster than a failing check. `/health` answers 503 while draining as well, for
+  the balancers that only follow health checks.
 
 ## Consequences
 

@@ -30,10 +30,12 @@ Two questions a developer of a PonySDK screen cannot answer from the browser, an
    mode only, so that the update loop keeps no offset.
 4. The inspector is a badge and a panel in a shadow root, styled by a constructed sheet: no inline style, under the
    page's policy (ADR-0015). Pick takes the click in the capture phase: it does not reach the application.
-5. `ApplicationConfiguration.hotReload`: `JavaApplicationManager` scans the directory the entry point was loaded from,
+5. `ApplicationConfiguration.hotReload`: `ApplicationManager`, for the Java and the Spring managers alike, scans the
+   directory the entry point was loaded from (the configured class, or the first entry point bean of Spring),
    twice a second, by the paths and times of its class files. Once they stayed still 300 ms, a class loader defines
-   again the classes of the entry point's package found there, others from its parent; each live context is
-   destroyed as `SessionAdmin.destroy` does, so its client reloads its page at its history token.
+   again the classes of the entry point's package found there, others from its parent (each session's Spring context
+   loads its beans through it); each live context is destroyed as `SessionAdmin.destroy` does, so its client
+   reloads its page at its history token.
 
 ## Options considered
 

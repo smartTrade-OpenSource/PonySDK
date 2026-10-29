@@ -24,7 +24,7 @@ month for the balancer and two small tasks; the AWS Pricing Calculator gives it 
 | Setting | Value | Why |
 |---|---|---|
 | Target group stickiness | On (load-balancer cookie) | A page that lost its connection reconnects to the server that holds its context ([reconnection](reconnection.md)) |
-| Health check path | `/<applicationContextName>/` | The bootstrap page: 200 once the server is up |
+| Health check path | `/<applicationContextName>/health` | 200 `UP` once the server is up, 503 `DRAINING` while it moves its pages; no session, not cached, unlike the bootstrap page the server builds for each request |
 | ALB idle timeout | The default, 60 s | A silent client is pinged every half heartbeat period, 2.5 s by default ([ADR-0006](../decisions/0006-liveness-by-ping.md)): the connection is never idle that long |
 | `PonySDKServer.setUseSSL(false)` | | TLS ends at the balancer |
 | `setSessionCookieSecure(true)` | The default | The browser speaks HTTPS to the balancer |
@@ -40,6 +40,14 @@ SIGTERM, and kills it after its stop timeout. Without a drain, its pages find it
 server.setDrainMillis(25_000);
 ```
 
+With Spring, the property of the server bean:
+
+```xml
+<bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
+    <property name="drainMillis" value="25000" />
+</bean>
+```
+
 On SIGTERM the server destroys its contexts one by one over four fifths of that time: each page is told, reloads at
 its address, and the balancer, which no longer sends anything to a server it drains, sends it to another one. Then
 the server stops. Set it below both:
@@ -47,6 +55,9 @@ the server stops. Set it below both:
 - the target group's deregistration delay (300 s by default; 30 s is plenty with a drain of 25 s);
 - the platform's stop timeout: an ECS task's `stopTimeout` (30 s by default, 120 s at most on Fargate), a
   Kubernetes pod's `terminationGracePeriodSeconds`, the two minutes of a spot interruption.
+
+Meanwhile `/health` answers 503: a balancer that only follows health checks (an EC2 Auto Scaling group behind an
+ALB, a proxy without a deregistration step) stops sending pages to the server too.
 
 On one server alone the reloaded pages come back to it until it stops: a drain needs a second server.
 
