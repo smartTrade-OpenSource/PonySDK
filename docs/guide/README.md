@@ -11,6 +11,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Custom JavaScript](addons.md) | `PAddOn`: a JavaScript library behind a Java class |
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |
 | [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
+| [Routing](routing.md) | `@Route` views, a `Router` on the history token, guards and access |
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
 | [FDC3](fdc3.md) | Talking to the other applications of a trader's desktop |
 | [Reconnection](reconnection.md) | Keeping a session through a network cut |
