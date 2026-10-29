@@ -32,6 +32,7 @@ import java.util.List;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -157,8 +158,9 @@ public class PFocusWidgetTest extends PSuite {
 
         // not a click: no end of processing
         writer.clear();
-        button.onClientData(Json.createObjectBuilder().add("other", 1).build());
-        button.onClientData(domEvent(DomHandlerType.FOCUS));
+        UIContext.get().fireClientData(about(button, Json.createObjectBuilder().add("other", 1)));
+        UIContext.get().fireClientData(about(button, Json.createObjectBuilder()
+            .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.FOCUS.getValue())));
         assertEquals(0, writer.count(ServerToClientModel.END_OF_PROCESSING));
         assertFalse(button.isEnabled());
     }
@@ -168,8 +170,13 @@ public class PFocusWidgetTest extends PSuite {
         final PButton button = attachedButton();
         button.showLoadingOnRequest(true);
         writer.clear();
-        button.onClientData(Json.createObjectBuilder()
-            .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.MOUSE_OVER.getValue()).build());
+        UIContext.get().fireClientData(about(button, Json.createObjectBuilder()
+            .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.MOUSE_OVER.getValue())));
         assertEquals(0, writer.count(ServerToClientModel.END_OF_PROCESSING));
+    }
+
+    /** A message of the terminal about the widget, as the context hands it over. */
+    private static JsonObject about(final PWidget widget, final JsonObjectBuilder message) {
+        return message.add(ClientToServerModel.OBJECT_ID.toStringValue(), widget.getID()).build();
     }
 }

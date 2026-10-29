@@ -281,6 +281,17 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         }
     }
 
+    /**
+     * Called by the context after {@link #onClientData(JsonObject)}, whatever it did or threw: what answers the
+     * terminal for its message, which a subclass that filters the message before its parent's {@code onClientData}
+     * would otherwise skip.
+     *
+     * @param event Json received from the terminal
+     */
+    public void onClientDataProcessed(final JsonObject event) {
+        // nothing to answer by default
+    }
+
     protected CompactIntRunnableMap safeStackedInstructions() {
         if (stackedInstructions == null) stackedInstructions = new CompactIntRunnableMap(2); // usually the add + one
         return stackedInstructions;

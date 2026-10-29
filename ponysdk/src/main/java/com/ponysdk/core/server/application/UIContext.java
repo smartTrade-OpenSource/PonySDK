@@ -385,7 +385,11 @@ public class UIContext {
 
                 if (terminalDataReceiver != null) terminalDataReceiver.onDataReceived(object, jsonObject);
 
-                object.onClientData(jsonObject);
+                try {
+                    object.onClientData(jsonObject);
+                } finally {
+                    object.onClientDataProcessed(jsonObject);
+                }
             }
         }
     }

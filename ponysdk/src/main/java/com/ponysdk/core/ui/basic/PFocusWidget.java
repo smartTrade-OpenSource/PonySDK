@@ -118,13 +118,18 @@ public abstract class PFocusWidget extends PWidget {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        try {
-            if (canNotify(instruction)) super.onClientData(instruction);
-        } finally {
-            // The terminal disabled the widget (or showed it loading) for this click: give it back once the click is
-            // processed, whatever the number of handlers, decided by the flags the terminal applied
-            if ((showLoadingOnRequest || !enabledOnRequest) && isClick(instruction)) saveUpdate(END_OF_PROCESSING);
-        }
+        if (canNotify(instruction)) super.onClientData(instruction);
+    }
+
+    /**
+     * The terminal disabled the widget (or showed it loading) for this click: give it back once the click is
+     * processed, whatever the number of handlers, decided by the flags the terminal applied; also when a subclass
+     * filtered the click out (hidden or disabled meanwhile) or a handler threw.
+     */
+    @Override
+    public void onClientDataProcessed(final JsonObject instruction) {
+        super.onClientDataProcessed(instruction);
+        if ((showLoadingOnRequest || !enabledOnRequest) && isClick(instruction)) saveUpdate(END_OF_PROCESSING);
     }
 
     private static boolean isClick(final JsonObject instruction) {
