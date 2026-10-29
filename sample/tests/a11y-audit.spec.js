@@ -115,7 +115,8 @@ test('the lists of a twin list box are named by its captions', async ({ page }) 
 // WCAG 3.1.1: the page says its language
 test('the page has a language', async ({ page }) => {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  // the showcase supports locales: the visitor's (Playwright says en-US) gives en-GB; without them, setLanguage's "en"
+  await expect(page.locator('html')).toHaveAttribute('lang', /^en(-[A-Z]{2})?$/);
 });
 
 // The chevron of a drop-down list is the main button's twin: hidden, so a screen reader hears one button
