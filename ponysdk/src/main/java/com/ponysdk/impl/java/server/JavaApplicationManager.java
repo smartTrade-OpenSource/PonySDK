@@ -29,24 +29,16 @@ import com.ponysdk.core.ui.main.EntryPoint;
 
 public class JavaApplicationManager extends ApplicationManager {
 
-    /** With {@code ApplicationConfiguration.setHotReload(true)} and the classes in a directory; null otherwise. */
-    private HotReload hotReload;
-
     @Override
     public void start() {
-        if (configuration.isHotReload()) hotReload = HotReload.of(configuration.getEntryPointClass(), HotReload::reloadPages);
-    }
-
-    @Override
-    public void shutdown() {
-        super.shutdown();
-        if (hotReload != null) hotReload.close();
+        hotReload(configuration.getEntryPointClass());
     }
 
     @Override
     protected EntryPoint initializeEntryPoint() {
-        final Class<? extends EntryPoint> entryPointClass = hotReload != null ? hotReload.current(EntryPoint.class, configuration.getEntryPointClass())
-                : configuration.getEntryPointClass();
+        final HotReload reload = hotReload();
+        final Class<? extends EntryPoint> entryPointClass = reload != null
+                ? reload.current(EntryPoint.class, configuration.getEntryPointClass()) : configuration.getEntryPointClass();
         try {
             return entryPointClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

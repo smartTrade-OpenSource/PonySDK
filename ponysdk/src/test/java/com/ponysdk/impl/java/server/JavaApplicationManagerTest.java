@@ -75,6 +75,7 @@ public class JavaApplicationManagerTest extends PSuite {
         configuration.setHotReload(true);
         applicationManager.start();
         try {
+            applicationManager.start(); // started once
             assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass(), "not changed yet");
         } finally {
             applicationManager.shutdown();

@@ -83,6 +83,11 @@ public final class HotReload implements AutoCloseable {
         Drain.live().forEach(UIContext::destroyByAdministrator);
     }
 
+    /** The class loader of the classes as last compiled: the entry point's own until a first change. */
+    public ClassLoader classLoader() {
+        return loader;
+    }
+
     /** The class as last compiled: the one given until a first change. */
     public <T> Class<? extends T> current(final Class<T> base, final Class<? extends T> type) {
         try {

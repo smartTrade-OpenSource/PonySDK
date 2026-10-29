@@ -35,6 +35,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.HotReload;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.main.EntryPoint;
@@ -65,12 +66,16 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
         final UIContext uiContext = UIContext.get();
         boolean closedWithTheUI = false;
         try {
+            // With hot reload, the beans' classes as last compiled: the next contexts once a page was recompiled
+            final HotReload reload = hotReload();
+            if (reload != null) applicationContext.setClassLoader(reload.classLoader());
             if (serverApplicationContext != null)
                 applicationContext.getEnvironment().setActiveProfiles(serverApplicationContext.getEnvironment().getActiveProfiles());
             applicationContext.load(configurations);
             applicationContext.refresh();
 
             final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
+            hotReload(entryPoint.getClass()); // the first entry point says where the application's classes are
 
             final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
             initializingPages.values().forEach(InitializingActivity::afterContextInitialized);

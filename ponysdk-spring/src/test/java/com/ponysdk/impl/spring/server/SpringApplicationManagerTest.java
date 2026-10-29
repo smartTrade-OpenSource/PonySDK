@@ -27,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -112,6 +115,34 @@ public class SpringApplicationManagerTest {
         Mockito.verify(uiContext).addContextDestroyListener(listener.capture());
         listener.getValue().onBeforeDestroy(uiContext);
         assertEquals(List.of("entryPoint"), destroyed);
+    }
+
+    @Test
+    public void withHotReloadTheNextContextsTakeTheBeansAsLastCompiled() throws Exception {
+        configuration.setClientConfigFile(CLIENT_CONFIG);
+        configuration.setHotReload(true);
+        manager.setApplicationContext(serverContext());
+        manager.start();
+        try {
+            assertEquals(RecordingEntryPoint.class, manager.initializeEntryPoint().getClass(), "the first, from the classpath");
+
+            // a class of the entry point's package compiled again
+            final Path classes = Path.of(RecordingEntryPoint.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            final Path file = classes.resolve(RecordingEntryPoint.class.getName().replace('.', '/') + ".class");
+            Files.setLastModifiedTime(file, FileTime.fromMillis(System.currentTimeMillis()));
+
+            final long deadline = System.currentTimeMillis() + 10_000;
+            EntryPoint next = manager.initializeEntryPoint();
+            while (!"ponysdk-hot-reload".equals(next.getClass().getClassLoader().getName()) && System.currentTimeMillis() < deadline) {
+                Thread.sleep(100);
+                next = manager.initializeEntryPoint();
+            }
+            assertEquals("ponysdk-hot-reload", next.getClass().getClassLoader().getName());
+            assertEquals(RecordingEntryPoint.class.getName(), next.getClass().getName());
+            assertNotSame(RecordingEntryPoint.class, next.getClass(), "defined again");
+        } finally {
+            manager.shutdown();
+        }
     }
 
     @Test

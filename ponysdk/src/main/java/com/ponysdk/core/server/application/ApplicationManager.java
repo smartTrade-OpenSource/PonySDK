@@ -38,6 +38,10 @@ public abstract class ApplicationManager {
     // Shared dictionary provider for cross-session string frequency learning
     private volatile SharedDictionaryProvider sharedDictionaryProvider;
 
+    /** {@link ApplicationConfiguration#setHotReload(boolean)}: started once its classes are known, whatever the manager. */
+    private HotReload hotReload;
+    private boolean hotReloadStarted;
+
     public void startApplication(final UIContext uiContext) {
         uiContext.execute(() -> {
             final EntryPoint entryPoint = initializeEntryPoint();
@@ -52,6 +56,24 @@ public abstract class ApplicationManager {
     }
 
     protected abstract EntryPoint initializeEntryPoint();
+
+    /**
+     * With {@link ApplicationConfiguration#setHotReload(boolean)}, the hot reload of the classes of this class's package,
+     * started at the first call: a manager calls it with its entry point's class, as soon as it knows it. Null without
+     * hot reload, or when the classes come from a jar.
+     */
+    protected final synchronized HotReload hotReload(final Class<?> entryPoint) {
+        if (!hotReloadStarted && configuration.isHotReload()) {
+            hotReloadStarted = true;
+            hotReload = HotReload.of(entryPoint, HotReload::reloadPages);
+        }
+        return hotReload;
+    }
+
+    /** The hot reload started by {@link #hotReload(Class)}; null before, or without one. */
+    protected final synchronized HotReload hotReload() {
+        return hotReload;
+    }
 
     public ApplicationConfiguration getConfiguration() {
         return configuration;
@@ -106,6 +128,8 @@ public abstract class ApplicationManager {
             provider.shutdown();
             log.info("Shared string dictionary shut down and persisted");
         }
+        final HotReload reload = hotReload();
+        if (reload != null) reload.close();
     }
 
     public abstract void start();

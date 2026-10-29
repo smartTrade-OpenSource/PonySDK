@@ -250,8 +250,8 @@ public class ApplicationConfiguration {
 
     /**
      * For development: the classes of the entry point's package reload when they are compiled again, and the page of
-     * each live context reloads with them, where it was ({@link HotReload}). Only when they are loaded from a
-     * directory, not a jar. Off by default.
+     * each live context reloads with them, where it was ({@link HotReload}), with the Java and the Spring application
+     * managers alike. Only when they are loaded from a directory, not a jar. Off by default.
      */
     public void setHotReload(final boolean hotReload) {
         this.hotReload = hotReload;

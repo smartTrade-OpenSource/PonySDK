@@ -83,6 +83,7 @@ public class HotReloadTest {
     @Test
     public void aChangeIsTakenOnceItsFilesStoppedChanging() throws Exception {
         assertEquals("one", greet());
+        assertSame(parent, hotReload.classLoader(), "the entry point's own until a change");
         assertFalse(hotReload.check(0), "nothing changed");
 
         greeter("two", 2_000_000);
@@ -92,6 +93,7 @@ public class HotReloadTest {
         assertTrue(hotReload.check(10_400));
         assertEquals(1, reloads.get());
         assertEquals("two", greet());
+        assertEquals("ponysdk-hot-reload", hotReload.classLoader().getName());
         assertFalse(hotReload.check(20_000), "taken once");
     }
 
