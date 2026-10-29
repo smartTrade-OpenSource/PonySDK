@@ -64,6 +64,9 @@ public abstract sealed class Signal<T> permits MutableSignal, Computed {
     /** The current value. Inside {@link #computed}, the reading signal follows this one. */
     public abstract T get();
 
+    /** The current value, followed by no one: what a binding applies, outside any computation. */
+    abstract T peek();
+
     /** The number of the current value, brought up to date; it changes with the value. */
     abstract long version();
 

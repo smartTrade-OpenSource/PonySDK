@@ -106,6 +106,8 @@ final class Bindings implements ContextDestroyListener {
     void offer(final Effect<?> effect) {
         final boolean first;
         synchronized (this) {
+            if (effect.queued) return; // another thread queued it meanwhile
+            effect.queued = true;
             if (dirtyCount == dirty.length) dirty = Arrays.copyOf(dirty, dirtyCount * 2);
             dirty[dirtyCount++] = effect;
             first = dirtyCount == 1; // a later one rides the drain the first one asked for
@@ -122,6 +124,8 @@ final class Bindings implements ContextDestroyListener {
             count = dirtyCount;
             dirty = spare;
             dirtyCount = 0;
+            // before the reads: a change from now on queues its binding again
+            for (int i = 0; i < count; i++) batch[i].queued = false;
         }
         for (int i = 0; i < count; i++) {
             try {

@@ -55,6 +55,11 @@ public final class MutableSignal<T> extends Signal<T> {
     }
 
     @Override
+    T peek() {
+        return value;
+    }
+
+    @Override
     long version() {
         return version;
     }

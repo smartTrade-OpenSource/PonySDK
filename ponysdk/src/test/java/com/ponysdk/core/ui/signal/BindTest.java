@@ -127,6 +127,21 @@ public class BindTest {
         assertEquals("1000", label[0].getText());
     }
 
+    /** Two threads that both saw the binding unqueued both offer it: the second finds it queued, it runs once. */
+    @Test
+    public void aBindingOfferedTwiceRunsOnce() {
+        final MutableSignal<String> signal = Signal.of("a");
+        final List<String> applied = new ArrayList<>();
+        final Effect<?>[] effect = new Effect<?>[1];
+        ctx.execute(() -> effect[0] = (Effect<?>) Bind.to(added(Element.newPLabel()), signal, (label, text) -> applied.add(text)));
+
+        signal.set("b");
+        Bindings.of(ctx).offer(effect[0]); // the thread that lost the race
+        drain();
+
+        assertEquals(List.of("a", "b"), applied);
+    }
+
     @Test
     public void manyBindingsThatChangeTogetherAreOneDrainAndOneTransaction() {
         final List<MutableSignal<String>> signals = new ArrayList<>();
