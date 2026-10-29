@@ -46,6 +46,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.application.StringDictionary;
 import com.ponysdk.core.server.application.UIContext;
@@ -393,6 +394,33 @@ public class WebSocketPusherSendTest {
         final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(64, 8));
         pusher.flush();
         assertTrue(client.sent.isEmpty());
+    }
+
+    @Test
+    public void aSendFailedByTheClosedConnectionIsNotAServerError() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(12, 8));
+        pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 1L);
+        pusher.flush();
+        Mockito.when(client.session.isOpen()).thenReturn(false);
+
+        try (LogCapture log = LogCapture.of(WebSocketPusher.class)) {
+            client.callbacks.get(0).fail(new java.nio.channels.ClosedChannelException());
+            assertEquals(List.of(), log.events().stream().filter(e -> !e.startsWith("DEBUG")).toList());
+        }
+    }
+
+    @Test
+    public void aSendFailedOnAnOpenConnectionIsAnError() throws IOException {
+        final ManualSession client = new ManualSession();
+        final WebSocketPusher pusher = new WebSocketPusher(client.session, 1 << 15, 1_000, new ByteBufferPool(12, 8));
+        pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 1L);
+        pusher.flush();
+
+        try (LogCapture log = LogCapture.of(WebSocketPusher.class)) {
+            client.callbacks.get(0).fail(new IOException("reset"));
+            assertEquals(List.of("ERROR sendBinary failed"), log.events());
+        }
     }
 
     @Test

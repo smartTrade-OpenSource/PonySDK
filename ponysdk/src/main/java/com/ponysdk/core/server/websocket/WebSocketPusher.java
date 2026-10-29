@@ -968,7 +968,9 @@ public class WebSocketPusher implements Closeable {
 
         @Override
         public void fail(final Throwable t) {
-            log.error("sendBinary failed", t);
+            // a send cut by the closing connection is the client leaving, not a server fault
+            if (session.isOpen()) log.error("sendBinary failed", t);
+            else log.debug("sendBinary failed on a closed connection: {}", t.toString());
             asyncError = t;
             lock.lock();
             try {

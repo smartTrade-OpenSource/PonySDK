@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.LogLevel;
+import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 
 /**
@@ -701,6 +702,15 @@ public class BootstrapServletTest {
 
         Mockito.verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
         assertEquals(-1, servlet.getLastModified(request("", "/script/ponysdk.js")));
+    }
+
+    @Test
+    public void aMissingResourceIsNotAServerError() throws IOException {
+        final TestableBootstrapServlet servlet = servletOnTheClasspath(null);
+        try (LogCapture log = LogCapture.of(BootstrapServlet.class)) {
+            servlet.handleRequest(request("", "/script/absent.js"), response(new ByteArrayOutputStream()), "/script/absent.js");
+            assertEquals(List.of(), log.events().stream().filter(e -> !e.startsWith("DEBUG")).toList());
+        }
     }
 
     @Test

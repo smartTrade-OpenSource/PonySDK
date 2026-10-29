@@ -188,7 +188,8 @@ public class BootstrapServlet extends HttpServlet {
                     out.write(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
                 }
             } else {
-                log.error("Failed to load resource: {}", request.getPathInfo());
+                // a client asking for a path the application does not have: not a server fault
+                log.debug("Resource not found: {}", path);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         }
