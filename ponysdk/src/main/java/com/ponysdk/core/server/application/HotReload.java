@@ -14,8 +14,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.SessionManager;
-
 /**
  * For development ({@link ApplicationConfiguration#setHotReload(boolean)}): the classes of the entry point's package,
  * read from the directory the entry point was loaded from, are loaded again by a new class loader once they change,
@@ -82,8 +80,7 @@ public final class HotReload implements AutoCloseable {
 
     /** Destroys the live contexts: each client is told and reloads its page, which starts a new context. */
     public static void reloadPages() {
-        SessionManager.get().getApplications().stream().flatMap(application -> application.getUIContexts().stream())
-            .filter(UIContext::isAlive).forEach(UIContext::destroyByAdministrator);
+        Drain.live().forEach(UIContext::destroyByAdministrator);
     }
 
     /** The class as last compiled: the one given until a first change. */

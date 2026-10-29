@@ -43,11 +43,14 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 import org.openqa.selenium.By;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -61,6 +64,7 @@ import com.ponysdk.driver.PonyWebElement;
 import com.ponysdk.impl.java.server.JavaApplicationManager;
 
 import jakarta.json.JsonObject;
+import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.Session;
 
@@ -181,6 +185,75 @@ public class PonySDKServerRunTest {
             driver.close();
             assertTrue(closed.await(10, TimeUnit.SECONDS));
         } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    public void withADrainTimeTheLivePagesAreToldToMoveBeforeTheServerStops() throws Exception {
+        final PonySDKServer server = server();
+        server.setDrainMillis(2_000);
+        server.start();
+        try {
+            final CountDownLatch hello = new CountDownLatch(1);
+            final CountDownLatch destroyed = new CountDownLatch(1);
+            final CountDownLatch closed = new CountDownLatch(1);
+            final PonyMessageListener helloListener = waitingFor("Go", hello);
+            final PonySDKWebDriver driver = new PonySDKWebDriver(new PonyMessageListener() {
+
+                @Override
+                public void onSendMessage(final JsonObject message) {
+                }
+
+                @Override
+                public void onReceiveMessage(final List<PonyFrame> message) {
+                    helloListener.onReceiveMessage(message);
+                    if (message.stream().anyMatch(f -> f.getModel() == ServerToClientModel.DESTROY_CONTEXT)) destroyed.countDown();
+                }
+            }, null, new PonySessionListener() {
+
+                @Override
+                public void onOpen(final Session session) {
+                }
+
+                @Override
+                public void onClose(final Session session, final CloseReason closeReason) {
+                    closed.countDown();
+                }
+
+                @Override
+                public void onError(final Session session, final Throwable thr) {
+                }
+            }, true);
+            driver.get("ws://127.0.0.1:" + port(server) + "/app/ws");
+            assertTrue(hello.await(10, TimeUnit.SECONDS));
+
+            server.drainAndStop(); // what SIGTERM runs
+            assertTrue(destroyed.await(10, TimeUnit.SECONDS), "the page told its context is over: it reloads");
+            assertTrue(closed.await(10, TimeUnit.SECONDS));
+            assertFalse(server.server.isRunning());
+        } finally {
+            server.stop(); // the SIGTERM hook removed
+        }
+    }
+
+    @Test
+    public void anInterruptedDrainLeavesTheServerAsItIs() throws Exception {
+        final PonySDKServer server = server();
+        server.setDrainMillis(5_000);
+        server.start();
+        final Application application = new Application("drain", Mockito.mock(HttpSession.class), new ApplicationConfiguration());
+        final UIContext lingering = Mockito.mock(UIContext.class);
+        Mockito.when(lingering.isAlive()).thenReturn(true);
+        application.registerUIContext(lingering);
+        SessionManager.get().registerApplication(application);
+        try {
+            Thread.currentThread().interrupt();
+            server.drainAndStop();
+            assertTrue(server.server.isRunning(), "not stopped by a drain that did not end");
+        } finally {
+            Thread.interrupted();
+            SessionManager.get().unregisterApplication(application);
             server.stop();
         }
     }
