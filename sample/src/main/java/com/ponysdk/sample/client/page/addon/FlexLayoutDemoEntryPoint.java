@@ -99,6 +99,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         // Theme selector
         final com.ponysdk.core.ui.basic.PListBox themeSelector = Element.newPListBox();
+        themeSelector.setAttribute("aria-label", "Theme");
         themeSelector.addItem("Default (Catppuccin)", "");
         themeSelector.addItem("Light", "fl-theme-light");
         themeSelector.addItem("Gray (VS Code)", "fl-theme-gray");
@@ -332,10 +333,10 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         // Badges demo: simulate notifications on non-active tabs
         flexLayout.getAddon().setBadge(searchTabId, "", "#00e676");       // green glowing dot
-        flexLayout.getAddon().setBadge(extTabId, "2", "#cba6f7");        // purple "2" bubble
-        flexLayout.getAddon().setBadge(notifTabId, "5", "#ff6d00");      // orange "5" bubble
+        flexLayout.getAddon().setBadge(extTabId, "2", "#7c3aed");        // purple "2" bubble
+        flexLayout.getAddon().setBadge(notifTabId, "5", "#c2410c");      // orange "5" bubble
         flexLayout.getAddon().setBadge(outlineTabId, "", null);          // default red dot
-        flexLayout.getAddon().setBadge(problemsTabId, "12", "#f38ba8");  // pink "12" bubble
+        flexLayout.getAddon().setBadge(problemsTabId, "12", "#be123c");  // pink "12" bubble
 
         // API documentation in bottom sidebar
         flexLayout.addBorderTab("bottom", "API Doc", createDocPanel());
@@ -406,7 +407,10 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
     private static PWidget createDocPanel() {
         final PFlowPanel doc = Element.newPFlowPanel();
         doc.setStyleProperty("padding", "20px");
+        doc.setStyleProperty("box-sizing", "border-box");
+        doc.setStyleProperty("height", "100%"); // the panel scrolls its text, not the tab around it
         doc.setStyleProperty("overflow", "auto");
+        doc.setAttribute("tabindex", "0"); // no focusable content: a keyboard user scrolls it as a whole
         doc.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
         doc.setStyleProperty("font-size", "13px");
         doc.setStyleProperty("line-height", "1.6");

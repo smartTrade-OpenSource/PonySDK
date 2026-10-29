@@ -36,6 +36,7 @@ import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PFlexTable;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 
 /** Component costs: the measured cost of every component. */
 final class CostsPage {
@@ -78,6 +79,7 @@ final class CostsPage {
         // 8 columns: the table scrolls on its own instead of widening the page
         final PFlowPanel tableScroll = Element.newPFlowPanel();
         tableScroll.addStyleName("table-scroll");
+        tableScroll.setTabindex(TabindexMode.TABULABLE); // a keyboard user scrolls what overflows
         tableScroll.add(table);
         p.add(tableScroll);
         p.add(el("ov-note", "Heavy components (DataGrid2, FlexLayout) are measured on 5 instances laid out off-screen, "

@@ -54,9 +54,11 @@ final class EmbeddingPage {
         ticket.add(Element.newPLabel("Loading the ticket…"));
 
         final PListBox instrument = Element.newPListBox();
+        instrument.setAttribute("aria-label", "Instrument");
         for (final String name : List.of("EURUSD", "GBPUSD", "USDJPY", "USDCHF")) instrument.addItem(name);
         instrument.addChangeHandler(event -> ticket.setAttribute("instrument", instrument.getSelectedItem()));
         final PTextBox quantity = Element.newPTextBox();
+        quantity.setAttribute("aria-label", "Quantity");
         quantity.setText("1000000");
         quantity.addValueChangeHandler(event -> ticket.setAttribute("quantity", quantity.getText()));
 

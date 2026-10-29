@@ -15,8 +15,8 @@
     --border-strong: #cbd5e1;
     --text: #0f172a;
     --text-2: #334155;
-    --text-3: #64748b;
-    --text-4: #94a3b8;
+    --text-3: #586579;
+    --text-4: #5b6b80;
     --accent: #4f46e5;
     --accent-strong: #4338ca;
     --accent-soft: #eef2ff;
@@ -33,7 +33,7 @@
     --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     /* legacy names still used by inline styles / scripts */
     --accent2: #047857;
-    --text2: #64748b;
+    --text2: #586579;
     /* surfaces and states, redefined by the dark theme below */
     --surface: #ffffff;
     --header-bg: rgba(255, 255, 255, .92);
@@ -60,7 +60,7 @@
         --text: #e5e7eb;
         --text-2: #cbd5e1;
         --text-3: #94a3b8;
-        --text-4: #64748b;
+        --text-4: #8190a5;
         --accent: #818cf8;
         --accent-strong: #a5b4fc;
         --accent-soft: #1e1b4b;
@@ -515,7 +515,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .pony-DatePicker-day:hover, .pony-DatePicker-day:focus-visible { background: var(--bg-muted); }
 .pony-DatePicker-day[aria-current=date] { box-shadow: inset 0 0 0 1px var(--accent-line); }
 .pony-DatePicker-day[aria-selected=true]:not([data-filler]) { background: var(--accent); color: #fff; }
-.pony-DatePicker-day[data-filler] { color: var(--border-strong); }
+.pony-DatePicker-day[data-filler] { color: var(--text-4); opacity: 1; }
 
 .pony-Tree .pony-TreeItem-row {
     padding: 4px 8px;
@@ -603,7 +603,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .code-kw { color: #f472b6; }
 .code-type { color: #7dd3fc; }
 .code-str { color: #86efac; }
-.code-comment { color: #64748b; font-style: italic; }
+.code-comment { color: #8190a5; font-style: italic; }
 .code-method { color: #c4b5fd; }
 .code-num { color: #fdba74; }
 .code-ann { color: #7dd3fc; }

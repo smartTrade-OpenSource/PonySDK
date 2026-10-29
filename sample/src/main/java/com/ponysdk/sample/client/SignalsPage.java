@@ -132,6 +132,7 @@ final class SignalsPage {
         final Signal<Integer> units = Signal.computed(() -> parse(quantity.get()));
         final PTextBox box = Element.newPTextBox();
         box.addStyleName("signal-quantity");
+        box.setAttribute("aria-label", "Quantity");
         Bind.value(box, quantity);
         final PLabel invalid = Element.newPLabel("Not a whole number");
         invalid.addStyleName("signal-invalid");

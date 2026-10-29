@@ -47,6 +47,7 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.PWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,7 @@ final class LayoutsPage {
         scroll.setHeight("110px");
         scroll.setWidth("320px");
         scroll.addStyleName("lay-frame");
+        scroll.setTabindex(TabindexMode.TABULABLE); // no focusable content: a keyboard user scrolls it as a whole
         final PFlowPanel lines = Element.newPFlowPanel();
         for (int i = 1; i <= 20; i++) lines.add(Element.newPLabel("Line " + i + " — scroll me"));
         scroll.setWidget(lines);

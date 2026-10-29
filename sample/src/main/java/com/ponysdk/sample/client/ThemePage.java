@@ -42,8 +42,10 @@ import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PDisclosurePanel;
 import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PImage;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
@@ -242,7 +244,9 @@ final class ThemePage {
         final PButton busy = Element.newPButton("Saving");
         busy.setEnabled(false);
         busy.setAttribute("aria-busy", "true"); // what the terminal sets while a request is in flight
-        final PButton push = Element.newPPushButton(Element.newPImage());
+        final PImage icon = Element.newPImage();
+        icon.setAttribute("alt", ""); // decorative: the button's text says it
+        final PButton push = Element.newPPushButton(icon);
         push.setText("Push button");
         return row(Element.newPButton("Default"), primary, danger, disabled, busy, push, Element.newPAnchor("An anchor", "#"));
     }
@@ -250,25 +254,34 @@ final class ThemePage {
     private static PFlowPanel textFields() {
         final PTextBox box = Element.newPTextBox();
         box.setPlaceholder("A text box");
+        box.setAttribute("aria-label", "Text box");
         final PTextBox invalid = Element.newPTextBox();
         invalid.setText("Not a number");
         invalid.setAttribute("aria-invalid", "true");
+        invalid.setAttribute("aria-label", "Invalid text box");
         final PTextBox disabled = Element.newPTextBox();
         disabled.setText("Disabled");
         disabled.setEnabled(false);
+        disabled.setAttribute("aria-label", "Disabled text box");
         final PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
         oracle.addAll(List.of("EUR/USD", "EUR/GBP", "EUR/JPY", "GBP/USD", "USD/JPY"));
         final PListBox select = Element.newPListBox();
+        select.setAttribute("aria-label", "Drop-down list");
         select.addItem("One");
         select.addItem("Two");
         final PListBox multiple = Element.newPListBox();
         multiple.setMultipleSelect(true);
+        multiple.setAttribute("aria-label", "Desks");
         multiple.addItem("Rates");
         multiple.addItem("Credit");
         multiple.addItem("FX");
         final PWidget area = Element.newPTextArea();
-        return row(box, invalid, disabled, Element.newPPasswordTextBox("Password"), Element.newPSuggestBox(oracle), select,
-            multiple, area);
+        area.setAttribute("aria-label", "Text area");
+        final PWidget password = Element.newPPasswordTextBox("Password");
+        password.setAttribute("aria-label", "Password");
+        final PWidget suggest = Element.newPSuggestBox(oracle);
+        suggest.setAttribute("aria-label", "Currency pair");
+        return row(box, invalid, disabled, password, suggest, select, multiple, area);
     }
 
     private static PFlowPanel choices() {
@@ -324,7 +337,9 @@ final class ThemePage {
     }
 
     private static PFlowPanel dates() {
-        return row(Element.newPDatePicker(), Element.newPDateBox());
+        final PDateBox dateBox = Element.newPDateBox();
+        dateBox.setAttribute("aria-label", "Date");
+        return row(Element.newPDatePicker(), dateBox);
     }
 
     private static PFlowPanel dropDowns() {
@@ -345,6 +360,7 @@ final class ThemePage {
         split.addWest(Element.newPLabel("Drag the splitter"), 150);
         split.add(Element.newPLabel("Center"));
         final PScrollPanel scroll = Element.newPScrollPanel();
+        scroll.setTabindex(PWidget.TabindexMode.TABULABLE); // no focusable content: a keyboard user scrolls it as a whole
         final PFlowPanel lines = Element.newPFlowPanel();
         for (int i = 1; i <= 12; i++) lines.add(Element.newPLabel("A line of a scroll panel, number " + i));
         scroll.setWidget(lines);
