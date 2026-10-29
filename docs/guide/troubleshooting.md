@@ -15,13 +15,9 @@
 | Proxy not configured | Configure proxy for WebSocket upgrade |
 | SSL mismatch | Use `wss://` for HTTPS, `ws://` for HTTP |
 
-```java
-// Debug: Enable verbose logging
-config.setDebugMode(true);
-
-// Check server is listening
-System.out.println("Server started on port: " + config.getPort());
-```
+The server logs `Webserver started on: <address>:<port>` once listening. For more of it, set the `com.ponysdk`
+logger to DEBUG in the logging configuration; what the page receives, element by element: debug mode and its
+inspector ([development tools](development.md)).
 
 ### Connection Drops Frequently
 

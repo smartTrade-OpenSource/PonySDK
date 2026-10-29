@@ -80,7 +80,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 | **Security** | Business logic never leaves the server |
 | **Type Safety** | Compile-time checking, IDE refactoring |
 | **Simplicity** | One language, one codebase |
-| **Debugging** | Server-side breakpoints, standard logging |
+| **Debugging** | Server-side breakpoints, standard logging; in debug mode, each element names its Java class and line, and an inspector shows the bytes per element ([ADR-0016](docs/decisions/0016-development-tools.md)) |
 | **Testing** | JUnit tests for UI logic |
 
 ---
@@ -1247,7 +1247,7 @@ What the server receives from it is checked against traces recorded with the GWT
 | **100% Java** | No JavaScript required |
 | **Type Safety** | Compile-time checking |
 | **Security** | Logic stays on server |
-| **Debugging** | Server-side breakpoints |
+| **Debugging** | Server-side breakpoints, the inspector in debug mode, hot reload |
 | **Testing** | Standard JUnit |
 | **Real-time** | Native WebSocket push |
 

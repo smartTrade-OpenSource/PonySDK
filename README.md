@@ -48,11 +48,19 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - Metrics: active contexts (gauge), created/destroyed (counters), bytes sent/received, roundtrip latency, execute duration, lock wait (histograms)
 - Fully opt-in — no-op when not configured
 
+**Development**
+- Debug mode: each element names its Java class and the line that created it (`data-pony="PButton
+  InputsPage.java:85"`); an inspector over the page shows the bytes by class and by object, and picks an element
+  ([guide](docs/guide/development.md))
+- Hot reload: a recompiled screen reloads in the open browser, where it was, without restarting the server
+
 **UI**
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
 - Any DOM event of any widget, listened to by name from Java (`addEventListener("input", PEventOptions.fields(
   "target.value").debounce(...), e -> ...)`): the fields read and the rate limited in the browser (protocol 4,
   [ADR-0003](docs/decisions/0003-protocol-v4-listeners.md))
+- `PEventOptions.lock()`: an event sent once until the server answers it, the element `aria-busy` meanwhile, as a
+  button's click is by default
 - `PAddOn` for integrating any JavaScript library — typed creation args and method calls sent in pure binary (no JSON) via `PAddOn(Object...)`
 - Virtual threads (Java 25) for scalable concurrent `UIContext`s
 - TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's

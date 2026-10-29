@@ -11,7 +11,8 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `entryPointClass` | The `EntryPoint` started for each browser tab | none (required) |
 | `heartBeatPeriod` | Liveness: a client silent for half of it is pinged, for two of it is dropped ([ADR-0006](../decisions/0006-liveness-by-ping.md)) (ms) | 5000 |
 | `sessionTimeout` | Stored and readable (`getSessionTimeout`); `PonySDKServer` does not apply it (minutes) | 15 |
-| `debugMode` | Verbose logging | false |
+| `debugMode` | Each element names its Java class and creation line; the inspector over the page ([development tools](development.md)). Not for production | false |
+| `hotReload` | A recompiled screen reloads in the browser, without restarting ([development tools](development.md)) | false |
 | `style`, `javascript` | Stylesheets and scripts of the bootstrap page | none |
 | `stringDictionaryEnabled` | Strings sent once, then by index | true |
 | `stringDictionaryMaxSize` | Max dictionary entries | 4096 |

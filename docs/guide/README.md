@@ -17,4 +17,5 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Security](security.md) | What is protected by default, and the settings |
 | [Observability](observability.md) | OpenTelemetry metrics, latency |
 | [Testing](testing.md) | `PSuite`, the Pony driver, browser tests |
+| [Development tools](development.md) | The inspector over the page, hot reload of a recompiled screen |
 | [Troubleshooting](troubleshooting.md) | Symptoms and their causes |

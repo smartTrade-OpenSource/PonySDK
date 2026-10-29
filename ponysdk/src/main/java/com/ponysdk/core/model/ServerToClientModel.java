@@ -296,7 +296,7 @@ public enum ServerToClientModel {
     UPDATE_NEXT_ID(ValueTypeModel.UINT31),   // next object = absolute id
 
     // DOM events by name (protocol >= ProtocolVersion.LISTENERS, ADR-0003)
-    LISTEN_EVENT(ValueTypeModel.STRING),     // JSON {"name", "fields", "throttle", "debounce", "prevent", "stop", "capture"}
+    LISTEN_EVENT(ValueTypeModel.STRING),     // JSON {"name", "fields", "throttle", "debounce", "prevent", "stop", "capture", "lock"}
     UNLISTEN_EVENT(ValueTypeModel.STRING),   // the event's name
 
     // An embedded application's element (ADR-0008): a CustomEvent dispatched on it, [type, detail as JSON or null]

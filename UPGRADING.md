@@ -13,8 +13,23 @@
 
 ## Removed APIs
 
+3.0 has no deprecated API: what 2.x deprecated is gone, and of the packages that existed twice one is left. An
+application that used a removed package can keep a copy of it in its own sources: they depend on the public API only.
+
 | Removed | Use |
 |---|---|
+| Package `com.ponysdk.core.ui.datagrid` (`DataGrid`, `DynamicDataGrid`, `ColumnDescriptor`...) | `com.ponysdk.core.ui.datagrid2` |
+| Package `com.ponysdk.core.ui.eventbus2`, `UIContext.getNewEventBus()` | `com.ponysdk.core.ui.eventbus.EventBus`, `UIContext.getRootEventBus()` ([EventBus](docs/guide/event-bus.md)) |
+| Package `com.ponysdk.core.ui.form2` | `com.ponysdk.core.ui.form`: `AbstractFormField` and its fields, `FieldValidator`s |
+| `Focusable`, `setFocus(boolean)` of `PFocusWidget`, `PDateBox`, `PSuggestBox` | `focus()`, `blur()` |
+| `PWidget.isFocused()` (the server's guess, never told what the browser did) | `addFocusHandler`, `addBlurHandler` of a focus widget; `addDomHandler(handler, PFocusEvent.TYPE)` on another |
+| `PPopupPanel.isShowing()` | `isVisible()` |
+| `Event.getEventID()` | nothing: it returned 0 |
+| `HasPEvent` | nothing: no class implemented it |
+| `com.ponysdk.core.ui.basic.DataListener` | `com.ponysdk.core.server.application.DataListener`, which it only extended |
+| `new FlexLayoutPanel(String modelJson, String theme[, String bordersJson])` | `new FlexLayoutPanel(FlexLayoutModel, FlexTheme, FlexBorder...)`; a saved model: `loadModel(json)` |
+| `FlexLayoutPanel.setKeymap(String)`, `getOpenTabsRaw(Consumer<String>)`, `setBlockedActions(String...)` | `setKeymap(FlexKeymap)`, `getOpenTabs(Consumer<List<FlexTabInfo>>)`, `setBlockedActions(FlexAction...)` |
+| `com.ponysdk.spring.ListLoader` (`ponysdk-spring`) | nothing: it was deprecated as useless |
 | `UIContext.getRequest()` (Jetty 12 recycles the request after the upgrade) | `getParameterMap`, `getHeader(s)`, `getRequestCookies`, `getHost`, `isSecure`, `getRemoteSocketAddress`, `getSession` |
 | `SessionManager.getUIContext(int)` (a lookup across sessions) | `getUIContext(applicationId, id)` |
 | `WebSocket.getRequest()` / `setRequest()` (the same recycled request) | `WebSocket.getUpgradeRequestData()`, the snapshot taken during the handshake |
@@ -127,6 +142,18 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
   two periods (10 s by default) is dropped as an abnormal close: suspended with transparent reconnection, destroyed
   without. The terminal no longer sends heartbeats. A proxy between browser and server must forward ping and pong
   frames, as TCP-level WebSocket proxies do.
+- After `onClientData`, the context calls `PObject.onClientDataProcessed`, even when `onClientData` throws: what
+  answers the terminal for its message goes there. A focus widget's `END_OF_PROCESSING` is sent from it, so a click
+  filtered out by an override (`PTextBoxBase` on a widget hidden meanwhile) still enables the widget again. A test
+  that sends a click by calling `onClientData` itself gets no `END_OF_PROCESSING`: it calls
+  `UIContext.fireClientData`, the path of the terminal's messages.
+- A focus widget disabled by a click (the default, `setEnabledOnRequest(false)`) is enabled again when its context
+  resumes after a lost connection: a click made while the connection was down never reached the server.
+- `debugMode` is a development mode: each widget's creation carries its Java class and the line that created it,
+  found by walking the stack, and the terminal loads its inspector ([development tools](docs/guide/development.md)).
+  Leave it off in production. It used to only send `ensureDebugId`'s ids, which it still does.
+- A path the server does not have is logged at DEBUG ("Resource not found"), and a send that fails because the
+  connection is closing too; they were ERRORs. A send that fails on an open connection stays an ERROR.
 - Latency: the probe goes every 5 s (or every heartbeat period when shorter); `getRoundtripLatency()` and the others
   average the last 10 probes received, not 10 slots counting the empty ones as 0. `getTerminalLatency()` is the time
   the probe waited in the terminal (it was always 0), and `getNetworkLatency()` the roundtrip minus that time.
@@ -135,5 +162,7 @@ API and the `window.pony` JavaScript API stay; the DOM changes.
 
 The protocol version is negotiated at the WebSocket handshake: a terminal announcing an older version gets its
 format, and `setMaxProtocolVersion` caps it for everyone. The server's keys keep the numbers of 2.10.
-`PWidget.addEventListener` needs protocol 4: below it, the listener is kept, the terminal is not told, and a warning
-is logged.
+`PWidget.addEventListener` needs protocol 4: below it, it throws `IllegalStateException`
+([ADR-0011](docs/decisions/0011-one-way-to-listen.md)). Protocol 4 also has `EVENT_HANDLED`, the answer to an event
+listened to with `PEventOptions.lock()`, and `DEBUG_INFO`, sent in debug mode only
+([ADR-0016](docs/decisions/0016-development-tools.md)).
