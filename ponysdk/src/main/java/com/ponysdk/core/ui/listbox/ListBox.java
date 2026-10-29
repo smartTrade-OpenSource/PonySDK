@@ -635,6 +635,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             defaultContainer.add(clearMultiButton);
         }
         itemContainer = buildInfiniteScrollAddon();
+        itemContainer.asWidget().setAttribute("role", "listbox");
+        if (configuration.isMultiSelectionEnabled()) itemContainer.asWidget().setAttribute("aria-multiselectable", "true");
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
@@ -1252,6 +1254,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
         public ListBoxItemWidget() {
             panel = Element.newPFlowPanel();
+            panel.setAttribute("role", "option");
             if (configuration.isMultiSelectionEnabled()) {
                 checkBox = Element.newPCheckBox();
                 checkBox.setTabindex(TabindexMode.FOCUSABLE);
@@ -1279,7 +1282,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
 
         void select() {
-            if (checkBox != null) checkBox.setValue(!checkBox.getValue());
+            if (checkBox != null) {
+                checkBox.setValue(!checkBox.getValue());
+                panel.setAttribute("aria-selected", String.valueOf(checkBox.getValue())); // the row is not drawn again
+            }
             if (configuration.isEventOnlyEnabled()) {
                 onValueChange(List.of(item));
             } else {
@@ -1306,15 +1312,21 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 else checkBox.setValue(item.isSelected());
                 if (item.equals(lastSelectedItem)) panel.addStyleName(STYLE_LISTBOX_ITEM_LAST_SELECTED);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_LAST_SELECTED);
+                panel.setAttribute("aria-selected", String.valueOf(checkBox.getValue()));
             } else {
                 boolean selected;
                 if (dataProvider != null) selected = selectedDataItems.contains(item);
                 else selected = item.isSelected();
                 if (selected) panel.addStyleName(STYLE_LISTBOX_ITEM_SELECTED);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_SELECTED);
-                if (ListBoxItemType.GROUP.equals(item.getType())) panel.addStyleName(STYLE_LISTBOX_ITEM_GROUP);
+                panel.setAttribute("aria-selected", String.valueOf(selected));
+                final boolean group = ListBoxItemType.GROUP.equals(item.getType());
+                if (group) panel.addStyleName(STYLE_LISTBOX_ITEM_GROUP);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_GROUP);
+                panel.setAttribute("role", group ? "presentation" : "option"); // a group's title is no choice
             }
+            if (item.isEnabled()) panel.removeAttribute("aria-disabled");
+            else panel.setAttribute("aria-disabled", "true");
             itemRenderer.setItem(item);
         }
     }

@@ -599,6 +599,11 @@ public class ListBoxTest extends PSuite {
         box.open();
         assertTrue(row(box, "a").hasStyleName("dd-listbox-item-selected"));
         assertFalse(row(box, "c").hasStyleName("dd-listbox-item-selected"));
+        // the same for a screen reader
+        assertEquals("listbox", box.getItemContainer().asWidget().getAttribute("role"));
+        assertEquals("option", row(box, "a").getAttribute("role"));
+        assertEquals("true", row(box, "a").getAttribute("aria-selected"));
+        assertEquals("false", row(box, "c").getAttribute("aria-selected"));
     }
 
     @Test
@@ -882,6 +887,8 @@ public class ListBoxTest extends PSuite {
         assertEquals(List.of("Fruits", "apple", "pear", "Vegetables", "leek"), renderedLabels(box));
         assertTrue(row(box, "Fruits").hasStyleName("dd-listbox-item-group"));
         assertFalse(row(box, "apple").hasStyleName("dd-listbox-item-group"));
+        assertEquals("presentation", row(box, "Fruits").getAttribute("role"), "a group's title is no choice");
+        assertEquals("option", row(box, "apple").getAttribute("role"));
         assertEquals("apple", currentLabel(box));
 
         DropDownTestEvents.keyDown(box.getContainer().asWidget(), PKeyCodes.DOWN);
@@ -1555,6 +1562,27 @@ public class ListBoxTest extends PSuite {
     private static <D> ListBox<D> attach(final ListBox<D> box) {
         PWindow.getMain().add(box.asWidget());
         return box;
+    }
+
+    @Test
+    public void aScreenReaderHearsTheStateOfTheListAndOfItsItems() {
+        final ListBox<String> box = attach(new ListBox<>(new ListBoxConfiguration().enableMultiSelection(), items("a", "b", "c")));
+        assertEquals("true", mainButton(box).getAttribute("aria-haspopup"));
+        assertEquals("false", mainButton(box).getAttribute("aria-expanded"));
+        box.setDataEnabled("c", false);
+        box.open();
+        assertEquals("true", mainButton(box).getAttribute("aria-expanded"));
+        assertEquals("true", box.getItemContainer().asWidget().getAttribute("aria-multiselectable"));
+
+        clickItem(box, "a");
+        box.open();
+        assertEquals("true", row(box, "a").getAttribute("aria-selected"));
+        assertEquals("false", row(box, "b").getAttribute("aria-selected"));
+        assertEquals("true", row(box, "c").getAttribute("aria-disabled"));
+        assertNull(row(box, "b").getAttribute("aria-disabled"));
+
+        box.close();
+        assertEquals("false", mainButton(box).getAttribute("aria-expanded"));
     }
 
     private static PButton mainButton(final ListBox<?> box) {

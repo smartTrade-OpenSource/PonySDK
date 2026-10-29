@@ -145,6 +145,9 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             mainButton = Element.newPButton(configuration.getTitle());
             mainButton.addStyleName(STYLE_CONTAINER_BUTTON);
             mainButton.setTabindex(TabindexMode.FOCUSABLE);
+            // a screen reader says it opens something, and whether it is open
+            mainButton.setAttribute("aria-haspopup", "true");
+            mainButton.setAttribute("aria-expanded", "false");
             if (configuration.isTitleDisplayed() && configuration.isTitlePlaceHolder()) {
                 mainButton.addStyleName(STYLE_CONTAINER_BUTTON_PLACEHOLDER);
             }
@@ -476,6 +479,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.addStyleName(STYLE_CONTAINER_WIDGET_OPENED);
             beforeContainerVisible();
             container.show();
+            mainButton.setAttribute("aria-expanded", "true"); // shown in a window: its widget, its button are built
             afterContainerVisible();
             final POpenEvent event = new POpenEvent(this);
             openHandlers.forEach(l -> l.onOpen(event));
@@ -483,6 +487,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             widget.removeStyleName(STYLE_CONTAINER_OPENED);
             container.removeStyleName(STYLE_CONTAINER_WIDGET_OPENED);
             container.hide();
+            mainButton.setAttribute("aria-expanded", "false");
             if (!configuration.isEventOnlyEnabled()) updateTitle(getValue());
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);

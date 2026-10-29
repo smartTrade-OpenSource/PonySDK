@@ -69,6 +69,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's
   top layer; 27 KB gzipped before the first widget, the rarely shown ones loaded on demand
   ([ADR-0004](docs/decisions/0004-terminal-chunks.md))
+- `ListBox` and the dropdowns built in Java say their state to a screen reader too: `listbox` and `option` roles,
+  `aria-selected`, `aria-disabled`, `aria-multiselectable`, `aria-expanded` on the button that opens them
 - Stylesheets select `pony-<Type>` classes and native or ARIA states; [ADR-0002](docs/decisions/0002-javascript-terminal.md)
   maps each widget to its elements, the guide for stylesheets written on GWT's `gwt-*` classes.
   `ApplicationConfiguration.setLegacyClassNames(true)` adds GWT's class names to the DOM meanwhile
