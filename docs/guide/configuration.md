@@ -46,6 +46,7 @@ Metrics are set on the servlet, not here: `WebSocketServlet.setMetrics(PonySDKMe
 | `setUseSSL` | Adds an HTTPS connector; needs `setSslKeyStoreFile` (and its passphrase, type) | true |
 | `setSslPort` | HTTPS port | 443 |
 | `setSessionCookieSecure` | The session cookie is `Secure`: a browser does not send it over plain HTTP | true |
+| `setDrainMillis` | On SIGTERM, the live pages move to the other servers over this time, then the server stops ([deployment](deployment.md)) (ms) | 0: stops at once |
 | `setApplicationManager` | The application: a `JavaApplicationManager` holding the configuration | none (required) |
 
 For plain HTTP on a development machine: `setUseSSL(false)` and `setSessionCookieSecure(false)`, as in the

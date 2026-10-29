@@ -124,3 +124,9 @@ window.onPonyReconnected = function() {
 ```
 
 The `ReconnectionListener` on the server side can also trigger risk checks or force a data refresh before the session resumes.
+
+## A server that stops
+
+Reconnection keeps a context through a network cut, on the same server. A server that stops (a deployment, a
+scale-in) takes its contexts with it: `PonySDKServer.setDrainMillis` moves its pages to the other servers first, each
+reloaded at its address ([deployment](deployment.md)).

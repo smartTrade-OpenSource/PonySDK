@@ -42,6 +42,9 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - Transparent WebSocket reconnection (opt-in): UIContext survives network drops, state replayed on reconnect
 - `RecordingEncoder` buffers all protocol ops during suspension with compaction (merge updates, cancel create+remove pairs)
 - Configurable reconnection timeout and buffer limit — safe default is disabled (no silent state resume)
+- A server that stops (a deployment, a scale-in, a spot interruption) moves its pages to the other servers first:
+  `setDrainMillis`, in waves, each page reloaded where it was. Behind an ALB on ECS or EC2, no shared store
+  ([deployment](docs/guide/deployment.md))
 
 **Observability**
 - OpenTelemetry instrumentation via `PonySDKMetrics` (OTel API only, SDK goes in your app)
