@@ -1077,3 +1077,10 @@ div.selected-row { background-color: var(--selected-row); }
 @media (max-width: 760px) { .pony-embedding-live { grid-template-columns: minmax(0, 1fr); } }
 .pony-embedding-trades { font: 12.5px/1.6 var(--mono); color: var(--text-2); max-height: 180px; overflow-y: auto; }
 .pony-embedding-trade { border-bottom: 1px solid var(--border); padding: 2px 0; }
+
+/* ── i18n page: a small screen the language switch changes (docs/decisions/0022-locale.md) ──────────────── */
+.i18n-screen { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 420px; margin: 0 0 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.i18n-title { font-weight: 600; font-size: 16px; color: var(--text); }
+.i18n-greeting, .i18n-volume, .i18n-amount, .i18n-today, .i18n-date-label, .i18n-picked { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.i18n-stepper { display: flex; align-items: center; gap: 8px; }
+.i18n-orders { color: var(--text); min-width: 11em; text-align: center; }

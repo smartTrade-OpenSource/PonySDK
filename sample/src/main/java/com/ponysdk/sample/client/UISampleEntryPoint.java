@@ -161,7 +161,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
             {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
-            {"⧉", "Embedding"}, {"⇄", "FDC3"}
+            {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"Aa", "i18n"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
         final int[] groupStarts = {0, 2, 9};
@@ -271,6 +271,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);
             case "Embedding" -> EmbeddingPage.build(uiContext, schedulers);
             case "FDC3" -> Fdc3Page.build();
+            case "i18n" -> I18nPage.build(uiContext);
             default -> throw new IllegalArgumentException("No page " + tabNames[idx]);
         };
     }
