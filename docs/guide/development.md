@@ -65,11 +65,15 @@ as last compiled. The server scans that directory twice a second. Once class fil
 2. every live context is destroyed: its page reloads, at the same history token, and its new context starts from
    the new classes.
 
+A file changed in another directory of the classpath (`build/resources/main`: a stylesheet, a script the build
+copies) reloads the pages the same way: on the showcase, edit `css/showcase.css`, then run
+`./gradlew :sample:processResources`.
+
 On the showcase, a page recompiled by `javac` showed in the open browser 1.3 s later.
 
 | Reloaded | Not reloaded |
 |---|---|
-| The classes of the entry point's package and subpackages, in the watched directory | The framework, the libraries, the classes of other packages (the main class, if it is elsewhere) |
+| The classes of the entry point's package and subpackages, in the watched directory; the pages, when a resource of the classpath's directories changes | The framework, the libraries, the classes of other packages (the main class, if it is elsewhere) |
 
 What stays across a reload stays of the old classes: an object created by the main class and handed to the new
 screens, a static field of a class that is not reloaded, a thread started by an old class. The state of the screens

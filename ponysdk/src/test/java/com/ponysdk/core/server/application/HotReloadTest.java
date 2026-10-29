@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +65,7 @@ public class HotReloadTest {
     public void setUp() throws IOException {
         greeter("one", 1_000_000);
         parent = new URLClassLoader(new URL[] { root.toUri().toURL() }, getClass().getClassLoader());
-        hotReload = new HotReload(root, "demo.", parent, reloads::incrementAndGet, TimeUnit.HOURS.toMillis(1));
+        hotReload = new HotReload(root, List.of(), "demo.", parent, reloads::incrementAndGet, TimeUnit.HOURS.toMillis(1));
     }
 
     @AfterEach
@@ -98,6 +99,24 @@ public class HotReloadTest {
     }
 
     @Test
+    public void aResourceChangedReloadsThePagesOtherFilesOfTheClassesDoNot() throws Exception {
+        final Path resources = Files.createTempDirectory("pony-resources");
+        Files.createDirectories(resources.resolve("css"));
+        final Path css = Files.writeString(resources.resolve("css/app.css"), "body {}");
+        try (HotReload watching = new HotReload(root, List.of(resources), "demo.", parent, reloads::incrementAndGet,
+            TimeUnit.HOURS.toMillis(1))) {
+            Files.writeString(root.resolve("notes.txt"), "not a class");
+            assertFalse(watching.check(0));
+            assertFalse(watching.check(1_000), "a file of the classes directory that is no class");
+
+            Files.setLastModifiedTime(css, FileTime.fromMillis(5_000_000));
+            watching.check(2_000);
+            assertTrue(watching.check(3_000), "a stylesheet changed");
+            assertEquals(1, reloads.get());
+        }
+    }
+
+    @Test
     public void onlyThePrefixUnderTheRootIsLoadedAgain() throws Exception {
         compile("other/Thing.java", "package other; public class Thing {}");
         greeter("two", 2_000_000);
@@ -126,7 +145,7 @@ public class HotReloadTest {
         assertEquals(0, ToolProvider.getSystemJavaCompiler().run(null, null, null, "-d", elsewhere.toString(),
             elsewhere.resolve("demo/Elsewhere.java").toString()));
         try (URLClassLoader both = new URLClassLoader(new URL[] { root.toUri().toURL(), elsewhere.toUri().toURL() },
-            getClass().getClassLoader()); HotReload reloading = new HotReload(root, "demo.", both, () -> {}, TimeUnit.HOURS.toMillis(1))) {
+            getClass().getClassLoader()); HotReload reloading = new HotReload(root, List.of(), "demo.", both, () -> {}, TimeUnit.HOURS.toMillis(1))) {
             greeter("two", 2_000_000);
             reloading.check(0);
             reloading.check(1_000);
@@ -164,7 +183,7 @@ public class HotReloadTest {
     @Test
     public void theScannerTakesAChangeByItself() throws Exception {
         final CountDownLatch reloaded = new CountDownLatch(1);
-        try (HotReload scanning = new HotReload(root, "demo.", parent, reloaded::countDown, 5)) {
+        try (HotReload scanning = new HotReload(root, List.of(), "demo.", parent, reloaded::countDown, 5)) {
             greeter("three", 3_000_000);
             assertTrue(reloaded.await(10, TimeUnit.SECONDS));
         }
