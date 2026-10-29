@@ -952,6 +952,21 @@ div.selected-row { background-color: var(--selected-row); }
 .stream-name { display: block; font-size: 12px; color: var(--text-3); }
 .stream-price { display: block; font: 600 16px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
 
+/* ── Signals page: tiles and rows bound to signals (docs/decisions/0019-signals.md) ──────────────────────── */
+.signal-price { color: var(--bad); }
+.signal-price.signal-up { color: var(--good); }
+.signal-position { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 0 16px; }
+.signal-field { display: flex; align-items: center; gap: 12px; }
+.signal-field-label { width: 80px; font-size: 12.5px; color: var(--text-3); }
+.signal-invalid { font-size: 12.5px; color: var(--bad); }
+.signal-held { font: 12.5px var(--mono); color: var(--text-3); }
+.signal-total { font: 600 16px var(--mono); color: var(--text); font-variant-numeric: tabular-nums; }
+.signal-rows { display: flex; flex-direction: column; gap: 6px; margin: 0 0 8px; }
+.signal-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; max-width: 320px; padding: 6px 10px;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.signal-row-name { font-size: 12.5px; color: var(--text-3); }
+.signal-made { display: block; font-size: 12.5px; color: var(--text-3); margin: 0 0 12px; }
+
 /* ── FDC3 page: channels, instruments, what came from the others (docs/decisions/0014-fdc3.md) ──────────── */
 .fdc3-agent { display: block; color: var(--text-2); margin: 0 0 8px; }
 .fdc3-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 16px; }

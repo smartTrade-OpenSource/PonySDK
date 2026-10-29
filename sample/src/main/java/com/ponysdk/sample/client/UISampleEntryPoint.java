@@ -45,6 +45,7 @@ import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.ui.signal.Bind;
 
 public class UISampleEntryPoint implements EntryPoint {
 
@@ -58,6 +59,7 @@ public class UISampleEntryPoint implements EntryPoint {
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
+        Bind.configure(Duration.ofMillis(50), null); // what the Signals page binds reaches the browser every 50 ms at most
 
         final String token = uiContext.getHistory().getToken();
         if (token != null && token.startsWith(ReconnectionPage.CLIENT_TOKEN)) {
@@ -160,7 +162,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"⋯", "Misc"},
-            {"⚡", "Performance"}, {"≋", "Streams"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"⚡", "Performance"}, {"≋", "Streams"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -271,6 +273,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Misc" -> MiscPage.build(schedulers);
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
             case "Streams" -> StreamsPage.build(uiContext, schedulers);
+            case "Signals" -> SignalsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
             case "Binary protocol" -> BinaryProtocolPage.build(schedulers);
             case "Reconnection" -> ReconnectionPage.build(uiContext, schedulers);
