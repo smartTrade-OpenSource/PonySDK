@@ -77,6 +77,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - Charts: `PChart`, live time series drawn by the terminal from typed arrays, conflated feeds, a 5 KB chunk loaded
   only when a chart exists ([guide](docs/guide/charts.md))
 - A default theme: `setTheme("pony")`, CSS tokens, light and dark, WCAG AA contrast ([guide](docs/guide/theme.md))
+- i18n: a locale per context from `Accept-Language` or the user's choice, `Messages` from resource bundles,
+  locale-aware formats, date names from the browser, right-to-left pages ([guide](docs/guide/i18n.md))
 - `PAddOn` for integrating any JavaScript library — typed creation args and method calls sent in pure binary (no JSON) via `PAddOn(Object...)`
 - Virtual threads (Java 25) for scalable concurrent `UIContext`s
 - TypeScript terminal on native elements and ARIA patterns: keyboard and screen readers, popups in the browser's
