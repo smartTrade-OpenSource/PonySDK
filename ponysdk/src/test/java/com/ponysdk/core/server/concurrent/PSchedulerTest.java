@@ -144,6 +144,14 @@ public class PSchedulerTest {
         assertEquals(before, timerQueueSize());
     }
 
+    private static int queueSize() {
+        try {
+            return timerQueueSize();
+        } catch (final ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     @AfterEach
     public void tearDown() {
         UIContext.remove();
@@ -188,7 +196,8 @@ public class PSchedulerTest {
         rate.cancel();
         delayed.cancel();
         delay.cancel();
-        assertEquals(before, timerQueueSize());
+        // a task cancelled between its run and its requeue (the JDK's reExecutePeriodic) leaves at its next due time
+        await(() -> queueSize() == before);
     }
 
     @Test
