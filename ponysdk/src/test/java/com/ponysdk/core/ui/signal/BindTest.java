@@ -446,6 +446,28 @@ public class BindTest {
     }
 
     @Test
+    public void aBindingOfAWidgetOutsideTheWindowsEndsWithItsContextToo() {
+        final MutableSignal<String> signal = Signal.of("a");
+        final AtomicInteger computed = new AtomicInteger();
+        final Signal<String> text = Signal.computed(() -> {
+            computed.incrementAndGet();
+            return signal.get();
+        });
+        final UIContext doomed = context();
+        final PLabel[] label = new PLabel[1];
+        doomed.execute(() -> Bind.text(label[0] = Element.newPLabel(), text)); // in no window: its context's destroy does not reach it
+        final WeakReference<PLabel> reference = new WeakReference<>(label[0]);
+        label[0] = null;
+
+        doomed.destroy();
+        signal.set("b");
+
+        assertEquals("b", text.get());
+        assertEquals(2, computed.get(), "nothing followed the computed signal after the destroy");
+        assertTrue(SignalTest.collected(reference));
+    }
+
+    @Test
     public void aBindingIsMadeOnTheUiThreadOfAContext() {
         final PLabel[] label = new PLabel[1];
         ctx.execute(() -> label[0] = Element.newPLabel());
