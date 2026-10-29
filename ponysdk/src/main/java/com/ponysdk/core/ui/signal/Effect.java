@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.signal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import com.ponysdk.core.ui.basic.PObject;
@@ -41,7 +40,8 @@ final class Effect<T> implements Observer, Binding {
     private final Consumer<? super T> apply;
     private final Runnable onClose; // what the application's handlers need removed, or null
     private final PObject.DestroyListener destroyListener = object -> close();
-    private final AtomicBoolean queued = new AtomicBoolean();
+    /** In its owner's dirty list: set under the owner's lock, cleared there when a drain takes the list. */
+    volatile boolean queued;
     private volatile boolean closed;
 
     Effect(final Bindings owner, final PObject widget, final Signal<T> signal, final Consumer<? super T> apply,
@@ -62,13 +62,12 @@ final class Effect<T> implements Observer, Binding {
 
     @Override
     public void invalidate() {
-        if (queued.compareAndSet(false, true)) owner.offer(this);
+        if (!queued) owner.offer(this); // queued: the drain reads the value after clearing it, this one included
     }
 
     /** On the UI thread. */
     void run() {
-        queued.set(false); // before the read: a change from now on asks again
-        if (!closed) apply.accept(signal.get());
+        if (!closed) apply.accept(signal.peek()); // no computation reads it here: nothing to follow
     }
 
     @Override

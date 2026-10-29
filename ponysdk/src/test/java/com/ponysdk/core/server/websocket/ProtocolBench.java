@@ -354,7 +354,7 @@ public final class ProtocolBench {
     }
 
     private enum Update {
-        DIRECT("direct setters"), SIGNAL("bound signals"), COMPUTED("bound computed");
+        DIRECT("direct setters"), FEED("setters, an execute each"), SIGNAL("bound signals"), COMPUTED("bound computed");
 
         final String label;
 
@@ -382,12 +382,12 @@ public final class ProtocolBench {
             final List<MutableSignal<String>> sources = new ArrayList<>(cellCount);
             final ArrayDeque<Runnable> drains = new ArrayDeque<>();
             b.ctx.execute(() -> {
-                if (update != Update.DIRECT) Bind.configure(Duration.ZERO, drains::add);
+                if (update == Update.SIGNAL || update == Update.COMPUTED) Bind.configure(Duration.ZERO, drains::add);
                 for (int c = 0; c < cellCount; c++) {
                     final PLabel label = Element.newPLabel("1.00000");
                     b.root.add(label);
                     cells.add(label);
-                    if (update == Update.DIRECT) continue;
+                    if (update == Update.DIRECT || update == Update.FEED) continue;
                     final MutableSignal<String> source = Signal.of("1.00000");
                     sources.add(source);
                     Bind.text(label, update == Update.SIGNAL ? source : Signal.computed(source::get));
@@ -402,6 +402,12 @@ public final class ProtocolBench {
                     b.ctx.execute(() -> {
                         for (int k = 0; k < perFlush; k++) cells.get((first + k) % cellCount).setText(texts[(first + k) * 31 % texts.length]);
                     });
+                } else if (update == Update.FEED) {
+                    // a feed thread without signals: each value its own transaction, as uiContext.execute gives it
+                    for (int k = 0; k < perFlush; k++) {
+                        final int cell = (first + k) % cellCount, text = (first + k) * 31 % texts.length;
+                        b.ctx.execute(() -> cells.get(cell).setText(texts[text]));
+                    }
                 } else {
                     for (int k = 0; k < perFlush; k++) sources.get((first + k) % cellCount).set(texts[(first + k) * 31 % texts.length]);
                     Runnable drain;

@@ -75,6 +75,13 @@ final class Computed<T> extends Signal<T> implements Observer {
     }
 
     @Override
+    synchronized T peek() {
+        checkNotEvaluating();
+        refresh();
+        return value;
+    }
+
+    @Override
     synchronized long version() {
         checkNotEvaluating();
         refresh();

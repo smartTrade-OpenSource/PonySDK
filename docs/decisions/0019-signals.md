@@ -86,21 +86,26 @@ Vaadin 25.1 has "signals" for this: a value, a value computed from others, widge
 ## Consequences
 
 - Measured, protocol 4, 60 of 240 labels updated per flush, per cell, the drain run on the measuring thread
-  (`./gradlew :ponysdk:bench -Pbench.args="v4 signals 4"`, three runs):
+  (`./gradlew :ponysdk:bench -Pbench.args="v4 signals 4"`, five runs):
 
-  | update | protocol | wire | CPU | allocation |
+  | update | frames per flush | wire | CPU | allocation |
   |---|---|---|---|---|
-  | `setText` in one `execute` | 10.1 B | 3.9 B | 34.3 to 35.0 ns | 0.40 B |
-  | signal set, label bound | 10.1 B | 3.9 B | 51.2 to 55.2 ns | 1.33 B |
-  | signal set, label bound to a computed signal of it | 10.1 B | 3.9 B | 78.4 to 82.5 ns | 1.33 B |
+  | `setText`, all 60 in one `execute` | 1 | 3.9 B | 33 to 41 ns | 0.40 B |
+  | `setText` from the feed's thread, an `execute` each | 60 | more | 93 to 103 ns | 32 B |
+  | signal set, label bound | 1 | 3.9 B | 53 to 57 ns | 1.33 B |
+  | signal set, label bound to a computed signal of it | 1 | 3.9 B | 76 to 79 ns | 1.33 B |
 
-  The wire is the same: one frame per flush, the same bytes. The target of less than 10 % CPU was not met: a setter
-  costs 35 ns, a signal set and its binding add 18 ns (+51 %), a computed signal in between 46 ns (+130 %), in
-  absolute terms 1.1 and 2.8 µs per 60-cell flush. The path takes two monitors per update (the signal's, the context's list)
-  and the binding's flag (a compare-and-set, a volatile write); it allocates nothing per binding, the dirty list being
-  an array swapped with a spare. The 0.9 B more than a setter is 56 B per flush of 60 cells. What a signal gives back is the work not done: a burst
-  between two flushes applies one value per binding, where direct setters on a feed's thread cost a transaction per
-  value (ADR-0013).
+  The first row is a setter's best case: the 60 values already on the UI thread, in one transaction. A feed's thread
+  that sets widgets without signals pays a transaction and a frame per value (second row); a signal costs about half
+  of that, in one frame. Against the best case a bound signal adds 18 to 20 ns, for two reasons that are its
+  function: the value is compared twice (5.5 ns in the signal, to keep "the same value does nothing", then again by
+  the setter), and the update takes two passes (marked on the feed's thread, applied in the drain). The 0.9 B more
+  than a setter is 56 B per flush of 60 cells, nothing per binding.
+- Tuned (2026-10-30): a binding reads its signal without tracking (no thread-local lookup, it is never inside a
+  computation), and its "queued" flag is a volatile read before the context's lock instead of a compare-and-set. A
+  computed signal's binding went from 82–88 ns to 76–79 ns; a plain one did not move (50–55 ns, within noise). Two
+  other changes were measured and dropped: the signal without its monitor (−2 ns, within noise; the monitor keeps
+  `update` atomic) and a lock-free list of changed bindings instead of the context's lock (no difference).
 - On the showcase's Signals page (Chrome, localhost, 8 instruments, bindings paced at 50 ms): 9 836 signals set a
   second, 144 values computed and shown a second, 98.5 % replaced before being shown.
 - `terminal.js` does not change: the terminal is not touched.
