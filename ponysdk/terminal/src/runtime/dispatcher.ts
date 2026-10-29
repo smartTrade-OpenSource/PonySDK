@@ -100,8 +100,11 @@ export class Dispatcher implements Context {
     private readonly objects = new Map<number, TerminalObject>();
     private readonly host: Host;
     private readonly factory: ObjectFactory;
-    /** The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md). */
-    private readonly loader: (type: number) => Promise<void> | null;
+    /**
+     * The loading of a type's module, or null when it is loaded (docs/decisions/0004-terminal-chunks.md); for an addon,
+     * the reader is at its FACTORY, where the module of a built-in addon is named.
+     */
+    private readonly loader: (type: number, reader: Reader) => Promise<void> | null;
     /** Set while a block waits for a module: the blocks that come meanwhile wait in the reader. */
     private paused = false;
     readonly session: Session;
@@ -120,7 +123,8 @@ export class Dispatcher implements Context {
     private frameBytes = 0;
 
     constructor(host: Host, factory: ObjectFactory, session: Session, history: HistoryPort,
-                dictionaryFallback?: (id: number) => string | undefined, loader: (type: number) => Promise<void> | null = () => null) {
+                dictionaryFallback?: (id: number) => string | undefined,
+                loader: (type: number, reader: Reader) => Promise<void> | null = () => null) {
         this.host = host;
         this.factory = factory;
         this.loader = loader;
@@ -355,7 +359,7 @@ export class Dispatcher implements Context {
         const r = this.reader;
         r.read(); // WIDGET_TYPE
         const type = r.int;
-        const loading = this.loader(type);
+        const loading = this.loader(type, r);
         if (loading !== null) throw new Pending(loading); // before any effect of the block
         const object = this.factory(type, this, id, r);
         if (object === null) {

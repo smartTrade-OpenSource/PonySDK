@@ -13,6 +13,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
 | [Signals](signals.md) | A value shown in several places, computed from others, bound to widgets: `Signal`, `Bind` |
 | [Routing](routing.md) | `@Route` views, a `Router` on the history token, guards and access |
+| [Charts](charts.md) | Time series drawn by the terminal: `PChart`, live feeds, sliding window |
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
 | [FDC3](fdc3.md) | Talking to the other applications of a trader's desktop |
 | [Reconnection](reconnection.md) | Keeping a session through a network cut |
