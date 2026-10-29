@@ -29,6 +29,10 @@ import java.util.ResourceBundle;
 
 import com.ponysdk.core.server.application.UIContext;
 
+/**
+ * The messages of the framework (conf/MessagesCore), in the locale of the context
+ * (docs/decisions/0022-locale.md); {@link Messages} is for an application's own.
+ */
 public class PString {
 
     private static final String MESSAGES_CORE = "conf/MessagesCore";
@@ -36,7 +40,7 @@ public class PString {
     private ResourceBundle coreResourceBundle;
 
     private PString() {
-        coreResourceBundle = ResourceBundle.getBundle(MESSAGES_CORE);
+        coreResourceBundle = Messages.bundle(MESSAGES_CORE, UIContext.get().getLocale());
     }
 
     private static PString get() {
@@ -66,6 +70,6 @@ public class PString {
     }
 
     private ResourceBundle _switchLocal(final Locale locale) {
-        return coreResourceBundle = ResourceBundle.getBundle(MESSAGES_CORE, locale);
+        return coreResourceBundle = Messages.bundle(MESSAGES_CORE, locale);
     }
 }

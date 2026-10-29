@@ -23,12 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Locale;
+
 import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.i18n.Locales;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -45,6 +48,14 @@ public class PRootPanel extends PAbsolutePanel {
 
     PRootPanel(final String id) {
         this.id = id;
+        // The page's language and direction, which the browser reads on its root (docs/decisions/0022-locale.md). Written
+        // with the creation, so that the widgets under it find them
+        final UIContext context = UIContext.get();
+        if (id == null && !context.getConfiguration().getSupportedLocales().isEmpty()) {
+            final Locale locale = context.getLocale();
+            setAttribute("lang", locale.toLanguageTag());
+            setAttribute("dir", Locales.isRightToLeft(locale) ? "rtl" : "ltr");
+        }
     }
 
     @Override

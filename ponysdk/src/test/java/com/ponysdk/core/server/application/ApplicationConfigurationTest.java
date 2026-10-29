@@ -260,6 +260,7 @@ public class ApplicationConfigurationTest {
             .wsIdleTimeoutMs(30_000)
             .wsSendTimeoutMs(1_000)
             .wsPermessageDeflateEnabled(false)
+            .supportedLocales(java.util.List.of(java.util.Locale.FRENCH))
             .build();
 
         assertEquals("id", built.getApplicationID());
@@ -298,6 +299,7 @@ public class ApplicationConfigurationTest {
         assertEquals(2048, built.getWsMaxInboundMessageSize());
         assertEquals(512, built.getWsInputBufferSize());
         assertEquals(-1, built.getWsDeflateLevel());
+        assertEquals(java.util.List.of(java.util.Locale.FRENCH), built.getSupportedLocales());
         assertEquals(ProtocolVersion.V1, built.getMaxProtocolVersion());
         assertFalse(built.isUpdateCoalescingEnabled());
         assertEquals(30_000, built.getWsIdleTimeoutMs());
@@ -367,5 +369,14 @@ public class ApplicationConfigurationTest {
         assertTrue(policy.allows(caller, sibling, null));
         assertFalse(policy.allows(caller, stranger, null));
         assertFalse(policy.allows(orphan, sibling, null), "no application: only itself");
+    }
+
+    @Test
+    public void testSupportedLocalesAreNoneByDefaultAndCopied() {
+        assertTrue(new ApplicationConfiguration().getSupportedLocales().isEmpty());
+        final java.util.List<java.util.Locale> locales = new java.util.ArrayList<>(java.util.List.of(java.util.Locale.ENGLISH));
+        config.setSupportedLocales(locales);
+        locales.add(java.util.Locale.FRENCH);
+        assertEquals(java.util.List.of(java.util.Locale.ENGLISH), config.getSupportedLocales());
     }
 }

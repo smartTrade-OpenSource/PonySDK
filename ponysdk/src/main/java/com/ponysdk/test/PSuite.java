@@ -23,6 +23,8 @@
 
 package com.ponysdk.test;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.Mockito;
@@ -54,6 +56,8 @@ public class PSuite {
         final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration,
                 new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null)));
         Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
+        // The texts a test reads do not depend on the machine's language (docs/decisions/0022-locale.md)
+        Mockito.when(uiContext.getLocale()).thenReturn(Locale.ENGLISH);
         UIContext.setCurrent(uiContext);
     }
 

@@ -49,6 +49,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.server.LogLevel;
 import com.ponysdk.core.server.LogCapture;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.ui.i18n.Locales;
 
 /**
  * Tests for {@link BootstrapServlet} path handling — context-path stripping and the
@@ -794,5 +795,64 @@ public class BootstrapServletTest {
         assertEquals("[]", manifest.getJsonArray("styles").toString());
         assertEquals("[\"script/ponysdk.js\"]", manifest.getJsonArray("scripts").toString());
         assertEquals("[]", manifest.getJsonArray("sharedSheets").toString());
+    }
+
+    // ---- the visitor's locale on the page's root (docs/decisions/0022-locale.md) ----
+
+    private static HttpServletRequest requestFrom(final String acceptLanguage, final String localeCookie) {
+        final HttpServletRequest request = request("", "/");
+        Mockito.when(request.getHeader("Accept-Language")).thenReturn(acceptLanguage);
+        if (localeCookie != null) {
+            Mockito.when(request.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {
+                new jakarta.servlet.http.Cookie("theme", "dark"), new jakarta.servlet.http.Cookie(Locales.COOKIE, localeCookie)});
+        }
+        return request;
+    }
+
+    private static ApplicationConfiguration translated() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+        config.setSupportedLocales(List.of(java.util.Locale.ENGLISH, java.util.Locale.FRENCH, java.util.Locale.forLanguageTag("ar")));
+        return config;
+    }
+
+    @Test
+    public void theRootOfAPageWithoutSupportedLocalesIsLeftAlone() {
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+
+        assertTrue(servletWith(config).buildIndexHTML(requestFrom("fr", null)).contains("\n<html>\n"));
+    }
+
+    @Test
+    public void theRootCarriesTheLanguageAndTheDirectionOfTheVisitor() {
+        final BootstrapServlet servlet = servletWith(translated());
+
+        assertTrue(servlet.buildIndexHTML(requestFrom("fr-CH,fr;q=0.9", null)).contains("<html lang=\"fr\" dir=\"ltr\">"));
+        assertTrue(servlet.buildIndexHTML(requestFrom("ar", null)).contains("<html lang=\"ar\" dir=\"rtl\">"));
+        assertTrue(servlet.buildIndexHTML(requestFrom(null, null)).contains("<html lang=\"en\" dir=\"ltr\">"), "the first supported");
+    }
+
+    @Test
+    public void theVisitorsChoiceIsTheCookiesAndTheCookiesOfOtherNamesAreIgnored() {
+        final BootstrapServlet servlet = servletWith(translated());
+
+        assertTrue(servlet.buildIndexHTML(requestFrom("fr", "ar")).contains("<html lang=\"ar\" dir=\"rtl\">"));
+        final HttpServletRequest others = request("", "/");
+        Mockito.when(others.getCookies()).thenReturn(new jakarta.servlet.http.Cookie[] {new jakarta.servlet.http.Cookie("a", "b")});
+        assertTrue(servlet.buildIndexHTML(others).contains("<html lang=\"en\" dir=\"ltr\">"));
+    }
+
+    @Test
+    public void thePageVariesWithTheHeaderAndTheCookieItIsNegotiatedFrom() throws IOException {
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+        servletWith(translated()).handleRequest(requestFrom("fr", null), response, "/index.html");
+        Mockito.verify(response).setHeader("Vary", "Accept-Language, Cookie");
+
+        final HttpServletResponse plain = response(new ByteArrayOutputStream());
+        final ApplicationConfiguration config = new ApplicationConfiguration();
+        config.setApplicationName("App");
+        servletWith(config).handleRequest(requestFrom("fr", null), plain, "/index.html");
+        Mockito.verify(plain, Mockito.never()).setHeader(Mockito.eq("Vary"), Mockito.anyString());
     }
 }
