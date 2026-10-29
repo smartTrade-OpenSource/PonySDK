@@ -96,6 +96,17 @@ public class DropDownContainerTest extends PSuite {
         assertSame(dropDown.getContainer().asWidget(), dropDown.defaultContainer.getParent());
     }
 
+    /** The chevron has no text and does what the main button does: a screen reader hears one button, named. */
+    @Test
+    public void theChevronIsHiddenFromAScreenReaderTheMainButtonIsNot() {
+        final TestDropDown dropDown = new TestDropDown(titled());
+        dropDown.asWidget();
+
+        assertEquals("true", dropDown.stateButton.getAttribute("aria-hidden"));
+        assertNull(dropDown.mainButton.getAttribute("aria-hidden"));
+        assertEquals("true", dropDown.mainButton.getAttribute("aria-haspopup"));
+    }
+
     @Test
     public void clearButtonDisabledByConfiguration() {
         final TestDropDown dropDown = new TestDropDown(withoutClearButton());
