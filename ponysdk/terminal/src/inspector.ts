@@ -6,7 +6,7 @@
 // first DEBUG_INFO, a chunk of its own (docs/decisions/0004-terminal-chunks.md). It counts what the server sends to
 // each object and what the terminal sends back, and shows it over the page: Alt+Shift+I, or its badge.
 
-import { ClientToServerModel as C, ServerToClientModel as K } from '#model';
+import { ClientToServerModel as C, ServerToClientModel as K, WidgetType } from '#model';
 import type { Message } from './protocol/messages.ts';
 import type { Dispatcher, Recording, Watcher } from './runtime/dispatcher.ts';
 import { Widget } from './runtime/widget.ts';
@@ -98,6 +98,14 @@ export function size(bytes: number): string {
     return bytes < 1024 ? `${Math.round(bytes)} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB`
         : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
+
+const TYPE_NAMES = new Map<number, string>(Object.entries(WidgetType).map(([name, value]) => [value, name]));
+
+/** For the other terminals of a page that has its inspector: they count nothing. */
+const IGNORED: Watcher = { frame: () => undefined, block: () => undefined, sent: () => undefined };
+
+/** One inspector per page: the first terminal's; those of the applications it embeds (<pony-app>) do not add theirs. */
+let installed = false;
 
 const CSS = `
 :host { all: initial; }
@@ -210,17 +218,27 @@ class Inspector {
         if (!on) this.overlay.hidden = this.label.hidden = true;
     }
 
-    /** The object an element shows: the closest element that carries an id (DEBUG_INFO); none over the inspector. */
-    private objectOf(event: MouseEvent): [number, HTMLElement] | null {
+    /**
+     * The object an element shows: the closest element that carries an id (DEBUG_INFO); none over the inspector. The
+     * id is null for an element of an application the page embeds: its ids are those of its own terminal.
+     */
+    private objectOf(event: MouseEvent): [number | null, HTMLElement] | null {
         if (event.composedPath().includes(this.host)) return null;
-        const element = (event.target as Element).closest<HTMLElement>('[data-pony-id]');
-        return element === null ? null : [Number(element.getAttribute('data-pony-id')), element];
+        // the element itself, inside an embedded application's shadow root too: the target is its host at this level
+        const element = (event.composedPath()[0] as Element).closest<HTMLElement>('[data-pony-id]');
+        if (element === null) return null;
+        const id = Number(element.getAttribute('data-pony-id'));
+        return [(this.dispatcher.peek(id) as Partial<Widget> | undefined)?.element === element ? id : null, element];
     }
 
-    /** In debug mode every widget of the server carries its DEBUG_INFO from its creation; another object, or a collected one, is named so. */
+    /**
+     * Its DEBUG_INFO for a widget of the server; its type for an element the terminal draws for an object that is no
+     * widget on the server (a tree item, a menu item); "object" for another object, or a collected one.
+     */
     private describe(id: number): string {
         const object = this.dispatcher.peek(id);
-        return object instanceof Widget ? object.element.getAttribute('data-pony')! : 'object';
+        if (!(object instanceof Widget)) return 'object';
+        return object.element.getAttribute('data-pony') ?? TYPE_NAMES.get(object.type)!;
     }
 
     private hover(event: MouseEvent): void {
@@ -230,11 +248,12 @@ class Inspector {
             return;
         }
         const [id, element] = found;
+        const o = id === null ? undefined : this.stats.objects.get(id);
         const rect = element.getBoundingClientRect();
         Object.assign(this.overlay.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`,
             height: `${rect.height}px` });
-        const o = this.stats.objects.get(id);
-        this.label.textContent = `${this.describe(id)} · #${id}` + (o === undefined ? ''
+        this.label.textContent = `${element.getAttribute('data-pony')} · #${element.getAttribute('data-pony-id')}`
+            + (id === null ? ' · an embedded application' : '') + (o === undefined ? ''
             : ` · ${size(o.bytes)} in ${o.creates + o.updates} blocks · ${o.events} events`);
         Object.assign(this.label.style, { left: `${Math.max(0, rect.left)}px`,
             top: `${rect.top > 24 ? rect.top - 22 : rect.bottom + 2}px` });
@@ -245,8 +264,11 @@ class Inspector {
         const found = this.objectOf(event);
         this.pick(false);
         if (found === null) return;
-        this.selected = found[0];
-        console.log(`[pony] #${found[0]} ${this.describe(found[0])}`, found[1], this.stats.objects.get(found[0]));
+        const [id, element] = found;
+        console.log(`[pony] #${element.getAttribute('data-pony-id')} ${element.getAttribute('data-pony')}`, element,
+            id === null ? 'an embedded application' : this.stats.objects.get(id));
+        if (id === null) return;
+        this.selected = id;
         this.render();
     }
 
@@ -310,6 +332,11 @@ export function replay(recording: Recording, watcher: Watcher): void {
 
 /** Takes over from the recording the dispatcher kept since the first DEBUG_INFO. */
 export function install(dispatcher: Dispatcher, recording: Recording): void {
+    if (installed) {
+        dispatcher.watcher = IGNORED; // a non-null watcher: its next DEBUG_INFO loads nothing again
+        return;
+    }
+    installed = true;
     const inspector = new Inspector(dispatcher);
     replay(recording, inspector.watcher);
     dispatcher.watcher = inspector.watcher;

@@ -107,3 +107,35 @@ test('an object that is no widget is counted as an object; outside any widget, p
   await expect(inspector.locator('.label')).toBeHidden();
   await expect(panel.getByRole('button', { name: 'Pick' })).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('objects that are no widget on the server (tree items) are counted by their type', async ({ page }) => {
+  await page.evaluate(() => { location.hash = '#data'; });
+  await expect(page.locator('.pony-TreeItem').first()).toBeAttached({ timeout: 10000 });
+  await page.keyboard.press('Alt+Shift+KeyI');
+  const panel = page.locator('pony-inspector').getByRole('region', { name: 'Pony inspector' });
+  await expect(panel).toContainText('Bytes by class');
+  await expect(panel).toContainText('Busiest objects');
+});
+
+test('one inspector for a page and the applications it embeds; their elements are named, not counted', async ({ page }) => {
+  await page.evaluate(() => { location.hash = '#embedding'; });
+  // an element the embedded application draws, in its element's shadow root (the light DOM is the page's)
+  await expect.poll(() => page.evaluate(() => {
+    const inner = [...document.querySelectorAll('pony-app')].map(app => app.shadowRoot?.querySelector('[data-pony-id]'))
+      .find(e => e && e.getBoundingClientRect().height > 0);
+    inner?.setAttribute('data-test-embedded', '');
+    return inner !== undefined;
+  }), { timeout: 15000 }).toBe(true);
+  const embedded = page.locator('[data-test-embedded]');
+  await expect(page.locator('pony-inspector')).toHaveCount(1);
+
+  await page.keyboard.press('Alt+Shift+KeyI');
+  const inspector = page.locator('pony-inspector');
+  const panel = inspector.getByRole('region', { name: 'Pony inspector' });
+  await panel.getByRole('button', { name: 'Pick' }).click();
+  await embedded.hover();
+  await expect(inspector.locator('.label')).toContainText('· an embedded application');
+  await embedded.click();
+  await expect(panel.locator('.selected')).toHaveCount(0);
+  await expect(panel.getByRole('button', { name: 'Pick' })).toHaveAttribute('aria-pressed', 'false');
+});
