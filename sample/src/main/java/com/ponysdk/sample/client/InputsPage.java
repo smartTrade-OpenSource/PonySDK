@@ -47,8 +47,8 @@ import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
-import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
+import com.ponysdk.core.ui.form.validator.IntegerFieldValidator;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,11 +160,11 @@ final class InputsPage {
 
         p.add(sectionTitle("Form fields"));
         // region formfields
-        final StringTextBoxFormField text = new StringTextBoxFormField("String");
-        final ColorInputFormField color = new ColorInputFormField("Color");
+        final IntegerTextBoxFormField quantity = new IntegerTextBoxFormField();
+        quantity.setValidator(new IntegerFieldValidator());
+        quantity.addValueChangeHandler(event -> quantity.isValid());
         // endregion
-        p.add(labeled("String FormField", text, Source.code(InputsPage.class, "formfields")));
-        p.add(labeled("Color FormField", color, Source.code(InputsPage.class, "formfields")));
+        p.add(labeled("Integer FormField", quantity, Source.code(InputsPage.class, "formfields")));
 
         p.add(sectionTitle("File"));
         p.add(labeled("FileUpload", MiscPage.createPFileUpload(), Source.code(MiscPage.class, "fileupload")));

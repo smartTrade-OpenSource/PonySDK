@@ -4304,33 +4304,6 @@ public class UIContextReconnectionTest {
     }
 
     /**
-     * EventBus2 handlers registered on the newEventBus are not cleared in doDestroy().
-     * Verify that unsubscribe properly removes the handler.
-     */
-    @Test
-    public void testEventBus2_HandlerRemovedAfterUnsubscribe() {
-        uiContext.acquire();
-        UIContext.setCurrent(uiContext);
-        try {
-            final com.ponysdk.core.ui.eventbus2.EventBus bus = uiContext.getNewEventBus();
-
-            final java.util.concurrent.atomic.AtomicBoolean called = new java.util.concurrent.atomic.AtomicBoolean();
-            final com.ponysdk.core.ui.eventbus2.EventBus.EventHandler<String> handler =
-                    bus.subscribe(String.class, s -> called.set(true));
-
-            // Unsubscribe
-            assertTrue(bus.unsubscribe(handler), "Unsubscribe should return true");
-
-            // Post event — handler should NOT be called
-            bus.post("test");
-            assertFalse(called.get(), "Handler should not be called after unsubscribe");
-        } finally {
-            uiContext.release();
-            UIContext.remove();
-        }
-    }
-
-    /**
      * PScheduler registers a ContextDestroyListener on the UIContext.
      * When the UIContext is destroyed, PScheduler.destroy() is called,
      * which cancels all scheduled tasks and removes the UIContext from

@@ -99,7 +99,6 @@ public class UIContext {
 
     private final PHistory history = new PHistory();
     private final com.ponysdk.core.ui.eventbus.EventBus rootEventBus = new com.ponysdk.core.ui.eventbus.EventBus();
-    private final com.ponysdk.core.ui.eventbus2.EventBus newEventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
 
     /** Its cookie requests go through this context's private stackCookieRequest: no public door on UIContext. */
     private final PCookies cookies = new PCookies(this::stackCookieRequest);
@@ -229,15 +228,6 @@ public class UIContext {
      */
     public com.ponysdk.core.ui.eventbus.EventBus getRootEventBus() {
         return rootEventBus;
-    }
-
-    /**
-     * Gets the default {@link com.ponysdk.core.ui.eventbus2.EventBus}
-     *
-     * @return the new event bus
-     */
-    public com.ponysdk.core.ui.eventbus2.EventBus getNewEventBus() {
-        return newEventBus;
     }
 
     /**
