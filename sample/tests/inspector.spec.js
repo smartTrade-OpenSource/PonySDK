@@ -92,12 +92,12 @@ test('picking stops on Escape; over the inspector, or after a reset, it names wh
   await expect(panel.locator('.selected')).toHaveText(new RegExp(`#${id} PButton InputsPage\\.java:\\d+$`));
 });
 
-test('an object that is no widget is counted as an object; outside any widget, picking names nothing', async ({ page }) => {
-  await page.evaluate(() => { location.hash = '#fdc3'; }); // its FDC3 addon: a terminal object, no element
+test('an object that is no widget is counted by its type; outside any widget, picking names nothing', async ({ page }) => {
+  await page.evaluate(() => { location.hash = '#fdc3'; }); // its FDC3 addon: an object of the terminal, no element
   await page.keyboard.press('Alt+Shift+KeyI');
   const inspector = page.locator('pony-inspector');
   const panel = inspector.getByRole('region', { name: 'Pony inspector' });
-  await expect(panel.locator('table').first()).toContainText('object', { timeout: 10000 });
+  await expect(panel.locator('table').first()).toContainText('ADDON', { timeout: 10000 });
 
   await panel.getByRole('button', { name: 'Pick' }).click();
   await page.evaluate(() => {
@@ -106,6 +106,18 @@ test('an object that is no widget is counted as an object; outside any widget, p
   });
   await expect(inspector.locator('.label')).toBeHidden();
   await expect(panel.getByRole('button', { name: 'Pick' })).toHaveAttribute('aria-pressed', 'false');
+
+  // an element whose id no terminal of the page has: nothing named
+  await page.evaluate(() => {
+    const stray = document.createElement('div');
+    stray.setAttribute('data-pony-id', '987654');
+    stray.textContent = 'stray';
+    stray.id = 'stray';
+    document.body.prepend(stray);
+  });
+  await panel.getByRole('button', { name: 'Pick' }).click();
+  await page.locator('#stray').hover();
+  await expect(inspector.locator('.label')).toBeHidden();
 });
 
 test('objects that are no widget on the server (tree items) are counted by their type', async ({ page }) => {
@@ -117,7 +129,7 @@ test('objects that are no widget on the server (tree items) are counted by their
   await expect(panel).toContainText('Busiest objects');
 });
 
-test('one inspector for a page and the applications it embeds; their elements are named, not counted', async ({ page }) => {
+test('one inspector for a page and the applications it embeds, each counted and named', async ({ page }) => {
   await page.evaluate(() => { location.hash = '#embedding'; });
   // an element the embedded application draws, in its element's shadow root (the light DOM is the page's)
   await expect.poll(() => page.evaluate(() => {
@@ -132,10 +144,23 @@ test('one inspector for a page and the applications it embeds; their elements ar
   await page.keyboard.press('Alt+Shift+KeyI');
   const inspector = page.locator('pony-inspector');
   const panel = inspector.getByRole('region', { name: 'Pony inspector' });
+  await expect(panel).toContainText('Terminals');
+  await expect(panel).toContainText('embedded 1');
   await panel.getByRole('button', { name: 'Pick' }).click();
   await embedded.hover();
-  await expect(inspector.locator('.label')).toContainText('· an embedded application');
+  await expect(inspector.locator('.label')).toContainText(/ · embedded \d+ · \d+ B in \d+ blocks/);
   await embedded.click();
-  await expect(panel.locator('.selected')).toHaveCount(0);
-  await expect(panel.getByRole('button', { name: 'Pick' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(panel.locator('.selected')).toContainText(/ · embedded \d+ · /);
+});
+
+test('what the page sends to a window it opened is counted', async ({ page }) => {
+  await page.goto('about:blank'); // from #inputs, the same document would only change its fragment
+  await page.goto(BASE_URL + '#terminal-window'); // a page of terminal objects, built at the start
+  const open = page.getByRole('button', { name: 'Open window', exact: true });
+  await expect(open).toBeVisible({ timeout: 10000 });
+  const [child] = await Promise.all([page.waitForEvent('popup'), open.click()]);
+  await expect(child.getByText('Child content')).toBeVisible();
+  await page.keyboard.press('Alt+Shift+KeyI');
+  const panel = page.locator('pony-inspector').getByRole('region', { name: 'Pony inspector' });
+  await expect(panel).toContainText('WINDOW');
 });

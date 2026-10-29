@@ -6,9 +6,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { ClientToServerModel as C, ServerToClientModel as K, WidgetType as W } from '#model';
-import { replay, size, Stats } from '../src/inspector.ts';
+import { objectName, replay, size, Stats } from '../src/inspector.ts';
 import { Dispatcher, Recording, type HistoryPort, type Host } from '../src/runtime/dispatcher.ts';
-import { BaseObject, type Session, type TerminalObject } from '../src/runtime/object.ts';
+import { BaseObject, type Context, type Session, type TerminalObject } from '../src/runtime/object.ts';
+import { Widget } from '../src/runtime/widget.ts';
 import type { Reader } from '../src/protocol/reader.ts';
 import { encode } from './frames.ts';
 
@@ -59,6 +60,18 @@ test('each byte of the server goes to the object it was for: an update run count
     assert.deepEqual([five.creates, five.updates, five.collected], [1, 1, true]);
     assert.ok(five.bytes > stats.objects.get(6)!.bytes, 'the long text is five\'s');
     assert.deepEqual([stats.objects.get(6)!.updates, stats.objects.get(9)!.updates], [1, 1]);
+});
+
+test('what the page forwards to a frame is counted as the frame object', () => {
+    const { dispatcher, stats } = watched();
+    const forwarded: Uint8Array[] = [];
+    dispatcher.receive(encode([K.TYPE_CREATE, 7], [K.WIDGET_TYPE, W.FRAME], [K.END]));
+    (dispatcher.peek(7) as unknown as { postMessage: (b: Uint8Array) => void }).postMessage = b => forwarded.push(b);
+    const before = stats.objects.get(7)!.bytes;
+    const frame = encode([K.FRAME_ID, 7], [K.TYPE_CREATE, 3], [K.WIDGET_TYPE, W.LABEL], [K.END]);
+    dispatcher.receive(frame);
+    assert.equal(forwarded.length, 1);
+    assert.equal(stats.objects.get(7)!.bytes - before, frame.byteLength, 'the whole block, its FRAME_ID included');
 });
 
 test('what the terminal sends is counted, by object when it names one', () => {
@@ -120,4 +133,14 @@ test('until the inspector is loaded, the dispatcher records what happens', () =>
     replay(recording, stats);
     assert.deepEqual([stats.framesIn, stats.bytesIn, stats.messagesOut], [1, 10, 1]);
     assert.deepEqual(stats.objects.get(4), { id: 4, bytes: 10, creates: 1, updates: 0, events: 1, collected: false });
+});
+
+test('an object is named by its DEBUG_INFO, else by its type, else as an object', () => {
+    const element = (info: string | null) => ({ getAttribute: () => info }) as unknown as HTMLElement;
+    const context = null as unknown as Context;
+    assert.equal(objectName(new Widget(context, 1, W.BUTTON, element('PButton Page.java:9'))), 'PButton Page.java:9');
+    assert.equal(objectName(new Widget(context, 2, W.TREE_ITEM, element(null))), 'TREE_ITEM', 'no widget on the server');
+    assert.equal(objectName(new BaseObject(context, 3, W.ADDON)), 'ADDON');
+    assert.equal(objectName(new BaseObject(context, 0, -1)), 'object', 'created by the terminal itself');
+    assert.equal(objectName(undefined), 'object', 'collected');
 });

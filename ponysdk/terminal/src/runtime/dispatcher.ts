@@ -273,10 +273,12 @@ export class Dispatcher implements Context {
             end = blockEnd;
             r.offset = end;
         }
+        if (this.watcher !== null) this.watcher.block(K.WINDOW_ID, this.currentWindowId, end - this.blockStart);
         window.postMessage(r.slice(start, end));
     }
 
     private forwardToFrame(frameId: number, end: number): void {
+        if (this.watcher !== null) this.watcher.block(K.FRAME_ID, frameId, end - this.blockStart);
         const frame = this.object(frameId) as Partial<ChildTerminal> | undefined;
         const bytes = this.reader.slice(this.reader.offset, end);
         if (frame?.postMessage) frame.postMessage(bytes);
