@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -41,6 +42,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.chart.PChart;
 
 /**
  * Writes the frames the TypeScript terminal is tested on (docs/decisions/0002-javascript-terminal.md, P1), produced by
@@ -51,6 +53,7 @@ import com.ponysdk.core.ui.basic.PWindow;
  * without then with the string dictionary.</li>
  * <li>{@code page-v1}, {@code page-v2}, {@code page-v3}: the same page built, updated and partly removed by a
  * UIContext, in each protocol version. The terminal must apply the same operations whatever the version.</li>
+ * <li>{@code chart}: a chart created, fed and cleared, whose points the terminal must decode (ADR-0026).</li>
  * <li>{@code dates.json}: dates formatted by {@link SimpleDateFormat} in English, and texts it parses, which the
  * terminal's date patterns must format and parse alike (ADR-0002, R3).</li>
  * </ul>
@@ -71,6 +74,7 @@ public final class TerminalFixtures {
         for (final int version : new int[] {ProtocolVersion.V1, ProtocolVersion.UPDATE_RUNS, ProtocolVersion.CREATE_IN_PARENT}) {
             page(dir, "page-v" + version, version);
         }
+        chart(dir);
         dates(dir);
     }
 
@@ -239,6 +243,40 @@ public final class TerminalFixtures {
     private static void page(final Path dir, final String name, final int version) throws IOException {
         final List<Integer> frames = new ArrayList<>();
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        final UIContext context = context(stream, frames, version);
+
+        final PFlowPanel[] rows = new PFlowPanel[3];
+        final List<PLabel> labels = new ArrayList<>();
+        context.execute(() -> {
+            final PFlowPanel root = Element.newPFlowPanel();
+            root.addStyleName("root");
+            PWindow.getMain().add(root);
+            for (int i = 0; i < rows.length; i++) {
+                rows[i] = Element.newPFlowPanel();
+                rows[i].addStyleName("row");
+                for (int j = 0; j < 4; j++) {
+                    final PLabel label = Element.newPLabel("cell " + i + "." + j);
+                    labels.add(label);
+                    rows[i].add(label);
+                }
+                final PButton button = Element.newPButton("Buy " + i);
+                button.addClickHandler(e -> {
+                });
+                rows[i].add(button);
+                root.add(rows[i]);
+            }
+        });
+        context.execute(() -> labels.forEach(label -> label.setText(label.getText() + " updated"))); // update runs
+        context.execute(() -> {
+            for (int i = 0; i < labels.size(); i += 2) labels.get(i).addStyleName("even");
+        });
+        context.execute(() -> rows[1].removeFromParent());
+        context.execute(() -> rows[2].clear());
+        write(dir, name, stream.toByteArray(), frames, Json.createObjectBuilder().add("version", version));
+    }
+
+    /** A UIContext whose writes go to the stream, a frame at each flush; the end of each frame is added to frames. */
+    private static UIContext context(final ByteArrayOutputStream stream, final List<Integer> frames, final int version) {
         final WebSocketPusher pusher = pusher(stream, frames);
         pusher.setStringDictionary(new StringDictionary(70_000, 4, 70_000));
         final WebSocket socket = new WebSocket() {
@@ -279,36 +317,36 @@ public final class TerminalFixtures {
         });
         final ApplicationConfiguration config = new ApplicationConfiguration();
         config.setHeartBeatPeriod(0, TimeUnit.SECONDS);
-        final UIContext context = new UIContext(socket, txn, config);
+        return new UIContext(socket, txn, config);
+    }
 
-        final PFlowPanel[] rows = new PFlowPanel[3];
-        final List<PLabel> labels = new ArrayList<>();
+    /**
+     * A chart created and fed by a UIContext: the points as the terminal must decode them. {@code chart.json} holds the
+     * creation arguments and, for each point, the time and the values the chart must hold once decoded.
+     */
+    private static void chart(final Path dir) throws IOException {
+        final List<Integer> frames = new ArrayList<>();
+        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        final UIContext context = context(stream, frames, ProtocolVersion.CREATE_IN_PARENT);
+        final long t0 = 1_761_700_000_000L;
+        final PChart[] chart = new PChart[1];
         context.execute(() -> {
-            final PFlowPanel root = Element.newPFlowPanel();
-            root.addStyleName("root");
-            PWindow.getMain().add(root);
-            for (int i = 0; i < rows.length; i++) {
-                rows[i] = Element.newPFlowPanel();
-                rows[i].addStyleName("row");
-                for (int j = 0; j < 4; j++) {
-                    final PLabel label = Element.newPLabel("cell " + i + "." + j);
-                    labels.add(label);
-                    rows[i].add(label);
-                }
-                final PButton button = Element.newPButton("Buy " + i);
-                button.addClickHandler(e -> {
-                });
-                rows[i].add(button);
-                root.add(rows[i]);
-            }
+            chart[0] = PChart.builder(PChart.Type.LINE, "EURUSD", "GBPUSD").title("Prices").decimals(5)
+                .window(Duration.ofSeconds(60)).dataTable(5).build();
+            PWindow.getMain().add(chart[0]);
+            chart[0].append(t0, 1.08512, 1.27021);
         });
-        context.execute(() -> labels.forEach(label -> label.setText(label.getText() + " updated"))); // update runs
-        context.execute(() -> {
-            for (int i = 0; i < labels.size(); i += 2) labels.get(i).addStyleName("even");
-        });
-        context.execute(() -> rows[1].removeFromParent());
-        context.execute(() -> rows[2].clear());
-        write(dir, name, stream.toByteArray(), frames, Json.createObjectBuilder().add("version", version));
+        context.execute(() -> chart[0].append(t0 + 100, 1.08515, Double.NaN));
+        context.execute(() -> chart[0].append(t0 + 100, 1.08511, 1.27025));
+        context.execute(() -> chart[0].append(t0 + 70_000, 1.1, 1.3)); // a change of 10 s, which no byte holds
+        context.execute(() -> chart[0].clear());
+        context.execute(() -> chart[0].append(t0 + 5_000, 1.0, 2.0));
+        final JsonArrayBuilder points = Json.createArrayBuilder();
+        for (final double[] point : new double[][] {{0, 1.08512, 1.27021}, {100, 1.08515, 1.27021}, {100, 1.08511, 1.27025},
+            {70_000, 1.1, 1.3}, {5_000, 1.0, 2.0}}) {
+            points.add(Json.createArrayBuilder().add(t0 + (long) point[0]).add(point[1]).add(point[2]));
+        }
+        write(dir, "chart", stream.toByteArray(), frames, Json.createObjectBuilder().add("points", points));
     }
 
     // ---- writing -------------------------------------------------------------------------------------------------

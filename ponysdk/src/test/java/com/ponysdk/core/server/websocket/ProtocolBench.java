@@ -31,6 +31,7 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.Conflator;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAddOn;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -38,6 +39,7 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PEventOptions;
+import com.ponysdk.core.ui.chart.PChart;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}
@@ -304,6 +306,63 @@ public final class ProtocolBench {
         result.print();
     }
 
+    /** A chart's addon sent as absolute doubles, what PChart's typed array is compared to. */
+    private static final class DoublesAddOn extends PAddOn {
+        void append(final Object... point) {
+            callTerminalMethod("append", point);
+        }
+    }
+
+    /**
+     * ADR-0026: one point of a chart (a flush of its conflator sends one), prices moving by up to 20 units of 10^-5 a
+     * point, 100 ms apart. PChart's change in units against a time and doubles, which is what a typed array of values
+     * would carry without it.
+     */
+    private static void chart(final int protocolVersion, final int series) {
+        final String[] names = new String[series];
+        for (int s = 0; s < series; s++) names[s] = "Series " + s;
+        final long[] units = new long[series];
+        final Random rnd = new Random(5);
+        final long t0 = 1_761_700_000_000L;
+        final PChart[] chart = new PChart[1];
+        final DoublesAddOn[] doubles = new DoublesAddOn[1];
+        final Op reset = (b, i) -> {
+            java.util.Arrays.fill(units, 108_500);
+            chart[0] = PChart.builder(PChart.Type.LINE, names).decimals(5).build();
+            b.root.add(chart[0].asWidget());
+            doubles[0] = new DoublesAddOn();
+            doubles[0].attach(PWindow.getMain());
+        };
+        run("chart: " + series + " series, units", protocolVersion, reset, (b, i) -> {
+            final double[] values = new double[series];
+            for (int s = 0; s < series; s++) {
+                units[s] += rnd.nextInt(41) - 20;
+                values[s] = units[s] / 100_000.0;
+            }
+            chart[0].append(t0 + i * 100L, values);
+        }, 5_000, 20_000);
+        if (series > 1) {
+            // what a tick sent as it comes costs: one series moved, the others leave NaN and cost a byte
+            run("chart: " + series + " series, 1 moved", protocolVersion, reset, (b, i) -> {
+                final double[] values = new double[series];
+                java.util.Arrays.fill(values, Double.NaN);
+                final int moved = i % series;
+                units[moved] += rnd.nextInt(41) - 20;
+                values[moved] = units[moved] / 100_000.0;
+                chart[0].append(t0 + i * 100L, values);
+            }, 5_000, 20_000);
+        }
+        run("chart: " + series + " series, doubles", protocolVersion, reset, (b, i) -> {
+            final Object[] point = new Object[series + 1];
+            point[0] = t0 + i * 100L;
+            for (int s = 0; s < series; s++) {
+                units[s] += rnd.nextInt(41) - 20;
+                point[s + 1] = units[s] / 100_000.0;
+            }
+            doubles[0].append(point);
+        }, 5_000, 20_000);
+    }
+
     /** Retained heap per row of {@link #row}: 5 widgets, 1 handler, styles. */
     private static void heap(final int protocolVersion) {
         final int rows = 5_000;
@@ -465,6 +524,9 @@ public final class ProtocolBench {
                 list.add(row);
             }
         }, 1_000, 2_000);
+
+        // ADR-0026: a point of a chart, per series count: a change in units of 10^-5 against the values as doubles
+        for (final int series : new int[] {1, 10}) chart(v, series);
 
         for (final int quotes : new int[] {100, 1_000}) {
             stream(v, quotes, false);
