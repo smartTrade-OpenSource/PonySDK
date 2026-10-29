@@ -50,6 +50,8 @@ public class ShowcaseMain {
         // -Dponysdk.debug (runShowcase -Pdebug): each widget tells the terminal its class and creation line, and the
         // inspector shows over the page. Off by default: the Costs page measures the bytes of the normal mode
         configuration.setDebugMode(Boolean.getBoolean("ponysdk.debug"));
+        // -Dponysdk.hotReload (runShowcase -PhotReload): the showcase's classes reload once compiled again, and its pages
+        configuration.setHotReload(Boolean.getBoolean("ponysdk.hotReload"));
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
         // Map.of have no defined iteration order.

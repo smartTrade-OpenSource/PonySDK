@@ -239,6 +239,7 @@ public class ApplicationConfigurationTest {
             .contentSecurityPolicyEnabled(false)
             .scriptSources("https://cdn.example.com")
             .debugMode(true)
+            .hotReload(true)
             .tabindexOnlyFormField(true)
             .legacyClassNames(true)
             .stringDictionaryEnabled(false)
@@ -281,6 +282,7 @@ public class ApplicationConfigurationTest {
         assertFalse(built.isContentSecurityPolicyEnabled());
         assertEquals(Set.of("https://cdn.example.com"), built.getScriptSources());
         assertTrue(built.isDebugMode());
+        assertTrue(built.isHotReload());
         assertTrue(built.isTabindexOnlyFormField());
         assertTrue(built.isLegacyClassNames());
         assertFalse(built.isStringDictionaryEnabled());

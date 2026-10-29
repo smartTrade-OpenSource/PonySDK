@@ -62,9 +62,24 @@ public class JavaApplicationManagerTest extends PSuite {
     @Test
     public void testStartApplication() throws Exception {
         configuration.setEntryPointClass(SampleEntryPoint.class);
+        applicationManager.start(); // no hot reload: nothing to start
         applicationManager.startApplication(UIContext.get());
 
         assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass());
+        applicationManager.shutdown();
+    }
+
+    @Test
+    public void withHotReloadTheEntryPointComesFromItsLastCompilation() {
+        configuration.setEntryPointClass(SampleEntryPoint.class);
+        configuration.setHotReload(true);
+        applicationManager.start();
+        try {
+            assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass(), "not changed yet");
+        } finally {
+            applicationManager.shutdown();
+        }
+        applicationManager.shutdown(); // closed twice: nothing more
     }
 
     public static final class NoDefaultConstructorEntryPoint implements EntryPoint {

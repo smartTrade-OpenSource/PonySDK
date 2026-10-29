@@ -65,6 +65,8 @@ public class ApplicationConfiguration {
 
     private boolean debugMode;
 
+    private boolean hotReload;
+
     private boolean tabindexOnlyFormField;
 
     /** See {@link #setLegacyClassNames(boolean)}. */
@@ -242,6 +244,19 @@ public class ApplicationConfiguration {
         this.debugMode = debugMode;
     }
 
+    public boolean isHotReload() {
+        return hotReload;
+    }
+
+    /**
+     * For development: the classes of the entry point's package reload when they are compiled again, and the page of
+     * each live context reloads with them, where it was ({@link HotReload}). Only when they are loaded from a
+     * directory, not a jar. Off by default.
+     */
+    public void setHotReload(final boolean hotReload) {
+        this.hotReload = hotReload;
+    }
+
     public boolean isTabindexOnlyFormField() {
         return tabindexOnlyFormField;
     }
@@ -413,6 +428,7 @@ public class ApplicationConfiguration {
         public Builder contentSecurityPolicyEnabled(final boolean v) { config.setContentSecurityPolicyEnabled(v); return this; }
         public Builder scriptSources(final String... v)            { config.addScriptSources(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
+        public Builder hotReload(final boolean v)                  { config.setHotReload(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
         public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }

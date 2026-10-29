@@ -70,6 +70,8 @@ task runShowcase(type: JavaExec) {
     ]
     // ./gradlew :sample:runShowcase -Pdebug: the debug mode, its inspector on every page (Alt+Shift+I)
     if (project.hasProperty('debug')) systemProperty 'ponysdk.debug', 'true'
+    // ./gradlew :sample:runShowcase -PhotReload: a page recompiled (the IDE, or compileJava) reloads in the browser
+    if (project.hasProperty('hotReload')) systemProperty 'ponysdk.hotReload', 'true'
 }
 
 // The quick start of README.md and ARCHITECTURE.md: http://localhost:8080/hello/
