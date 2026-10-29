@@ -119,6 +119,10 @@ specificity.
 
 ## Behaviour changes
 
+- The bootstrap page's root carries a language, `<html lang="en">` by default (WCAG 3.1.1):
+  `configuration.setLanguage("fr")` sets another one; with `setSupportedLocales`, the context's locale gives it.
+- FlexLayout's close mark on a border tab is a `span`, no longer a `button` nested in the tab; Delete on a focused tab
+  closes it. A stylesheet or a test that selected it as a button selects `.fl-sidebar-tab-x` instead.
 - From the classpath, the server serves web files only (`html`, `js`, `mjs`, `css`, `map`, images, fonts). 2.x served
   any file of the classpath, classes and configuration included. An application that serves another type from its
   jars adds it: `configuration.addServedResourceExtensions("json")`.
