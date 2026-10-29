@@ -43,9 +43,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -449,14 +446,11 @@ public class BootstrapServlet extends HttpServlet {
             + "e.socket.onclose=function(c){e.closeEvent=c;};"
             + "window.ponyEarlySocket=e;})();";
     static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">" + EARLY_SOCKET_SOURCE + "</script>";
-    /** The source expression that allows it in the Content-Security-Policy: a constant, hashed once. */
-    static final String EARLY_SOCKET_HASH = "'sha256-" + sha256(EARLY_SOCKET_SOURCE) + "'";
-
-    private static String sha256(final String source) {
-        try {
-            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8)));
-        } catch (final NoSuchAlgorithmException e) { throw new IllegalStateException("Every Java platform has SHA-256", e); }
-    }
+    /**
+     * The source expression that allows it in the Content-Security-Policy: the SHA-256 of EARLY_SOCKET_SOURCE, which is
+     * a constant. BootstrapServletTest recomputes it: a change of the source fails the build until this is updated.
+     */
+    static final String EARLY_SOCKET_HASH = "'sha256-wkE9zbB3hs1FkKelJA+IUwnnwoSxVWT5v3T70BxzjPM='";
 
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();

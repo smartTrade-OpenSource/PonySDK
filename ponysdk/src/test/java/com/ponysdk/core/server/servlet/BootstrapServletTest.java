@@ -446,6 +446,12 @@ public class BootstrapServletTest {
     }
 
     @Test
+    public void theEarlySocketHashIsTheHashOfItsSource() throws Exception {
+        assertEquals(sha256(BootstrapServlet.EARLY_SOCKET_SOURCE), BootstrapServlet.EARLY_SOCKET_HASH,
+            "the early socket changed: update EARLY_SOCKET_HASH to this value");
+    }
+
+    @Test
     public void theBootstrapPageRunsOneInlineScriptWhoseHashThePolicyAllows() throws Exception {
         final ApplicationConfiguration config = configuration();
         config.setReconnectionTimeoutMs(5000);

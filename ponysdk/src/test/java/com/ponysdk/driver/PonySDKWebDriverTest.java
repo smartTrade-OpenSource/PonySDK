@@ -498,6 +498,9 @@ public class PonySDKWebDriverTest {
                 + "\t\t</LABEL>\n" //
                 + "\t</FLOW_PANEL>\n" //
                 + "</WEB>", driver.getPageSource());
+        final java.io.StringWriter xml = new java.io.StringWriter();
+        driver.printAsXml(xml);
+        assertEquals(driver.getPageSource(), xml.toString(), "printAsXml writes the page source");
     }
 
     @Test

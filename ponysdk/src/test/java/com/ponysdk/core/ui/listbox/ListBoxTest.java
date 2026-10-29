@@ -942,6 +942,45 @@ public class ListBoxTest extends PSuite {
         assertFalse(unselectAll.isEnabled());
     }
 
+    /** onSelectionChange is protected: a subclass may report "nothing selected" on a list box without a clear button. */
+    @Test
+    public void aSubclassReportingNothingSelectedWithoutAClearButtonEmptiesTheTitle() {
+        final class Reporting extends ListBox<String> {
+
+            Reporting() {
+                super(new ListBoxConfiguration().enableMultiSelection(), items("a", "b"));
+            }
+
+            void reportNothingSelected() {
+                onSelectionChange(null, false);
+            }
+        }
+        final Reporting box = new Reporting();
+        attach(box);
+        box.open();
+        clickItem(box, "a");
+        assertTrue(mainButton(box).getText().contains("a"));
+
+        box.reportNothingSelected();
+
+        assertFalse(mainButton(box).getText().contains("a"));
+    }
+
+    /** A bulk action on a list box opened then closed changes the selection without redrawing the closed list. */
+    @Test
+    public void aBulkSelectionOnAClosedListBoxSelectsWithoutRedrawing() {
+        final ListBoxConfiguration bulk = new ListBoxConfiguration().enableMultiSelection()
+            .enableMultiSelectionBulk("Select all", "Unselect all");
+        final ListBox<String> box = attach(new ListBox<>(bulk, items("a", "b")));
+        box.open();
+        box.close();
+
+        box.selectAllFiltered();
+
+        assertEquals(Set.of("a", "b"), Set.copyOf(box.getSelectedDataList()));
+        assertFalse(box.isOpen());
+    }
+
     @Test
     public void theSearchIsNotFocusedOnOpenWhenAutoFocusIsDisabled() {
         final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
