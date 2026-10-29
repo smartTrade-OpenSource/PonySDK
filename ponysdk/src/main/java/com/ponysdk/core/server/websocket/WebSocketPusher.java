@@ -453,7 +453,6 @@ public class WebSocketPusher implements Closeable {
             case DOUBLE -> write(model, (double) value);
             case STRING -> writeStringOrRef(model, (String) value);
             case ARRAY -> write(model, (Object[]) value);
-            default -> log.error("Unknown model type : {}", model.getTypeModel());
         }
     }
 
