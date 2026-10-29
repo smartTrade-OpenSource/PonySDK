@@ -63,19 +63,30 @@ processResources {
 
 def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
 
+def showcaseClasspath = sourceSets.main.runtimeClasspath + files(buildDirPath + '/resources/main')
+def showcaseJvmArgs = ['-Xmx1g', '-XX:+UseZGC', '-Dlog4j.configurationFile=etc/log4j2.xml']
+
 task runShowcase(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDirPath + '/resources/main')
+    classpath = showcaseClasspath
     mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
-    jvmArgs = [
-        '-Xmx1g',
-        '-XX:+UseZGC',
-        '-Dlog4j.configurationFile=etc/log4j2.xml'
-    ]
+    jvmArgs = showcaseJvmArgs
     // ./gradlew :sample:runShowcase -Pdebug: the debug mode, its inspector on every page (Alt+Shift+I)
     if (project.hasProperty('debug')) systemProperty 'ponysdk.debug', 'true'
     // ./gradlew :sample:runShowcase -PhotReload: a page recompiled (the IDE, or compileJava) reloads in the browser
     if (project.hasProperty('hotReload')) systemProperty 'ponysdk.hotReload', 'true'
+    // ./gradlew :sample:runShowcase -Pport=8091: another port, its portal on the next one
+    if (project.hasProperty('port')) systemProperty 'ponysdk.port', project.property('port')
+}
+
+// Two showcase servers, on 8091 and 8093, behind a load balancer on http://localhost:8090/sample/ (scripts/two-servers.mjs).
+// curl -X POST localhost:8090/lb/stop/a takes server a out of the balancer and sends it SIGTERM: its pages move to b.
+def showcaseJava = javaToolchains.launcherFor(java.toolchain).map { it.executablePath.asFile.absolutePath }
+tasks.register('runTwoServers', Exec) {
+    dependsOn 'classes'
+    workingDir = projectDir
+    executable = 'node'
+    args 'scripts/two-servers.mjs'
+    argumentProviders.add({ [showcaseJava.get(), showcaseClasspath.asPath] + showcaseJvmArgs } as CommandLineArgumentProvider)
 }
 
 // The quick start of README.md and ARCHITECTURE.md: http://localhost:8080/hello/

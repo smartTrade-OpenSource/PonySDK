@@ -61,6 +61,24 @@ ALB, a proxy without a deregistration step) stops sending pages to the server to
 
 On one server alone the reloaded pages come back to it until it stops: a drain needs a second server.
 
+### Try it on one machine
+
+`./gradlew :sample:runTwoServers` starts two showcase servers, on 8091 and 8093, behind a load balancer on
+[http://localhost:8090/sample/](http://localhost:8090/sample/) (`sample/scripts/two-servers.mjs`). It behaves as an
+ALB: a cookie keeps a browser on its server, a server leaves the balancer before it is stopped or when its health
+check is not 200, and a page whose server left goes to the other one.
+
+```sh
+curl localhost:8090/lb                  # the servers, their state, their WebSocket connections
+curl -X POST localhost:8090/lb/stop/a   # a leaves the balancer, then gets SIGTERM: its pages reload on b
+curl -X POST localhost:8090/lb/start/a  # a starts again and takes new pages once its health check is UP
+```
+
+The showcase drains over 5 s: three pages open on a server move one by one, about 1.3 s apart, each at its address.
+`sample/tests/drain.spec.js` checks it (`npx playwright test drain`, from `sample/`, with the two servers running).
+A single showcase takes another port with `./gradlew :sample:runShowcase -Pport=8091`; its embedding portal takes the
+next one.
+
 ## What a moved page keeps
 
 A move is a page reload on another server: what the page's address and the browser keep survives, what the screen
