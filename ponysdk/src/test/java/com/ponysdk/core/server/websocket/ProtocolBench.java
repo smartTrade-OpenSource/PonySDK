@@ -49,6 +49,8 @@ import com.ponysdk.core.ui.chart.PChart;
 import com.ponysdk.core.ui.signal.Bind;
 import com.ponysdk.core.ui.signal.MutableSignal;
 import com.ponysdk.core.ui.signal.Signal;
+import com.ponysdk.core.ui.binder.Binder;
+import com.ponysdk.core.ui.binder.Converters;
 
 /**
  * Reproducible server-side bench of the real write path: a {@link UIContext} driving a real {@link WebSocketPusher}
@@ -667,6 +669,8 @@ public final class ProtocolBench {
         }
 
         for (final Update update : Update.values()) signals(v, update);
+        forms(v, false);
+        forms(v, true);
 
         // The pending buffer is pooled per thread: one 3 000-update burst (op 0, warm-up included) leaves it grown
         // for every later small transaction on this thread. Last on purpose, it would skew the scenarios after it.
@@ -677,6 +681,71 @@ public final class ProtocolBench {
 
         if ("heap".startsWith(only) || only.isEmpty()) heap(v);
         if ("inbound".startsWith(only) || only.isEmpty()) inbound(v);
+    }
+
+    /** ADR-0021: a form of 6 text fields bound to a bean (3 texts, 3 numbers), with or without Bean Validation. */
+    public static final class FormBean {
+        @jakarta.validation.constraints.Size(max = 20) String a = "a", b = "b", c = "c";
+        @jakarta.validation.constraints.Min(0) @jakarta.validation.constraints.Max(1_000_000) Integer x = 1, y = 2, z = 3;
+
+        public String getA() { return a; }
+        public void setA(final String v) { a = v; }
+        public String getB() { return b; }
+        public void setB(final String v) { b = v; }
+        public String getC() { return c; }
+        public void setC(final String v) { c = v; }
+        public Integer getX() { return x; }
+        public void setX(final Integer v) { x = v; }
+        public Integer getY() { return y; }
+        public void setY(final Integer v) { y = v; }
+        public Integer getZ() { return z; }
+        public void setZ(final Integer v) { z = v; }
+    }
+
+    private static void forms(final int v, final boolean beanValidation) {
+        final String suffix = beanValidation ? " (Bean Validation)" : "";
+        final Binder<FormBean>[] binder = new Binder[1];
+        final Binder.Binding<FormBean, Integer>[] first = new Binder.Binding[1];
+        final boolean[] fine = { true };
+        final Op setup = (b, i) -> {
+            b.root.clear();
+            binder[0] = beanValidation ? new Binder<>(FormBean.class) : new Binder<>();
+            final PFlowPanel form = Element.newPFlowPanel();
+            b.root.add(form);
+            final java.util.function.Supplier<PTextBox> box = () -> {
+                final PTextBox t = Element.newPTextBox();
+                form.add(t);
+                return t;
+            };
+            binder[0].forField(box.get()).bind(FormBean::getA, FormBean::setA);
+            binder[0].forField(box.get()).bind(FormBean::getB, FormBean::setB);
+            binder[0].forField(box.get()).bind(FormBean::getC, FormBean::setC);
+            first[0] = binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number"))
+                .withValidator(n -> fine[0], "Not allowed").bind(FormBean::getX, FormBean::setX);
+            binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number")).bind(FormBean::getY, FormBean::setY);
+            binder[0].forField(box.get()).withConverter(Converters.toInteger("Not a number")).bind(FormBean::getZ, FormBean::setZ);
+            binder[0].readBean(new FormBean());
+        };
+        // A form shown, with or without a first error (its message element is created then)
+        run("form: shown, 6 fields" + suffix, v, (b, i) -> {}, (b, i) -> {
+            setup.run(b, i);
+            binder[0].readBean(new FormBean());
+        }, 2_000, 5_000);
+        run("form: shown, 1 first error" + suffix, v, (b, i) -> {}, (b, i) -> {
+            setup.run(b, i);
+            binder[0].readBean(new FormBean());
+            fine[0] = false;
+            first[0].validate();
+            fine[0] = true;
+        }, 2_000, 5_000);
+        run("form: validate 6 valid fields" + suffix, v, setup, (b, i) -> binder[0].validate(), 20_000, 50_000);
+        // One field goes invalid then valid again: its message is created on the first error, then only toggled
+        run("form: 1 error shown, then cleared" + suffix, v, setup, (b, i) -> {
+            fine[0] = false;
+            first[0].validate();
+            fine[0] = true;
+            first[0].validate();
+        }, 20_000, 50_000);
     }
 
     // ---- from the terminal ----------------------------------------------------------------------------------

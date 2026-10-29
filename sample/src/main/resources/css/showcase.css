@@ -1125,3 +1125,21 @@ div.selected-row { background-color: var(--selected-row); }
 .th-token-value { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .th-token-text { font-family: var(--mono); color: var(--text-3); overflow-wrap: anywhere; }
 .th-swatch { flex: none; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border-strong); }
+/* Forms: an order ticket bound to a bean (FormsPage). An error is aria-invalid on the field and a message after it. */
+.forms-card { max-width: 560px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.forms-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 14px; align-items: center; margin-bottom: 12px; }
+.forms-row > label { font-size: 13px; font-weight: 600; color: var(--text); }
+.forms-row > .pony-TextBox, .forms-row > .pony-TextArea, .forms-row > .pony-DateBox, .forms-row > .pony-ListBox { width: 100%; }
+.forms-row > .pony-TextArea { min-height: 56px; resize: vertical; }
+.forms-row-check > :first-child { grid-column: 2; }
+.forms-row > .pony-FieldError { grid-column: 2; margin-top: -2px; }
+.pony-FieldError { color: var(--bad); font-size: 12.5px; font-weight: 500; }
+/* A symbol as well as the colour; the empty alternative keeps it out of what a screen reader reads (a browser without it shows none) */
+.pony-FieldError::before { content: "\26A0\FE0E\00a0" / ""; }
+[aria-invalid="true"], .pony-TextBox[aria-invalid="true"]:focus, .pony-ListBox[aria-invalid="true"]:focus { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-soft); }
+input[type=checkbox][aria-invalid="true"] { outline: 2px solid var(--bad); outline-offset: 1px; }
+.forms-problems { color: var(--bad); font-size: 13px; font-weight: 600; margin: 4px 0 10px; }
+.forms-problems:empty { display: none; }
+.forms-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.forms-status { margin-left: auto; font-size: 12.5px; color: var(--text-3); }
+.forms-saved { max-width: 560px; margin: 14px 0 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12.5px; color: var(--text-2); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); white-space: pre-wrap; }

@@ -29,3 +29,4 @@ what was measured once it was built. They are written for the people who change 
 | [0023](0023-spring-boot-starter.md) | A Spring Boot starter, PonySDK's servlets in Boot's own Jetty | Accepted |
 | [0024](0024-default-theme.md) | A default theme for the widgets: tokens, light and dark, scoped by a class | Accepted |
 | [0026](0026-chart.md) | A chart drawn by the terminal, fed by typed arrays | Accepted |
+| [0021](0021-forms-binder.md) | A binder between the fields of a screen and a bean, with Bean Validation | Accepted |

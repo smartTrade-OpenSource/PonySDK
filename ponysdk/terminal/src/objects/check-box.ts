@@ -65,7 +65,7 @@ export class CheckBox extends FocusWidget {
             r.read(); // INPUT_ATTRIBUTE_VALUE
             w.input.setAttribute(name, r.str);
         }],
-        [K.REMOVE_ATTRIBUTE_KEY, (w, r) => w.input.removeAttribute(r.str)],
+        [K.REMOVE_INPUT_ATTRIBUTE_KEY, (w, r) => w.input.removeAttribute(r.str)],
     ]);
 }
 

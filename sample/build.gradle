@@ -7,6 +7,7 @@ dependencies {
             project(path: ':ponysdk', configuration: 'default'),
             libs.jakarta.json.api,
             libs.jakarta.servlet.api,
+            libs.jakarta.validation.api, // the constraints of the Forms page's order
             libs.slf4j.api,
             libs.jetty.websocket.jetty.client,
             libs.commons.io,
@@ -17,6 +18,8 @@ dependencies {
     implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
+            libs.hibernate.validator, // Bean Validation for the Forms page, with its message interpolation
+            libs.expressly,
             libs.parsson,
             libs.spring.context,
             libs.slf4j.jcl.over.slf4j,

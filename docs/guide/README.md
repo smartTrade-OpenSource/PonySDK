@@ -9,6 +9,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Configuration](configuration.md) | Every setting of `ApplicationConfiguration` and `PonySDKServer`, HTTP compression |
 | [Web components](web-components.md) | Driving custom elements from Java; typed classes from a Custom Elements Manifest |
 | [Custom JavaScript](addons.md) | `PAddOn`: a JavaScript library behind a Java class |
+| [Forms](forms.md) | Binding fields to a bean: converters, validators, Bean Validation, errors a screen reader reads |
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |
 | [Streams](streams.md) | Values from another thread, the latest per key: `Conflator` |
 | [Signals](signals.md) | A value shown in several places, computed from others, bound to widgets: `Signal`, `Bind` |
