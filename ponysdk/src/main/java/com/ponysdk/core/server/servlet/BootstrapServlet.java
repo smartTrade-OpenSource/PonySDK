@@ -266,8 +266,12 @@ public class BootstrapServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("<!doctype html>").append(NEW_LINE);
-        // The theme's stylesheet applies where the class pony-theme is: on the page's root, to the whole page
-        sb.append(configuration.getTheme() == null ? "<html>" : "<html class=\"pony-theme\">").append(NEW_LINE);
+        // The language is the page's (WCAG 3.1.1); the theme's stylesheet applies where the class pony-theme is: on
+        // the page's root, to the whole page
+        sb.append("<html");
+        if (configuration.getLanguage() != null) sb.append(" lang=\"").append(configuration.getLanguage()).append('"');
+        if (configuration.getTheme() != null) sb.append(" class=\"pony-theme\"");
+        sb.append('>').append(NEW_LINE);
         sb.append("<head>").append(NEW_LINE);
         sb.append(addHeader(request));
         sb.append("</head>").append(NEW_LINE);

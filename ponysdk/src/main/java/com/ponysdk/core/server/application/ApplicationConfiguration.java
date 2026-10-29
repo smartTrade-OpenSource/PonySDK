@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -45,6 +46,8 @@ public class ApplicationConfiguration {
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
     private static final String THEME_PONY = "pony";
+    /** A BCP 47 tag as the {@code lang} attribute takes it: subtags of letters and digits; nothing that closes an attribute. */
+    private static final Pattern LANGUAGE_TAG = Pattern.compile("[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*");
 
     private String applicationID;
     private String applicationName;
@@ -76,6 +79,8 @@ public class ApplicationConfiguration {
 
     /** See {@link #setTheme(String)}. */
     private String theme;
+    /** See {@link #setLanguage(String)}. */
+    private String language = "en";
 
     // String Dictionary configuration for protocol optimization
     private boolean stringDictionaryEnabled = true;
@@ -315,6 +320,24 @@ public class ApplicationConfiguration {
         this.theme = theme;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * The language of the bootstrap page, the {@code lang} of its {@code <html>}: a screen reader reads the page with
+     * the voice of that language (WCAG 3.1.1). A BCP 47 tag ({@code "fr"}, {@code "pt-BR"}); {@code "en"} by default,
+     * the language of the texts PonySDK itself writes.
+     *
+     * @throws IllegalArgumentException for a value that is no language tag
+     */
+    public void setLanguage(final String language) {
+        if (language == null || !LANGUAGE_TAG.matcher(language).matches()) {
+            throw new IllegalArgumentException("Not a language tag: " + language);
+        }
+        this.language = language;
+    }
+
     // Web Component shared stylesheets — injected into every PonyElement shadow root
     private Set<String> wcSharedSheets;
 
@@ -469,6 +492,7 @@ public class ApplicationConfiguration {
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
         public Builder legacyClassNames(final boolean v)           { config.setLegacyClassNames(v); return this; }
         public Builder theme(final String v)                       { config.setTheme(v); return this; }
+        public Builder language(final String v)                    { config.setLanguage(v); return this; }
         public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }
         public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
         public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }

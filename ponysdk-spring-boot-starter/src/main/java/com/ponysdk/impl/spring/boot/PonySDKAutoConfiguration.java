@@ -87,6 +87,7 @@ public class PonySDKAutoConfiguration {
         map.from(properties::getDebugMode).to(configuration::setDebugMode);
         map.from(properties::getStateTransferKey).as(java.util.Base64.getDecoder()::decode).to(configuration::setStateTransferKey);
         map.from(properties::getLegacyClassNames).to(configuration::setLegacyClassNames);
+        map.from(properties::getLanguage).to(configuration::setLanguage);
         map.from(properties::getMeta).to(configuration::setMeta);
         map.from(properties::getJavascript).to(configuration::setJavascript);
         map.from(properties::getStyle).to(configuration::setStyle);

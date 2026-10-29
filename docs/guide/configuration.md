@@ -31,6 +31,7 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `servedResourceExtensions` | File types served from the classpath (`addServedResourceExtensions("json")` adds one); the servlet context's files are all served ([security](security.md)) | web files: `html`, `js`, `mjs`, `css`, `map`, images, fonts |
 | `contentSecurityPolicyEnabled` | The bootstrap page carries a Content-Security-Policy ([security](security.md)) | true |
 | `scriptSources` | More script origins the policy allows (`addScriptSources("https://cdn.example.com")`) | none |
+| `language` | The `lang` of the bootstrap page, a BCP 47 tag: a screen reader reads with its voice ([accessibility](accessibility.md)) | en |
 | `legacyClassNames` | Adds the GWT class names the 2.x CSS used ([UPGRADING.md](../../UPGRADING.md)) | false |
 | `reconnectionTimeoutMs` | Transparent WebSocket reconnection window (ms); 0 = disabled (destroy on close) | 0 |
 | `maxRecordingEntries` | Max buffered protocol entries during a suspension; exceeded, the context is destroyed | 10 000 |
