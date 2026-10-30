@@ -1162,3 +1162,12 @@ input[type=checkbox][aria-invalid="true"] { outline: 2px solid var(--bad); outli
 .i18n-greeting, .i18n-volume, .i18n-amount, .i18n-today, .i18n-date-label, .i18n-picked { color: var(--text-2); font-variant-numeric: tabular-nums; }
 .i18n-stepper { display: flex; align-items: center; gap: 8px; }
 .i18n-orders { color: var(--text); min-width: 11em; text-align: center; }
+/* ── Perspective page (docs/decisions/0029-perspective.md): its viewer's own colours that fall short of WCAG AA ───── */
+/* The Pro Light theme's blue and red numbers are 3.6 and 3.4 to 1 on white, its inactive text 2.3 to 1: darker values,
+   through the custom properties the library reads, on the viewer and on the elements inside it that carry the theme. Specific
+   enough to win over its theme sheet, which loads later. */
+html perspective-viewer[theme="Pro Light"], html perspective-viewer [theme="Pro Light"] {
+    --psp-datagrid--pos-cell--color: #1a6aa8;
+    --psp-datagrid--neg-cell--color: #c42a07;
+    --psp-inactive--color: #6b6b6b;
+}

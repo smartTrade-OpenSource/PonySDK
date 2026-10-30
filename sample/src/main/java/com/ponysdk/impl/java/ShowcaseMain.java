@@ -74,8 +74,14 @@ public class ShowcaseMain {
             "script/flexlayout.js",
             "script/flexlayout-addon.js",
             "script/fdc3-agent.js", // the sample's demonstration desktop agent: a real desktop brings its own
-            "script/fdc3-addon.js"
+            "script/fdc3-addon.js",
+            "script/perspective-addon.js" // a few KB: the Perspective library itself is loaded by the page that has a viewer
         )));
+        // The Perspective page (ADR-0029): its query engine is WebAssembly, which the policy lets the page compile (never
+        // eval); its charts draw in a worker that imports a script from a blob: URL, which a grid alone does not need
+        configuration.setWebAssemblyEnabled(true);
+        configuration.addScriptSources("blob:");
+        configuration.addServedResourceExtensions("wasm");
 
         final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();
         styles.put("ponysdk", "style/ponysdk.css");
