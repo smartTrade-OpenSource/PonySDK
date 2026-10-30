@@ -28,10 +28,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
@@ -328,7 +326,7 @@ public class DefaultDataGridViewAriaTest extends PSuite {
             };
             final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
             source.setFilterController(new FilterController<>());
-            Mockito.doReturn(attributes).when(UIContext.get()).getWriter();
+            GridDraws.useWriter(attributes);
             grid = new DefaultDataGridView<>(source);
             grid.setAdapter(new TestAdapter(List.<ColumnDefinition<String>> of(name)) {
                 @Override

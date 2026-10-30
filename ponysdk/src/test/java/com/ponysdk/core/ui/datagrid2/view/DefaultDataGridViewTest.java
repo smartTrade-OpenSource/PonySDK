@@ -1149,7 +1149,7 @@ public class DefaultDataGridViewTest extends PSuite {
     @Test
     public void refreshOnColumnVisibilitySetBeforeAdapterIsSentWithTheAddon() {
         final RecordingWriter recorder = new RecordingWriter();
-        Mockito.doReturn(recorder).when(UIContext.get()).getWriter();
+        GridDraws.useWriter(recorder);
         final DefaultCacheDataSource<String, String> source = new DefaultCacheDataSource<>();
         source.setFilterController(new FilterController<>());
         final DefaultDataGridView<String, String> grid = new DefaultDataGridView<>(source);
@@ -1452,7 +1452,7 @@ public class DefaultDataGridViewTest extends PSuite {
 
         @SafeVarargs
         Grid(final boolean header, final DefaultCacheDataSource<String, String> source, final ColumnDefinition<String>... extraColumns) {
-            Mockito.doReturn(recorder).when(UIContext.get()).getWriter();
+            GridDraws.useWriter(recorder);
             final List<ColumnDefinition<String>> columns = new ArrayList<>();
             if (extraColumns.length == 1 && extraColumns[0] instanceof LabelColumnDefinition) {
                 columns.add(extraColumns[0]);

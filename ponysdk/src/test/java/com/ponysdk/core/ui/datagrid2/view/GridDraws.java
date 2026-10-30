@@ -24,8 +24,13 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
+
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * Waits for the draw of an action on a grid. A draw is scheduled on the timer and the row updates notify on their
@@ -38,7 +43,25 @@ final class GridDraws {
     /** A grid that has not drawn for this long is taken as settled. */
     private static final long SETTLE_MS = 50;
 
+    /** The writer the context's spy gives, the one of the grid a test builds now. */
+    private static final AtomicReference<ModelWriter> WRITER = new AtomicReference<>();
+    private static UIContext stubbed;
+
     private GridDraws() {
+    }
+
+    /**
+     * The grid built next writes to this writer. The suite's context is a spy shared by the tests of a class, and a
+     * grid's data arrives on another thread: a draw of the previous test's grid can call the spy while a stubbing of it
+     * is under way, which Mockito does not support (UnfinishedStubbingException, once in a while on CI). The spy is
+     * stubbed once, to read this reference; then a grid only sets it.
+     */
+    static void useWriter(final ModelWriter writer) {
+        WRITER.set(writer);
+        final UIContext context = UIContext.get();
+        if (stubbed == context) return;
+        Mockito.doAnswer(invocation -> WRITER.get()).when(context).getWriter();
+        stubbed = context;
     }
 
     static void drawAfter(final DataGridView<?, ?> grid, final Runnable action) throws InterruptedException {
