@@ -47,9 +47,10 @@ class SourceTest {
     private static final Path SOURCES = Path.of("src/main/java/com/ponysdk/sample/client");
     private static final Path QUICKSTART = Path.of("src/main/java/com/ponysdk/sample/quickstart");
     private static final Path MAIN = Path.of("src/main/java/com/ponysdk/impl/java");
+    private static final Path WA = Path.of("src/main/java/com/ponysdk/sample/client/wa");
     /** The directories whose sources the build copies for the panels (sample/build.gradle), and their packages. */
     private static final Map<Path, String> PACKAGES = Map.of(SOURCES, "com.ponysdk.sample.client.", QUICKSTART,
-        "com.ponysdk.sample.quickstart.", MAIN, "com.ponysdk.impl.java.");
+        "com.ponysdk.sample.quickstart.", MAIN, "com.ponysdk.impl.java.", WA, "com.ponysdk.sample.client.wa.");
     private static final Pattern USE = Pattern.compile("Source\\.code\\((\\w+)\\.class, \"([^\"]+)\"\\)");
     private static final Pattern MARKER = Pattern.compile("^\\s*// region (\\w+)\\b");
 

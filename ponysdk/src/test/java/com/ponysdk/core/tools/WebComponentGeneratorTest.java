@@ -446,14 +446,111 @@ public class WebComponentGeneratorTest extends PSuite {
     }
 
     @Test
-    public void oneEnumNameForTwoTypesFails() {
+    public void aMemberNamedWithALeadingUnderscoreIsInternal() {
+        // Web Awesome's wa-option: a backing field _label beside the property label, both "public" in the manifest
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"_label","type":{"text":"string"}},
+                          {"kind":"field","name":"label","type":{"text":"string"}},
+                          {"kind":"method","name":"_render"}]}]}]}""";
+
+        final String source = sources(manifest).get("PA");
+
+        assertEquals(1, source.split("public void setLabel\\(").length - 1, source);
+        assertFalse(source.contains("_render") || source.contains("render"), source);
+    }
+
+    @Test
+    public void aTypeNoJsonTextCanStandForGivesNoAccessorAndNoMethod() {
+        // Web Awesome's manifest lists what its Lit decorators query and its callbacks as public members: a dialog's
+        // inner <dialog>, its ElementInternals, a function that formats, another custom element
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"WaPopup","customElement":true,"tagName":"x-popup"},
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"dialog","type":{"text":"HTMLDialogElement"}},
+                          {"kind":"field","name":"inputs","type":{"text":"(HTMLElement & { value: unknown }) | HTMLInputElement | undefined"}},
+                          {"kind":"field","name":"internals","type":{"text":"ElementInternals"}},
+                          {"kind":"field","name":"states","type":{"text":"CustomStateSet"}},
+                          {"kind":"field","name":"reflected","type":{"text":"Map<string, unknown>"}},
+                          {"kind":"field","name":"formatter","type":{"text":"(value: number) => string"}},
+                          {"kind":"field","name":"popup","type":{"text":"WaPopup"}},
+                          {"kind":"field","name":"options","type":{"text":"WaPopup[]"}},
+                          {"kind":"field","name":"keyframes","type":{"text":"Keyframe[] | undefined"}},
+                          {"kind":"field","name":"date","type":{"text":"Date | string"}},
+                          {"kind":"field","name":"label","type":{"text":"string"}},
+                          {"kind":"method","name":"drag","parameters":[{"name":"event","type":{"text":"PointerEvent"}}]},
+                          {"kind":"method","name":"anchorTo","parameters":[{"name":"element","type":{"text":"Element | string"}}]},
+                          {"kind":"method","name":"scrollTo","parameters":[{"name":"options","type":{"text":"ScrollToOptions"}}]}]}]}]}""";
+
+        final String source = sources(manifest).get("PA");
+
+        for (final String name : List.of("Dialog", "Inputs", "Internals", "States", "Reflected", "Formatter", "Popup", "Options")) {
+            assertFalse(source.contains("set" + name), name + ": " + source);
+            assertFalse(source.contains("get" + name), name + ": " + source);
+        }
+        assertFalse(source.contains(" drag("), "an event cannot be sent: " + source);
+        assertFalse(source.contains(" anchorTo("), source);
+        assertTrue(source.contains("public void scrollTo(final JsonValue options)"), "a dictionary can: " + source);
+        assertTrue(source.contains("public void setKeyframesJson(final String value)"), source);
+        assertTrue(source.contains("public void setDateJson(final String value)"), source);
+        assertTrue(source.contains("public void setLabel(final String value)"), source);
+    }
+
+    @Test
+    public void aMethodNamedLikeAnAccessorDoesNotOverloadIt() {
+        // Web Awesome's form controls: a property value, and the internal method setValue(...args) of their base class,
+        // listed in the manifest before and after it; setValue(null) would not compile with both
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"method","name":"setValue","description":"Internal.",
+                           "parameters":[{"name":"args","type":{"text":"Parameters<typeof this.internals.setFormValue>"}}]},
+                          {"kind":"field","name":"value","type":{"text":"string"}},
+                          {"kind":"method","name":"reset","parameters":[{"name":"value","optional":true,"type":{"text":"string"}}]}],
+               "events":[{"name":"reset"}]}]}]}""";
+
+        final String source = sources(manifest).get("PA");
+
+        assertTrue(source.contains("public void setValue(final String value)"), source);
+        assertTrue(source.contains("public void setValueMethod(final JsonValue args)"), source);
+        assertTrue(source.contains("Named {@code setValueMethod}: {@code setValue} is also the name of a property's accessor."), source);
+        assertTrue(source.contains("public void reset(final String value)"), "no accessor named reset, no listener: " + source);
+        assertFalse(source.contains("setValue(final JsonValue"), source);
+    }
+
+    @Test
+    public void twoEnumsOfOneNameTakeTheNameOfTheirMember() {
+        // Web Awesome's color picker: a field format and a method getFormattedValue(format), of different literals
+        final String manifest = """
+            {"modules":[{"path":"a.js","declarations":[
+              {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
+               "members":[{"kind":"field","name":"format","type":{"text":"'hex' | 'rgb'"}},
+                          {"kind":"method","name":"getFormatted","parameters":[{"name":"format","type":{"text":"'hex' | 'hexa' | 'rgb'"}}]},
+                          {"kind":"method","name":"other","parameters":[{"name":"format","type":{"text":"'hex' | 'rgb'"}}]}],
+               "attributes":[{"name":"format","fieldName":"none","type":{"text":"'a' | 'b'"}}]}]}]}""";
+
+        final String source = sources(manifest).get("PA");
+
+        assertTrue(source.contains("public void setFormat(final Format value)"), source);
+        assertTrue(source.contains("public void getFormatted(final GetFormattedFormat format)"), "the second takes its method's name: " + source);
+        assertTrue(source.contains("public void other(final Format format)"), "the same literals share the first: " + source);
+        assertTrue(source.contains("public void setFormatAttribute(final AttributeFormat value)"), source);
+        assertEquals(1, source.split("public enum Format ").length - 1);
+        assertEquals(1, source.split("public enum GetFormattedFormat ").length - 1);
+    }
+
+    @Test
+    public void oneEnumNameForTwoTypesStillFailsWhenTheMemberNameDoesNot() {
         final String manifest = """
             {"modules":[{"path":"a.js","declarations":[
               {"kind":"class","name":"A","customElement":true,"tagName":"x-a",
                "members":[{"kind":"field","name":"mode","type":{"text":"'a' | 'b'"}}],
-               "attributes":[{"name":"mode","type":{"text":"'a' | 'c'"}}]}]}]}""";
+               "attributes":[{"name":"mode","fieldName":"m1","type":{"text":"'a' | 'c'"}},
+                             {"name":"mode","fieldName":"m2","type":{"text":"'a' | 'd'"}}]}]}]}""";
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> sources(manifest));
-        assertEquals("<x-a>: two types named Mode: [a, b], [a, c]", e.getMessage());
+        assertEquals("<x-a>: two types named AttributeMode: [a, c], [a, d]", e.getMessage());
     }
 
     @Test

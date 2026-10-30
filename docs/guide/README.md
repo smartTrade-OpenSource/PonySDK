@@ -8,6 +8,7 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Quick start](quick-start.md) | The dependency, a first screen, the server, in five minutes |
 | [Configuration](configuration.md) | Every setting of `ApplicationConfiguration` and `PonySDKServer`, HTTP compression |
 | [Web components](web-components.md) | Driving custom elements from Java; typed classes from a Custom Elements Manifest |
+| [Design systems](design-systems.md) | A library of web components (Web Awesome as the example) as typed classes, served by the application, themed from the default theme, its form controls in a Binder |
 | [Custom JavaScript](addons.md) | `PAddOn`: a JavaScript library behind a Java class |
 | [Forms](forms.md) | Binding fields to a bean: converters, validators, Bean Validation, errors a screen reader reads |
 | [EventBus](event-bus.md) | Decoupling the parts of a screen |

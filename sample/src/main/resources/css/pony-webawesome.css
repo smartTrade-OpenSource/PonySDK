@@ -1,0 +1,109 @@
+/*
+ * The tokens of PonySDK's default theme (style/pony-theme.css, ADR-0024) given to Web Awesome (ADR-0028).
+ *
+ * Web Awesome reads its look from custom properties (--wa-*): a surface, a text colour, a "brand" with a fill, a border
+ * and a text colour per emphasis, a radius, a font. They are set here from --pony-*, on the element that has the
+ * class pony-theme, so that a Web Awesome element and a native PonySDK widget in the same container share one palette,
+ * and both follow the container's scheme: prefers-color-scheme, or [data-theme=dark] / [data-theme=light].
+ *
+ * Scope: an element with both classes, pony-theme and the library's wa-theme-default. The second is what makes the library
+ * compute its derived tokens (a form control's background, a tooltip's colours: var(--wa-color-surface-default) and the
+ * like) on that element; declared on :root only, they would be resolved there, in the light scheme, and inherited as
+ * the result whatever the scheme of the subtree.
+ *
+ * Same rules as pony-theme.css: under :where(), no specificity, so an application rule wins; and
+ * unlayered, so it wins over the library's own theme (its @layer wa-theme) whatever the order of the sheets.
+ * Written against Web Awesome 3.14: the semantic tokens of its default theme, none of its colour scales.
+ */
+
+:where(.pony-theme.wa-theme-default, :host(.pony-theme.wa-theme-default)) {
+    /* Surfaces, text, focus */
+    --wa-color-surface-default: var(--pony-surface);
+    --wa-color-surface-raised: var(--pony-surface);
+    --wa-color-surface-lowered: var(--pony-surface-2);
+    --wa-color-surface-border: var(--pony-border);
+    --wa-color-text-normal: var(--pony-text);
+    --wa-color-text-quiet: var(--pony-muted);
+    --wa-color-text-link: var(--pony-accent);
+    --wa-color-focus: var(--pony-focus);
+    --wa-color-overlay-modal: var(--pony-overlay);
+    --wa-color-overlay-inline: color-mix(in oklab, var(--pony-muted) 18%, transparent);
+    --wa-color-shadow: color-mix(in oklab, var(--pony-text) 16%, transparent);
+
+    /* One triple per variant: a quiet and a normal fill, a loud one; their borders and the text on them */
+    --wa-color-brand-fill-quiet: var(--pony-accent-soft);
+    --wa-color-brand-fill-normal: var(--pony-accent-soft);
+    --wa-color-brand-fill-loud: var(--pony-accent);
+    --wa-color-brand-border-quiet: var(--pony-accent-soft);
+    --wa-color-brand-border-normal: var(--pony-accent);
+    --wa-color-brand-border-loud: var(--pony-accent);
+    --wa-color-brand-on-quiet: var(--pony-accent);
+    --wa-color-brand-on-normal: var(--pony-accent);
+    --wa-color-brand-on-loud: var(--pony-on-accent);
+
+    --wa-color-success-fill-quiet: var(--pony-success-soft);
+    --wa-color-success-fill-normal: var(--pony-success-soft);
+    --wa-color-success-fill-loud: var(--pony-success);
+    --wa-color-success-border-quiet: var(--pony-success-soft);
+    --wa-color-success-border-normal: var(--pony-success);
+    --wa-color-success-border-loud: var(--pony-success);
+    --wa-color-success-on-quiet: var(--pony-success);
+    --wa-color-success-on-normal: var(--pony-success);
+    --wa-color-success-on-loud: var(--pony-on-accent);
+
+    --wa-color-warning-fill-quiet: var(--pony-warning-soft);
+    --wa-color-warning-fill-normal: var(--pony-warning-soft);
+    --wa-color-warning-fill-loud: var(--pony-warning);
+    --wa-color-warning-border-quiet: var(--pony-warning-soft);
+    --wa-color-warning-border-normal: var(--pony-warning);
+    --wa-color-warning-border-loud: var(--pony-warning);
+    --wa-color-warning-on-quiet: var(--pony-warning);
+    --wa-color-warning-on-normal: var(--pony-warning);
+    --wa-color-warning-on-loud: var(--pony-on-accent);
+
+    --wa-color-danger-fill-quiet: var(--pony-danger-soft);
+    --wa-color-danger-fill-normal: var(--pony-danger-soft);
+    --wa-color-danger-fill-loud: var(--pony-danger);
+    --wa-color-danger-border-quiet: var(--pony-danger-soft);
+    --wa-color-danger-border-normal: var(--pony-danger);
+    --wa-color-danger-border-loud: var(--pony-danger);
+    --wa-color-danger-on-quiet: var(--pony-danger);
+    --wa-color-danger-on-normal: var(--pony-danger);
+    --wa-color-danger-on-loud: var(--pony-on-accent);
+
+    --wa-color-neutral-fill-quiet: var(--pony-surface-2);
+    --wa-color-neutral-fill-normal: var(--pony-surface-2);
+    --wa-color-neutral-fill-loud: var(--pony-text);
+    --wa-color-neutral-border-quiet: var(--pony-border);
+    --wa-color-neutral-border-normal: var(--pony-border-strong);
+    --wa-color-neutral-border-loud: var(--pony-border-strong);
+    --wa-color-neutral-on-quiet: var(--pony-muted);
+    --wa-color-neutral-on-normal: var(--pony-text);
+    --wa-color-neutral-on-loud: var(--pony-bg);
+
+    /* Type, shape and motion */
+    --wa-font-family-body: var(--pony-font-family);
+    --wa-font-family-code: var(--pony-font-mono);
+    --wa-border-radius-s: var(--pony-radius-sm);
+    --wa-border-radius-m: var(--pony-radius);
+    --wa-border-radius-l: var(--pony-radius-lg);
+    --wa-focus-ring-width: var(--pony-focus-width);
+    --wa-focus-ring-offset: var(--pony-focus-offset);
+    --wa-transition-normal: var(--pony-duration);
+    --wa-transition-fast: var(--pony-duration);
+}
+
+/*
+ * A field the Binder marked invalid (aria-invalid on the element, ADR-0021) shows it on the control itself: the library
+ * exposes a validity state (:state(user-invalid)) but styles none, and a Binder error is not a constraint of the element.
+ */
+:where(.pony-theme.wa-theme-default, :host(.pony-theme.wa-theme-default)) [aria-invalid=true] {
+    --wa-form-control-border-color: var(--pony-danger);
+}
+
+/*
+ * The scheme of the library's own parts that are not tokens above (the native controls inside its shadow roots, its
+ * scrollbars) is the container's: pony-theme.css sets color-scheme with the tokens.
+ * An element whose module is not loaded yet is a box of unstyled text: hold it back until it is defined.
+ */
+:where(.pony-theme.wa-theme-default, :host(.pony-theme.wa-theme-default)) :not(:defined) { visibility: hidden; }

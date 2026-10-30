@@ -10,7 +10,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /** The tabs, by the token of their URL (UISampleEntryPoint). */
-const TABS = ['overview', 'code', 'inputs', 'forms', 'layouts', 'data', 'datagrid', 'web-components', 'flexlayout',
+const TABS = ['overview', 'code', 'inputs', 'forms', 'layouts', 'data', 'datagrid', 'web-components', 'web-awesome', 'flexlayout',
   'charts', 'misc', 'theme', 'performance', 'streams', 'signals', 'component-costs', 'binary-protocol', 'reconnection',
   'embedding', 'fdc3', 'routing'];
 

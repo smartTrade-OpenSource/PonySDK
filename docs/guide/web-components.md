@@ -126,7 +126,8 @@ counter.reset();
 ```
 
 The generated class writes the same frames as the untyped calls; `sample/build.gradle` (task `webComponents`) is a
-working setup.
+working setup. A whole library (Web Awesome: 73 classes) is the subject of the
+[design systems](design-systems.md) guide.
 
 ## 5-level protocol optimization
 
