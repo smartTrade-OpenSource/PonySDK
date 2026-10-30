@@ -165,12 +165,12 @@ public class UISampleEntryPoint implements EntryPoint {
         final String[][] tabs = {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"☑", "Forms"}, {"⊞", "Layouts"}, {"◈", "Data"},
-            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"∿", "Charts"}, {"⋯", "Misc"}, {"◐", "Theme"},
+            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"✦", "Web Awesome"}, {"▦", "FlexLayout"}, {"∿", "Charts"}, {"⋯", "Misc"}, {"◐", "Theme"},
             {"⚡", "Performance"}, {"↯", "Client commands"}, {"≋", "Streams"}, {"▤", "Perspective"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}, {"Aa", "i18n"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
-        final int[] groupStarts = {0, 2, 12};
+        final int[] groupStarts = {0, 2, 13};
         tabNames = new String[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabNames[i] = tabs[i][1];
 
@@ -274,6 +274,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Data" -> DataPage.build(schedulers);
             case "DataGrid" -> DataGridPage.build(schedulers);
             case "Web Components" -> WebComponentsPage.build(schedulers);
+            case "Web Awesome" -> WebAwesomePage.build(uiContext);
             case "FlexLayout" -> FlexLayoutPage.build();
             case "Charts" -> ChartsPage.build(uiContext, schedulers);
             case "Misc" -> MiscPage.build(schedulers);

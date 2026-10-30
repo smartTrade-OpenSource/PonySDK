@@ -70,6 +70,7 @@ public class ShowcaseMain {
         configuration.setJavascript(new java.util.LinkedHashSet<>(java.util.List.of(
             "script/jquery-3.7.1.min.js",
             "script/webcomponents.js",
+            "script/webawesome-loader.js", // Web Awesome, loaded on the page that uses it (ADR-0028)
             "script/sample.js",
             "script/flexlayout.js",
             "script/flexlayout-addon.js",

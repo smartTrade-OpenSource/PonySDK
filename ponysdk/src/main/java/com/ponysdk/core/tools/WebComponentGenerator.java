@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 import com.ponysdk.core.ui.basic.PWebComponent;
 
@@ -65,6 +66,15 @@ public final class WebComponentGenerator {
         "native", "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super",
         "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while", "true",
         "false", "null", "var", "record", "yield", "sealed", "permits");
+
+    /**
+     * The types a JSON text cannot stand for, in a manifest: a function, a DOM node or event, the element's internals,
+     * the collections and promises of the platform. Web Awesome lists what its decorators query as public fields:
+     * {@code dialog: HTMLDialogElement}, {@code internals: ElementInternals}, {@code getTag: (option) => ...}.
+     */
+    private static final Pattern NOT_JSON = Pattern.compile("=>|\\b\\w*(Element|Elements|Event|Internals|StateSet)\\b"
+        + "|\\b(ShadowRoot|Node|NodeList|Document|Window|Map|Set|WeakMap|WeakSet|Promise|Function|File|Blob|FormData)\\b");
+    private static final Pattern TYPE_WORDS = Pattern.compile("[^\\w$]+");
 
     /** The signatures a generated method must not take: those of PWebComponent and its superclasses. */
     private static final Set<String> INHERITED = inheritedSignatures();
@@ -115,6 +125,12 @@ public final class WebComponentGenerator {
         final Map<String, String> sources = new LinkedHashMap<>();
         final Map<String, String> tags = new HashMap<>();
         final Map<String, String> classes = new HashMap<>();
+        final Set<String> elements = new HashSet<>();
+        for (final JsonObject module : objects(manifest, "modules")) {
+            for (final JsonObject declaration : objects(module, "declarations")) {
+                if (declaration.getBoolean("customElement", false)) elements.add(declaration.getString("name", ""));
+            }
+        }
         for (final JsonObject module : objects(manifest, "modules")) {
             final String path = module.getString("path", "?");
             for (final JsonObject declaration : objects(module, "declarations")) {
@@ -126,7 +142,7 @@ public final class WebComponentGenerator {
                 if (sameTag != null) throw new IllegalArgumentException("<" + tag + "> is declared twice: " + sameTag + ", " + where);
                 final String sameName = classes.putIfAbsent(name, where);
                 if (sameName != null) throw new IllegalArgumentException("Class " + name + " is declared twice: " + sameName + ", " + where);
-                final ElementClass element = new ElementClass(javaPackage, origin, declaration);
+                final ElementClass element = new ElementClass(javaPackage, origin, declaration, elements);
                 sources.put(element.className, element.source());
             }
         }
@@ -140,32 +156,38 @@ public final class WebComponentGenerator {
         private final String javaPackage;
         private final String origin;
         private final JsonObject declaration;
+        /** The class names of the manifest's custom elements: a type that names one is a reference to an element. */
+        private final Set<String> elements;
         private final String className;
         private final String tag;
         private final StringBuilder body = new StringBuilder();
         private final StringBuilder enums = new StringBuilder();
         private final Map<String, List<String>> enumLiterals = new HashMap<>();
         private final Set<String> signatures = new HashSet<>();
+        /** The names of the setters, getters, listeners, slots that a method of the element must not be overloaded with. */
+        private final Set<String> accessors = new HashSet<>();
         private boolean usesEvents;
         private boolean usesJson;
 
-        ElementClass(final String javaPackage, final String origin, final JsonObject declaration) {
+        ElementClass(final String javaPackage, final String origin, final JsonObject declaration, final Set<String> elements) {
             this.javaPackage = javaPackage;
             this.origin = origin;
             this.declaration = declaration;
+            this.elements = elements;
             this.className = "P" + declaration.getString("name");
             this.tag = declaration.getString("tagName");
         }
 
         String source() {
             final Set<String> fields = new HashSet<>();
+            final List<JsonObject> methods = new ArrayList<>();
             for (final JsonObject member : objects(declaration, "members")) {
                 if (!isPublic(member)) continue;
                 if ("field".equals(member.getString("kind", ""))) {
                     fields.add(member.getString("name"));
-                    if (!member.getBoolean("readonly", false)) field(member);
+                    if (!member.getBoolean("readonly", false) && !isReference(typeText(member))) field(member);
                 } else if ("method".equals(member.getString("kind", ""))) {
-                    methodOf(member);
+                    methods.add(member);
                 }
             }
             for (final JsonObject attribute : objects(declaration, "attributes")) {
@@ -179,6 +201,12 @@ public final class WebComponentGenerator {
             }
             for (final JsonObject property : objects(declaration, "cssProperties")) {
                 cssProperty(property);
+            }
+            // Last: a method named like what the others generated (a form control's internal setValue(...args) beside its
+            // value property) must not overload it
+            for (final String signature : signatures) accessors.add(signature.substring(0, signature.indexOf('(')));
+            for (final JsonObject method : methods) {
+                methodOf(method);
             }
 
             final StringBuilder out = new StringBuilder();
@@ -205,7 +233,7 @@ public final class WebComponentGenerator {
             final String name = member.getString("name");
             final Type type = Type.parse(typeText(member));
             final String javaName = capitalize(camel(name));
-            final String javaType = type.java(this, javaName);
+            final String javaType = type.java(this, javaName, "Field");
             final String q = quote(name);
             final String setter = type.kind == Kind.JSON ? "set" + javaName + "Json" : "set" + javaName;
             final String getter = type.kind == Kind.JSON ? "get" + javaName + "Json" : "get" + javaName;
@@ -246,7 +274,7 @@ public final class WebComponentGenerator {
                 method(attribute, "set" + capitalize(camel(name)), List.of("boolean"), "void", List.of("value"),
                     "        if (value) setAttribute(" + q + ", \"\");\n        else removeAttribute(" + q + ");\n", null);
             } else if (type.kind == Kind.ENUM) {
-                final String javaType = type.java(this, capitalize(camel(name)));
+                final String javaType = type.java(this, capitalize(camel(name)), "Attribute");
                 method(attribute, "set" + capitalize(camel(name)) + "Attribute", List.of(javaType), "void", List.of("value"),
                     "        if (value == null) removeAttribute(" + q + ");\n        else setAttribute(" + q + ", value.literal);\n", null);
             } else {
@@ -262,9 +290,19 @@ public final class WebComponentGenerator {
                 List.of("listener"), "        return addEventListener(" + quote(name) + ", listener);\n", null);
         }
 
+        /** Whether a type is one that JSON cannot stand for: a DOM object, a function, a map, another custom element. */
+        private boolean isReference(final String type) {
+            if (type == null) return false;
+            if (NOT_JSON.matcher(type).find()) return true;
+            for (final String word : TYPE_WORDS.split(type)) if (elements.contains(word)) return true;
+            return false;
+        }
+
         private void methodOf(final JsonObject member) {
             final String name = member.getString("name");
             final List<JsonObject> parameters = objects(member, "parameters");
+            // What the server cannot give: an event, an element, a callback
+            for (final JsonObject parameter : parameters) if (isReference(typeText(parameter))) return;
             int required = 0;
             for (final JsonObject parameter : parameters) {
                 if (!parameter.getBoolean("optional", false) && !parameter.getBoolean("rest", false)) required++;
@@ -280,7 +318,7 @@ public final class WebComponentGenerator {
                     final Type type = Type.parse(parameter.getBoolean("rest", false) ? null : typeText(parameter));
                     // An object or an array as a JsonValue: the terminal parses an array element that is JSON
                     if (type.kind == Kind.JSON) usesJson = true;
-                    types.add(type.kind == Kind.JSON ? "JsonValue" : type.java(this, capitalize(camel(parameter.getString("name")))));
+                    types.add(type.kind == Kind.JSON ? "JsonValue" : type.java(this, capitalize(camel(parameter.getString("name"))), capitalize(camel(name))));
                     names.add(parameterName);
                     args.add(type.kind == Kind.ENUM ? parameterName + " == null ? null : " + parameterName + ".literal" : parameterName);
                 }
@@ -306,6 +344,12 @@ public final class WebComponentGenerator {
         private String method(final JsonObject documented, final String name, final List<String> types,
                               final String returns, final List<String> names, final String code, final Type type) {
             String doc = text(documented).orElse(null);
+            String javaName = name;
+            if ("method".equals(documented.getString("kind", "")) && accessors.contains(name)) {
+                javaName = name + "Method";
+                doc = (doc == null ? "" : doc + "\n") + "Named {@code " + javaName + "}: {@code " + name
+                    + "} is also the name of a property's accessor.";
+            }
             if (type != null && type.kind == Kind.JSON) {
                 doc = (doc == null ? "" : doc + "\n") + "As JSON text, of type {@code " + escape(type.text) + "}.";
             }
@@ -315,7 +359,7 @@ public final class WebComponentGenerator {
                     doc = (doc == null ? "" : doc + "\n") + "Its result, of type {@code " + escape(returned) + "}, does not come back.";
                 }
             }
-            return method(name, types, returns, names, code, doc, documented);
+            return method(javaName, types, returns, names, code, doc, documented);
         }
 
         private String method(final String name, final List<String> types, final String returns,
@@ -345,8 +389,16 @@ public final class WebComponentGenerator {
             return javaName;
         }
 
-        /** A nested enum of string literals, once per name. */
-        String enumOf(final String name, final List<String> literals) {
+        /**
+         * A nested enum of string literals, once per name. Other literals under a name already taken (a field
+         * {@code format} and the parameter {@code format} of a method) go under the name of their member in front.
+         */
+        String enumOf(final String name, final String scope, final List<String> literals) {
+            final List<String> known = enumLiterals.get(name);
+            return declare(known == null || known.equals(literals) ? name : scope + name, literals);
+        }
+
+        private String declare(final String name, final List<String> literals) {
             final List<String> known = enumLiterals.putIfAbsent(name, literals);
             if (known != null) {
                 if (!known.equals(literals)) {
@@ -415,12 +467,12 @@ public final class WebComponentGenerator {
         }
 
         /** The Java type; an enum is declared in the element's class under {@code name}. */
-        String java(final ElementClass element, final String name) {
+        String java(final ElementClass element, final String name, final String scope) {
             return switch (kind) {
                 case STRING, JSON -> "String";
                 case NUMBER -> nullable ? "Double" : "double";
                 case BOOLEAN -> nullable ? "Boolean" : "boolean";
-                case ENUM -> element.enumOf(name, literals);
+                case ENUM -> element.enumOf(name, scope, literals);
             };
         }
 
@@ -524,7 +576,7 @@ public final class WebComponentGenerator {
 
     private static boolean isPublic(final JsonObject member) {
         return "public".equals(member.getString("privacy", "public")) && !member.getBoolean("static", false)
-                && !member.getString("name", "#").startsWith("#");
+                && !member.getString("name", "#").startsWith("#") && !member.getString("name", "").startsWith("_");
     }
 
     private static String typeText(final JsonObject typed) {

@@ -1171,3 +1171,18 @@ html perspective-viewer[theme="Pro Light"], html perspective-viewer [theme="Pro 
     --psp-datagrid--neg-cell--color: #c42a07;
     --psp-inactive--color: #6b6b6b;
 }
+/* ── Web Awesome page (WebAwesomePage, docs/decisions/0028-web-awesome.md): the library's elements in a themed container ── */
+.wad-root { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.wad-scheme { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 13px; }
+.wad-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; margin: 0 0 16px; }
+.wad-card, .wad-ticket { display: flex; flex-direction: column; align-items: stretch; gap: 12px; min-width: 0; padding: 16px 18px; background: var(--pony-surface); color: var(--pony-text); border: 1px solid var(--pony-border); border-radius: var(--pony-radius-lg); }
+.wad-ticket { max-width: 560px; }
+.wad-card .pony-section-title, .wad-ticket .pony-section-title { margin: 0; color: var(--pony-text); }
+.wad-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.wad-status { min-height: 1.5em; font-size: 12.5px; color: var(--pony-muted); }
+.wad-split { height: 96px; border: 1px solid var(--pony-border); border-radius: var(--pony-radius); }
+.wad-split > [slot] { display: flex; align-items: center; justify-content: center; height: 100%; }
+.wad-ticket .forms-saved { max-width: none; }
+.wad-row > wa-progress-bar { flex: 1 1 200px; }
+/* The showcase's ring for aria-invalid is for native widgets: the library's controls show it on the control (css/pony-webawesome.css) */
+.wad-root [aria-invalid="true"] { box-shadow: none; }

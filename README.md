@@ -64,6 +64,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 
 **UI**
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
+- A design system from its Custom Elements Manifest: Web Awesome's 73 components as typed Java classes, the theme's
+  tokens bridged, its form controls bound by the `Binder`, loaded only where used ([guide](docs/guide/design-systems.md))
 - Any DOM event of any widget, listened to by name from Java (`addEventListener("input", PEventOptions.fields(
   "target.value").debounce(...), e -> ...)`): the fields read and the rate limited in the browser (protocol 4,
   [ADR-0003](docs/decisions/0003-protocol-v4-listeners.md))
