@@ -80,6 +80,8 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
   read by screen readers ([guide](docs/guide/forms.md))
 - Charts: `PChart`, live time series drawn by the terminal from typed arrays, conflated feeds, a 5 KB chunk loaded
   only when a chart exists ([guide](docs/guide/charts.md))
+- FINOS Perspective in the sample: a streaming grid, pivots and charts fed from Java through a `Conflator`, about
+  17 B per row on the wire, WebAssembly allowed by one CSP option, never eval ([guide](docs/guide/perspective.md))
 - A default theme: `setTheme("pony")`, CSS tokens, light and dark, WCAG AA contrast ([guide](docs/guide/theme.md))
 - i18n: a locale per context from `Accept-Language` or the user's choice, `Messages` from resource bundles,
   locale-aware formats, date names from the browser, right-to-left pages ([guide](docs/guide/i18n.md))
