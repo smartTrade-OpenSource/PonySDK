@@ -62,6 +62,19 @@
   }
 
   // A configuration as the server sent it: JSON text, which the terminal may already have parsed
+  /**
+   * Frees a viewer and its table. The element left the page with its tab: its resize observer has queued a task that
+   * still reads the view ("null pointer passed to rust" once freed). Two frames let it run, flush waits for the
+   * renders under way, then the viewer and the table go.
+   */
+  async function free(viewer, table) {
+    await new Promise(function (done) { requestAnimationFrame(function () { requestAnimationFrame(done); }); });
+    await viewer.flush();
+    await viewer.delete();
+    viewer.remove();
+    if (table) await table.delete();
+  }
+
   function parsed(json) {
     return typeof json === 'string' ? JSON.parse(json) : json;
   }
@@ -124,6 +137,7 @@
       viewer.style.height = '100%';
       this.element.appendChild(viewer);
       await viewer.load(client);
+      if (this._destroyed) return free(viewer, table); // left while it loaded: destroy() had nothing to free yet
       this._table = table;
       this._viewer = viewer;
 
@@ -142,7 +156,7 @@
       this._scheme.addEventListener('change', this._onScheme);
 
       await this._restore(Object.assign({ table: name }, initial ? parsed(initial) : {}));
-      this.sendDataToServer({ type: 'ready' });
+      if (!this._destroyed) this.sendDataToServer({ type: 'ready' });
     },
 
     // The row selected: a grid reports the window of the view that is selected (the first row of it is the one given),
@@ -159,11 +173,12 @@
     // Applies a configuration, with the theme, then remembers what the viewer holds so that this is not reported as
     // a change of the user's
     _restore: async function (config) {
+      var viewer = this._viewer; // destroy() may take it meanwhile: this one is the one being configured
       var theme = this._theme === 'auto' ? (this._scheme.matches ? 'dark' : 'light') : this._theme;
       this._applying = true;
       try {
-        await this._viewer.restore(Object.assign({ theme: THEMES[theme] }, config));
-        this._reported = JSON.stringify(modeled(await this._viewer.save()));
+        await viewer.restore(Object.assign({ theme: THEMES[theme] }, config));
+        if (!this._destroyed) this._reported = JSON.stringify(modeled(await viewer.save()));
       } finally {
         this._applying = false;
       }
@@ -175,8 +190,10 @@
       var self = this;
       clearTimeout(this._timer);
       this._timer = setTimeout(async function () {
+        var viewer = self._viewer;
+        if (self._destroyed || viewer === null) return;
+        var config = modeled(await viewer.save());
         if (self._destroyed) return;
-        var config = modeled(await self._viewer.save());
         var text = JSON.stringify(config);
         if (text === self._reported) return;
         self._reported = text;
@@ -250,11 +267,9 @@
       if (this._scheme) this._scheme.removeEventListener('change', this._onScheme);
       var viewer = this._viewer, table = this._table;
       this._viewer = this._table = null;
-      // The engine holds the table's rows in WebAssembly memory: freed with the viewer
+      // The engine holds the table's rows in WebAssembly memory: freed with the viewer, after what it still does
       this._chain = this._chain.then(function () {
-        return viewer ? viewer.delete() : null;
-      }).then(function () {
-        return table ? table.delete() : null;
+        return viewer ? free(viewer, table) : null;
       }).catch(function () { /* already gone with the page */ });
     }
   });

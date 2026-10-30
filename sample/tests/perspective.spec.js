@@ -218,3 +218,20 @@ test('leaving the page frees the viewer, and coming back builds another', async 
   await expect(page.locator('perspective-viewer regular-table tbody tr').first()).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+// Left at any moment, as a visitor clicking through the tabs does: while the library loads, while the table is built,
+// while the feed streams. CI saw "null pointer passed to rust" once, the viewer freed while it still worked
+test('leaving the page at any moment, loading or streaming, frees it without an error', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = collectErrors(page);
+  await page.goto(BASE_URL + '#streams', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.pony-tab', { hasText: 'Perspective' })).toBeVisible({ timeout: 15000 });
+  for (const wait of [0, 20, 50, 100, 200, 400, 800, 1500, 3000, 3000]) {
+    await page.locator('.pony-tab', { hasText: 'Perspective' }).click();
+    await page.waitForTimeout(wait);
+    await page.locator('.pony-tab', { hasText: 'Signals' }).click();
+    await expect(page.locator('perspective-viewer')).toHaveCount(0);
+  }
+  await page.waitForTimeout(1000); // what the freed viewers would still do
+  expect(errors).toEqual([]);
+});
