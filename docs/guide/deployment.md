@@ -113,7 +113,10 @@ uiContext.onMove(state -> state.putString("draft", draft.getText()));
 ```
 
 - `onMove` runs on the context's thread when a drain or `SessionAdmin.move(id)` moves it;
-  `SessionAdmin.destroy(id)` carries nothing.
+  `SessionAdmin.destroy(id)` carries nothing. It adds a listener and returns its registration: several parts of a
+  screen declare their own.
+- A form carries its fields with one call: `binder.carry("order")`, once its fields are bound and its bean read
+  ([forms](forms.md#a-move-to-another-server)).
 - The values are the protocol's types: boolean, int, long, double, string, bytes. Sealed, they must stay under 4 KB
   (they travel in the handshake's URL); a larger state is not carried and logged at WARN.
 - The state is sealed with AES-256-GCM under the key and the application's id: the browser can neither read nor

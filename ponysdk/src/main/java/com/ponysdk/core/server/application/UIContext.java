@@ -56,6 +56,7 @@ import jakarta.json.spi.JsonProvider;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,7 +149,7 @@ public class UIContext {
     private final ContextKeys keys;
     /** What the page carried from the server it moved from (ADR-0018). */
     private final MovedState movedState;
-    private java.util.function.Consumer<MovedState> moveListener;
+    private final List<java.util.function.Consumer<MovedState>> moveListeners = new CopyOnWriteArrayList<>();
 
     private final StringDictionary stringDictionary;
 
@@ -623,12 +624,13 @@ public class UIContext {
     }
 
     /**
-     * What a move of this context to another server carries (a drain, {@link SessionAdmin#move}): the listener fills
-     * the state, on the context's thread, as the context moves. Needs
-     * {@link ApplicationConfiguration#setStateTransferKey}. One listener: another replaces it.
+     * What a move of this context to another server carries (a drain, {@link SessionAdmin#move}): each listener fills
+     * the state, on the context's thread, as the context moves, in the order they were added; a form's
+     * {@code Binder.carry} adds one for its fields. Needs {@link ApplicationConfiguration#setStateTransferKey}.
      */
-    public void onMove(final java.util.function.Consumer<MovedState> listener) {
-        this.moveListener = listener;
+    public com.ponysdk.core.ui.eventbus.HandlerRegistration onMove(final java.util.function.Consumer<MovedState> listener) {
+        moveListeners.add(listener);
+        return () -> moveListeners.remove(listener);
     }
 
     private MovedState openMovedState() {
@@ -645,10 +647,10 @@ public class UIContext {
 
     private String sealMovedState() {
         final byte[] key = configuration.getStateTransferKey();
-        if (key == null || moveListener == null) return null;
+        if (key == null || moveListeners.isEmpty()) return null;
         try {
             final MovedState state = new MovedState();
-            moveListener.accept(state);
+            for (final java.util.function.Consumer<MovedState> listener : moveListeners) listener.accept(state);
             if (state.isEmpty()) return null;
             final String token = new StateSeal(key, configuration.getApplicationID(), java.time.Clock.systemUTC()).seal(state);
             if (token == null) log.warn("UIContext #{}: its moved state, sealed, is over {} characters: not carried", ID,
