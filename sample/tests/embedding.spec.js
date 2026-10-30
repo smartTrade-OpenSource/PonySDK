@@ -621,15 +621,16 @@ test('another site: a stylesheet refused with CORS after its element left the pa
 });
 
 /** A new <pony-app> element in the portal, of the application's URL plus suffix, or without src when suffix is null. */
-async function embed(page, id, suffix, attributes = {}, credential = undefined) {
-  await page.evaluate(([id, suffix, attributes, credential]) => {
+async function embed(page, id, suffix, attributes = {}, credential = undefined, unslashed = false) {
+  await page.evaluate(([id, suffix, attributes, credential, unslashed]) => {
     const app = /** @type {any} */ (document.createElement('pony-app'));
     app.id = id;
-    if (suffix !== null) app.setAttribute('src', /** @type {any} */ (window).portalApp + suffix);
+    const src = /** @type {any} */ (window).portalApp + suffix;
+    if (suffix !== null) app.setAttribute('src', unslashed ? src.replace(/\/$/, '') : src);
     for (const [name, value] of Object.entries(attributes)) app.setAttribute(name, value);
     if (credential !== undefined) app.credential = () => credential;
     document.querySelector('.portal-app').append(app);
-  }, [id, suffix, attributes, credential]);
+  }, [id, suffix, attributes, credential, unslashed]);
   return page.locator(`#${id}`);
 }
 
@@ -684,8 +685,9 @@ test('elements: one without src stays as it is; one whose src lacks its final sl
   const errors = trackErrors(page);
   await openPortal(page);
   const empty = await embed(page, 'empty', null);
-  const unslashed = await embed(page, 'unslashed', '', { view: 'ticket' }, 42);
-  await page.locator('#unslashed').evaluate(e => e.setAttribute('src', e.getAttribute('src').replace(/\/$/, '')));
+  // its src set before it is in the page: changed once there, the element restarts, and WebKit reports the socket it
+  // closes while connecting as a console error (once in ten runs)
+  const unslashed = await embed(page, 'unslashed', '', { view: 'ticket' }, 42, true);
   await expect(unslashed.getByText('EUR / USD')).toBeVisible({ timeout: 15000 });
   await expect(unslashed.locator('.pony-ticket-origin')).toContainText('no credential');
   await expect(empty).toHaveText('');
