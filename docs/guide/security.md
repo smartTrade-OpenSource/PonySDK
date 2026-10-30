@@ -56,6 +56,9 @@ Content-Security-Policy: script-src 'self' 'sha256-…' [script origins];
 - The page's one inline script, which opens the WebSocket early, is allowed by its hash; no other inline script runs.
 - Scripts come from the application's origin, the origins of the absolute URLs in `setJavascript`, and those added
   with `addScriptSources("https://cdn.example.com")`.
+- `setWebAssemblyEnabled(true)` adds `'wasm-unsafe-eval'` to `script-src`: the page can compile WebAssembly, and still
+  cannot `eval` a string. Off by default; [Perspective](perspective.md) needs it. A library that starts workers from a
+  script it builds (Perspective's charts) also needs `addScriptSources("blob:")`.
 - `frame-ancestors`: the application and the pages of `setWsAllowedOrigins`, the ones that embed it. A CSP source
   cannot name an IPv6 address: such an origin is left out, with a warning.
 - Every response of `BootstrapServlet` carries `X-Content-Type-Options: nosniff`.

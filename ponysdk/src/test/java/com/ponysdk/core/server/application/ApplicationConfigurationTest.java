@@ -265,6 +265,7 @@ public class ApplicationConfigurationTest {
             .servedResourceExtensions(".JSON")
             .contentSecurityPolicyEnabled(false)
             .scriptSources("https://cdn.example.com")
+            .webAssemblyEnabled(true)
             .debugMode(true)
             .hotReload(true)
             .tabindexOnlyFormField(true)
@@ -310,6 +311,7 @@ public class ApplicationConfigurationTest {
         assertTrue(built.getServedResourceExtensions().contains("json"));
         assertFalse(built.isContentSecurityPolicyEnabled());
         assertEquals(Set.of("https://cdn.example.com"), built.getScriptSources());
+        assertTrue(built.isWebAssemblyEnabled());
         assertTrue(built.isDebugMode());
         assertTrue(built.isHotReload());
         assertTrue(built.isTabindexOnlyFormField());
@@ -355,6 +357,13 @@ public class ApplicationConfigurationTest {
         config.addScriptSources("https://b.example.com", "https://a.example.com");
         assertEquals(java.util.List.of("https://b.example.com", "https://a.example.com"), java.util.List.copyOf(config.getScriptSources()));
         assertThrows(UnsupportedOperationException.class, () -> config.getScriptSources().clear());
+    }
+
+    @Test
+    public void testWebAssemblyIsOffByDefault() {
+        assertFalse(config.isWebAssemblyEnabled());
+        config.setWebAssemblyEnabled(true);
+        assertTrue(config.isWebAssemblyEnabled());
     }
 
     @Test

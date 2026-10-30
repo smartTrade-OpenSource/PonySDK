@@ -235,6 +235,9 @@ public class PonySDKProperties {
         /** More script origins the policy allows, e.g. {@code https://cdn.example.com}. */
         private Set<String> scriptSources;
 
+        /** The page may compile WebAssembly ({@code 'wasm-unsafe-eval'}, never {@code eval}). */
+        private Boolean webAssembly;
+
         public Boolean getEnabled() {
             return enabled;
         }
@@ -249,6 +252,14 @@ public class PonySDKProperties {
 
         public void setScriptSources(final Set<String> scriptSources) {
             this.scriptSources = scriptSources;
+        }
+
+        public Boolean getWebAssembly() {
+            return webAssembly;
+        }
+
+        public void setWebAssembly(final Boolean webAssembly) {
+            this.webAssembly = webAssembly;
         }
     }
 

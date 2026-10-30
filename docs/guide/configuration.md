@@ -31,6 +31,7 @@ Each property has its setter (`heartBeatPeriod`: `setHeartBeatPeriod`). Defaults
 | `servedResourceExtensions` | File types served from the classpath (`addServedResourceExtensions("json")` adds one); the servlet context's files are all served ([security](security.md)) | web files: `html`, `js`, `mjs`, `css`, `map`, images, fonts |
 | `contentSecurityPolicyEnabled` | The bootstrap page carries a Content-Security-Policy ([security](security.md)) | true |
 | `scriptSources` | More script origins the policy allows (`addScriptSources("https://cdn.example.com")`) | none |
+| `webAssemblyEnabled` | The policy allows the page to compile WebAssembly (`'wasm-unsafe-eval'`, never eval) | false |
 | `supportedLocales` | The languages of the application, the first the default: the locale of each context, `lang` and `dir` on the page ([internationalisation](i18n.md)) | none: no i18n |
 | `language` | The `lang` of the bootstrap page, a BCP 47 tag: a screen reader reads with its voice ([accessibility](accessibility.md)); with `supportedLocales`, the context's locale gives it | en |
 | `legacyClassNames` | Adds the GWT class names the 2.x CSS used ([UPGRADING.md](../../UPGRADING.md)) | false |

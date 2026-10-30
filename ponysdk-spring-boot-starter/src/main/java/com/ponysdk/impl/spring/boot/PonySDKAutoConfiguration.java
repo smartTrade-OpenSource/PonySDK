@@ -98,6 +98,7 @@ public class PonySDKAutoConfiguration {
         final PonySDKProperties.ContentSecurityPolicy policy = properties.getContentSecurityPolicy();
         map.from(policy::getEnabled).to(configuration::setContentSecurityPolicyEnabled);
         map.from(policy::getScriptSources).to(sources -> configuration.addScriptSources(sources.toArray(String[]::new)));
+        map.from(policy::getWebAssembly).to(configuration::setWebAssemblyEnabled);
 
         final PonySDKProperties.WebSocket websocket = properties.getWebsocket();
         map.from(websocket::getAllowedOrigins).to(configuration::setWsAllowedOrigins);

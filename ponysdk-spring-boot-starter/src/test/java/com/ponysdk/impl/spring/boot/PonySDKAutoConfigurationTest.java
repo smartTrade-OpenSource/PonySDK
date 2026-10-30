@@ -80,6 +80,7 @@ class PonySDKAutoConfigurationTest {
             assertEquals(defaults.isDebugMode(), actual.isDebugMode());
             assertEquals(defaults.isContentSecurityPolicyEnabled(), actual.isContentSecurityPolicyEnabled());
             assertEquals(defaults.getScriptSources(), actual.getScriptSources());
+            assertEquals(defaults.isWebAssemblyEnabled(), actual.isWebAssemblyEnabled());
             assertEquals(defaults.getServedResourceExtensions(), actual.getServedResourceExtensions());
             assertEquals(defaults.getWsAllowedOrigins(), actual.getWsAllowedOrigins());
             assertEquals(defaults.isWsOriginCheckEnabled(), actual.isWsOriginCheckEnabled());
@@ -119,6 +120,7 @@ class PonySDKAutoConfigurationTest {
             "ponysdk.served-resource-extensions=json,.txt",
             "ponysdk.content-security-policy.enabled=false",
             "ponysdk.content-security-policy.script-sources=https://cdn.example.com",
+            "ponysdk.content-security-policy.web-assembly=true",
             "ponysdk.websocket.allowed-origins=https://portal.example.com,https://other.example.com",
             "ponysdk.websocket.origin-check=false",
             "ponysdk.websocket.max-message-size=64KB",
@@ -150,6 +152,7 @@ class PonySDKAutoConfigurationTest {
                 assertTrue(configuration.getServedResourceExtensions().containsAll(Set.of("json", "txt", "js")));
                 assertFalse(configuration.isContentSecurityPolicyEnabled());
                 assertEquals(Set.of("https://cdn.example.com"), configuration.getScriptSources());
+                assertTrue(configuration.isWebAssemblyEnabled());
                 assertEquals(Set.of("https://portal.example.com", "https://other.example.com"), configuration.getWsAllowedOrigins());
                 assertFalse(configuration.isWsOriginCheckEnabled());
                 assertEquals(64 * 1024, configuration.getWsMaxInboundMessageSize());
