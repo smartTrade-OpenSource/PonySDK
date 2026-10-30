@@ -70,6 +70,11 @@ import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.sample.client.wa.PWaButton;
+import com.ponysdk.sample.client.wa.PWaCheckbox;
+import com.ponysdk.sample.client.wa.PWaInput;
+import com.ponysdk.sample.client.wa.PWaOption;
+import com.ponysdk.sample.client.wa.PWaSelect;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
@@ -175,6 +180,34 @@ final class Costs {
             wc.property("count").set(0);
             return wc;
         }, (w, i) -> ((PWebComponent) w).property("count").set(i), "property"));
+        // Web Awesome (ADR-0028): the same controls as PButton, PTextBox, PListBox and PCheckBox above, as library elements
+        l.add(new CostSpec("PWaButton", () -> {
+            final PWaButton button = new PWaButton();
+            final PElement label = Element.newPElement("span");
+            label.setInnerText("Buy");
+            button.add(label);
+            return button;
+        }, (w, i) -> ((PWaButton) w).setVariant(i % 2 == 0 ? PWaButton.Variant.BRAND : PWaButton.Variant.DANGER), "variant"));
+        l.add(new CostSpec("PWaInput", () -> new PWaInput(), (w, i) -> ((PWaInput) w).setValueJson("\"value " + i + "\""), "value"));
+        l.add(new CostSpec("PWaSelect (5 options)", () -> {
+            final PWaSelect select = new PWaSelect();
+            for (final String it : new String[] { "Spot", "Forward", "Swap", "NDF", "Option" }) {
+                final PWaOption option = new PWaOption();
+                option.setValue(it);
+                final PElement label = Element.newPElement("span");
+                label.setInnerText(it);
+                option.add(label);
+                select.add(option);
+            }
+            return select;
+        }, (w, i) -> ((PWaSelect) w).setValueJson("\"" + new String[] { "Spot", "Forward", "Swap", "NDF", "Option" }[i % 5] + "\""), "value"));
+        l.add(new CostSpec("PWaCheckbox", () -> {
+            final PWaCheckbox box = new PWaCheckbox();
+            final PElement label = Element.newPElement("span");
+            label.setInnerText("Enable");
+            box.add(label);
+            return box;
+        }, (w, i) -> ((PWaCheckbox) w).setCheckedJson("true"), "checked"));
         l.add(new CostSpec("PPushButton", () -> {
             final PPushButton b = Element.newPPushButton(Element.newPImage());
             b.setText("Push");

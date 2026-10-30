@@ -1,5 +1,17 @@
+buildscript {
+    // The node plugin's Jackson (2.14.2, 14 Dependabot alerts), raised for the build only, as in ponysdk/build.gradle
+    dependencies {
+        classpath(platform(libs.jackson.buildscript.bom))
+    }
+}
+
+plugins {
+    alias(libs.plugins.node.gradle)
+}
+
 dependencies {
     testImplementation libs.junit.jupiter
+    testImplementation libs.mockito.core // PSuite's UIContext, which WaFieldsTest swaps the writer of
     testRuntimeOnly libs.junit.platform.launcher
     testRuntimeOnly libs.parsson // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
 
@@ -44,6 +56,52 @@ def webComponents = tasks.register('webComponents', JavaExec) {
 }
 sourceSets.main.java.srcDir(webComponents)
 
+// Web Awesome (docs/decisions/0028-web-awesome.md): a pinned npm dependency (package.json), installed by the build
+// (Node comes from Gradle, as for the terminal; no network once npm's cache holds the package), copied to the served
+// resources, and its Custom Elements Manifest turned into Java classes. No CDN at run time.
+node {
+    version = '24.22.1'
+    download = true
+    nodeProjectDir = projectDir
+    npmInstallCommand = 'ci'
+}
+tasks.named('npmInstall') {
+    args = ['--ignore-scripts', '--prefer-offline'] // a dependency's install script has no business in the build
+}
+
+def webAwesome = layout.projectDirectory.dir('node_modules/@awesome.me/webawesome')
+
+// The bundled build (dist-cdn): every component a module of its own over shared chunks, served by the application's
+// own origin as script/webawesome/**, loaded by script/webawesome-loader.js when a page that uses it is built
+def webAwesomeFiles = tasks.register('webAwesomeFiles', Sync) {
+    description = 'Copies the scripts and style sheets of Web Awesome to the served resources'
+    dependsOn 'npmInstall'
+    from(webAwesome.dir('dist-cdn')) {
+        include '**/*.js', 'styles/**/*.css'
+        exclude 'react/**', 'ssr/**', 'webawesome.ssr-loader.js'
+        into 'script/webawesome'
+    }
+    from(webAwesome.file('LICENSE.md')) { into 'script/webawesome' }
+    includeEmptyDirs = false
+    into layout.buildDirectory.dir('generated/resources/webawesome')
+}
+sourceSets.main.resources.srcDir(webAwesomeFiles)
+
+// The classes of its elements, from the library's own manifest (package.json: "customElements")
+def webAwesomeClasses = tasks.register('webAwesomeClasses', JavaExec) {
+    description = 'Generates the Java classes of Web Awesome from its Custom Elements Manifest'
+    classpath = configurations.runtimeClasspath
+    mainClass = 'com.ponysdk.core.tools.WebComponentGenerator'
+    dependsOn 'npmInstall'
+    def manifest = webAwesome.file('dist/custom-elements.json')
+    def output = layout.buildDirectory.dir('generated/sources/webawesome')
+    inputs.file(manifest).withPropertyName('manifest')
+    outputs.dir(output)
+    doFirst { output.get().asFile.deleteDir() }
+    argumentProviders.add({ [manifest.asFile.path, 'com.ponysdk.sample.client.wa', output.get().asFile.path] } as CommandLineArgumentProvider)
+}
+sourceSets.main.java.srcDir(webAwesomeClasses)
+
 // The code the showcase and the portal show is the code that runs: the sources themselves, on the classpath
 processResources {
     from('src/main/java/com/ponysdk/sample/client') {
@@ -52,6 +110,10 @@ processResources {
     }
     from('src/main/java/com/ponysdk/sample/quickstart') {
         include '*.java'
+        into 'source'
+    }
+    from('src/main/java/com/ponysdk/sample/client/wa') {
+        include '*.java' // the adapters of Web Awesome's form controls (the generated classes are not sources of the repository)
         into 'source'
     }
     from('src/main/java/com/ponysdk/impl/java') {
