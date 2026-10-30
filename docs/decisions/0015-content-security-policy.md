@@ -1,6 +1,6 @@
 # ADR-0015: A Content Security Policy built by PonySDK, and JavaScript called by name
 
-- Status: Accepted
+- Status: Accepted; amended by [ADR-0029](0029-perspective.md) (WebAssembly, with `setWebAssemblyEnabled`)
 - Date: 2026-10-27
 - Supersedes: pull request #379 (2.x, `feat(csp)!`), whose API it keeps
 
