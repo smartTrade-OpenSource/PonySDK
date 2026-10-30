@@ -216,7 +216,7 @@ the bundle size and the porting rate the rest is estimated from.
 ## Outcome
 
 P0 to P9 are done on `NC_V3` (2026-10-21): the TypeScript terminal is the only one, GWT is gone from the build, the
-jar and the server.
+jar and the server. `NC_V3` was merged into master as 3.0 on 2026-10-29 (`93ae190e`, PR #366), then deleted.
 
 - Bundle: 134 KB minified, 39 KB gzip, against 122 KB gzip for one GWT permutation; 27 KB gzip before the first
   widget since ADR-0004. The jar no longer pulls `gwt-user`, elemental2 or jsinterop; the build no longer needs
