@@ -30,6 +30,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
+import com.ponysdk.core.server.application.SessionAdmin;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
@@ -94,9 +96,10 @@ final class FormsPage {
         final PButton save = Element.newPButton("Save");
         save.addStyleName("primary");
         final PButton reset = Element.newPButton("Reset");
+        final PButton move = Element.newPButton("Move this page");
         final PFlowPanel actions = Element.newPFlowPanel();
         actions.addStyleName("forms-actions");
-        actions.add(save, reset, status);
+        actions.add(save, reset, move, status);
         final PElement saved = Element.newDiv();
         saved.addStyleName("forms-saved");
         saved.setAttribute("aria-live", "polite");
@@ -142,7 +145,14 @@ final class FormsPage {
             problems.setInnerText("");
         });
         // endregion
-        status.setInnerText("No changes");
+
+        // region carry
+        // What the user typed, saved or not, valid or not, survives a move of the page to another server (ADR-0018)
+        binder.carry("ticket");
+        // What a draining server does to each of its pages: this one, here
+        move.addClickHandler(e -> SessionAdmin.of(UIContext.get()).move(UIContext.get().getID()));
+        // endregion
+        status.setInnerText(binder.getStatus().hasChanges() ? "Unsaved changes" : "No changes"); // carried back or not
 
         form.add(problems, actions);
         p.add(form, saved);
@@ -151,6 +161,10 @@ final class FormsPage {
         p.add(codeToggle("the fields and their binding", Source.code(FormsPage.class, "fields")
             + Source.code(FormsPage.class, "binder")));
         p.add(codeToggle("reading, saving and the status", Source.code(FormsPage.class, "save")));
+        p.add(el("ov-note", "Type something, valid or not, then Move this page: the page reloads in a new session, as on "
+            + "another server after a drain, and the ticket comes back as you left it, sealed and carried by the page "
+            + "(docs/decisions/0018-state-transfer.md)."));
+        p.add(codeToggle("the ticket carried by a move", Source.code(FormsPage.class, "carry")));
         return p;
     }
 

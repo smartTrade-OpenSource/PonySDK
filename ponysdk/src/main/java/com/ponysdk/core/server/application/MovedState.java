@@ -91,6 +91,12 @@ public final class MovedState {
         return values.get(name) instanceof final byte[] b ? b.clone() : null;
     }
 
+    /** The value as it was put: a Boolean, Integer, Long, Double, String or byte[] (a copy); null when absent. */
+    public Object get(final String name) {
+        final Object value = values.get(name);
+        return value instanceof final byte[] b ? b.clone() : value;
+    }
+
     byte[] encode() {
         final ByteBuffer buffer = ByteBuffer.allocate(size());
         for (final Map.Entry<String, Object> entry : values.entrySet()) {
