@@ -5,7 +5,7 @@ name: Dependency graph
 
 on:
   push:
-    branches: [master, NC_V3]
+    branches: [master]
 
 jobs:
   submit:
