@@ -80,10 +80,10 @@ public class PSchedulerTest {
      * not make the context forget the tasks it already had: the destroy cancels them.
      */
     @Test
-    public void aTaskScheduledDuringTheDestroyLeavesTheOthersToIt() throws ReflectiveOperationException {
+    public void aTaskScheduledDuringTheDestroyLeavesTheOthersToIt() throws ReflectiveOperationException, InterruptedException {
         final UIContext context = Mockito.mock(UIContext.class);
         Mockito.when(context.isAlive()).thenReturn(true);
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
         final UIRunnable first = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
         final ArgumentCaptor<ContextDestroyListener> destroy = ArgumentCaptor.forClass(ContextDestroyListener.class);
         Mockito.verify(context).addContextDestroyListener(destroy.capture());
@@ -100,12 +100,12 @@ public class PSchedulerTest {
 
     /** A context destroyed before the destroy listener is registered (which it then ignores) leaves nothing behind. */
     @Test
-    public void aTaskOfAContextDestroyedWhileItRegistersIsCancelled() throws ReflectiveOperationException {
+    public void aTaskOfAContextDestroyedWhileItRegistersIsCancelled() throws ReflectiveOperationException, InterruptedException {
         final UIContext context = Mockito.mock(UIContext.class);
         Mockito.when(context.isAlive()).thenReturn(true);
         Mockito.doAnswer(inv -> Mockito.when(context.isAlive()).thenReturn(false)).when(context)
             .addContextDestroyListener(Mockito.any());
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         final UIRunnable task = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
 
@@ -132,16 +132,34 @@ public class PSchedulerTest {
      * purging it means copying and scanning the whole queue (every session's tasks) on each session close.
      */
     @Test
-    public void aCancelledTaskLeavesTheTimerAtOnce() throws ReflectiveOperationException {
+    public void aCancelledTaskLeavesTheTimerAtOnce() throws ReflectiveOperationException, InterruptedException {
         final UIContext context = Mockito.mock(UIContext.class);
         Mockito.when(context.isAlive()).thenReturn(true);
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         final UIRunnable task = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
         assertEquals(before + 1, timerQueueSize());
         task.cancel();
 
         assertEquals(before, timerQueueSize());
+    }
+
+    /**
+     * The shared timer's size once it stays the same for 50 ms. A repeated task of a previous test, cancelled between
+     * its run and its requeue (the JDK's reExecutePeriodic), leaves at its next due time: read before, the size would
+     * count it, and the test would see it go as its own task's doing.
+     */
+    private static int settledQueueSize() throws InterruptedException {
+        int size = queueSize();
+        for (int stable = 0; stable < 10; stable++) {
+            Thread.sleep(5);
+            final int now = queueSize();
+            if (now != size) {
+                size = now;
+                stable = -1;
+            }
+        }
+        return size;
     }
 
     private static int queueSize() {
@@ -182,7 +200,7 @@ public class PSchedulerTest {
         final CountDownLatch fixedDelay = new CountDownLatch(2);
         final UIContext context = runningContext();
         UIContext.setCurrent(context);
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         final UIRunnable rate = PScheduler.scheduleAtFixedRate(fixedRate::countDown, Duration.ofMillis(1));
         final UIRunnable delayed = PScheduler.scheduleAtFixedRate(delayedRate::countDown, Duration.ZERO, Duration.ofMillis(1));
@@ -209,7 +227,7 @@ public class PSchedulerTest {
             ran.countDown();
             throw new IllegalStateException("boom");
         });
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         PScheduler.scheduleAtFixedRate(context, () -> {}, Duration.ofMillis(1));
         assertTrue(ran.await(5, TimeUnit.SECONDS));
@@ -234,7 +252,7 @@ public class PSchedulerTest {
             ran.countDown();
             return false;
         });
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
         assertTrue(ran.await(5, TimeUnit.SECONDS));
@@ -253,7 +271,7 @@ public class PSchedulerTest {
     public void aRepeatedTaskOfADeadContextNeverRuns() throws Exception {
         final UIContext context = Mockito.mock(UIContext.class);
         Mockito.when(context.isAlive()).thenReturn(false);
-        final int before = timerQueueSize();
+        final int before = settledQueueSize();
 
         final UIRunnable task = PScheduler.scheduleWithFixedDelay(context, () -> {}, Duration.ZERO, Duration.ofMillis(1));
 
