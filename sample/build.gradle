@@ -1,3 +1,5 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 buildscript {
     // The node plugin's Jackson (2.14.2, 14 Dependabot alerts), raised for the build only, as in ponysdk/build.gradle
     dependencies {
@@ -102,11 +104,51 @@ def webAwesomeClasses = tasks.register('webAwesomeClasses', JavaExec) {
 }
 sourceSets.main.java.srcDir(webAwesomeClasses)
 
+// FINOS Perspective (ADR-0029), served by the showcase itself, never from a CDN: pinned in perspective/package.json,
+// installed by npm, and the files the browser loads copied into the served resources (script/perspective/<package>/dist/...,
+// the layout of the packages, which their modules resolve each other by). Only the Perspective page loads them.
+// its own package.json and lock (sample/perspective), installed with the Node of the block below
+def perspectiveInstall = tasks.register('perspectiveInstall', NpmTask) {
+    description = 'Installs the pinned Perspective packages (sample/perspective/package-lock.json)'
+    dependsOn tasks.named('npmSetup')
+    workingDir = file('perspective')
+    args = ['ci', '--ignore-scripts', '--prefer-offline']
+    inputs.files('perspective/package.json', 'perspective/package-lock.json')
+    outputs.dir('perspective/node_modules')
+}
+def perspectiveFiles = [
+    'client'          : ['dist/esm/perspective.js', 'dist/cdn/perspective-server.worker.js'],
+    'server'          : ['dist/wasm/perspective-server.wasm'],
+    'viewer'          : ['dist/esm/perspective-viewer.js', 'dist/wasm/perspective-viewer.js', 'dist/wasm/perspective-viewer.wasm',
+                         'dist/wasm/snippets/**/*.js', 'dist/css/pro.css', 'dist/css/pro-dark.css'],
+    'viewer-datagrid' : ['dist/cdn/perspective-viewer-datagrid.js'],
+    'viewer-charts'   : ['dist/cdn/perspective-viewer-charts.js'],
+]
+def perspectiveOutput = layout.buildDirectory.dir('generated/perspective')
+def copyPerspective = tasks.register('copyPerspective', Sync) {
+    description = 'Copies the Perspective files the browser loads, and their licences, into script/perspective'
+    dependsOn perspectiveInstall
+    into perspectiveOutput
+    perspectiveFiles.each { name, files ->
+        from(file("perspective/node_modules/@perspective-dev/${name}")) {
+            include files
+            include 'LICENSE*'
+            into name
+        }
+    }
+    includeEmptyDirs = false
+}
+
 // The code the showcase and the portal show is the code that runs: the sources themselves, on the classpath
 processResources {
+    from(copyPerspective) { into 'script/perspective' }
     from('src/main/java/com/ponysdk/sample/client') {
         include '*.java'
         into 'source' // the showcase's Code panels (Source.java)
+    }
+    from('src/main/java/com/ponysdk/sample/perspective') {
+        include '*.java'
+        into 'source'
     }
     from('src/main/java/com/ponysdk/sample/quickstart') {
         include '*.java'

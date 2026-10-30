@@ -166,7 +166,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"☑", "Forms"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"✦", "Web Awesome"}, {"▦", "FlexLayout"}, {"∿", "Charts"}, {"⋯", "Misc"}, {"◐", "Theme"},
-            {"⚡", "Performance"}, {"↯", "Client commands"}, {"≋", "Streams"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"⚡", "Performance"}, {"↯", "Client commands"}, {"≋", "Streams"}, {"▤", "Perspective"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}, {"Aa", "i18n"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -282,6 +282,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
             case "Client commands" -> ClientCommandsPage.build(schedulers);
             case "Streams" -> StreamsPage.build(uiContext, schedulers);
+            case "Perspective" -> PerspectivePage.build(uiContext, schedulers);
             case "Signals" -> SignalsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
             case "Binary protocol" -> BinaryProtocolPage.build(schedulers);

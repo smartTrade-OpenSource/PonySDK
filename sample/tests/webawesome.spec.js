@@ -71,9 +71,10 @@ test.describe('Web Awesome', () => {
     const errors = await track(page);
     const response = await page.goto(BASE_URL + '#web-awesome', { waitUntil: 'domcontentloaded' });
     const policy = response.headers()['content-security-policy'];
-    expect(policy).toMatch(/^script-src 'self' 'sha256-[A-Za-z0-9+/=]+';/);
+    // the showcase's policy also lets the Perspective page compile WebAssembly (ADR-0029): still no eval, no inline
+    expect(policy).toMatch(/^script-src 'self' 'sha256-[A-Za-z0-9+/=]+'( 'wasm-unsafe-eval' blob:)?;/);
     expect(policy).not.toContain('unsafe-inline');
-    expect(policy).not.toContain('unsafe-eval');
+    expect(policy).not.toMatch(/'unsafe-eval'/);
     await open(page, errors);
 
     // Shadow roots, adopted style sheets, and the library's inline SVG icons (the system library: data: images)

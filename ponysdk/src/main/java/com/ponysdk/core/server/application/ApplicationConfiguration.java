@@ -118,6 +118,8 @@ public class ApplicationConfiguration {
     private List<Locale> supportedLocales = List.of();
     /** See {@link #addScriptSources(String...)}. */
     private final Set<String> scriptSources = new LinkedHashSet<>();
+    /** See {@link #setWebAssemblyEnabled(boolean)}. */
+    private boolean webAssemblyEnabled;
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
     private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
     /**
@@ -490,6 +492,7 @@ public class ApplicationConfiguration {
         public Builder servedResourceExtensions(final String... v)  { config.addServedResourceExtensions(v); return this; }
         public Builder contentSecurityPolicyEnabled(final boolean v) { config.setContentSecurityPolicyEnabled(v); return this; }
         public Builder scriptSources(final String... v)            { config.addScriptSources(v); return this; }
+        public Builder webAssemblyEnabled(final boolean v)         { config.setWebAssemblyEnabled(v); return this; }
         public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
         public Builder hotReload(final boolean v)                  { config.setHotReload(v); return this; }
         public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
@@ -757,6 +760,20 @@ public class ApplicationConfiguration {
      */
     public void addScriptSources(final String... sources) {
         scriptSources.addAll(Arrays.asList(sources));
+    }
+
+    public boolean isWebAssemblyEnabled() {
+        return webAssemblyEnabled;
+    }
+
+    /**
+     * Lets the page compile WebAssembly: {@code 'wasm-unsafe-eval'} in {@code script-src}, which does not allow
+     * {@code eval} or {@code new Function}. Off by default; a page that loads a WebAssembly library (a query engine, a
+     * codec) turns it on. A library that starts its workers from a script it builds also needs
+     * {@code addScriptSources("blob:")}.
+     */
+    public void setWebAssemblyEnabled(final boolean webAssemblyEnabled) {
+        this.webAssemblyEnabled = webAssemblyEnabled;
     }
 
     public int getMaxProtocolVersion() {

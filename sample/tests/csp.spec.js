@@ -18,9 +18,9 @@ async function recordViolations(page) {
 test('the page forbids inline scripts and eval, and is framed by its embedding sites only', async ({ page }) => {
   const response = await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
   const policy = response.headers()['content-security-policy'];
-  expect(policy).toMatch(/^script-src 'self' 'sha256-[A-Za-z0-9+/=]+';/);
+  expect(policy).toMatch(/^script-src 'self' 'sha256-[A-Za-z0-9+/=]+'( 'wasm-unsafe-eval' blob:)?;/); // the Perspective page's, ADR-0029
   expect(policy).not.toContain('unsafe-inline');
-  expect(policy).not.toContain('unsafe-eval');
+  expect(policy).not.toMatch(/'unsafe-eval'/); // 'wasm-unsafe-eval', for the Perspective page, is not eval (ADR-0029)
   expect(policy).toContain("object-src 'none'; base-uri 'self'; frame-ancestors 'self' http://");
   expect(response.headers()['x-content-type-options']).toBe('nosniff');
 });

@@ -11,7 +11,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /** The tabs, by the token of their URL (UISampleEntryPoint). */
 const TABS = ['overview', 'code', 'inputs', 'forms', 'layouts', 'data', 'datagrid', 'web-components', 'web-awesome', 'flexlayout',
-  'charts', 'misc', 'theme', 'performance', 'streams', 'signals', 'component-costs', 'binary-protocol', 'reconnection',
+  'charts', 'misc', 'theme', 'performance', 'streams', 'perspective', 'signals', 'component-costs', 'binary-protocol', 'reconnection',
   'embedding', 'fdc3', 'routing'];
 
 /**
@@ -27,6 +27,14 @@ const ALLOWED = [
       + 'scroller without a tabbable child one (the grid is one tab stop, a cell, ADR-0025), and tabindex="-1" stops that. '
       + 'axe then finds no tabbable content in the region. The keyboard reaches all of it: the arrows scroll the active '
       + 'cell into view (datagrid-a11y.spec.js).',
+  },
+  {
+    rule: 'button-name',
+    html: /^<button class="psp-tab-settings"><\/button>$/,
+    why: 'The button that opens Perspective\'s settings panel, in the title bar of its viewer, is an icon without a text or an '
+      + 'aria-label: the library\'s own markup (@perspective-dev/viewer 5.6.0, in its shadow DOM), which the application cannot '
+      + 'name. Its contrast was the library\'s too; the showcase fixes that one with the library\'s own custom properties '
+      + '(showcase.css, ADR-0029).',
   },
   {
     rule: 'aria-required-children',
@@ -70,6 +78,7 @@ async function openTab(page, slug) {
   await expect.poll(async () => (await page.locator('.pony-content').innerText()).trim().length, { timeout: 15000 })
     .toBeGreaterThan(0);
   if (slug === 'datagrid') await expect(page.getByRole('grid', { name: 'Sample data' }).getByRole('gridcell').first()).toBeVisible({ timeout: 20000 });
+  if (slug === 'perspective') await expect(page.locator('perspective-viewer regular-table tbody tr').first()).toBeVisible({ timeout: 30000 });
   await page.waitForTimeout(800);
 }
 

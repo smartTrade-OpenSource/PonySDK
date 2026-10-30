@@ -386,13 +386,15 @@ public class BootstrapServlet extends HttpServlet {
 
     /**
      * The policy of the page PonySDK builds (ADR-0015): its one inline script by hash, the script origins the
-     * configuration names, no eval, frames by the pages that embed it. An
+     * configuration names, no eval (WebAssembly compilation when the configuration allows it, ADR-0029), frames by
+     * the pages that embed it. An
      * application that adds inline scripts to the page overrides this to allow them.
      */
     protected String buildContentSecurityPolicy() {
         final Set<String> scripts = new LinkedHashSet<>();
         scripts.add("'self'");
         scripts.add(EARLY_SOCKET_HASH);
+        if (configuration.isWebAssemblyEnabled()) scripts.add("'wasm-unsafe-eval'");
         final Set<String> configured = configuration.getJavascript();
         if (configured != null) configured.forEach(url -> {
             final String origin = originOf(url);

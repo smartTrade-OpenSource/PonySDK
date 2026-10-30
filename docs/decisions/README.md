@@ -34,3 +34,4 @@ what was measured once it was built. They are written for the people who change 
 | [0026](0026-chart.md) | A chart drawn by the terminal, fed by typed arrays | Accepted |
 | [0027](0027-client-commands.md) | Client commands, run by the terminal on a DOM event without a round trip | Accepted |
 | [0028](0028-web-awesome.md) | Web Awesome, a design system driven from Java through its Custom Elements Manifest | Accepted |
+| [0029](0029-perspective.md) | FINOS Perspective in a PonySDK screen, a table the server feeds with typed arrays | Accepted |

@@ -565,6 +565,20 @@ public class BootstrapServletTest {
         assertFalse(policy.contains("unsafe-eval"), policy);
     }
 
+    /** ADR-0029: a WebAssembly library compiles its module, which `'wasm-unsafe-eval'` allows and eval is not. */
+    @Test
+    public void thePolicyAllowsWebAssemblyOnlyWhenAskedAndStillNeverEval() throws Exception {
+        final String off = pageHeaders(configuration()).get("Content-Security-Policy");
+        assertFalse(off.contains("wasm-unsafe-eval"), off);
+
+        final ApplicationConfiguration config = configuration();
+        config.setWebAssemblyEnabled(true);
+        config.addScriptSources("blob:");
+        final String on = pageHeaders(config).get("Content-Security-Policy");
+        assertTrue(on.matches("script-src 'self' 'sha256-[A-Za-z0-9+/=]+' 'wasm-unsafe-eval' blob:; object-src.*"), on);
+        assertFalse(on.contains("'unsafe-eval'"), on);
+    }
+
     @Test
     public void anApplicationThatSendsItsOwnPolicyTurnsPonySdksOff() throws Exception {
         final ApplicationConfiguration config = configuration();

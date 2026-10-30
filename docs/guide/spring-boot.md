@@ -89,6 +89,7 @@ of [`ApplicationConfiguration`](configuration.md). Your IDE completes them from 
 | `ponysdk.drain-timeout` | On a graceful shutdown, the live pages move to the other servers over this time; 0 stops at once (below) | 10s |
 | `ponysdk.content-security-policy.enabled` | The bootstrap page carries a Content-Security-Policy ([security](security.md)) | true |
 | `ponysdk.content-security-policy.script-sources` | More script origins the policy allows | none |
+| `ponysdk.content-security-policy.web-assembly` | The page may compile WebAssembly (`'wasm-unsafe-eval'`, never eval) | false |
 | `ponysdk.websocket.allowed-origins` | The other origins allowed to connect: the pages that embed the application ([embedding](embedding.md)) | none: same origin only |
 | `ponysdk.websocket.origin-check` | The upgrade checks the `Origin` header | true |
 | `ponysdk.websocket.max-message-size` | Largest message a client sends | 1MB |
