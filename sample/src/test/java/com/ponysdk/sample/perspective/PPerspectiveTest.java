@@ -363,8 +363,11 @@ class PPerspectiveTest {
         final Instant at = Instant.parse("2026-10-30T12:00:00Z");
 
         final long before = System.currentTimeMillis();
+        // each flushed before the next is offered: offered together, the conflator would merge them into fewer flushes
         onUi(() -> blotter.update(row("id", "A", "open", true, "day", LocalDate.of(2026, 10, 30), "at", at, "px", -12.34, "n", 7L)));
+        awaitFlushes(blotter, 1);
         onUi(() -> blotter.update(row("id", "B", "at", Date.from(at), "px", 3)));
+        awaitFlushes(blotter, 2);
         onUi(() -> blotter.update(row("id", "C", "at", at.toEpochMilli(), "n", Integer.MIN_VALUE)));
         awaitFlushes(blotter, 3);
         final long after = System.currentTimeMillis();
