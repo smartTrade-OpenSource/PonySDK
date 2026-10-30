@@ -4,6 +4,7 @@
 
 import { ClientToServerModel as C } from '#model';
 import { about } from '../protocol/messages.ts';
+import { compileCommands, runCommands } from './commands.ts';
 import type { Context } from './object.ts';
 
 /** LISTEN_EVENT's JSON (docs/decisions/0003-protocol-v4-listeners.md). */
@@ -16,6 +17,10 @@ interface Options {
     stop?: boolean;
     capture?: boolean;
     lock?: boolean;
+    /** Client commands (ADR-0027): [operation, target id, arguments...], run before the event is sent. */
+    commands?: unknown[][];
+    /** False when no server listener wants the event: only the commands run. */
+    send?: boolean;
 }
 
 /** A DOM event listened to by name: stop() is UNLISTEN_EVENT, handled() EVENT_HANDLED. */
@@ -93,7 +98,8 @@ function rateLimited(send: (fields: Fields | null) => void, options: Options, si
 
 /**
  * Listens to a DOM event by name for an object (LISTEN_EVENT). With lock, an event sent locks the name until the
- * server answers it (EVENT_HANDLED): the element is busy, the events of the name meanwhile are not sent.
+ * server answers it (EVENT_HANDLED): the element is busy, the events of the name meanwhile are not sent. The commands
+ * (ADR-0027) run on every event, at once and in order, before it is sent: the rate options limit the sending only.
  */
 export function listenByName(context: Context, objectId: number, element: EventTarget, json: string): NamedListener {
     const options = JSON.parse(json) as Options;
@@ -121,10 +127,21 @@ export function listenByName(context: Context, objectId: number, element: EventT
         context.send(message);
     }, options, signal);
     const paths = options.fields ?? [];
+    const commands = compileCommands(context, objectId, options.commands ?? []);
+    const sends = options.send !== false;
+    let running = false; // a command that dispatches this very event does not run its own commands again
     element.addEventListener(options.name, event => context.guard(() => {
         if (options.prevent) event.preventDefault();
         if (options.stop) event.stopPropagation();
-        deliver(paths.length > 0 ? readFields(event, paths) : null);
+        if (commands.length > 0 && !running) {
+            running = true;
+            try {
+                runCommands(context, commands);
+            } finally {
+                running = false;
+            }
+        }
+        if (sends) deliver(paths.length > 0 ? readFields(event, paths) : null);
     }), { signal, capture: options.capture === true, passive: options.prevent !== true });
     return { name: options.name, stop: () => controller.abort(), handled };
 }

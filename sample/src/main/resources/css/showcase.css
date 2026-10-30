@@ -977,6 +977,19 @@ div.selected-row { background-color: var(--selected-row); }
 .fdc3-channels .pony-Button.fdc3-channel-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
 .fdc3-received, .fdc3-raised { display: block; color: var(--text); font-variant-numeric: tabular-nums; margin: 4px 0; }
 
+/* ── Client commands page: a panel shown by the server, and by the terminal (docs/decisions/0027-client-commands.md) ── */
+.cmd-slow { display: block; margin: 0 0 16px; }
+.cmd-columns { align-items: start; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 0 0 16px; }
+.cmd-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 18px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.cmd-card .pony-section-title { margin: 0; }
+.cmd-panel { align-self: stretch; padding: 14px; border: 1px dashed var(--border); border-radius: var(--radius); color: var(--text-2); }
+.cmd-card .pony-Button.cmd-open { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.cmd-seen, .cmd-knows { font: 12.5px var(--mono); color: var(--text-3); }
+.cmd-pill { display: block; margin: 8px 0; padding: 6px 10px; width: fit-content; border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text-3); }
+.cmd-pill.cmd-on { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+
 /* ── Narrow screens: the sidebar becomes a horizontal strip ─────────────── */
 @media (max-width: 960px) {
     .rc-layout { grid-template-columns: minmax(0, 1fr); }
