@@ -1,5 +1,12 @@
 import com.github.gradle.node.npm.task.NpmTask
 
+buildscript {
+    // The node plugin's Jackson (2.14.2, 14 Dependabot alerts), raised for the build only: PonySDK uses no Jackson
+    dependencies {
+        classpath(platform(libs.jackson.buildscript.bom))
+    }
+}
+
 plugins {
     id 'jacoco'
     alias(libs.plugins.node.gradle)
