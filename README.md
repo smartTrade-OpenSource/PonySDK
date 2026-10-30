@@ -45,8 +45,9 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 - A server that stops (a deployment, a scale-in, a spot interruption) moves its pages to the other servers first:
   `setDrainMillis`, in waves, each page reloaded where it was; `/health` for the balancer. Behind an ALB on ECS or
   EC2, no shared store ([deployment](docs/guide/deployment.md)). On one machine: `./gradlew :sample:runTwoServers`
-- A moved page carries the state its application declares (`uiContext.onMove`), sealed with AES-GCM under a key
-  every server shares, through the page itself: no session store ([ADR-0018](docs/decisions/0018-state-transfer.md))
+- A moved page carries the state its application declares (`uiContext.onMove`), and a form what was typed in it
+  (`binder.carry`), sealed with AES-GCM under a key every server shares, through the page itself: no session store
+  ([ADR-0018](docs/decisions/0018-state-transfer.md))
 
 **Observability**
 - OpenTelemetry instrumentation via `PonySDKMetrics` (OTel API only, SDK goes in your app)

@@ -21,6 +21,12 @@ PonySDK's screens hold lambdas, threads' tasks and subscriptions: they cannot be
 2. The application declares what a move carries: `uiContext.onMove(Consumer<MovedState>)` fills a `MovedState`, a
    map of names to values of the protocol's own types (boolean, int, long, double, string, bytes), when the context
    is moved. The next server's context finds it in `uiContext.getMovedState()` before its entry point starts.
+   `onMove` adds a listener (the application's, a form's) and returns its registration.
+   Amended 2026-10-30: `Binder.carry(name)` declares a form's fields, as Phoenix LiveView recovers its forms after a
+   reconnection without code. Each field's value as it shows (a text, a boolean, a number, a date, an enum constant;
+   invalid ones included) goes under `name/<index of the binding>`; the same call on the next server, once the fields
+   are bound and the bean read, puts them back, and the form has the changes to save it had. Both servers bind the
+   fields in the same order; a field of another type, an enum renamed, is left as the bean shows it.
 3. The page carries it, not a store: the state goes to the client in the block that destroys the context
    (`CONTEXT_STATE`, a server-to-client key appended to the protocol, before `DESTROY_CONTEXT`), the terminal keeps it
    in the tab's `sessionStorage`, and the reloaded page offers it in its WebSocket handshake (parameter `ms`). No

@@ -165,6 +165,32 @@ test.describe('Forms', () => {
     expect(errors).toEqual([]);
   });
 
+  // Binder.carry (ADR-0018): what was typed comes back after the page moves, saved or not, valid or not
+  test('a move of the page keeps the ticket as it was left', async ({ page }) => {
+    const errors = trackErrors(page);
+    await open(page);
+    await enter(page.getByLabel('Instrument'), 'GBPUSD');
+    await page.getByLabel('Side').selectOption({ label: 'Sell' });
+    await page.getByLabel('Type').selectOption({ label: 'Limit' });
+    await enter(page.getByLabel('Quantity'), '12x'); // invalid: carried too
+    await page.getByRole('checkbox', { name: 'I confirm the details' }).check();
+    await expect(status(page)).toHaveText('Unsaved changes');
+
+    const reloaded = page.waitForEvent('load');
+    await page.getByRole('button', { name: 'Move this page' }).click();
+    await reloaded;
+
+    await expect(page.getByLabel('Instrument')).toHaveValue('GBPUSD', { timeout: 10000 });
+    await expect(page.getByLabel('Side')).toHaveValue(/.+/);
+    expect(await page.getByLabel('Side').evaluate(select => select.selectedOptions[0].textContent)).toBe('Sell');
+    expect(await page.getByLabel('Type').evaluate(select => select.selectedOptions[0].textContent)).toBe('Limit');
+    await expect(page.getByLabel('Quantity')).toHaveValue('12x');
+    await expect(page.getByLabel('Quantity')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByRole('checkbox', { name: 'I confirm the details' })).toBeChecked();
+    await expect(status(page)).toHaveText('Unsaved changes');
+    expect(errors).toEqual([]);
+  });
+
   test('the code panels are the running source', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: /Show the code: the bean and its constraints/ }).click();

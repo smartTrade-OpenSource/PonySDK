@@ -47,6 +47,16 @@ public class MovedStateTest {
     }
 
     @Test
+    public void aValueIsReadAsItWasPutBytesAsACopy() {
+        final MovedState state = new MovedState().putLong("at", 7L).putBytes("raw", new byte[] { 1 });
+
+        assertEquals(7L, state.get("at"));
+        ((byte[]) state.get("raw"))[0] = 9;
+        assertArrayEquals(new byte[] { 1 }, (byte[]) state.get("raw"));
+        assertNull(state.get("missing"));
+    }
+
+    @Test
     public void aNullIsNotCarriedAndRemovesTheName() {
         final MovedState state = new MovedState().putString("s", "a").putBytes("b", new byte[] { 1 });
         state.putString("s", null).putBytes("b", null);

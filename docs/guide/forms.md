@@ -146,6 +146,24 @@ Hibernate Validator: one warning in the log), nothing breaks and no constraint a
 of the binding are still there. `new Binder<>()` never applies a constraint. The first binder of a bean class starts
 Hibernate Validator, about half a second once per JVM.
 
+## A move to another server
+
+When a server stops, its pages move to the others (a drain, [deployment](deployment.md)). With the state transfer
+key set, one call keeps what the user typed:
+
+```java
+binder.readBean(order);
+binder.carry("order"); // what the fields show goes with the page, and comes back here on the next server
+```
+
+- Every field's value as it shows is carried, saved or not, valid or not: a text, a boolean, a number, a date, an
+  enum constant. A field of another type is not carried.
+- On the next server the same call, once the fields are bound and the bean read, puts the values back and validates
+  them: the form has the changes to save, and the errors, it had.
+- Both servers bind the fields in the same order (the same code does). `carry` returns a registration: remove it when
+  the form leaves the screen before the context does.
+- The showcase's Forms page has Move this page: type, then move, and the ticket comes back.
+
 ## Testing
 
 A form is tested with [`PSuite`](testing.md) and no browser: `PEmulator.valueChange` and a client message to the widget

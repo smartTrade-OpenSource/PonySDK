@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,6 +36,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.ponysdk.core.server.application.MovedState;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -285,6 +288,72 @@ public final class Binder<B> {
     public HandlerRegistration addStatusChangeListener(final Consumer<Status> listener) {
         listeners.add(listener);
         return () -> listeners.remove(listener);
+    }
+
+    // ---- a move to another server --------------------------------------------------------------------------
+
+    /** The suffix of a date, carried as its milliseconds. */
+    private static final String DATE = "#date";
+    /** The suffix of an enum constant, carried as its class and its name. */
+    private static final String ENUM = "#enum";
+
+    /**
+     * What the user typed survives a move of the page to another server (ADR-0018): as the context moves, each
+     * field's value as it shows goes in the moved state under {@code name}; on the next server the same call, made
+     * once the fields are bound and the bean read, puts them back, invalid ones included, and the form has the
+     * changes to save it had. Texts, booleans, numbers, dates and enum constants are carried; a field of another type
+     * is not. Both
+     * servers bind the fields in the same order. Needs the state transfer key; without it, nothing is carried.
+     *
+     * @return what stops carrying them, when the form leaves the screen before the context does
+     */
+    public HandlerRegistration carry(final String name) {
+        final UIContext context = UIContext.get();
+        restore(context.getMovedState(), name);
+        return context.onMove(state -> save(state, name));
+    }
+
+    private void save(final MovedState state, final String name) {
+        for (int i = 0; i < bindings.size(); i++) {
+            final String key = name + '/' + i;
+            switch (bindings.get(i).field.getValue()) {
+                case final String text -> state.putString(key, text);
+                case final Boolean b -> state.putBoolean(key, b);
+                case final Integer n -> state.putInt(key, n);
+                case final Long n -> state.putLong(key, n);
+                case final Double n -> state.putDouble(key, n);
+                case final Date date -> state.putLong(key + DATE, date.getTime());
+                case final Enum<?> constant -> state.putString(key + ENUM, constant.getDeclaringClass().getName() + ':' + constant.name());
+                case null, default -> { // nothing a move can carry
+                }
+            }
+        }
+    }
+
+    private void restore(final MovedState state, final String name) {
+        for (int i = 0; i < bindings.size(); i++) {
+            final BindingImpl<?> binding = bindings.get(i);
+            final String key = name + '/' + i;
+            final Object value = state.get(key + DATE) instanceof final Long time ? new Date(time)
+                    : state.get(key + ENUM) instanceof final String constant ? constant(constant) : state.get(key);
+            final Object shown = binding.field.getValue();
+            // a field of another type than the one that was carried (the screen changed between the servers): left
+            if (value == null || shown != null && !shown.getClass().isInstance(value)) continue;
+            binding.field.setValue(value);
+            changed(binding);
+        }
+    }
+
+    /** Sealed by a server of this application, never by the client: the class is this application's. */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Object constant(final String carried) {
+        final int colon = carried.indexOf(':');
+        try {
+            final Class type = Class.forName(carried.substring(0, colon), false, Binder.class.getClassLoader());
+            return Enum.valueOf(type, carried.substring(colon + 1));
+        } catch (final ClassNotFoundException | IllegalArgumentException e) {
+            return null; // renamed between the two servers' versions: left as the bean shows it
+        }
     }
 
     private void fire() {
