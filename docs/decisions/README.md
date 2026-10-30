@@ -32,3 +32,4 @@ what was measured once it was built. They are written for the people who change 
 | [0024](0024-default-theme.md) | A default theme for the widgets: tokens, light and dark, scoped by a class | Accepted |
 | [0025](0025-datagrid-accessibility.md) | DataGrid2 read as a grid by a screen reader, and driven from the keyboard | Accepted |
 | [0026](0026-chart.md) | A chart drawn by the terminal, fed by typed arrays | Accepted |
+| [0027](0027-client-commands.md) | Client commands, run by the terminal on a DOM event without a round trip | Accepted |

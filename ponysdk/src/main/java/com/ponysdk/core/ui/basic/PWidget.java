@@ -156,12 +156,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private static final class EventListening {
+        /** What the terminal was told, null before the first LISTEN_EVENT. */
         private PEventOptions options;
         private final List<Consumer<PEvent>> listeners = new ArrayList<>(1);
-
-        private EventListening(final PEventOptions options) {
-            this.options = options;
-        }
+        /** The registration of a listening with commands and no listener (ADR-0027). */
+        private Object commandsOnly;
     }
 
     private Extras wx;
@@ -525,12 +524,49 @@ public abstract class PWidget extends PObject implements IsPWidget {
      * {@code addEventListener(name, Consumer<JsonValue>)}.
      *
      * @throws IllegalStateException when the context speaks a protocol below 4 ({@code maxProtocolVersion}), whose
-     *         terminal cannot listen to events by name
+     *         terminal cannot listen to events by name, or when the name already has commands without a listener
+     *         ({@link #addEventListener(String, PEventOptions)})
      */
     public HandlerRegistration addEventListener(final String name, final PEventOptions options, final Consumer<PEvent> listener) {
+        Objects.requireNonNull(listener, "listener");
+        final EventListening listening = entry(name, options);
+        if (listening.commandsOnly != null) throw new IllegalStateException(this + ": '" + name
+                + "' has commands without listener: give them as PEventOptions.commands of this listener");
+        listening.listeners.add(listener);
+        tell(name, listening, options);
+        return () -> removeEventListener(name, listener);
+    }
+
+    /**
+     * Runs the commands of the options in the browser on a DOM event of this widget, and sends nothing to the server
+     * (docs/decisions/0027-client-commands.md). With a server listener too, give the commands to it:
+     * {@link PEventOptions#commands(PCommands)} and {@link #addEventListener(String, PEventOptions, Consumer)}. Options
+     * given again for a name replace the previous ones, and the registration removed stops the terminal.
+     *
+     * @throws IllegalArgumentException when the options hold no command
+     * @throws IllegalStateException when the context speaks a protocol below 4, or the name has a listener
+     */
+    public HandlerRegistration addEventListener(final String name, final PEventOptions options) {
+        Objects.requireNonNull(options, "options");
+        if (!options.hasCommands()) throw new IllegalArgumentException("No command: this would listen to '" + name + "' for nothing");
+        final EventListening listening = entry(name, options);
+        if (!listening.listeners.isEmpty()) throw new IllegalStateException(this + ": '" + name
+                + "' has a listener: give the commands as PEventOptions.commands of one of its listeners");
+        final Object registration = new Object();
+        listening.commandsOnly = registration;
+        tell(name, listening, options);
+        return () -> {
+            final EventListening current = listening(name);
+            if (current == null || current.commandsOnly != registration) return; // removed, or replaced by another
+            wx.eventListening.remove(name);
+            saveListening(ServerToClientModel.UNLISTEN_EVENT, name);
+        };
+    }
+
+    /** The listening of the name, created if need be: the arguments and the protocol checked. */
+    private EventListening entry(final String name, final PEventOptions options) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(options, "options");
-        Objects.requireNonNull(listener, "listener");
         final int protocol = UIContext.get().getProtocolVersion();
         if (protocol < ProtocolVersion.LISTENERS) {
             throw new IllegalStateException(this + ": listening to '" + name + "' needs protocol " + ProtocolVersion.LISTENERS
@@ -539,12 +575,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Extras x = wx();
         if (x.eventListening == null) x.eventListening = new HashMap<>(2);
         EventListening listening = x.eventListening.get(name);
-        final boolean tell = listening == null || !listening.options.equals(options);
-        if (listening == null) x.eventListening.put(name, listening = new EventListening(options));
+        if (listening == null) x.eventListening.put(name, listening = new EventListening());
+        return listening;
+    }
+
+    /** Tells the terminal the options when they are not those it has: it sends the event when a listener wants it. */
+    private void tell(final String name, final EventListening listening, final PEventOptions options) {
+        final boolean tell = !options.equals(listening.options);
         listening.options = options;
-        listening.listeners.add(listener);
-        if (tell) saveListening(ServerToClientModel.LISTEN_EVENT, options.toJson(name));
-        return () -> removeEventListener(name, listener);
+        if (tell) saveListening(ServerToClientModel.LISTEN_EVENT, options.toJson(name, !listening.listeners.isEmpty()));
     }
 
     private void removeEventListener(final String name, final Consumer<PEvent> listener) {

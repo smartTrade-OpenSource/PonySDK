@@ -62,6 +62,8 @@ export interface Context {
     sendRaw(message: Message): void;
     /** The object with this id; a missing one is reported to the server. */
     object(id: number): TerminalObject | undefined;
+    /** The object with this id, or undefined without a word: for what may be gone (a command's target, ADR-0027). */
+    peek(id: number): TerminalObject | undefined;
     addOnFactory(signature: string): AddOnFactory | undefined;
     /** Logs and reports to the server. */
     warn(message: string, objectId?: number): void;

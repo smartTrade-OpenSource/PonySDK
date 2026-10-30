@@ -166,7 +166,7 @@ public class UISampleEntryPoint implements EntryPoint {
             {"◎", "Overview"}, {"</>", "Code"},
             {"⌨", "Inputs"}, {"☑", "Forms"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"▦", "FlexLayout"}, {"∿", "Charts"}, {"⋯", "Misc"}, {"◐", "Theme"},
-            {"⚡", "Performance"}, {"≋", "Streams"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"⚡", "Performance"}, {"↯", "Client commands"}, {"≋", "Streams"}, {"⇅", "Signals"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
             {"⧉", "Embedding"}, {"⇄", "FDC3"}, {"↦", "Routing"}, {"Aa", "i18n"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -279,6 +279,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case "Misc" -> MiscPage.build(schedulers);
             case "Theme" -> ThemePage.build();
             case "Performance" -> PerformancePage.build(uiContext, schedulers);
+            case "Client commands" -> ClientCommandsPage.build(schedulers);
             case "Streams" -> StreamsPage.build(uiContext, schedulers);
             case "Signals" -> SignalsPage.build(uiContext, schedulers);
             case "Component costs" -> CostsPage.build();
