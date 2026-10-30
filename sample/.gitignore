@@ -14,3 +14,7 @@ test-popup.js
 test-results/
 package.json
 package-lock.json
+
+# The showcase's Perspective pins (ADR-0029) are tracked, unlike the Playwright ones above
+!/perspective/package.json
+!/perspective/package-lock.json
