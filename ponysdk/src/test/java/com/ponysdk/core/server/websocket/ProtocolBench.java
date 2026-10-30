@@ -481,6 +481,97 @@ public final class ProtocolBench {
         }, 5_000, 20_000);
     }
 
+    /** A table's batch of rows sent as a typed array, what the sample's PPerspective writes (docs/decisions/0029-perspective.md). */
+    private static final class BatchAddOn extends PAddOn {
+        void batch(final Object... args) {
+            callTerminalMethod("batch", args);
+        }
+    }
+
+    /**
+     * ADR-0029: one flush of a blotter, 100 rows of 5,000 each moving bid, ask, last (4 decimals) and the time they were
+     * updated, one in three their volume, one in two their P&amp;L (2 decimals). The layout PPerspective writes (key, mask of
+     * the columns, their values; floats as whole numbers of their decimals) against the same layout with doubles, with
+     * each float as the change from the last one sent for that cell, and against the rows as one JSON text.
+     */
+    private static void perspective(final int protocolVersion) {
+        final int keys = 5_000;
+        final int rowsPerFlush = 100;
+        final long[] mid = new long[keys];
+        final long[][] sent = new long[keys][5]; // the last units sent per cell, for the deltas
+        final Random rnd = new Random(9);
+        final BatchAddOn[] addOn = new BatchAddOn[1];
+        final Op reset = (b, i) -> {
+            java.util.Arrays.fill(mid, 1_000_000L);
+            for (final long[] cells : sent) java.util.Arrays.fill(cells, 0);
+            addOn[0] = new BatchAddOn();
+            addOn[0].attach(PWindow.getMain());
+        };
+        // the change of a row: its key, then bid, ask, last in units of 10^-4, the volume (0: none), the P&L in units of 10^-2
+        final long[] change = new long[6];
+        for (final String variant : new String[] {"units", "doubles", "deltas", "json"}) {
+            run("perspective: 100 rows, " + variant, protocolVersion, reset, (b, i) -> {
+                final long base = 1_761_700_000_000L + i * 100L;
+                final StringBuilder json = variant.equals("json") ? new StringBuilder(rowsPerFlush * 110).append('[') : null;
+                final Object[] out = new Object[4 + rowsPerFlush * 9];
+                int at = 0;
+                out[at++] = 0;      // flags
+                out[at++] = base;   // the time of the datetimes
+                out[at++] = 0;      // nothing removed
+                out[at++] = rowsPerFlush;
+                for (int r = 0; r < rowsPerFlush; r++) {
+                    final int key = rnd.nextInt(keys);
+                    mid[key] = Math.max(10_000, mid[key] + Math.round(rnd.nextGaussian() * 200));
+                    final long spread = 50 + rnd.nextInt(100);
+                    change[0] = key;
+                    change[1] = mid[key] - spread;
+                    change[2] = mid[key] + spread;
+                    change[3] = mid[key];
+                    change[4] = rnd.nextInt(3) == 0 ? 1_000 + rnd.nextInt(499_000) : 0;
+                    change[5] = rnd.nextBoolean() ? Math.round(rnd.nextGaussian() * 500_000) : Long.MIN_VALUE;
+                    final long updated = rnd.nextInt(100);
+                    if (json != null) {
+                        if (r > 0) json.append(',');
+                        json.append("{\"id\":").append(key).append(",\"bid\":").append(change[1] / 10_000.0)
+                            .append(",\"ask\":").append(change[2] / 10_000.0).append(",\"last\":").append(change[3] / 10_000.0)
+                            .append(",\"updated\":").append(base - updated);
+                        if (change[4] != 0) json.append(",\"volume\":").append(change[4]);
+                        if (change[5] != Long.MIN_VALUE) json.append(",\"pnl\":").append(change[5] / 100.0);
+                        json.append('}');
+                        continue;
+                    }
+                    int mask = 0b1111; // bid, ask, last, updated
+                    if (change[4] != 0) mask |= 0b10000;
+                    if (change[5] != Long.MIN_VALUE) mask |= 0b100000;
+                    out[at++] = key;
+                    out[at++] = mask;
+                    for (int c = 1; c <= 3; c++) {
+                        final long units = change[c];
+                        final long delta = units - sent[key][c - 1];
+                        sent[key][c - 1] = units;
+                        out[at++] = switch (variant) {
+                            case "doubles" -> (Object) (units / 10_000.0);
+                            case "deltas" -> (Object) delta;
+                            default -> (Object) units;
+                        };
+                    }
+                    out[at++] = -updated; // the time since the batch's
+                    if (change[4] != 0) out[at++] = (int) change[4];
+                    if (change[5] != Long.MIN_VALUE) {
+                        final long delta = change[5] - sent[key][4];
+                        sent[key][4] = change[5];
+                        out[at++] = switch (variant) {
+                            case "doubles" -> (Object) (change[5] / 100.0);
+                            case "deltas" -> (Object) delta;
+                            default -> (Object) change[5];
+                        };
+                    }
+                }
+                addOn[0].batch(json != null ? new Object[] { json.append(']').toString() } : java.util.Arrays.copyOf(out, at));
+            }, 2_000, 10_000);
+        }
+    }
+
     /** Retained heap per row of {@link #row}: 5 widgets, 1 handler, styles. */
     private static void heap(final int protocolVersion) {
         final int rows = 5_000;
@@ -668,6 +759,9 @@ public final class ProtocolBench {
 
         // ADR-0026: a point of a chart, per series count: a change in units of 10^-5 against the values as doubles
         for (final int series : new int[] {1, 10}) chart(v, series);
+
+        // ADR-0029: a flush of a Perspective blotter, in four encodings
+        perspective(v);
 
         for (final int quotes : new int[] {100, 1_000}) {
             stream(v, quotes, false);
