@@ -1,4 +1,3 @@
-[![codecov](https://codecov.io/gh/smartTrade-OpenSource/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/smartTrade-OpenSource/PonySDK)
 [![CI](https://github.com/smartTrade-OpenSource/PonySDK/actions/workflows/ci.yml/badge.svg)](https://github.com/smartTrade-OpenSource/PonySDK/actions)
 
 # PonySDK
