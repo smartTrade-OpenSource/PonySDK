@@ -55,3 +55,12 @@ test('a server that stops moves its pages to the other one, in waves, each at it
 
   await request.post(LB + 'lb/start/' + from); // back to two servers, as a rolling deployment ends
 });
+
+test('the balancer acts only on its own servers, not on what every object inherits', async ({ request }) => {
+  const before = await servers(request);
+  for (const name of ['__proto__', 'constructor', 'toString', 'c']) {
+    expect((await request.post(LB + 'lb/start/' + name)).status(), name).toBe(404);
+    expect((await request.post(LB + 'lb/stop/' + name)).status(), name).toBe(404);
+  }
+  expect((await servers(request)).map(s => s.name)).toEqual(before.map(s => s.name));
+});
