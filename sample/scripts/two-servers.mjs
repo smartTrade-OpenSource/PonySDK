@@ -32,6 +32,11 @@ const servers = {
 };
 let turn = 0;
 
+/** A server of this balancer by its name; a name every object inherits (__proto__, constructor) is none. */
+function named(name) {
+    return name && Object.hasOwn(servers, name) ? servers[name] : undefined;
+}
+
 function start(server) {
     if (server.process) return;
     const log = fs.openSync(`${LOGS}/${server.name}.log`, 'a');
@@ -70,14 +75,14 @@ function checkHealth() {
 /** The server of the browser's cookie while it is up, otherwise the next one up. */
 function pick(request) {
     const sticky = /(?:^|;\s*)lb=(\w+)/.exec(request.headers.cookie ?? '')?.[1];
-    if (servers[sticky]?.state === 'up') return servers[sticky];
+    if (named(sticky)?.state === 'up') return named(sticky);
     const up = Object.values(servers).filter(s => s.state === 'up');
     return up.length ? up[turn++ % up.length] : null;
 }
 
 function admin(request, response) {
     const [, action, name] = /^\/lb(?:\/(stop|start)\/(\w+))?\/?$/.exec(request.url) ?? [];
-    const server = servers[name];
+    const server = named(name);
     if (action && request.method === 'POST' && server) {
         (action === 'stop' ? stop : start)(server);
     } else if (action || request.method !== 'GET') {
