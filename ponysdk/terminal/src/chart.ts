@@ -9,7 +9,7 @@
 
 import {
     extent, fixed, formatTime, formatValue, linear, nearest, Rows, meanGap, Store, summary, tableRows, timeDomain,
-    timeTicks, valueDomain, valueTicks,
+    spacedValueTicks, timeTicks, valueDomain,
 } from './chart-model.ts';
 import type { AddOn } from './runtime/object.ts';
 
@@ -43,6 +43,8 @@ interface Palette {
     text: string;
     border: string;
     font: string;
+    /** The labels' line, in pixels: two value labels are never closer. */
+    line: number;
     series: string[];
 }
 
@@ -53,6 +55,7 @@ function readPalette(host: HTMLElement): Palette {
         text: get('--pony-text', style.color),
         border: get('--pony-border', 'rgba(128,128,128,.35)'),
         font: `${style.fontSize} ${style.fontFamily}`,
+        line: Math.ceil((parseFloat(style.fontSize) || 12) * 1.4),
         series: COLORS.map((color, i) => get(`--pony-chart-${i + 1}`, color)),
     };
 }
@@ -298,7 +301,8 @@ class Chart implements AddOn {
 
         const top = 8;
         const bottom = this.height - 22;
-        const rows = valueTicks(value0, value1, Math.max(2, Math.floor((bottom - top) / 36)), this.decimals);
+        const rows = spacedValueTicks(value0, value1, Math.max(2, Math.floor((bottom - top) / 36)), this.decimals,
+            bottom - top, palette.line);
         const labels = rows.ticks.map(v => formatValue(v, rows.step, this.decimals));
         const left = Math.ceil(Math.max(0, ...labels.map(l => g.measureText(l).width))) + 10;
         const right = this.width - 14;

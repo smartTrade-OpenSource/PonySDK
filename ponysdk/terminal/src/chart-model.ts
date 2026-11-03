@@ -141,6 +141,23 @@ export function valueTicks(min: number, max: number, count: number, decimals: nu
     return { ticks, step };
 }
 
+/**
+ * The value axis' ticks for a plot pixels high: those of valueTicks, fewer while two labels would stand closer than
+ * minGap pixels (a label's line), and only the middle one when even two would. A low chart keeps labels apart.
+ */
+export function spacedValueTicks(min: number, max: number, count: number, decimals: number, pixels: number,
+                                 minGap: number): { ticks: number[]; step: number } {
+    const gap = (step: number) => max > min ? pixels * step / (max - min) : Infinity;
+    let rows = valueTicks(min, max, count, decimals);
+    for (let c = count - 1; c >= 1 && rows.ticks.length > 1 && gap(rows.step) < minGap; c--) {
+        rows = valueTicks(min, max, c, decimals);
+    }
+    if (rows.ticks.length > 1 && gap(rows.step) < minGap) {
+        return { ticks: [rows.ticks[Math.floor((rows.ticks.length - 1) / 2)]!], step: rows.step };
+    }
+    return rows;
+}
+
 /** The value axis' domain: the extent of the data with a margin, and zero in it when the bars need their base. */
 export function valueDomain(min: number, max: number, zero: boolean): [number, number] {
     if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];

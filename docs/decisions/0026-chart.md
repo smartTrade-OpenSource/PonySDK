@@ -46,7 +46,8 @@ properties; the strict policy of ADR-0015.
    when a point, the size or the theme changed, and the crosshair, which the pointer redraws alone. The size is
    measured in the next frame, not in the `ResizeObserver` callback (WebKit reports a loop otherwise).
 6. **The pure part is apart from the drawing.** `chart-model.ts` holds the store of points (a time column and one
-   column per series, trimmed by window and by count), the decoding of a point, the 1-2-5 ticks of the value axis, the
+   column per series, trimmed by window and by count), the decoding of a point, the 1-2-5 ticks of the value axis (fewer on a low
+   plot, so two labels stand at least a line apart), the
    round-time ticks of the time axis (local clock, from 100 ms to 30 days), the labels, the scales, the nearest point,
    the summary for a screen reader: the Node tests drive them.
 7. **Accessible.** The plot is `role="img"`; its `aria-label` is the title, the last value of each series and the time,
@@ -125,7 +126,7 @@ Measured on 2026-10-29.
   ms it is 10 frames and about 200 B/s. On the Charts page, four series: 18 to 19 B on the wire per point, the whole
   page's framing included, at 1,000 and at 10,000 ticks a second alike (the page shows 9 to 10 points a second for
   both). The former Sparkline, per sample: 797 B, 39.9 B on the wire, 7.9 µs, 4.8 KB.
-- **Tests.** Node: `chart-model.test.ts` (14: store, trim, decoding, malformed rows, ticks, domains, labels, scales,
+- **Tests.** Node: `chart-model.test.ts` (15: store, trim, decoding, malformed rows, ticks, ticks on a low plot, domains, labels, scales,
   nearest point, summary) and `chart.test.ts` (4: the frames the real write path writes in `TerminalFixtures`' `chart`
   fixture decode to the values given, the creation arguments, the loading of the chunk). Java: `PChartTest` (11: what
   goes on the wire, what is refused, a refused point leaving the state alone, `clear`, calls before creation, destroy)

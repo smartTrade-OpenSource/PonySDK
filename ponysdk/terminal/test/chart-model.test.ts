@@ -7,7 +7,7 @@ import { test } from 'node:test';
 
 import {
     extent, fixed, formatTime, formatValue, linear, nearest, niceStep, Rows, meanGap, Store, summary, tableRows,
-    timeDomain, timeTicks, valueDomain, valueTicks,
+    spacedValueTicks, timeDomain, timeTicks, valueDomain, valueTicks,
 } from '../src/chart-model.ts';
 
 // What the chart computes (src/chart-model.ts, docs/decisions/0026-chart.md): the scales, the ticks, the points kept
@@ -88,6 +88,16 @@ test('ticks are the multiples of a 1, 2 or 5 step', () => {
     // a series of whole numbers has no tick between two of them
     assert.deepEqual(valueTicks(51.52, 52.48, 4, 0), { ticks: [52], step: 1 });
     assert.deepEqual(valueTicks(0, 0.003, 3, 2).ticks, [0]);
+});
+
+test('a low chart drops value ticks until two labels stand a line apart', () => {
+    // 18 pixels for a tenth of a pip: three ticks would stand 9 pixels apart, two stand 18
+    assert.deepEqual(valueTicks(1.2647, 1.2648, 2, 5).ticks, [1.2647, 1.26475, 1.2648]);
+    assert.deepEqual(spacedValueTicks(1.2647, 1.2648, 2, 5, 18, 17).ticks, [1.2647, 1.2648]);
+    // under a line for the whole range: the middle tick alone
+    assert.deepEqual(spacedValueTicks(1.2647, 1.2648, 2, 5, 10, 17).ticks, [1.2647]);
+    assert.deepEqual(spacedValueTicks(0, 100, 5, 4, 300, 17).ticks, [0, 20, 40, 60, 80, 100], 'room enough: unchanged');
+    assert.deepEqual(spacedValueTicks(3, 3, 2, 2, 5, 17).ticks, [3], 'a flat range has no gap to keep');
 });
 
 test('the value axis fits the data with a margin, bars from zero', () => {
