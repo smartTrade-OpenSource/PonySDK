@@ -55,7 +55,7 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
 
 **Development**
 - Debug mode: each element names its Java class and the line that created it (`data-pony="PButton
-  InputsPage.java:85"`); an inspector over the page shows the bytes by class and by object, and picks an element
+  InputsPage.java:87"`); an inspector over the page shows the bytes by class and by object, and picks an element
   ([guide](docs/guide/development.md))
 - Hot reload: a recompiled screen reloads in the open browser, where it was, without restarting the server
 - Spring Boot starter: `ponysdk-spring-boot-starter` registers PonySDK in Boot's own Jetty, `ponysdk.*` properties,
