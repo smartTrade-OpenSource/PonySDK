@@ -21,11 +21,11 @@ properties; the strict policy of ADR-0015.
 ## Decision
 
 1. `com.ponysdk.core.ui.chart.PChart`, a `PAddOnComposite<PElement>` built with `PChart.builder(type, series...)`:
-   `LINE`, `AREA` or `BAR`; `title`, `decimals`, `window`, `maxPoints`, `interval`, `dataTable`, `sparkline`. Points go in with
+   `LINE`, `AREA` or `BAR`; `title`, `decimals`, `window`, `maxPoints`, `interval`, `dataTable`, `sparkline`, `minSpan`. Points go in with
    `append(time, values...)` on the UI thread, `offer(series, value)` from any thread, `clear()`. The signature of
    the addon is the class's name; nothing is added to the protocol.
 2. **The wire is the addon's typed arrays.** Creation arguments (`PADDON_CREATION_ARGS`): type, decimals, window,
-   maxPoints, title, table rows, sparkline, series names. A point is a `PADDON_METHOD` "append" with `PADDON_ARGUMENTS`: the time
+   maxPoints, title, table rows, sparkline, least span, series names. A point is a `PADDON_METHOD` "append" with `PADDON_ARGUMENTS`: the time
    since the previous point, then for each series its change since the previous point in units of 10<sup>-decimals</sup>,
    or null for no change. The array encoder already writes the smallest of byte, short, int and long: a price that
    moved by a few units is a tag and a byte. The server and the terminal each keep the previous point (`PChart`, and
@@ -55,7 +55,10 @@ properties; the strict policy of ADR-0015.
    (a table that is not clipped by a wrapper keeps its width). The legend is text with the last values; a space
    separates a name from its value. `sparkline()` draws no axis and no legend: the data takes the whole box, and each
    series' last value is drawn at the end of its line, a dot on its point; the tooltip and the label stay. It is for a
-   chart a few lines high beside the figure it follows.
+   chart a few lines high beside the figure it follows. `minSpan(span)` keeps the value axis at least that wide,
+   centred on the data: a series that moves less stays near the middle instead of filling the box with its noise. An
+   area fades from its colour under the line to nothing at the bottom. The values' text groups the whole part by
+   thousands ("67,504.56"), on the axis, in the legend, the tooltip and the screen reader's label.
 8. **Colours and themes.** `--pony-chart-1..8`, `--pony-text`, `--pony-border`, `--pony-surface`, read with
    fallbacks (a palette of eight, the chart's own colour, a translucent grey, `Canvas`) once the chart is in the
    document, when `prefers-color-scheme` changes and when an attribute of `<html>` changes. The chart and its

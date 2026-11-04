@@ -159,8 +159,13 @@ export function spacedValueTicks(min: number, max: number, count: number, decima
 }
 
 /** The value axis' domain: the extent of the data with a margin, and zero in it when the bars need their base. */
-export function valueDomain(min: number, max: number, zero: boolean): [number, number] {
+export function valueDomain(min: number, max: number, zero: boolean, minSpan = 0): [number, number] {
     if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
+    if (max - min < minSpan) { // at least minSpan, centred on the data: a quiet series stays flat, not full height
+        const centre = (min + max) / 2;
+        min = centre - minSpan / 2;
+        max = centre + minSpan / 2;
+    }
     if (zero) {
         min = Math.min(min, 0);
         max = Math.max(max, 0);
@@ -208,7 +213,12 @@ export function formatTime(time: number, step: number, offset: number): string {
 
 /** A value with the decimals its tick step needs, no more than the series have. */
 export function formatValue(value: number, step: number, decimals: number): string {
-    return value.toFixed(Math.max(0, Math.min(decimals, Math.ceil(-Math.log10(step) - 1e-9))));
+    return group(value.toFixed(Math.max(0, Math.min(decimals, Math.ceil(-Math.log10(step) - 1e-9)))));
+}
+
+/** "-67504.56" as "-67,504.56": a comma every three digits of the whole part, as the chart's text is English. */
+export function group(text: string): string {
+    return text.replace(/^(-?)(\d+)/, (_, sign: string, whole: string) => sign + whole.replace(/\B(?=(\d{3})+$)/g, ','));
 }
 
 /** The time axis' domain: the window before the last point, else the points' extent, a margin more for bars. */
@@ -257,7 +267,7 @@ export function meanGap(times: Float64Array, from: number, to: number, fallback:
 
 /** A value with the series' decimals; a dash for no value. */
 export function fixed(value: number, decimals: number): string {
-    return Number.isNaN(value) ? '–' : value.toFixed(decimals);
+    return Number.isNaN(value) ? '–' : group(value.toFixed(decimals));
 }
 
 /** What a screen reader says for the chart: its title, the last value of each series and when. */

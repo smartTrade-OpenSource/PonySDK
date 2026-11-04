@@ -123,7 +123,7 @@ test('the area and the bars are drawn, and the bars come in a series each', asyn
   for (const card of await cards.all()) {
     await expect.poll(() => painted(card.locator('canvas').first()), { timeout: 10000 }).toBeGreaterThan(500);
   }
-  await expect(cards.nth(0).locator('[role=img]')).toHaveAttribute('aria-label', /^Desk P&L, EUR: P&L -?\d+ at \d\d:\d\d:\d\d$/);
+  await expect(cards.nth(0).locator('[role=img]')).toHaveAttribute('aria-label', /^Desk P&L, EUR: P&L -?\d{1,3}(,\d{3})* at \d\d:\d\d:\d\d$/);
   await expect(cards.nth(1).locator('[role=img]')).toHaveAttribute('aria-label', /^Executions per second: Buys \d+, Sells \d+ at /);
   await expect(cards.nth(1).locator('.legend li')).toHaveText([/Buys \d+/, /Sells \d+/]);
 });
@@ -191,7 +191,7 @@ test('the Performance page draws its 60-second charts with PChart', async ({ pag
   await page.goto(BASE_URL + '#performance', { waitUntil: 'domcontentloaded' });
   const cards = page.locator('.spark-grid .spark-card');
   await expect(cards).toHaveCount(3);
-  await expect(cards.nth(0).locator('[role=img]')).toHaveAttribute('aria-label', /^Live heap, last 60 seconds: Live heap, MB \d+ at /, { timeout: 10000 });
+  await expect(cards.nth(0).locator('[role=img]')).toHaveAttribute('aria-label', /^Live heap, last 60 seconds: Live heap, MB \d{1,3}(,\d{3})* at /, { timeout: 10000 });
   await expect(cards.nth(1).locator('[role=img]')).toHaveAttribute('aria-label', /^Sent on the wire, last 60 seconds: /);
   await expect(cards.nth(2).locator('[role=img]')).toHaveAttribute('aria-label', /^Roundtrip latency, last 60 seconds: /);
   for (const card of await cards.all()) {

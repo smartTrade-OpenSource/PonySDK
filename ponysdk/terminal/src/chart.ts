@@ -88,6 +88,8 @@ class Chart implements AddOn {
     private readonly tableLength: number;
     /** No axes and no legend: the line over the whole box, each series' last value at its end. */
     private readonly sparkline: boolean;
+    /** The least the value axis spans, 0 for none. */
+    private readonly minSpan: number;
     private readonly names: string[];
     private readonly store: Store;
     private readonly rows: Rows;
@@ -117,7 +119,7 @@ class Chart implements AddOn {
     private a11yTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(host: HTMLElement, args: unknown[]) {
-        const [kind, decimals, windowMs, maxPoints, title, tableLength, sparkline, ...names] = args;
+        const [kind, decimals, windowMs, maxPoints, title, tableLength, sparkline, minSpan, ...names] = args;
         this.kind = kind as Kind;
         this.decimals = decimals as number;
         this.windowMs = windowMs as number;
@@ -125,6 +127,7 @@ class Chart implements AddOn {
         this.title = String(title);
         this.tableLength = tableLength as number;
         this.sparkline = sparkline === true;
+        this.minSpan = Number(minSpan) || 0;
         this.names = names.map(String);
         this.store = new Store(this.names.length);
         this.rows = new Rows(this.names.length, this.decimals);
@@ -300,7 +303,7 @@ class Chart implements AddOn {
         const gap = bars ? meanGap(store.times, first, end, Math.max(this.windowMs / 20, 1000)) : 0;
         const [time0, time1] = timeDomain(store.times[first]!, store.times[end - 1]!, this.windowMs, gap / 2);
         const [low, high] = extent(store.columns, first, end);
-        const [value0, value1] = valueDomain(low, high, bars);
+        const [value0, value1] = valueDomain(low, high, bars, this.minSpan);
         const offset = -new Date(time0).getTimezoneOffset() * 60000;
         g.font = palette.font;
         if (this.sparkline) return this.drawSparkline(g, time0, time1, value0, value1, gap);
@@ -344,7 +347,7 @@ class Chart implements AddOn {
         g.rect(left, top, right - left, bottom - top + 1);
         g.clip();
         if (bars) this.drawBars(g, x, y, gap);
-        else this.drawLines(g, x, y, bottom);
+        else this.drawLines(g, x, y, top, bottom);
         g.restore();
         return { left, right, top, bottom, x, y, time: linear(left, right, time0, time1) };
     }
@@ -366,7 +369,7 @@ class Chart implements AddOn {
         g.rect(left, top, right - left, bottom - top + 1);
         g.clip();
         if (this.kind === 'bar') this.drawBars(g, x, y, gap);
-        else this.drawLines(g, x, y, bottom);
+        else this.drawLines(g, x, y, top, bottom);
         g.restore();
         g.textAlign = 'left';
         g.textBaseline = 'middle';
@@ -384,7 +387,8 @@ class Chart implements AddOn {
         return { left, right, top, bottom, x, y, time: linear(left, right, time0, time1) };
     }
 
-    private drawLines(g: CanvasRenderingContext2D, x: (t: number) => number, y: (v: number) => number, bottom: number): void {
+    private drawLines(g: CanvasRenderingContext2D, x: (t: number) => number, y: (v: number) => number, top: number,
+                      bottom: number): void {
         const { store } = this;
         const area = this.kind === 'area';
         g.lineWidth = 1.5;
@@ -425,9 +429,12 @@ class Chart implements AddOn {
             }
             close();
             const color = this.color(s);
-            if (fill !== null) {
-                g.globalAlpha = 0.18;
-                g.fillStyle = color;
+            if (fill !== null) { // the colour under the line, fading to nothing at the bottom
+                const fade = g.createLinearGradient(0, top, 0, bottom);
+                fade.addColorStop(0, color);
+                fade.addColorStop(1, 'transparent');
+                g.globalAlpha = 0.28;
+                g.fillStyle = fade;
                 g.fill(fill);
                 g.globalAlpha = 1;
             }

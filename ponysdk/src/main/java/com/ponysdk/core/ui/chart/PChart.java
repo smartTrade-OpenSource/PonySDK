@@ -158,7 +158,7 @@ public final class PChart extends PAddOnComposite<PElement> {
     }
 
     private static Object[] creationArguments(final Builder builder) {
-        final Object[] args = new Object[7 + builder.names.length];
+        final Object[] args = new Object[8 + builder.names.length];
         args[0] = builder.type.name().toLowerCase(Locale.ROOT);
         args[1] = builder.decimals;
         args[2] = builder.window.toMillis();
@@ -166,7 +166,8 @@ public final class PChart extends PAddOnComposite<PElement> {
         args[4] = builder.title;
         args[5] = builder.tableRows;
         args[6] = builder.sparkline;
-        System.arraycopy(builder.names, 0, args, 7, builder.names.length);
+        args[7] = builder.minSpan;
+        System.arraycopy(builder.names, 0, args, 8, builder.names.length);
         return args;
     }
 
@@ -181,6 +182,7 @@ public final class PChart extends PAddOnComposite<PElement> {
         private Duration interval = DEFAULT_INTERVAL;
         private int tableRows;
         private boolean sparkline;
+        private double minSpan;
 
         private Builder(final Type type, final String[] names) {
             this.type = Objects.requireNonNull(type, "type");
@@ -239,6 +241,16 @@ public final class PChart extends PAddOnComposite<PElement> {
          */
         public Builder sparkline() {
             this.sparkline = true;
+            return this;
+        }
+
+        /**
+         * The least the value axis spans, centred on the data, 0 (none) by default: a series that moves by less than
+         * that stays near the middle rather than filling the box with its noise. In the values' unit.
+         */
+        public Builder minSpan(final double span) {
+            if (!Double.isFinite(span) || span < 0) throw new IllegalArgumentException("A span is finite and not negative: " + span);
+            this.minSpan = span;
             return this;
         }
 
