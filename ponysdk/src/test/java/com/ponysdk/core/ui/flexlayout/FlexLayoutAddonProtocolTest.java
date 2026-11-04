@@ -230,6 +230,40 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
     }
 
     @Test
+    public void renameTabTellsTheTerminal() {
+        addon.renameTab("t1", "USD/JPY");
+        recorder.assertLast(addon, "renameTab", "t1", "USD/JPY");
+    }
+
+    @Test
+    public void aWindowPopOutBuildsTheComponentATabWasLastGiven() {
+        final List<String> built = new ArrayList<>();
+        addon.setWidgetFactory((component, tabId) -> {
+            built.add(component);
+            return Element.newPLabel(component);
+        });
+        addon.attachWidgetToTab("t1", Element.newPLabel(), "book:EUR/USD");
+
+        addon.setTabComponent("t1", "book:USD/JPY");
+        recorder.assertLast(addon, "setTabComponent", "t1", "book:USD/JPY");
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+        fire(addon, Json.createObjectBuilder().add("type", "popIn").add("tabId", "t1"));
+
+        assertEquals(List.of("book:USD/JPY", "book:USD/JPY"), built, "the window, then the tab back in the layout");
+    }
+
+    @Test
+    public void aTabGivenAComponentCanPopOutToAWindow() {
+        addon.setWidgetFactory((component, tabId) -> Element.newPLabel(component));
+        addon.addTab("t1", "T", Element.newPLabel());
+
+        addon.setTabComponent("t1", "book:USD/JPY");
+        fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
+
+        assertTrue(addon.isPopOut("t1"));
+    }
+
+    @Test
     public void removeUnknownTabOnlyNotifiesTheTerminal() {
         addon.removeTab("missing");
         recorder.assertLast(addon, "removeTab", "missing");
