@@ -21,11 +21,11 @@ properties; the strict policy of ADR-0015.
 ## Decision
 
 1. `com.ponysdk.core.ui.chart.PChart`, a `PAddOnComposite<PElement>` built with `PChart.builder(type, series...)`:
-   `LINE`, `AREA` or `BAR`; `title`, `decimals`, `window`, `maxPoints`, `interval`, `dataTable`. Points go in with
+   `LINE`, `AREA` or `BAR`; `title`, `decimals`, `window`, `maxPoints`, `interval`, `dataTable`, `sparkline`. Points go in with
    `append(time, values...)` on the UI thread, `offer(series, value)` from any thread, `clear()`. The signature of
    the addon is the class's name; nothing is added to the protocol.
 2. **The wire is the addon's typed arrays.** Creation arguments (`PADDON_CREATION_ARGS`): type, decimals, window,
-   maxPoints, title, table rows, series names. A point is a `PADDON_METHOD` "append" with `PADDON_ARGUMENTS`: the time
+   maxPoints, title, table rows, sparkline, series names. A point is a `PADDON_METHOD` "append" with `PADDON_ARGUMENTS`: the time
    since the previous point, then for each series its change since the previous point in units of 10<sup>-decimals</sup>,
    or null for no change. The array encoder already writes the smallest of byte, short, int and long: a price that
    moved by a few units is a tag and a byte. The server and the terminal each keep the previous point (`PChart`, and
@@ -53,7 +53,9 @@ properties; the strict policy of ADR-0015.
 7. **Accessible.** The plot is `role="img"`; its `aria-label` is the title, the last value of each series and the time,
    rewritten at most once a second. `dataTable(n)` adds a table of the last n rows, newest first, in a clipped wrapper
    (a table that is not clipped by a wrapper keeps its width). The legend is text with the last values; a space
-   separates a name from its value.
+   separates a name from its value. `sparkline()` draws no axis and no legend: the data takes the whole box, and each
+   series' last value is drawn at the end of its line, a dot on its point; the tooltip and the label stay. It is for a
+   chart a few lines high beside the figure it follows.
 8. **Colours and themes.** `--pony-chart-1..8`, `--pony-text`, `--pony-border`, `--pony-surface`, read with
    fallbacks (a palette of eight, the chart's own colour, a translucent grey, `Canvas`) once the chart is in the
    document, when `prefers-color-scheme` changes and when an attribute of `<html>` changes. The chart and its
@@ -128,9 +130,9 @@ Measured on 2026-10-29.
   both). The former Sparkline, per sample: 797 B, 39.9 B on the wire, 7.9 µs, 4.8 KB.
 - **Tests.** Node: `chart-model.test.ts` (15: store, trim, decoding, malformed rows, ticks, ticks on a low plot, domains, labels, scales,
   nearest point, summary) and `chart.test.ts` (4: the frames the real write path writes in `TerminalFixtures`' `chart`
-  fixture decode to the values given, the creation arguments, the loading of the chunk). Java: `PChartTest` (11: what
-  goes on the wire, what is refused, a refused point leaving the state alone, `clear`, calls before creation, destroy)
-  and `PChartFeedTest` (1: 1,001 offers on a real context, three points). Playwright: `chart.spec.js`, 11 tests on
+  fixture decode to the values given, the creation arguments, the loading of the chunk). Java: `PChartTest` (12: what
+  goes on the wire, a sparkline's creation arguments, what is refused, a refused point leaving the state alone, `clear`, calls before creation, destroy)
+  and `PChartFeedTest` (1: 1,001 offers on a real context, three points). Playwright: `chart.spec.js`, 12 tests on
   Chromium, Firefox and WebKit. The terminal's coverage on the chart's files: 100 % of lines, 98 to 100 % of
   branches (`chart.spec.js` joins the CI's coverage job).
 - A chart holds its series in the browser: the terminal's memory is the points kept, 8 bytes per value, and the server

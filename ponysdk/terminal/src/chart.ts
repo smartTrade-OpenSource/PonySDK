@@ -86,6 +86,8 @@ class Chart implements AddOn {
     private readonly maxPoints: number;
     private readonly title: string;
     private readonly tableLength: number;
+    /** No axes and no legend: the line over the whole box, each series' last value at its end. */
+    private readonly sparkline: boolean;
     private readonly names: string[];
     private readonly store: Store;
     private readonly rows: Rows;
@@ -115,13 +117,14 @@ class Chart implements AddOn {
     private a11yTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(host: HTMLElement, args: unknown[]) {
-        const [kind, decimals, windowMs, maxPoints, title, tableLength, ...names] = args;
+        const [kind, decimals, windowMs, maxPoints, title, tableLength, sparkline, ...names] = args;
         this.kind = kind as Kind;
         this.decimals = decimals as number;
         this.windowMs = windowMs as number;
         this.maxPoints = maxPoints as number;
         this.title = String(title);
         this.tableLength = tableLength as number;
+        this.sparkline = sparkline === true;
         this.names = names.map(String);
         this.store = new Store(this.names.length);
         this.rows = new Rows(this.names.length, this.decimals);
@@ -143,12 +146,14 @@ class Chart implements AddOn {
         this.tip = make('div', 'tip', this.plot);
         this.tip.hidden = true;
         this.tipTime = make('div', 'time', this.tip);
-        const legend = make('ul', 'legend', frame);
+        // a sparkline draws each last value at the end of its line: no legend under it
+        const legend = this.sparkline ? null : make('ul', 'legend', frame);
         this.palette = readPalette(host);
         this.names.forEach((name, s) => {
             const tipRow = make('div', undefined, this.tip);
-            const item = make('li', undefined, legend);
-            for (const [row, values] of [[tipRow, this.tipValues], [item, this.legendValues]] as const) {
+            const rows: [HTMLElement, HTMLElement[]][] = [[tipRow, this.tipValues]];
+            if (legend !== null) rows.push([make('li', undefined, legend), this.legendValues]);
+            for (const [row, values] of rows) {
                 this.swatches.push([make('span', 'swatch', row), s]);
                 make('span', undefined, row).textContent = name;
                 row.append(' '); // a screen reader says "EURUSD 1.0851", not "EURUSD1.0851"
@@ -274,7 +279,7 @@ class Chart implements AddOn {
         g.clearRect(0, 0, this.width, this.height);
         this.geometry = this.store.length === 0 ? null : this.drawData(g);
         this.drawOver();
-        this.names.forEach((_, s) => this.show(this.legendValues[s]!, this.store.length === 0 ? NaN : this.store.columns[s]![this.store.end - 1]!));
+        this.legendValues.forEach((target, s) => this.show(target, this.store.length === 0 ? NaN : this.store.columns[s]![this.store.end - 1]!));
     }
 
     private colorSwatches(): void {
@@ -298,6 +303,7 @@ class Chart implements AddOn {
         const [value0, value1] = valueDomain(low, high, bars);
         const offset = -new Date(time0).getTimezoneOffset() * 60000;
         g.font = palette.font;
+        if (this.sparkline) return this.drawSparkline(g, time0, time1, value0, value1, gap);
 
         const top = 8;
         const bottom = this.height - 22;
@@ -340,6 +346,41 @@ class Chart implements AddOn {
         if (bars) this.drawBars(g, x, y, gap);
         else this.drawLines(g, x, y, bottom);
         g.restore();
+        return { left, right, top, bottom, x, y, time: linear(left, right, time0, time1) };
+    }
+
+    /** The data over the whole box, no axis; each series' last value at its end, in its colour, a dot on its point. */
+    private drawSparkline(g: CanvasRenderingContext2D, time0: number, time1: number, value0: number, value1: number,
+                          gap: number): Geometry {
+        const { store } = this;
+        const last = store.end - 1;
+        const labels = this.names.map((_, s) => fixed(store.columns[s]![last]!, this.decimals));
+        const top = 4;
+        const bottom = this.height - 4;
+        const left = 1;
+        const right = this.width - Math.ceil(Math.max(0, ...labels.map(l => g.measureText(l).width))) - 10;
+        const x = linear(time0, time1, left, right);
+        const y = linear(value0, value1, bottom, top);
+        g.save();
+        g.beginPath();
+        g.rect(left, top, right - left, bottom - top + 1);
+        g.clip();
+        if (this.kind === 'bar') this.drawBars(g, x, y, gap);
+        else this.drawLines(g, x, y, bottom);
+        g.restore();
+        g.textAlign = 'left';
+        g.textBaseline = 'middle';
+        const lineHalf = this.palette.line / 2;
+        this.names.forEach((_, s) => {
+            // a series with no value yet is NaN: the canvas draws nothing at a NaN position, dot or label
+            const py = y(store.columns[s]![last]!);
+            g.fillStyle = this.color(s);
+            g.beginPath();
+            g.arc(x(store.times[last]!), py, 2.5, 0, 2 * Math.PI);
+            g.fill();
+            // kept whole inside the box when the last value is at its top or its bottom
+            g.fillText(labels[s]!, right + 6, Math.min(Math.max(py, lineHalf), this.height - lineHalf));
+        });
         return { left, right, top, bottom, x, y, time: linear(left, right, time0, time1) };
     }
 
