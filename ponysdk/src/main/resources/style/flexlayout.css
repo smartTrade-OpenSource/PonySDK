@@ -360,6 +360,12 @@
   scrollbar-width: none;
 }
 .fl-tabs::-webkit-scrollbar { display: none; }
+/* A tab toolbar: what the selected tab puts in its strip, after the tabs, which then keep their own width */
+.fl-strip:has(> .fl-tab-toolbar) > .fl-tabs { flex: 0 1 auto; }
+.fl-tab-toolbar {
+  display: flex; align-items: center; flex: 1 1 0; min-width: 0; overflow: hidden; padding: 0 4px 0 8px;
+  user-select: text;
+}
 
 /* â”€â”€ Tab button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tab {

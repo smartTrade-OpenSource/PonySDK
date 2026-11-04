@@ -494,6 +494,7 @@
       this._ghost          = null;
       this._dropInd        = this._mkDropInd();
       this._stripW         = null; // cached strip width
+      this._toolbarHomes   = new Set(); // where each tab toolbar shown in a strip came from
 
       // Icon rendering mode: 'text' (default) or 'attribute'
       this._iconMode = 'text';
@@ -921,6 +922,54 @@
         const ph = this._phList[i];
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
+      }
+      this.placeTabToolbars();
+    }
+
+    /**
+     * Shows each tabset's selected tab toolbar in its strip, between the tabs and the tabset's buttons, and puts every
+     * other one back where it was in its tab's content. A tab toolbar is the first element of a tab's content that
+     * carries data-fl-tab-toolbar. While it is in a strip, an empty hidden span holds its place, so the content keeps
+     * its children's count and order; a tab that leaves the layout (closed, popped out) takes its toolbar back.
+     * Call it again once a tab's content arrives after the render.
+     */
+    placeTabToolbars() {
+      const root = this.model.getRoot();
+      const shown = new Set();
+      for (const [id, el] of this._nodeEls) {
+        if (!root || !el.classList.contains('fl-tabset')) continue;
+        const strip = el.querySelector(':scope > .fl-strip');
+        const area = el.querySelector(':scope > .fl-content');
+        const node = root.findById(id);
+        const tab = node && node.children[node.getSelected()];
+        const content = tab && this._contentEls.get(tab.id);
+        if (!strip || !content || content.parentNode !== area) continue;
+        let home = content.querySelector('.fl-tab-toolbar-home');
+        const toolbar = home ? home._flToolbar : content.querySelector('[data-fl-tab-toolbar]');
+        if (!toolbar) continue;
+        if (!home) {
+          home = document.createElement('span');
+          home.className = 'fl-tab-toolbar-home';
+          home.hidden = true;
+          home._flToolbar = toolbar;
+          toolbar.before(home);
+          this._toolbarHomes.add(home);
+        }
+        let slot = strip.querySelector(':scope > .fl-tab-toolbar');
+        if (!slot) {
+          slot = document.createElement('div');
+          slot.className = 'fl-tab-toolbar';
+          strip.insertBefore(slot, strip.querySelector(':scope > .fl-toolbar'));
+        }
+        if (toolbar.parentNode !== slot) slot.replaceChildren(toolbar);
+        shown.add(toolbar);
+      }
+      for (const home of this._toolbarHomes) {
+        if (shown.has(home._flToolbar)) continue;
+        const slot = home._flToolbar.parentNode;
+        home.replaceWith(home._flToolbar);
+        this._toolbarHomes.delete(home);
+        if (slot && slot.classList.contains('fl-tab-toolbar') && !slot.firstChild) slot.remove();
       }
     }
 
@@ -1632,6 +1681,7 @@
           try { c.dispatchEvent(new CustomEvent('fl:hidden', { bubbles: false })); } catch(e) {}
         }
       });
+      this.placeTabToolbars();
     }
 
     _mkTabBtn(tab, tabset, idx) {

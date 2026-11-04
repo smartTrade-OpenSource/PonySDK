@@ -298,6 +298,60 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await win.close();
   });
 
+  // A tab toolbar: the first element of a tab's content marked data-fl-tab-toolbar (FlexLayoutAddon.asTabToolbar)
+  const markToolbar = async page => {
+    await page.waitForSelector('.fl-tabset .fl-pony-widget-host > [id]'); // the widget parked in its tab
+    return page.evaluate(() => {
+      const host = document.querySelector('.fl-tabset .fl-pony-widget-host > [id]').parentElement;
+      const t = document.createElement('div');
+      t.dataset.flTabToolbar = '';
+      t.id = 'toolbar-under-test';
+      t.textContent = 'Tools';
+      host.firstElementChild.prepend(t);
+      document.querySelector('.fl-layout').__flexLayout.placeTabToolbars();
+      return host.closest('.fl-tabset').dataset.flTabset;
+    });
+  };
+
+  test('a tab toolbar shows in its tabset strip, after the tabs, its place kept in the content', async ({ page }) => {
+    const tabset = await markToolbar(page);
+    const strip = page.locator(`[data-fl-tabset="${tabset}"] > .fl-strip`);
+    await expect(strip.locator('> .fl-tab-toolbar > #toolbar-under-test')).toBeVisible();
+    const order = await strip.evaluate(s => [...s.children].map(c => c.className));
+    expect(order).toEqual(['fl-tabs', 'fl-tab-toolbar', 'fl-toolbar']);
+    await expect(page.locator(`[data-fl-tabset="${tabset}"] .fl-content .fl-tab-toolbar-home`)).toHaveCount(1);
+    // a render rebuilds the strips: the toolbar goes up to the new one
+    await page.evaluate(() => document.querySelector('.fl-layout').__flexLayout._render());
+    await expect(strip.locator('> .fl-tab-toolbar > #toolbar-under-test')).toBeVisible();
+    await expect(page.locator('.fl-tab-toolbar-home')).toHaveCount(1);
+  });
+
+  test('a tab toolbar goes back into its content when the tab pops out, and up again when it pops in', async ({ page }) => {
+    const tabset = await markToolbar(page);
+    await page.locator(`[data-fl-tabset="${tabset}"] .fl-tbtn-popout`).click();
+    const win = page.locator('.fl-popout-window');
+    await expect(win.locator('.fl-popout-content #toolbar-under-test')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('.fl-tab-toolbar')).toHaveCount(0);
+    await expect(page.locator('.fl-tab-toolbar-home')).toHaveCount(0);
+    await win.locator('.fl-popout-popin').click();
+    await expect(page.locator('.fl-strip > .fl-tab-toolbar > #toolbar-under-test')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('a tab toolbar leaves the strip when another tab of its tabset is selected', async ({ page }) => {
+    const tabset = await markToolbar(page);
+    await page.evaluate(id => {
+      const fl = document.querySelector('.fl-layout').__flexLayout;
+      fl.model.doAction({ type: 'ADD_TAB', tabsetId: id, tab: { id: 'other-tab', name: 'Other', component: 'text' }, select: false });
+      fl._render();
+    }, tabset);
+    const ts = page.locator(`[data-fl-tabset="${tabset}"]`);
+    await ts.locator('.fl-tab', { hasText: 'Other' }).click();
+    await expect(ts.locator('.fl-tab-toolbar')).toHaveCount(0);
+    await expect(page.locator('#toolbar-under-test')).toBeHidden();
+    await ts.locator('.fl-tab').first().click();
+    await expect(ts.locator('.fl-strip > .fl-tab-toolbar > #toolbar-under-test')).toBeVisible();
+  });
+
   test('pop-out window is draggable', async ({ page }) => {
     await page.locator('.fl-tbtn-popout').first().click();
     const win = page.locator('.fl-popout-window');

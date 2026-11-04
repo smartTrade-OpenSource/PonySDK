@@ -142,6 +142,15 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
     }
 
     @Test
+    public void aTabToolbarIsAWidgetMarkedForTheTerminal() {
+        final PFlowPanel tools = Element.newPFlowPanel();
+        FlexLayoutAddon.asTabToolbar(tools);
+        // The terminal moves the first marked element of a tab's content into its strip: nothing else travels
+        assertEquals("", tools.getAttribute(FlexLayoutAddon.TAB_TOOLBAR_ATTRIBUTE));
+        assertEquals("data-fl-tab-toolbar", FlexLayoutAddon.TAB_TOOLBAR_ATTRIBUTE);
+    }
+
+    @Test
     public void defaultConstructorWritesEmptyCreationArguments() {
         assertArrayEquals(new Object[] { null, null, null }, recorder.creationArgs(addon));
         assertSame(addon.getPanel(), addon.asWidget());
