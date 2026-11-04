@@ -28,9 +28,13 @@ import com.ponysdk.core.ui.basic.PWindow;
  *   <li>External drag sources that create new tabs with server-instantiated widgets</li>
  *   <li>Layout persistence (save/load model as JSON)</li>
  *   <li>Change notifications for all layout modifications</li>
+ *   <li>Tab toolbars: a part of a tab's content shown in its tabset's strip ({@link #asTabToolbar(PWidget)})</li>
  * </ul>
  */
 public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
+
+    /** The attribute that makes an element of a tab's content its tab toolbar, see {@link #asTabToolbar(PWidget)}. */
+    public static final String TAB_TOOLBAR_ATTRIBUTE = "data-fl-tab-toolbar";
 
     private static final String EVT_TAB_CLOSED = "tabClosed";
     private static final String EVT_EXTERNAL_DROP = "externalDrop";
@@ -110,6 +114,17 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     /** Marks a content widget that the terminal has not parked in a tab host yet. */
     private static final String UNPARKED_STYLE = "fl-pony-unparked";
+
+    /**
+     * Makes a widget of a tab's content that tab's toolbar. While the tab is the one selected in its tabset, the
+     * widget's element shows in the tabset's strip, after the tabs; the rest of the time (another tab selected, the tab
+     * popped out, the content shown without a layout) it stays where it is in the content. Only the element moves: the
+     * widget keeps its parent, and a hidden placeholder keeps its place among its parent's children. The first such
+     * widget of a content is its toolbar.
+     */
+    public static void asTabToolbar(final PWidget toolbar) {
+        toolbar.setAttribute(TAB_TOOLBAR_ATTRIBUTE);
+    }
 
     // ─── Tab Management ──────────────────────────────────────────
 

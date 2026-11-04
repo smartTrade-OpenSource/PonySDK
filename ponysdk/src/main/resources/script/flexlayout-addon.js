@@ -297,6 +297,8 @@
         hostEl.appendChild(el);
         // Parked: drop the marker the server sets in FlexLayoutAddon#addContent.
         el.classList.remove('fl-pony-unparked');
+        // The widget came after the render: its tab toolbar, if it has one, goes up to the strip now
+        if (this._layout) this._layout.placeTabToolbars();
         // Popping a tab back in re-parents its whole host; drop the wrapper left behind empty.
         if (previousHost && previousHost !== hostEl && previousHost.parentNode
             && previousHost.classList && previousHost.classList.contains('fl-pony-widget-host')
