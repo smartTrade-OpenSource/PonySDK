@@ -825,23 +825,37 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
             "resizable=yes,scrollbars=yes,height=" + height + ",width=" + width);
         info.pWindow = pWindow;
         pWindow.addOpenHandler(event -> {
+            // The window's whole height, the button on top and the view in the rest: a view sized at 100% (a
+            // chart that takes the room left, a grid) fills the window as it filled its tab, instead of shrinking
+            // to its content
+            final PFlowPanel frame = Element.newPFlowPanel();
+            frame.addStyleName("fl-popout-frame");
+            frame.setStyleProperty("position", "fixed");
+            frame.setStyleProperty("inset", "0");
+            frame.setStyleProperty("display", "flex");
+            frame.setStyleProperty("flex-direction", "column");
             final com.ponysdk.core.ui.basic.PButton popInBtn = Element.newPButton("\u23CE Pop back in");
             popInBtn.setStyleProperty("margin", "6px");
             popInBtn.setStyleProperty("padding", "4px 12px");
             popInBtn.setStyleProperty("cursor", "pointer");
+            popInBtn.setStyleProperty("flex", "none");
             popInBtn.addClickHandler(e -> pWindow.close());
-            pWindow.add(popInBtn);
+            frame.add(popInBtn);
             final PWidget newWidget = widgetFactory.apply(component, tabId);
             if (newWidget != null) {
                 // Carry the theme on a wrapper: the class normally sits on the layout container,
                 // which only exists in the main window.
                 final PFlowPanel themed = Element.newPFlowPanel();
-                themed.setStyleProperty("width", "100%");
+                themed.addStyleName("fl-popout-body");
+                themed.setStyleProperty("flex", "1 1 0");
+                themed.setStyleProperty("min-height", "0");
+                themed.setStyleProperty("overflow", "auto"); // a view taller than the window scrolls in it
                 if (currentTheme != null && !currentTheme.isEmpty()) themed.addStyleName(currentTheme);
                 themed.add(newWidget);
                 info.themeWrapper = themed;
-                pWindow.add(themed);
+                frame.add(themed);
             }
+            pWindow.add(frame);
         });
         pWindow.addCloseHandler(event -> popInFromWindow(tabId));
         pWindow.open();

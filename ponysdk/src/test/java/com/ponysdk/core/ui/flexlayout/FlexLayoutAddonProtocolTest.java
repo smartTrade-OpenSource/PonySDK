@@ -47,7 +47,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PRootPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.test.PEmulator;
@@ -622,6 +621,8 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         final PWidget wrapper = (PWidget) windowWidget.getParent();
         assertNotNull(wrapper);
         assertTrue(wrapper.hasStyleName("theme-a"));
+        assertTrue(wrapper.hasStyleName("fl-popout-body"), "the view's box, the rest of the window");
+        assertTrue(((PWidget) wrapper.getParent()).hasStyleName("fl-popout-frame"), "in a frame the window's height");
 
         themed.setTheme("theme-b");
         recorder.assertLast(themed, "setTheme", "theme-b");
@@ -677,8 +678,8 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         });
         addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
         fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
-        final PRootPanel windowRoot = (PRootPanel) ((PWidget) built.get(0).getParent()).getParent();
-        final PButton popIn = (PButton) windowRoot.getWidget(0);
+        final PFlowPanel frame = (PFlowPanel) ((PWidget) built.get(0).getParent()).getParent(); // the window's frame
+        final PButton popIn = (PButton) frame.getWidget(0);
 
         PEmulator.click(popIn);
 
@@ -742,7 +743,7 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
         fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
         final PWidget wrapper = (PWidget) widgets.get(0).getParent();
-        assertEquals(0, wrapper.getStyleNames().count());
+        assertEquals(List.of("fl-popout-body"), wrapper.getStyleNames().toList(), "no theme yet");
 
         addon.setTheme("t-a");
         assertTrue(wrapper.hasStyleName("t-a"));
@@ -780,7 +781,7 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         addon.attachWidgetToTab("t1", Element.newPLabel(), "comp");
         fire(addon, Json.createObjectBuilder().add("type", "popOut").add("tabId", "t1").add("mode", "window"));
         final PWidget wrapper = (PWidget) widgets.get(0).getParent();
-        assertEquals(0, wrapper.getStyleNames().count());
+        assertEquals(List.of("fl-popout-body"), wrapper.getStyleNames().toList(), "no theme yet");
 
         addon.setTheme("t-a");
         assertTrue(wrapper.hasStyleName("t-a"));
