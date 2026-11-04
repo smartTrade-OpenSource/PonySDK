@@ -284,6 +284,20 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-tab:has-text("Welcome")')).toBeVisible({ timeout: 3000 });
   });
 
+  test('a tab popped out to a window fills it: the button on top, the view in the rest', async ({ page, context }) => {
+    const [win] = await Promise.all([context.waitForEvent('page'), page.locator('.fl-tbtn-popout-win').first().click()]);
+    await win.waitForSelector('.fl-popout-body', { timeout: 5000 });
+    const sizes = await win.evaluate(() => {
+      const box = e => document.querySelector(e).getBoundingClientRect();
+      return { window: innerHeight, frame: box('.fl-popout-frame').height, body: box('.fl-popout-body').bottom,
+        button: box('.fl-popout-frame > button').bottom, top: box('.fl-popout-body').top };
+    });
+    expect(sizes.frame).toBe(sizes.window);
+    expect(sizes.body, 'the view reaches the bottom of the window').toBe(sizes.window);
+    expect(sizes.top, 'and starts under the button').toBeGreaterThanOrEqual(sizes.button);
+    await win.close();
+  });
+
   test('pop-out window is draggable', async ({ page }) => {
     await page.locator('.fl-tbtn-popout').first().click();
     const win = page.locator('.fl-popout-window');
