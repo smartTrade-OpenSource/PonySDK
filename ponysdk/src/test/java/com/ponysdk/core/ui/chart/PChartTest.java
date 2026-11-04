@@ -61,7 +61,7 @@ public class PChartTest extends PSuite {
 
         assertEquals(List.of(WidgetType.ADDON_COMPOSITE.getValue()), writer.valuesOf(ServerToClientModel.WIDGET_TYPE));
         assertEquals(List.of("com.ponysdk.core.ui.chart.PChart"), writer.valuesOf(ServerToClientModel.FACTORY));
-        assertArrayEquals(new Object[] { "line", 5, 60_000L, 1000, "Prices", 10, false, "EURUSD", "GBPUSD" },
+        assertArrayEquals(new Object[] { "line", 5, 60_000L, 1000, "Prices", 10, false, 0.0, "EURUSD", "GBPUSD" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
         assertEquals(0, writer.count(ServerToClientModel.PADDON_CREATION), "no JSON");
         assertNotNull(chart.asWidget());
@@ -72,15 +72,15 @@ public class PChartTest extends PSuite {
         final PChart chart = PChart.builder(PChart.Type.BAR, "Volume").build();
         chart.attach(PWindow.getMain());
 
-        assertArrayEquals(new Object[] { "bar", 2, 0L, 3600, "Chart", 0, false, "Volume" },
+        assertArrayEquals(new Object[] { "bar", 2, 0L, 3600, "Chart", 0, false, 0.0, "Volume" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
     }
 
     @Test
     public void aSparklineSaysSoInItsCreationArguments() {
-        PChart.builder(PChart.Type.AREA, "Mid").decimals(5).sparkline().build().attach(PWindow.getMain());
+        PChart.builder(PChart.Type.AREA, "Mid").decimals(5).sparkline().minSpan(0.0002).build().attach(PWindow.getMain());
 
-        assertArrayEquals(new Object[] { "area", 5, 0L, 3600, "Chart", 0, true, "Mid" },
+        assertArrayEquals(new Object[] { "area", 5, 0L, 3600, "Chart", 0, true, 0.0002, "Mid" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
     }
 
@@ -91,7 +91,7 @@ public class PChartTest extends PSuite {
         names[0] = "changed";
         builder.build().attach(PWindow.getMain());
 
-        assertArrayEquals(new Object[] { "line", 2, 0L, 3600, "Chart", 0, false, "A", "B" },
+        assertArrayEquals(new Object[] { "line", 2, 0L, 3600, "Chart", 0, false, 0.0, "A", "B" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
     }
 
@@ -109,6 +109,9 @@ public class PChartTest extends PSuite {
         assertThrows(IllegalArgumentException.class, () -> builder.maxPoints(1));
         assertThrows(IllegalArgumentException.class, () -> builder.maxPoints(100_001));
         assertThrows(IllegalArgumentException.class, () -> builder.interval(Duration.ofMillis(-1)));
+        assertThrows(IllegalArgumentException.class, () -> builder.minSpan(-0.1));
+        assertThrows(IllegalArgumentException.class, () -> builder.minSpan(Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> builder.minSpan(Double.POSITIVE_INFINITY));
         assertThrows(IllegalArgumentException.class, () -> builder.dataTable(-1));
         assertThrows(IllegalArgumentException.class, () -> builder.dataTable(101));
         builder.decimals(0).decimals(9).maxPoints(2).maxPoints(100_000).interval(Duration.ZERO).dataTable(0).dataTable(100);

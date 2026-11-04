@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
-    extent, fixed, formatTime, formatValue, linear, nearest, niceStep, Rows, meanGap, Store, summary, tableRows,
+    extent, fixed, formatTime, formatValue, group, linear, nearest, niceStep, Rows, meanGap, Store, summary, tableRows,
     spacedValueTicks, timeDomain, timeTicks, valueDomain, valueTicks,
 } from '../src/chart-model.ts';
 
@@ -110,6 +110,9 @@ test('the value axis fits the data with a margin, bars from zero', () => {
     assert.deepEqual(valueDomain(0, 0, false), [-1, 1]);
     assert.deepEqual(valueDomain(0, 0, true), [0, 1]);
     assert.deepEqual(valueDomain(Infinity, -Infinity, false), [0, 1], 'no data');
+    const quiet = valueDomain(1.08750, 1.08752, false, 0.0002).map(v => Math.round(v * 1e6) / 1e6);
+    assert.deepEqual(quiet, [1.08740, 1.08762], 'a quiet series spans the least span, centred, then the margin');
+    assert.deepEqual(valueDomain(10, 20, false, 5), valueDomain(10, 20, false), 'a wider series: the span changes nothing');
 });
 
 test('time ticks are round times of the local clock', () => {
@@ -195,4 +198,9 @@ test('what a screen reader gets: the last values and the last rows, newest first
     assert.equal(tableRows(['EURUSD', 'GBPUSD'], store, 10, 0, 2).length, 4, 'no more rows than points');
     assert.deepEqual(tableRows(['EURUSD', 'GBPUSD'], store, 10, 0, 2)[3], ['10:00:00', '1.09', '–'], 'a dash for no value');
     assert.equal(fixed(NaN, 2), '–');
+    assert.equal(fixed(67504.561, 2), '67,504.56', 'the whole part grouped');
+    assert.equal(fixed(-1234567, 0), '-1,234,567');
+    assert.equal(fixed(999.5, 1), '999.5');
+    assert.equal(formatValue(12500, 500, 2), '12,500');
+    assert.equal(group('1.08751'), '1.08751', 'nothing to group');
 });

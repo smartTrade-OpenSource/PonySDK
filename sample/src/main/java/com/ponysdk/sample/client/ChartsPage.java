@@ -192,9 +192,10 @@ final class ChartsPage {
 
     private static PChart sparkline(final List<PScheduler.UIRunnable> schedulers) {
         // region sparkline
-        // No axes and no legend, the last value at the end of the line: a chart a few lines high
+        // No axes and no legend, the last value at the end of the line: a chart a few lines high. Two pips at least
+        // on its height, so a quiet minute stays flat
         final PChart eurusd = PChart.builder(PChart.Type.AREA, "EURUSD").title("EURUSD, last 60 seconds").decimals(5)
-            .window(Duration.ofSeconds(60)).sparkline().build();
+            .window(Duration.ofSeconds(60)).sparkline().minSpan(0.0002).build();
         final double[] value = { 1.0850 };
         final long now = System.currentTimeMillis();
         for (int i = 60; i > 0; i--) {
