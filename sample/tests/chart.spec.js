@@ -128,6 +128,28 @@ test('the area and the bars are drawn, and the bars come in a series each', asyn
   await expect(cards.nth(1).locator('.legend li')).toHaveText([/Buys \d+/, /Sells \d+/]);
 });
 
+test('a sparkline draws its line over the whole box, its last value at its end, and has no legend', async ({ page }) => {
+  await page.goto(BASE_URL + '#charts', { waitUntil: 'domcontentloaded' });
+  const card = page.locator('.sparkline-card');
+  const data = card.locator('canvas').first();
+  await expect.poll(() => painted(data), { timeout: 10000 }).toBeGreaterThan(200);
+  await expect(card.locator('.legend')).toHaveCount(0);
+  await expect(card.locator('[role=img]')).toHaveAttribute('aria-label', /^EURUSD, last 60 seconds: EURUSD 1\.\d{5} at /);
+  // no axis: the data reaches the box's left edge, where a value axis would keep its labels
+  const left = await data.evaluate(c => {
+    const g = c.getContext('2d');
+    const { data: px } = g.getImageData(0, 0, Math.ceil(c.width * 0.05), c.height);
+    let n = 0;
+    for (let i = 3; i < px.length; i += 4) if (px[i] > 0) n++;
+    return n;
+  });
+  expect(left, 'painted in the first twentieth of the width').toBeGreaterThan(0);
+  const plot = card.locator('.plot');
+  const size = await plot.boundingBox();
+  await plot.hover({ position: { x: size.width * 0.5, y: size.height / 2 } });
+  await expect(card.locator('.tip')).toBeVisible();
+});
+
 test('a feed of 10,000 ticks a second sends the same ten points a second', async ({ page }) => {
   await page.goto(BASE_URL + '#charts', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: '10,000 ticks/s' }).click();

@@ -61,7 +61,7 @@ public class PChartTest extends PSuite {
 
         assertEquals(List.of(WidgetType.ADDON_COMPOSITE.getValue()), writer.valuesOf(ServerToClientModel.WIDGET_TYPE));
         assertEquals(List.of("com.ponysdk.core.ui.chart.PChart"), writer.valuesOf(ServerToClientModel.FACTORY));
-        assertArrayEquals(new Object[] { "line", 5, 60_000L, 1000, "Prices", 10, "EURUSD", "GBPUSD" },
+        assertArrayEquals(new Object[] { "line", 5, 60_000L, 1000, "Prices", 10, false, "EURUSD", "GBPUSD" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
         assertEquals(0, writer.count(ServerToClientModel.PADDON_CREATION), "no JSON");
         assertNotNull(chart.asWidget());
@@ -72,7 +72,15 @@ public class PChartTest extends PSuite {
         final PChart chart = PChart.builder(PChart.Type.BAR, "Volume").build();
         chart.attach(PWindow.getMain());
 
-        assertArrayEquals(new Object[] { "bar", 2, 0L, 3600, "Chart", 0, "Volume" },
+        assertArrayEquals(new Object[] { "bar", 2, 0L, 3600, "Chart", 0, false, "Volume" },
+            (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
+    }
+
+    @Test
+    public void aSparklineSaysSoInItsCreationArguments() {
+        PChart.builder(PChart.Type.AREA, "Mid").decimals(5).sparkline().build().attach(PWindow.getMain());
+
+        assertArrayEquals(new Object[] { "area", 5, 0L, 3600, "Chart", 0, true, "Mid" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
     }
 
@@ -83,7 +91,7 @@ public class PChartTest extends PSuite {
         names[0] = "changed";
         builder.build().attach(PWindow.getMain());
 
-        assertArrayEquals(new Object[] { "line", 2, 0L, 3600, "Chart", 0, "A", "B" },
+        assertArrayEquals(new Object[] { "line", 2, 0L, 3600, "Chart", 0, false, "A", "B" },
             (Object[]) writer.valuesOf(ServerToClientModel.PADDON_CREATION_ARGS).get(0));
     }
 

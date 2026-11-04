@@ -39,7 +39,7 @@ function calls(): { creation: unknown[]; calls: [string, unknown[] | null][] } {
 }
 
 test('the creation arguments of a chart read back as the server wrote them', () => {
-    assert.deepEqual(calls().creation, ['line', 5, 60_000, 3600, 'Prices', 5, 'EURUSD', 'GBPUSD']);
+    assert.deepEqual(calls().creation, ['line', 5, 60_000, 3600, 'Prices', 5, false, 'EURUSD', 'GBPUSD']);
 });
 
 test('the points the server wrote decode to the values it was given, a clear starting the deltas again', () => {

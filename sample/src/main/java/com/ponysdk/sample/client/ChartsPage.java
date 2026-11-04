@@ -116,11 +116,13 @@ final class ChartsPage {
 
         final PChart pnl = area(schedulers);
         final PChart flow = bars(schedulers);
+        final PChart spark = sparkline(schedulers);
         p.addDestroyListener(event -> { // the page left: the feed stops, and the browser frees its charts
             running.set(false);
             prices.destroy();
             pnl.destroy();
             flow.destroy();
+            spark.destroy();
         });
         pnl.asWidget().setHeight("220px");
         flow.asWidget().setHeight("220px");
@@ -137,6 +139,13 @@ final class ChartsPage {
         p.add(sectionTitle("Area and bars"), grid);
         p.add(codeToggle("the area chart", Source.code(ChartsPage.class, "area")));
         p.add(codeToggle("the bar chart", Source.code(ChartsPage.class, "bars")));
+
+        spark.asWidget().setHeight("44px");
+        final PFlowPanel sparkCard = Element.newPFlowPanel();
+        sparkCard.addStyleName("sparkline-card");
+        sparkCard.add(el("spark-label", "Sparkline: EURUSD, last 60 seconds"), spark.asWidget());
+        p.add(sectionTitle("Sparkline"), sparkCard);
+        p.add(codeToggle("the sparkline", Source.code(ChartsPage.class, "sparkline")));
 
         final long[] previous = { 0, 0, 0 };
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
@@ -178,6 +187,26 @@ final class ChartsPage {
             pnl.append(System.currentTimeMillis(), value[0]);
         }, Duration.ofSeconds(1)));
         return pnl;
+        // endregion
+    }
+
+    private static PChart sparkline(final List<PScheduler.UIRunnable> schedulers) {
+        // region sparkline
+        // No axes and no legend, the last value at the end of the line: a chart a few lines high
+        final PChart eurusd = PChart.builder(PChart.Type.AREA, "EURUSD").title("EURUSD, last 60 seconds").decimals(5)
+            .window(Duration.ofSeconds(60)).sparkline().build();
+        final double[] value = { 1.0850 };
+        final long now = System.currentTimeMillis();
+        for (int i = 60; i > 0; i--) {
+            value[0] += ThreadLocalRandom.current().nextGaussian() * 0.00004;
+            eurusd.append(now - i * 1_000L, value[0]);
+        }
+        schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            if (idle()) return;
+            value[0] += ThreadLocalRandom.current().nextGaussian() * 0.00004;
+            eurusd.append(System.currentTimeMillis(), value[0]);
+        }, Duration.ofSeconds(1)));
+        return eurusd;
         // endregion
     }
 

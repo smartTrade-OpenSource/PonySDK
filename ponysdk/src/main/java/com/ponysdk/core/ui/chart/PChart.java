@@ -158,14 +158,15 @@ public final class PChart extends PAddOnComposite<PElement> {
     }
 
     private static Object[] creationArguments(final Builder builder) {
-        final Object[] args = new Object[6 + builder.names.length];
+        final Object[] args = new Object[7 + builder.names.length];
         args[0] = builder.type.name().toLowerCase(Locale.ROOT);
         args[1] = builder.decimals;
         args[2] = builder.window.toMillis();
         args[3] = builder.maxPoints;
         args[4] = builder.title;
         args[5] = builder.tableRows;
-        System.arraycopy(builder.names, 0, args, 6, builder.names.length);
+        args[6] = builder.sparkline;
+        System.arraycopy(builder.names, 0, args, 7, builder.names.length);
         return args;
     }
 
@@ -179,6 +180,7 @@ public final class PChart extends PAddOnComposite<PElement> {
         private int maxPoints = DEFAULT_MAX_POINTS;
         private Duration interval = DEFAULT_INTERVAL;
         private int tableRows;
+        private boolean sparkline;
 
         private Builder(final Type type, final String[] names) {
             this.type = Objects.requireNonNull(type, "type");
@@ -228,6 +230,15 @@ public final class PChart extends PAddOnComposite<PElement> {
         public Builder dataTable(final int rows) {
             if (rows < 0 || rows > 100) throw new IllegalArgumentException("Rows are 0 to 100: " + rows);
             this.tableRows = rows;
+            return this;
+        }
+
+        /**
+         * No axes and no legend: the data over the whole box, each series' last value at the end of its line; the
+         * tooltip stays. For a chart a few lines high beside the figure it follows.
+         */
+        public Builder sparkline() {
+            this.sparkline = true;
             return this;
         }
 
