@@ -26,6 +26,7 @@ import static com.ponysdk.core.ui.flexlayout.TerminalCallRecorder.fire;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -418,5 +419,17 @@ public class FlexLayoutPanelTest extends PSuite {
         recorder.clear();
         panel.setStatusBarWidget(null);
         assertTrue(recorder.calls(addon).isEmpty());
+    }
+
+    @Test
+    public void toolZones() {
+        final PLabel menu = Element.newPLabel();
+        panel.setToolZone(FlexToolZone.TOP_RIGHT, menu);
+        recorder.assertLast(addon, "setToolZone", "top-right", id(menu));
+        assertSame(menu, panel.getToolZone(FlexToolZone.TOP_RIGHT));
+
+        panel.clearToolZone(FlexToolZone.TOP_RIGHT);
+        recorder.assertLast(addon, "clearToolZone", "top-right");
+        assertNull(panel.getToolZone(FlexToolZone.TOP_RIGHT));
     }
 }
