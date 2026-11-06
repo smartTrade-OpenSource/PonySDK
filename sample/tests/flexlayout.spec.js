@@ -282,6 +282,135 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-tab:has-text("Welcome")')).toBeVisible({ timeout: 3000 });
   });
 
+  // Tool zones: application widgets in a bar above the layout and one below (FlexLayoutPanel.setToolZone); the
+  // demo's "Tool zones" button fills the six zones on the server, and empties them
+  const box = async locator => {
+    const b = await locator.boundingBox();
+    return { top: b.y, bottom: b.y + b.height, left: b.x, right: b.x + b.width, width: b.width, height: b.height };
+  };
+  const showToolZones = async page => {
+    await page.click('button:has-text("Tool zones")');
+    await expect(page.locator('[data-fl-tool-zone="bottom-right"] .fl-demo-zone-position')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('[data-fl-tool-zone="top-left"] .fl-demo-zone-title')).toBeVisible();
+  };
+  const addonOf = page => page.locator('.fl-layout').locator('xpath=..');
+
+  test('tool zones: no bar, no room taken, until a zone holds a widget', async ({ page }) => {
+    await expect(page.locator('.fl-zone-bar')).toHaveCount(0);
+    await expect(page.locator('.fl-tool-zone')).toHaveCount(0);
+    const addon = await box(addonOf(page));
+    const layout = await box(page.locator('.fl-layout'));
+    expect(layout.top).toBe(addon.top);
+    expect(layout.height).toBe(addon.height);
+  });
+
+  test('tool zones: each widget in its zone, left and right hugging, the center centered', async ({ page }) => {
+    await showToolZones(page);
+    const addon = await box(addonOf(page));
+    const top = await box(page.locator('.fl-zone-bar-top'));
+    const bottom = await box(page.locator('.fl-zone-bar-bottom'));
+    expect(top.top).toBe(addon.top);
+    expect(Math.round(bottom.bottom)).toBe(Math.round(addon.bottom));
+    const zones = {
+      'top-left': '.fl-demo-zone-title', 'top-center': '.fl-demo-zone-workspace', 'top-right': '.fl-demo-zone-ping',
+      'bottom-left': '.fl-demo-zone-status', 'bottom-center': '.fl-demo-zone-encoding', 'bottom-right': '.fl-demo-zone-position',
+    };
+    for (const [zone, widget] of Object.entries(zones)) {
+      const w = await box(page.locator(`[data-fl-tool-zone="${zone}"] > ${widget}`));
+      const bar = zone.startsWith('top') ? top : bottom;
+      expect(w.top).toBeGreaterThanOrEqual(bar.top);
+      expect(w.bottom).toBeLessThanOrEqual(bar.bottom);
+      if (zone.endsWith('left')) expect(w.left - bar.left).toBeLessThan(20);
+      if (zone.endsWith('right')) expect(bar.right - w.right).toBeLessThan(20);
+      if (zone.endsWith('center')) {
+        const z = await box(page.locator(`[data-fl-tool-zone="${zone}"]`));
+        expect(Math.abs((w.left + w.right) / 2 - (z.left + z.right) / 2)).toBeLessThan(2);
+      }
+    }
+  });
+
+  test('tool zones: the layout shrinks to the room the bars leave, and gets it back', async ({ page }) => {
+    const before = await box(page.locator('.fl-layout'));
+    await showToolZones(page);
+    const top = await box(page.locator('.fl-zone-bar-top'));
+    const bottom = await box(page.locator('.fl-zone-bar-bottom'));
+    const layout = await box(page.locator('.fl-layout'));
+    expect(Math.abs(layout.top - top.bottom)).toBeLessThan(1);
+    expect(Math.abs(layout.bottom - bottom.top)).toBeLessThan(1);
+    expect(Math.abs(layout.height - (before.height - top.height - bottom.height))).toBeLessThan(1);
+    // Tabsets and sidebars live in that room
+    for (const sel of ['.fl-tabset', '.fl-sidebar-left', '.fl-sidebar-bottom']) {
+      const b = await box(page.locator(sel).first());
+      expect(b.top).toBeGreaterThanOrEqual(layout.top - 0.5);
+      expect(b.bottom).toBeLessThanOrEqual(layout.bottom + 0.5);
+    }
+    // A maximized tabset stays in the layout, under the top bar
+    await page.locator('.fl-tbtn-max').first().click();
+    const max = await box(page.locator('.fl-maximized'));
+    expect(Math.abs(max.top - layout.top)).toBeLessThan(1);
+    expect(max.bottom).toBeLessThanOrEqual(layout.bottom + 0.5);
+    await page.locator('.fl-maximized .fl-tbtn-max').click();
+    // Emptied, the bars go and the layout is back to its size
+    await page.click('button:has-text("Tool zones")');
+    await expect(page.locator('.fl-zone-bar')).toHaveCount(0, { timeout: 2000 });
+    expect(await box(page.locator('.fl-layout'))).toEqual(before);
+  });
+
+  test('tool zones: a click on a zone widget reaches the server', async ({ page }) => {
+    await showToolZones(page);
+    await expect(page.locator('.fl-demo-zone-status')).toHaveText('Ready');
+    await page.locator('.fl-demo-zone-ping').click();
+    await expect(page.locator('.fl-demo-zone-status')).toHaveText('Pings: 1', { timeout: 2000 });
+    await page.locator('.fl-demo-zone-ping').click();
+    await expect(page.locator('.fl-demo-zone-status')).toHaveText('Pings: 2', { timeout: 2000 });
+  });
+
+  test('tool zones: a tab still drags to another tabset with the bars shown', async ({ page }) => {
+    await showToolZones(page);
+    await page.click('button:has-text("+ Add Tab")');
+    await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });
+    const target = page.locator('.fl-tabset').last();
+    const before = await target.locator('.fl-tab').count();
+    const tab = page.locator('.fl-tabset').first().locator('.fl-tab').last();
+    const tabBox = await tab.boundingBox();
+    const rightBox = await target.boundingBox();
+    await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tabBox.x + 10, tabBox.y + 10, { steps: 2 });
+    await page.mouse.move(rightBox.x + rightBox.width / 2, rightBox.y + rightBox.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await expect(target.locator('.fl-tab')).toHaveCount(before + 1, { timeout: 2000 });
+    await expect(page.locator('.fl-tab')).toHaveCount(3);
+  });
+
+  test('tool zones: a tab still pops out and back in, a sidebar still opens, with the bars shown', async ({ page }) => {
+    await showToolZones(page);
+    const tabs = await page.locator('.fl-tab').count();
+    await page.locator('.fl-tbtn-popout').first().click();
+    const win = page.locator('.fl-popout-window');
+    await expect(win).toBeVisible({ timeout: 2000 });
+    await win.locator('.fl-popout-popin').click();
+    await expect(win).toHaveCount(0, { timeout: 2000 });
+    await expect(page.locator('.fl-tab')).toHaveCount(tabs, { timeout: 2000 });
+    const layout = await box(page.locator('.fl-layout'));
+    await page.locator('.fl-sidebar-right .fl-sidebar-tab').first().click();
+    const panel = page.locator('.fl-sidebar-right .fl-sidebar-panel').first();
+    await expect(panel).toBeVisible({ timeout: 2000 });
+    const p = await box(panel);
+    expect(p.top).toBeGreaterThanOrEqual(layout.top - 0.5);
+    expect(p.bottom).toBeLessThanOrEqual(layout.bottom + 0.5);
+  });
+
+  test('tool zones: the bars follow the theme', async ({ page }) => {
+    await showToolZones(page);
+    const bg = () => page.locator('.fl-zone-bar-top').evaluate(el => getComputedStyle(el).backgroundColor);
+    const dark = await bg();
+    await page.locator('select:has(option:text-is("Light"))').selectOption({ label: 'Light' });
+    await expect(page.locator('.fl-zone-bar-top')).toHaveClass(/fl-theme-light/, { timeout: 2000 });
+    await expect(page.locator('.fl-zone-bar-bottom')).toHaveClass(/fl-theme-light/);
+    expect(await bg()).not.toBe(dark);
+  });
+
   test('pop-out window is draggable', async ({ page }) => {
     await page.locator('.fl-tbtn-popout').first().click();
     const win = page.locator('.fl-popout-window');

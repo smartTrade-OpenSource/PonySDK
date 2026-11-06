@@ -635,6 +635,24 @@
   font-size: 11px; color: var(--fl-text-dim); overflow: hidden;
 }
 
+/* ── Tool zones: application bars above and below the layout ────── */
+/* Tokens, all optional (a theme or the application sets them): --fl-zone-bar-h (min height), --fl-zone-bar-bg,
+   --fl-zone-bar-text, --fl-zone-bar-border (color), --fl-zone-bar-pad, --fl-zone-bar-gap. Their fallbacks
+   follow the theme's strip. */
+.fl-zone-bar {
+  position: absolute; left: 0; right: 0; box-sizing: border-box;
+  display: flex; align-items: center; gap: var(--fl-zone-bar-gap, 8px);
+  min-height: var(--fl-zone-bar-h, 32px); padding: var(--fl-zone-bar-pad, 2px 8px);
+  background: var(--fl-zone-bar-bg, var(--fl-strip)); color: var(--fl-zone-bar-text, var(--fl-text));
+  font-family: var(--fl-font); font-size: var(--fl-font-sz);
+}
+.fl-zone-bar-top { top: 0; border-bottom: 1px solid var(--fl-zone-bar-border, var(--fl-border)); }
+.fl-zone-bar-bottom { bottom: 0; border-top: 1px solid var(--fl-zone-bar-border, var(--fl-border)); }
+/* Left and right hug their content; the center takes the rest and centers its own */
+.fl-tool-zone { display: flex; align-items: center; gap: var(--fl-zone-bar-gap, 8px); min-width: 0; }
+.fl-tool-zone-left, .fl-tool-zone-right { flex: 0 1 auto; }
+.fl-tool-zone-center { flex: 1 1 0; justify-content: center; }
+
 /* ── Feature 11: Notification/Toast ─────────────────────────────── */
 .fl-toast-container {
   position: absolute; top: 8px; right: 8px; z-index: 10002;

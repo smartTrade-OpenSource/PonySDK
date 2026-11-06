@@ -32,6 +32,8 @@
       this._autoSaveEnabled = false; // Feature 14
       this._iconMode = 'text';       // 'text' or 'attribute'
       this._iconAttribute = 'ui-icon';
+      this._toolZones = {};          // zone ('top-left', ...) -> id of the widget the server put there
+      this._toolBars = {};           // 'top' / 'bottom' -> its bar, only while one of its zones holds a widget
       this._buttonConfig = {
         popoutFloat:  { visible: true, icon: '⧉', title: 'Pop out (overlay)', className: 'fl-tbtn fl-tbtn-popout', style: 'font-size:11px;' },
         popoutWindow: { visible: true, icon: '↗', title: 'Pop out (new window)', className: 'fl-tbtn fl-tbtn-popout-win', style: 'font-size:12px;' }
@@ -414,6 +416,7 @@
       if (!this._layoutContainer) return;
       this._layoutContainer.className = this._layoutContainer.className.replace(/fl-theme-\S+/g, '').trim();
       if (theme) this._layoutContainer.classList.add(theme);
+      for (var bar in this._toolBars) this._skinToolBar(this._toolBars[bar], theme ? [theme] : []);
       // Propagate theme to popout windows (they live outside .fl-layout)
       if (this._popOuts) {
         for (var id in this._popOuts) {
@@ -1045,6 +1048,98 @@
       setTimeout(function () { self._moveWidgetToHost(widgetId, self._statusBar); }, 50);
     },
 
+    // ─── Tool zones ─────────────────────────────────────────────
+    // A bar above the layout and one below it, each with a left, a center and a right zone where the server puts an
+    // application widget. A bar is built with the first widget of its zones and removed with the last: without one,
+    // the DOM and the layout's room stay as they were. The layout container gives the bars their height.
+
+    setToolZone: function (zone, widgetId) {
+      var place = this._toolZonePlace(zone);
+      if (!place) return;
+      var wid = String(widgetId);
+      // A widget already in another zone moves here: that zone is empty now
+      for (var z in this._toolZones) if (this._toolZones[z] === wid) delete this._toolZones[z];
+      this._toolZones[zone] = wid;
+      var el = this.element.querySelector('[id="' + wid + '"]');
+      this._renderToolBars();
+      // The previous widget stays until the server removes it, right after this call
+      var slot = this._toolBars[place.bar].querySelector('[data-fl-tool-zone="' + zone + '"]');
+      if (el && !this.element.contains(el)) {
+        slot.appendChild(el); // from a bar that just went, with it
+        return;
+      }
+      slot._retryCount = 0; // long-lived host, don't inherit a previous attempt's budget
+      this._moveWidgetToHost(wid, slot);
+    },
+
+    clearToolZone: function (zone) {
+      if (!this._toolZones[zone]) return;
+      // Its widget stays until the server removes it, right after this call; a bar left empty goes, with it
+      delete this._toolZones[zone];
+      this._renderToolBars();
+    },
+
+    _toolZonePlace: function (zone) {
+      var m = /^(top|bottom)-(left|center|right)$/.exec(zone || '');
+      return m ? { bar: m[1], side: m[2] } : null;
+    },
+
+    // Builds the bars that have a widget in one of their zones, removes the others, and fits the layout between them.
+    _renderToolBars: function () {
+      var self = this;
+      ['top', 'bottom'].forEach(function (name) {
+        var used = false;
+        for (var z in self._toolZones) if (z.indexOf(name + '-') === 0) used = true;
+        var bar = self._toolBars[name];
+        if (used && !bar) {
+          bar = document.createElement('div');
+          bar.className = 'fl-zone-bar fl-zone-bar-' + name;
+          ['left', 'center', 'right'].forEach(function (side) {
+            var slot = document.createElement('div');
+            slot.className = 'fl-tool-zone fl-tool-zone-' + side;
+            slot.dataset.flToolZone = name + '-' + side;
+            bar.appendChild(slot);
+          });
+          self._skinToolBar(bar, self._layout && self._layout.getSkinClasses ? self._layout.getSkinClasses() : []);
+          // Top bar before the layout, bottom bar after it: the keyboard reaches them in the order they show
+          if (name === 'top') self.element.insertBefore(bar, self._layoutContainer);
+          else self.element.appendChild(bar);
+          self._toolBars[name] = bar;
+          if (!self._toolBarObserver && typeof ResizeObserver !== 'undefined') {
+            self._toolBarObserver = new ResizeObserver(function () { self._fitLayoutToToolBars(); });
+          }
+          if (self._toolBarObserver) self._toolBarObserver.observe(bar);
+        } else if (!used && bar) {
+          if (self._toolBarObserver) self._toolBarObserver.unobserve(bar);
+          bar.remove();
+          delete self._toolBars[name];
+        }
+      });
+      this._fitLayoutToToolBars();
+    },
+
+    _fitLayoutToToolBars: function () {
+      var top = this._toolBars.top, bottom = this._toolBars.bottom;
+      var lc = this._layoutContainer.style;
+      if (!top && !bottom) {
+        // Back to the inline geometry of initDom
+        lc.top = '0px'; lc.height = '';
+        if (this._statusBar) this._statusBar.style.bottom = '';
+        return;
+      }
+      var topH = top ? top.offsetHeight : 0, bottomH = bottom ? bottom.offsetHeight : 0;
+      // .fl-layout's height:100% sizes the layout, not the inline bottom: it loses the bars' height, nothing else
+      lc.top = topH + 'px'; lc.height = 'calc(100% - ' + (topH + bottomH) + 'px)';
+      // The bottom bar takes the edge; the status bar keeps its place at the layout's foot, above it
+      if (this._statusBar) this._statusBar.style.bottom = bottomH + 'px';
+    },
+
+    // The bars sit outside the layout container that carries the theme class: they carry it too, as pop-outs do.
+    _skinToolBar: function (bar, classes) {
+      bar.className = bar.className.replace(/fl-theme-\S+/g, '').trim();
+      classes.forEach(function (c) { bar.classList.add(c); });
+    },
+
     // ─── Feature 11: Notification/Toast ─────────────────────────
     showNotification: function (message, type, duration) {
       var self = this;
@@ -1085,6 +1180,7 @@
     destroy: function () {
       if (this._pendingTimeouts) { this._pendingTimeouts.forEach(clearTimeout); this._pendingTimeouts = []; }
       if (this._layout) { this._layout.destroy(); this._layout = null; }
+      if (this._toolBarObserver) { this._toolBarObserver.disconnect(); this._toolBarObserver = null; }
       this._closeFloatPopOuts();
       this._debouncedModelChange = function () {};
       this._debouncedAutoSave = function () {};
