@@ -320,6 +320,28 @@ public final class FlexLayoutPanel implements IsPWidget {
         addon.setStatusBarWidget(w);
     }
 
+    // ─── Tool zones ─────────────────────────────────────────────
+
+    /**
+     * Puts a widget in a tool zone, a bar above or below the layout: one widget per zone (pass a panel for several),
+     * the previous one replaced, null to empty the zone. Not part of the saved layout model.
+     *
+     * @see FlexLayoutAddon#setToolZone(FlexToolZone, PWidget)
+     */
+    public void setToolZone(final FlexToolZone zone, final PWidget widget) {
+        addon.setToolZone(zone, widget);
+    }
+
+    /** Empties a tool zone; its bar goes with its last widget. */
+    public void clearToolZone(final FlexToolZone zone) {
+        addon.clearToolZone(zone);
+    }
+
+    /** Returns the widget of a tool zone, or null when the zone is empty. */
+    public PWidget getToolZone(final FlexToolZone zone) {
+        return addon.getToolZone(zone);
+    }
+
     // ─── Feature 11: Notifications ──────────────────────────────
 
     public void showNotification(final String message, final String type, final int durationMs) {

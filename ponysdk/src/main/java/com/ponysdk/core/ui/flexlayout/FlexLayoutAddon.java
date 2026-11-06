@@ -1,6 +1,7 @@
 package com.ponysdk.core.ui.flexlayout;
 
 import java.io.StringReader;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import com.ponysdk.core.ui.basic.PWindow;
  *   <li>External drag sources that create new tabs with server-instantiated widgets</li>
  *   <li>Layout persistence (save/load model as JSON)</li>
  *   <li>Change notifications for all layout modifications</li>
+ *   <li>Tool zones: application widgets in bars above and below the layout ({@link #setToolZone(FlexToolZone, PWidget)})</li>
  * </ul>
  */
 public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
@@ -51,6 +53,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     private final Map<String, PWidget> tabWidgets = new HashMap<>();
     private final Map<String, PopOutInfo> popOutTabs = new HashMap<>();
+    private final Map<FlexToolZone, PWidget> toolZones = new EnumMap<>(FlexToolZone.class);
     private ExternalDropHandler onExternalDrop;
     private Consumer<String> onTabClosed;
     private Consumer<String> onModelChange;
@@ -505,6 +508,45 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("setStatusBar", String.valueOf(w.getID()));
     }
 
+    // ─── Tool zones ─────────────────────────────────────────────
+
+    /**
+     * Puts a widget in a tool zone: a bar above or below the layout, application chrome independent of the tabs. A
+     * zone holds one widget (pass a panel for several); setting one replaces the previous one, which leaves the
+     * layout, and a widget already in another zone moves here. A bar shows only while one of its zones holds a widget,
+     * and the layout gives it the room. The widget keeps its PonySDK lifecycle. Tool zones are not part of the layout
+     * model: neither saved nor restored with it, an application sets them again when it builds its page.
+     *
+     * @param zone the zone
+     * @param zoneWidget the widget, or null to empty the zone
+     */
+    public void setToolZone(final FlexToolZone zone, final PWidget zoneWidget) {
+        if (zoneWidget == null) {
+            clearToolZone(zone);
+            return;
+        }
+        final PWidget previous = toolZones.get(zone);
+        if (previous == zoneWidget) return;
+        toolZones.values().remove(zoneWidget); // from another zone, it moves
+        toolZones.put(zone, zoneWidget);
+        if (zoneWidget.getParent() != widget) addContent(zoneWidget);
+        callTerminalMethod("setToolZone", zone.getValue(), String.valueOf(zoneWidget.getID()));
+        if (previous != null) previous.removeFromParent();
+    }
+
+    /** Empties a tool zone: its widget leaves the layout, and its bar goes with its last widget. */
+    public void clearToolZone(final FlexToolZone zone) {
+        final PWidget previous = toolZones.remove(zone);
+        if (previous == null) return;
+        callTerminalMethod("clearToolZone", zone.getValue());
+        previous.removeFromParent();
+    }
+
+    /** Returns the widget of a tool zone, or null when the zone is empty. */
+    public PWidget getToolZone(final FlexToolZone zone) {
+        return toolZones.get(zone);
+    }
+
     // ─── Feature 11: Notification/Toast ─────────────────────────
 
     public void showNotification(final String message, final String type, final int durationMs) {
@@ -663,6 +705,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     public void onDestroy() {
         tabWidgets.clear();
         popOutTabs.clear();
+        toolZones.clear();
         onExternalDrop = null;
         onTabClosed = null;
         onModelChange = null;
