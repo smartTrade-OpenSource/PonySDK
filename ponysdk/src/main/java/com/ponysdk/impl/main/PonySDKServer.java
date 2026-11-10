@@ -83,7 +83,7 @@ public class PonySDKServer {
         server.addConnector(createHttpConnector());
         if (useSSL) server.addConnector(createHttpsConnector());
 
-        server.setHandler(createMainHandler());
+        server.setHandler(createRootHandler());
 
         applicationManager.start();
 
@@ -143,7 +143,12 @@ public class PonySDKServer {
         final HttpConfiguration httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
         httpConfiguration.setSendDateHeader(false);
+        httpConfiguration.setRelativeRedirectAllowed(false);
         return httpConfiguration;
+    }
+
+    protected Handler createRootHandler() {
+        return new ContextPathRedirectHandler(createMainHandler());
     }
 
     protected Handler createMainHandler() {
