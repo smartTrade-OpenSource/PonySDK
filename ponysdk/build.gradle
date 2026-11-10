@@ -24,7 +24,7 @@ ext {
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
 group = 'com.ponysdk'
-version = '2.10.2' + versionSuffix
+version = '2.10.3' + versionSuffix
 
 publishing {
     publications {
