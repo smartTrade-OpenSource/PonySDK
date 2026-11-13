@@ -861,6 +861,26 @@
       this._layout.setBadge(tabId, badge, color);
     },
 
+    // A tab popped out is out of the model: its pop-out keeps the name and the component it comes back with.
+    renameTab: function (tabId, name) {
+      if (!this._model) return;
+      var info = this._popOuts && this._popOuts[tabId];
+      if (info) {
+        info.title = name;
+        var title = info.win && info.win.querySelector('.fl-popout-title');
+        if (title) title.textContent = name;
+      }
+      if (this._model.findById(tabId)) this._model.doAction({ type: 'RENAME_TAB', tabId: tabId, name: name });
+    },
+
+    setTabComponent: function (tabId, component) {
+      if (!this._model) return;
+      var info = this._popOuts && this._popOuts[tabId];
+      if (info) info.component = component;
+      var tabNode = this._model.findById(tabId);
+      if (tabNode) tabNode.component = component;
+    },
+
     enableUndoRedo: function (enabled) {
       if (!this._layout) return;
       this._layout.setUndoEnabled(!!enabled);
