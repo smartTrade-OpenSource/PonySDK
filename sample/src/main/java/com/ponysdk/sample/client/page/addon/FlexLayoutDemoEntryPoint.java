@@ -9,6 +9,7 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.flexlayout.FlexLayoutPanel;
+import com.ponysdk.core.ui.flexlayout.FlexToolZone;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
@@ -140,6 +141,18 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         styleSidebarButton(rightSize);
         rightSize.addClickHandler(e -> flexLayout.getAddon().setBorderSize("right-top", 300));
         toolbar.add(rightSize);
+
+        // Tool zones: application widgets in a bar above the layout and one below, independent of the tabs
+        final PButton toolZones = Element.newPButton("Tool zones");
+        styleSidebarButton(toolZones);
+        toolZones.addClickHandler(e -> {
+            if (flexLayout.getToolZone(FlexToolZone.TOP_LEFT) != null) {
+                for (final FlexToolZone zone : FlexToolZone.values()) flexLayout.clearToolZone(zone);
+            } else {
+                showToolZones(flexLayout);
+            }
+        });
+        toolbar.add(toolZones);
 
         // Theme selector handler
         themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
@@ -341,6 +354,37 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         label.setStyleProperty("font-size", "12px");
         label.setStyleProperty("cursor", "grab");
         label.setStyleProperty("white-space", "nowrap");
+    }
+
+    /** Fills the six tool zones; the button on the top right counts its clicks on the server, shown bottom left. */
+    private static void showToolZones(final FlexLayoutPanel flexLayout) {
+        final PLabel title = Element.newPLabel("PonySDK Studio");
+        title.addStyleName("fl-demo-zone-title");
+        title.setStyleProperty("font-weight", "600");
+        flexLayout.setToolZone(FlexToolZone.TOP_LEFT, title);
+
+        final PLabel workspace = Element.newPLabel("Workspace: demo");
+        workspace.addStyleName("fl-demo-zone-workspace");
+        flexLayout.setToolZone(FlexToolZone.TOP_CENTER, workspace);
+
+        final PLabel clicks = Element.newPLabel("Ready");
+        clicks.addStyleName("fl-demo-zone-status");
+        flexLayout.setToolZone(FlexToolZone.BOTTOM_LEFT, clicks);
+
+        final PButton ping = Element.newPButton("Ping");
+        ping.addStyleName("fl-demo-zone-ping");
+        styleSidebarButton(ping);
+        final int[] count = { 0 };
+        ping.addClickHandler(e -> clicks.setText("Pings: " + ++count[0]));
+        flexLayout.setToolZone(FlexToolZone.TOP_RIGHT, ping);
+
+        final PLabel encoding = Element.newPLabel("UTF-8");
+        encoding.addStyleName("fl-demo-zone-encoding");
+        flexLayout.setToolZone(FlexToolZone.BOTTOM_CENTER, encoding);
+
+        final PLabel position = Element.newPLabel("Ln 1, Col 1");
+        position.addStyleName("fl-demo-zone-position");
+        flexLayout.setToolZone(FlexToolZone.BOTTOM_RIGHT, position);
     }
 
     private static void styleSidebarButton(final PButton btn) {
