@@ -14,7 +14,7 @@ Each widget then tells the terminal, at its creation, its Java class and the lin
 it. The terminal writes them on the element:
 
 ```html
-<button class="pony-Button" data-pony="PButton InputsPage.java:85" data-pony-id="64">Click me</button>
+<button class="pony-Button" data-pony="PButton InputsPage.java:87" data-pony-id="64">Click me</button>
 ```
 
 The browser's element inspector names the Java behind each element; `data-pony-id` is the object's id, as the
@@ -29,7 +29,7 @@ opens its panel; `Alt+Shift+I` too.
 | Terminals | With embedded applications (`<pony-app>`): the page's terminal and each embedded one, their objects and bytes |
 | Bytes by class | Per class: objects, updates, bytes received |
 | Busiest objects | The ten objects that received the most bytes, with their updates and the events they sent |
-| Pick | The element under the pointer, outlined, with its class, line, id, bytes and events; a click selects it, logs it to the console (`[pony] #64 PButton InputsPage.java:85`) and does not reach the application; `Escape` stops picking |
+| Pick | The element under the pointer, outlined, with its class, line, id, bytes and events; a click selects it, logs it to the console (`[pony] #64 PButton InputsPage.java:87`) and does not reach the application; `Escape` stops picking |
 | Reset | Counts from now |
 
 Counts start with the first widget: a few blocks before it (the context, the window) are not counted. The bytes of
