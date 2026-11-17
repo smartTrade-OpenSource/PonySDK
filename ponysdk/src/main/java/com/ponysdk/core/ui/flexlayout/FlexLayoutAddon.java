@@ -174,6 +174,22 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("attachWidget", tabId, String.valueOf(content.getID()));
     }
 
+    /** Renames a tab: its strip shows the name and the model keeps it, also while the tab is popped out. */
+    public void renameTab(final String tabId, final String name) {
+        callTerminalMethod("renameTab", tabId, name);
+    }
+
+    /**
+     * Names the component a tab's widget is built from from now on: a pop-out to a window and the pop-in after it build
+     * the widget from it through the {@link #setWidgetFactory widget factory}, and a model saved and loaded again names
+     * it. A widget showing something else than it was built for (another instrument, another account) keeps its tab
+     * that way.
+     */
+    public void setTabComponent(final String tabId, final String component) {
+        tabComponents.put(tabId, component);
+        callTerminalMethod("setTabComponent", tabId, component);
+    }
+
     public void removeTab(final String tabId) {
         callTerminalMethod("removeTab", tabId);
         final PWidget removed = tabWidgets.remove(tabId);
