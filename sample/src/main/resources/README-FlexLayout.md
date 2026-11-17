@@ -116,6 +116,25 @@ Available themes: `DEFAULT`, `LIGHT`, `GRAY`, `NORD`, `SOLARIZED`, `GITHUB`, `MO
 String cssClass = FlexTheme.MONOKAI.getCssClass(); // "fl-theme-monokai"
 ```
 
+### Tool zones
+
+| Class | Purpose |
+|-------|---------|
+| `FlexToolZone` | A zone of the bar above the layout or the one below: `TOP_LEFT`, `TOP_CENTER`, `TOP_RIGHT`, `BOTTOM_LEFT`, `BOTTOM_CENTER`, `BOTTOM_RIGHT` |
+
+```java
+layout.setToolZone(FlexToolZone.TOP_LEFT, appTitle);
+layout.setToolZone(FlexToolZone.TOP_RIGHT, userMenu);     // one widget per zone: pass a panel for several
+layout.setToolZone(FlexToolZone.BOTTOM_LEFT, statusLabel);
+layout.clearToolZone(FlexToolZone.TOP_RIGHT);             // or setToolZone(zone, null)
+```
+
+A bar shows only while one of its zones holds a widget, and the layout shrinks to the room left. The widgets keep
+their PonySDK lifecycle (handlers, updates). Left and right zones hug their content; the center takes the rest and
+centers its own. Tool zones are application chrome: they are not part of the saved layout model, so set them again
+when the page is built. Optional tokens: `--fl-zone-bar-h`, `--fl-zone-bar-bg`, `--fl-zone-bar-text`,
+`--fl-zone-bar-border`, `--fl-zone-bar-pad`, `--fl-zone-bar-gap`.
+
 ### Hooks
 
 Tab lifecycle events are handled through the PonySDK addon mechanism. The client sends events (`tabSelect`, `tabClose`, `modelSnapshot`) which can be handled server-side via `AbstractAddon.onData()`.

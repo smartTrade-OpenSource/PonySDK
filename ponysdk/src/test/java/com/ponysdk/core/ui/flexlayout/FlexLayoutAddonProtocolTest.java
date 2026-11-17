@@ -943,6 +943,91 @@ public class FlexLayoutAddonProtocolTest extends PSuite {
         assertTrue(recorder.calls(addon).isEmpty());
     }
 
+    // ─── Tool zones ──────────────────────────────────────────────
+
+    @Test
+    public void aToolZoneWidgetIsParkedByTheTerminalInItsZone() {
+        final PLabel title = Element.newPLabel("App");
+        addon.setToolZone(FlexToolZone.TOP_LEFT, title);
+        recorder.assertLast(addon, "setToolZone", "top-left", id(title));
+        // A content widget like a tab's: in the panel, its id forced, hidden until the terminal moves it to its zone
+        assertSame(addon.getPanel(), title.getParent());
+        assertTrue(title.hasStyleName(UNPARKED));
+        assertSame(title, addon.getToolZone(FlexToolZone.TOP_LEFT));
+        assertNull(addon.getToolZone(FlexToolZone.BOTTOM_LEFT));
+    }
+
+    @Test
+    public void everyToolZoneHasItsBarAndItsPlaceOnTheWire() {
+        final String[] expected = { "top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right" };
+        final FlexToolZone[] zones = FlexToolZone.values();
+        assertEquals(expected.length, zones.length);
+        for (int i = 0; i < zones.length; i++) {
+            final PLabel w = Element.newPLabel();
+            addon.setToolZone(zones[i], w);
+            recorder.assertLast(addon, "setToolZone", expected[i], id(w));
+        }
+    }
+
+    @Test
+    public void aToolZoneHoldsOneWidgetTheNextReplacesIt() {
+        final PLabel first = Element.newPLabel();
+        final PLabel second = Element.newPLabel();
+        addon.setToolZone(FlexToolZone.BOTTOM_RIGHT, first);
+        addon.setToolZone(FlexToolZone.BOTTOM_RIGHT, second);
+        recorder.assertLast(addon, "setToolZone", "bottom-right", id(second));
+        assertNull(first.getParent());
+        assertSame(second, addon.getToolZone(FlexToolZone.BOTTOM_RIGHT));
+
+        // The same widget again: nothing to do
+        recorder.clear();
+        addon.setToolZone(FlexToolZone.BOTTOM_RIGHT, second);
+        assertTrue(recorder.calls(addon).isEmpty());
+    }
+
+    @Test
+    public void aWidgetSetInAnotherZoneMovesThere() {
+        final PLabel clock = Element.newPLabel();
+        addon.setToolZone(FlexToolZone.TOP_RIGHT, clock);
+        addon.setToolZone(FlexToolZone.BOTTOM_CENTER, clock);
+        recorder.assertLast(addon, "setToolZone", "bottom-center", id(clock));
+        assertSame(addon.getPanel(), clock.getParent());
+        assertNull(addon.getToolZone(FlexToolZone.TOP_RIGHT));
+        assertSame(clock, addon.getToolZone(FlexToolZone.BOTTOM_CENTER));
+    }
+
+    @Test
+    public void clearingAToolZoneReleasesItsWidget() {
+        final PLabel status = Element.newPLabel();
+        addon.setToolZone(FlexToolZone.BOTTOM_LEFT, status);
+        addon.clearToolZone(FlexToolZone.BOTTOM_LEFT);
+        recorder.assertLast(addon, "clearToolZone", "bottom-left");
+        assertNull(status.getParent());
+        assertNull(addon.getToolZone(FlexToolZone.BOTTOM_LEFT));
+
+        // An empty zone: nothing travels; null clears like clearToolZone
+        recorder.clear();
+        addon.clearToolZone(FlexToolZone.BOTTOM_LEFT);
+        assertTrue(recorder.calls(addon).isEmpty());
+        final PLabel other = Element.newPLabel();
+        addon.setToolZone(FlexToolZone.TOP_CENTER, other);
+        addon.setToolZone(FlexToolZone.TOP_CENTER, null);
+        recorder.assertLast(addon, "clearToolZone", "top-center");
+        assertNull(other.getParent());
+    }
+
+    @Test
+    public void toolZonesAreNotPartOfTheLayoutModel() {
+        final PLabel menu = Element.newPLabel();
+        addon.setToolZone(FlexToolZone.TOP_RIGHT, menu);
+        addon.addTab("t1", "Tab", Element.newPLabel());
+        addon.loadModel("{\"type\":\"row\"}");
+        // Loading a model releases the tabs' widgets, not the application chrome
+        assertTrue(addon.getTabWidgets().isEmpty());
+        assertSame(addon.getPanel(), menu.getParent());
+        assertSame(menu, addon.getToolZone(FlexToolZone.TOP_RIGHT));
+    }
+
     @Test
     public void onDestroyDropsTabsAndHandlers() {
         final List<String> closed = new ArrayList<>();

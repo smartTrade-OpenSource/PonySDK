@@ -1,5 +1,16 @@
 # FlexLayout Changelog
 
+## Unreleased
+
+### Tool zones
+- A bar above the layout and one below it, each with a left, a center and a right zone, where the application puts its own PonySDK widget, independent of the tabs: `FlexLayoutPanel.setToolZone(FlexToolZone, PWidget)`, `clearToolZone`, `getToolZone`
+- One widget per zone (pass a panel for several); the next one replaces it and the previous one leaves the layout; a widget set in another zone moves there
+- A bar exists only while one of its zones holds a widget: without one, no DOM and no room taken, the layout as before
+- The layout (tabsets, sidebars, splitters, maximize, drop targets) takes the room left between the bars; the status bar stays at its foot, above the bottom bar
+- Left and right zones hug their content, the center takes the rest and centers its own
+- The bars carry the theme class like pop-outs, and read optional tokens: `--fl-zone-bar-h`, `--fl-zone-bar-bg`, `--fl-zone-bar-text`, `--fl-zone-bar-border`, `--fl-zone-bar-pad`, `--fl-zone-bar-gap`
+- Application chrome, not layout: tool zones are neither saved with the model nor restored by `loadModel`; the application sets them when it builds its page
+
 ## 1.0.0 (2026-06-14)
 
 Initial release of the FlexLayout component for PonySDK.
