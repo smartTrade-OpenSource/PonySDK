@@ -5,9 +5,11 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.flexlayout.FlexLayoutAddon;
 import com.ponysdk.core.ui.flexlayout.FlexLayoutModel;
 import com.ponysdk.core.ui.flexlayout.FlexLayoutPanel;
 import com.ponysdk.core.ui.flexlayout.FlexTab;
@@ -168,6 +170,18 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         });
         toolbar.add(toolZones);
 
+        // A tab with its toolbar in its tabset strip; another pair renames the tab and becomes the component a
+        // pop-out to a window builds
+        final PButton quote = Element.newPButton("Quote tab");
+        styleSidebarButton(quote);
+        final int[] quotes = { 0 };
+        quote.addClickHandler(e -> {
+            final String tabId = "quote_" + ++quotes[0];
+            flexLayout.getAddon().addTab(tabId, PAIRS[0], quoteView(flexLayout.getAddon(), tabId, PAIRS[0]));
+            flexLayout.getAddon().setTabComponent(tabId, QUOTE + PAIRS[0]);
+        });
+        toolbar.add(quote);
+
         // Theme selector handler
         themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
         if (!fullViewport) { // embedded in the (light) showcase: start with the light theme
@@ -255,6 +269,8 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
                     fileLabel.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
                     return fileLabel;
                 default:
+                    // a quote popped out to a window: config is its tab id
+                    if (component.startsWith(QUOTE)) return quoteView(flexLayout.getAddon(), config, component.substring(QUOTE.length()));
                     final PLabel d = Element.newPLabel("Unknown: " + component);
                     d.setStyleProperty("padding", "12px");
                     return d;
@@ -403,6 +419,42 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         final PLabel position = Element.newPLabel("Ln 1, Col 1");
         position.addStyleName("fl-demo-zone-position");
         flexLayout.setToolZone(FlexToolZone.BOTTOM_RIGHT, position);
+    }
+
+    private static final String QUOTE = "quote:";
+    private static final String[] PAIRS = { "EUR/USD", "GBP/USD", "USD/JPY" };
+    private static final java.util.Map<String, String> PRICES = java.util.Map.of("EUR/USD", "1.0842", "GBP/USD", "1.2715",
+        "USD/JPY", "151.38");
+
+    /**
+     * A quote whose pair selector is its tab's toolbar ({@link FlexLayoutAddon#asTabToolbar}): shown in the tabset strip
+     * while the tab is selected. Another pair renames the tab and becomes the component its pop-out to a window builds.
+     */
+    private static PWidget quoteView(final FlexLayoutAddon layout, final String tabId, final String pair) {
+        final PFlowPanel view = Element.newPFlowPanel();
+        view.setStyleProperty("padding", "16px");
+
+        final PListBox pairs = Element.newPListBox();
+        pairs.addStyleName("fl-demo-quote-pair");
+        pairs.setAttribute("aria-label", "Pair");
+        for (final String p : PAIRS) pairs.addItem(p, p);
+        pairs.setSelectedValue(pair);
+        FlexLayoutAddon.asTabToolbar(pairs);
+        view.add(pairs);
+
+        final PLabel price = Element.newPLabel(pair + "  " + PRICES.get(pair));
+        price.addStyleName("fl-demo-quote-price");
+        price.setStyleProperty("font-size", "24px");
+        price.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
+        view.add(price);
+
+        pairs.addChangeHandler(e -> {
+            final String p = (String) pairs.getSelectedValue();
+            price.setText(p + "  " + PRICES.get(p));
+            layout.renameTab(tabId, p);
+            layout.setTabComponent(tabId, QUOTE + p);
+        });
+        return view;
     }
 
     private static void styleSidebarButton(final PButton btn) {

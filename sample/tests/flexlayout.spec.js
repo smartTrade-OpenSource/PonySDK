@@ -352,6 +352,24 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(ts.locator('.fl-strip > .fl-tab-toolbar > #toolbar-under-test')).toBeVisible();
   });
 
+  // The demo's "Quote tab" button adds a tab whose pair selector is its toolbar (asTabToolbar, from Java); another
+  // pair renames the tab (renameTab) and becomes its component (setTabComponent), which a pop-out to a window builds
+  test('a quote tab: its toolbar in the strip, another pair renames it and pops out to a window as that pair', async ({ page, context }) => {
+    await page.click('button:has-text("Quote tab")');
+    const tab = page.locator('.fl-tab', { hasText: 'EUR/USD' });
+    await expect(tab).toBeVisible({ timeout: 2000 });
+    const id = await page.locator('.fl-tabset', { has: tab }).getAttribute('data-fl-tabset');
+    const tabset = page.locator(`[data-fl-tabset="${id}"]`);
+    await expect(tabset.locator('.fl-strip > .fl-tab-toolbar > .fl-demo-quote-pair')).toBeVisible();
+    await tabset.locator('.fl-demo-quote-pair').selectOption('USD/JPY');
+    await expect(tabset.locator('.fl-tab', { hasText: 'USD/JPY' })).toBeVisible({ timeout: 2000 });
+    await expect(tabset.locator('.fl-tab', { hasText: 'EUR/USD' })).toHaveCount(0);
+    await expect(tabset.locator('.fl-demo-quote-price')).toHaveText(/USD\/JPY/);
+    const [win] = await Promise.all([context.waitForEvent('page'), tabset.locator('.fl-tbtn-popout-win').click()]);
+    await expect(win.locator('.fl-demo-quote-price')).toHaveText(/USD\/JPY/, { timeout: 5000 });
+    await win.close();
+  });
+
   // Tool zones: application widgets in a bar above the layout and one below (FlexLayoutPanel.setToolZone); the
   // demo's "Tool zones" button fills the six zones on the server, and empties them
   const box = async locator => {
