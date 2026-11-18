@@ -64,10 +64,30 @@ cap, which also applies to a window. The terminal trims; the server holds no poi
 | Type | Draws | Value axis |
 |---|---|---|
 | `LINE` | one line per series, broken where a series has no value | fits the data |
-| `AREA` | the lines, with a translucent fill to the bottom of the plot | fits the data |
+| `AREA` | the lines, with a fill that fades from their colour to nothing at the bottom of the plot | fits the data |
 | `BAR` | one bar per point and series, side by side | includes zero |
 
-Up to eight series have their own colour; more repeat them.
+Up to eight series have their own colour; more repeat them. Values are grouped by thousands ("67,504.56") on the axis,
+in the legend, the tooltip and the screen reader's label.
+
+## Sparkline
+
+```java
+final PChart spark = PChart.builder(PChart.Type.AREA, "EURUSD").title("EURUSD, last 60 seconds").decimals(5)
+    .window(Duration.ofSeconds(60))
+    .sparkline()                        // no axes, no legend: the data over the whole box
+    .minSpan(0.0002)                    // the value axis spans two pips at least, centred on the data
+    .build();
+spark.asWidget().setHeight("40px");
+```
+
+`sparkline()` is for a chart a few lines high beside the figure it follows, where the axes and the legend would leave
+no plot below 72 px. The data takes the whole box and each series' last value is drawn at the end of its line, a dot on
+its point. The tooltip and the screen reader's label stay.
+
+`minSpan(span)`, in the values' unit, works with or without `sparkline()`: a series that moves by less than `span`
+stays near the middle of the box rather than drawing its noise over the whole height, which makes a calm minute of a
+market look wild. 0, the default, fits the axis to the data.
 
 ## Reading by screen reader
 
@@ -111,5 +131,5 @@ not reach into it.
 One value axis (no secondary axis), no zoom or pan, no series hidden by a click on the legend, no categories on the
 time axis. A chart that needs them is a `PAddOn` over a JavaScript library ([Custom JavaScript](addons.md)).
 
-The showcase's Charts page shows a four-series feed at 1,000 and 10,000 ticks a second, an area and bars, each with
-its code; its Performance page draws its 60-second metrics with `PChart`.
+The showcase's Charts page shows a four-series feed at 1,000 and 10,000 ticks a second, an area, bars and a
+sparkline, each with its code; its Performance page draws its 60-second metrics with `PChart`.
