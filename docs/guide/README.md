@@ -17,7 +17,8 @@ built so: the [decisions](../decisions/README.md); from 2.10: [UPGRADING.md](../
 | [Signals](signals.md) | A value shown in several places, computed from others, bound to widgets: `Signal`, `Bind` |
 | [Client commands](client-commands.md) | A click that shows a panel, toggles a class or takes the focus in the browser, with no round trip: `PCommands` |
 | [Routing](routing.md) | `@Route` views, a `Router` on the history token, guards and access |
-| [Charts](charts.md) | Time series drawn by the terminal: `PChart`, live feeds, sliding window |
+| [Charts](charts.md) | Time series drawn by the terminal: `PChart`, live feeds, sliding window, sparklines |
+| [FlexLayout](flexlayout.md) | Dockable tabs, splits, sidebars, pop-outs, a tab's toolbar in its strip, bars around the layout |
 | [Perspective](perspective.md) | A blotter of thousands of rows updated many times a second, grouped, pivoted, sorted, filtered and charted in the browser: FINOS Perspective, an example to copy |
 | [Embedding](embedding.md) | The application inside another page, `<pony-app>` |
 | [FDC3](fdc3.md) | Talking to the other applications of a trader's desktop |

@@ -4,10 +4,14 @@
 
 FlexLayout is a server-side Java API for building IDE-style dockable tab layouts in PonySDK applications. It provides resizable split panels, draggable tabs, collapsible sidebars, keyboard shortcuts, and theming — all driven from Java with no client-side code required.
 
+The showcase's FlexLayout page runs the demo (`FlexLayoutDemoEntryPoint`): its "Quote tab" button adds a tab whose
+pair selector is its toolbar, and whose pair renames it; "Tool zones" fills the bars around the layout. What changed:
+[CHANGELOG-FlexLayout.md](../../CHANGELOG-FlexLayout.md).
+
 ## Quick Start
 
 ```java
-import com.ponysdk.sample.client.page.addon.flexlayout.*;
+import com.ponysdk.core.ui.flexlayout.*;
 
 // Build the layout model
 FlexLayoutModel model = FlexLayoutModel.row()
@@ -69,6 +73,44 @@ FlexTab.create("Name").component("type").icon("fa-icon").pinned()
 FlexTab.create("Name").config(Map.of("key", "value"))
 List<FlexTabInfo> tabs = FlexTabInfo.fromJson(jsonString);
 ```
+
+#### A tab's toolbar
+
+```java
+final PListBox pairs = Element.newPListBox();
+FlexLayoutAddon.asTabToolbar(pairs);    // a widget of the tab's content
+view.add(pairs);
+```
+
+While the tab is the one selected in its tabset, the marked widget shows in the tabset's strip, after the tabs, which
+keep their own width. Another tab selected, the tab closed or popped out, it goes back into the content. Only the
+element moves: the widget keeps its parent, and a hidden placeholder keeps its place. The first marked widget of a
+content is its toolbar; a content with none leaves the strip as before. A view can so drop the header that repeated
+the tab's name above it.
+
+#### Renaming a tab and changing its component
+
+```java
+final FlexLayoutAddon addon = layout.getAddon();
+addon.renameTab(tabId, "USD/JPY");               // the strip and the model take the name
+addon.setTabComponent(tabId, "quote:USD/JPY");   // what the widget factory builds from now on
+```
+
+A view that switches what it shows (a book moved to another instrument) keeps its tab: a popped-out tab keeps the new
+name for its float's title bar and for its return; a pop-out to a window, the pop-in after it, and a model saved and
+loaded again build the new component. A tab added as a plain widget can pop out to a window once it has a component.
+
+#### Pop-out to a window
+
+```java
+layout.popOutToWindow(tabId, "EUR/USD");
+```
+
+The window builds its own widget from the tab's component through the widget factory (`setWidgetFactory`): PonySDK
+cannot hand a widget from one window to another. The window holds a frame fixed to its edges, the "Pop back in"
+button on top and the view in the rest (`fl-popout-frame`, `fl-popout-body`), so a view sized at 100% of its height,
+a chart or a grid, fills the window; a view taller than the window scrolls. A tab with no component, or no factory,
+stays in the layout.
 
 ### Sidebars
 

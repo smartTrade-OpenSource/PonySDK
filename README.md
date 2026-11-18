@@ -79,8 +79,10 @@ It runs a Jetty 12 WebSocket server on the backend and a TypeScript terminal in 
   ([guide](docs/guide/routing.md))
 - Forms: `Binder` between fields and a bean, converters, validators, Jakarta Bean Validation when present, errors
   read by screen readers ([guide](docs/guide/forms.md))
-- Charts: `PChart`, live time series drawn by the terminal from typed arrays, conflated feeds, a 5 KB chunk loaded
-  only when a chart exists ([guide](docs/guide/charts.md))
+- Charts: `PChart`, live time series drawn by the terminal from typed arrays, conflated feeds, sparklines a few lines
+  high, a 5 KB chunk loaded only when a chart exists ([guide](docs/guide/charts.md))
+- FlexLayout: dockable tabs, splits, sidebars, pop-outs to a float or a window, a tab's toolbar in its strip, bars
+  around the layout for the application's widgets, the layout saved as JSON ([guide](docs/guide/flexlayout.md))
 - FINOS Perspective in the sample: a streaming grid, pivots and charts fed from Java through a `Conflator`, about
   17 B per row on the wire, WebAssembly allowed by one CSP option, never eval ([guide](docs/guide/perspective.md))
 - A default theme: `setTheme("pony")`, CSS tokens, light and dark, WCAG AA contrast ([guide](docs/guide/theme.md))

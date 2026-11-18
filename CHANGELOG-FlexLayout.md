@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Tab toolbar
+- `FlexLayoutAddon.asTabToolbar(PWidget)` marks a widget of a tab's content: while the tab is selected in its tabset, its element shows in the strip, after the tabs, which keep their own width
+- Another tab selected, the tab closed or popped out, it goes back into the content; a hidden placeholder keeps its place, so the content keeps its children's count and order
+- Without a marked widget nothing changes: no slot, the tabs as before
+
+### Rename a tab, change its component
+- `FlexLayoutAddon.renameTab(tabId, name)`: the strip and the model take the name; a popped-out tab keeps it for its float's title bar and its return
+- `FlexLayoutAddon.setTabComponent(tabId, component)`: the widget factory builds that component from now on, for a pop-out to a window, the pop-in after it and a model loaded again; a tab added as a plain widget can so pop out to a window
+
+### Fixed
+- A tab popped out to a window fills the window: a frame fixed to its edges, the "Pop back in" button on top and the view in the rest (`fl-popout-frame`, `fl-popout-body`), so a view sized at 100% of its height (a chart, a grid) no longer shrinks to its content
+
 ### Tool zones
 - A bar above the layout and one below it, each with a left, a center and a right zone, where the application puts its own PonySDK widget, independent of the tabs: `FlexLayoutPanel.setToolZone(FlexToolZone, PWidget)`, `clearToolZone`, `getToolZone`
 - One widget per zone (pass a panel for several); the next one replaces it and the previous one leaves the layout; a widget set in another zone moves there
