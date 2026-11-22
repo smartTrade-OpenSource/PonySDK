@@ -117,7 +117,7 @@ def perspectiveInstall = tasks.register('perspectiveInstall', NpmTask) {
     outputs.dir('perspective/node_modules')
 }
 def perspectiveFiles = [
-    'client'          : ['dist/esm/perspective.js', 'dist/cdn/perspective-server.worker.js'],
+    'client'          : ['dist/esm/perspective.js', 'dist/esm/wasm/registry.js', 'dist/cdn/perspective-server.worker.js'],
     'server'          : ['dist/wasm/perspective-server.wasm'],
     'viewer'          : ['dist/esm/perspective-viewer.js', 'dist/wasm/perspective-viewer.js', 'dist/wasm/perspective-viewer.wasm',
                          'dist/wasm/snippets/**/*.js', 'dist/css/pro.css', 'dist/css/pro-dark.css'],
@@ -135,6 +135,12 @@ def copyPerspective = tasks.register('copyPerspective', Sync) {
             include 'LICENSE*'
             into name
         }
+    }
+    // The viewer imports the client's registry by its package name, which a browser resolves only through an import
+    // map: it imports the client's own file instead, the module the client imports, so they share one registry
+    filteringCharset = 'UTF-8'
+    filesMatching('**/esm/perspective-viewer.js') {
+        filter { it.replace('"@perspective-dev/client/registry"', '"../../../client/dist/esm/wasm/registry.js"') }
     }
     includeEmptyDirs = false
 }

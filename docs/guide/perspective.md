@@ -28,11 +28,13 @@ blotter.addClickListener(row -> fdc3.broadcast(Fdc3.instrument(row.getString("sy
 
 ## Setting it up
 
-1. **The library, from your own files.** `sample/perspective/package.json` pins the five packages exactly (`5.6.0`, Apache-2.0)
+1. **The library, from your own files.** `sample/perspective/package.json` pins the five packages exactly (`5.8.0`, Apache-2.0)
    with a lock file; `./gradlew :sample:copyPerspective` runs `npm ci` and copies what a browser loads (5.1 MB: the modules,
    the two WebAssembly files, the engine's worker, the grid, the charts, two themes, the licences) into `script/perspective/`.
    Nothing is fetched from a CDN at run time. To move versions, change the pins, run the Perspective tests and read the
-   release notes: the integration reads the packages' files by path.
+   release notes: the integration reads the packages' files by path. Since 5.8 the viewer imports the client's registry
+   by its package name, which a browser resolves only through an import map: the copy rewrites that import to the client's
+   own file (`sample/build.gradle`).
 2. **The script.** List `script/perspective-addon.js` with the application's scripts (11.9 KB, 3.9 KB gzip, on every page).
    The library itself is loaded by the first `PPerspective` of a page, and by no other page.
 3. **The files are served.** `configuration.addServedResourceExtensions("wasm")`: only web files are served from the

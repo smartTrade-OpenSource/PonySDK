@@ -44,12 +44,15 @@ engine). Neither runs under the policy: the page raises no violation and no erro
    arrays, so glue is needed whatever the Java class; and `@perspective-dev/viewer` ships no Custom Elements Manifest for
    the generator of ADR-0010.
 2. **The library is the application's own files.** `sample/perspective/package.json` pins the five packages
-   exactly (`5.6.0`), with a lock file. Gradle's `copyPerspective` (`sample/build.gradle`), after an `npm ci` through the
+   exactly (`5.8.0`), with a lock file. Gradle's `copyPerspective` (`sample/build.gradle`), after an `npm ci` through the
    Node plugin ponysdk's terminal already uses, copies what a browser loads into `script/perspective/<package>/dist/...`,
    the layout of the packages, with their licences: the two ES modules (`client`, `viewer`), the viewer's wasm-bindgen
    glue and snippets, the grid and the charts (their bundled builds), the two WebAssembly files, the engine's worker
    and the two themes: 5.1 MB served out of 30 MB of `node_modules` (23 MB of them the five packages), none of it from a CDN. `wasm` is added to the served
-   extensions (`addServedResourceExtensions("wasm")`; Jetty answers `application/wasm`).
+   extensions (`addServedResourceExtensions("wasm")`; Jetty answers `application/wasm`). Since 5.8 the viewer imports
+   `@perspective-dev/client/registry` by its package name; rather than an import map (an inline script under the
+   policy), the copy rewrites that import to the client's own `wasm/registry.js`, the module the client imports, so the
+   two share one registry.
 3. **A script of 11.9 KB (3.9 KB gzip) on every page, the library on one.** `script/perspective-addon.js` is listed with
    the application's scripts and registers the addon. The library is loaded by the first `PPerspective` of a page with
    dynamic `import()`: the viewer, its glue, the client, `init_server(fetch(wasm))`, `init_client(fetch(wasm), glue)`, the
