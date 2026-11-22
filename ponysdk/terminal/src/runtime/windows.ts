@@ -12,7 +12,7 @@ export interface ChildWindow extends ChildTerminal {
     /** Closed by its user, or never opened. */
     readonly closed: boolean;
     close(): void;
-    /** Closed without an unload event: the server is told. */
+    /** Closed without a pagehide event: the server is told. */
     onClose(): void;
 }
 
