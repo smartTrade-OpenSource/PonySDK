@@ -48,7 +48,7 @@ engine). Neither runs under the policy: the page raises no violation and no erro
    Node plugin ponysdk's terminal already uses, copies what a browser loads into `script/perspective/<package>/dist/...`,
    the layout of the packages, with their licences: the two ES modules (`client`, `viewer`), the viewer's wasm-bindgen
    glue and snippets, the grid and the charts (their bundled builds), the two WebAssembly files, the engine's worker
-   and the two themes: 5.1 MB served out of 30 MB of `node_modules` (23 MB of them the five packages), none of it from a CDN. `wasm` is added to the served
+   and the two themes: 5.2 MB served out of 18 MB of `node_modules` (17 MB of them the five packages, 5.8.0), none of it from a CDN. `wasm` is added to the served
    extensions (`addServedResourceExtensions("wasm")`; Jetty answers `application/wasm`). Since 5.8 the viewer imports
    `@perspective-dev/client/registry` by its package name; rather than an import map (an inline script under the
    policy), the copy rewrites that import to the client's own `wasm/registry.js`, the module the client imports, so the
@@ -136,6 +136,10 @@ Measured on 2026-10-29 and 30, on a Mac, Chrome 156, Firefox 157 and WebKit 27 f
   | CSS, 2 themes | 181 KB | 37 KB |
   | **All** | **5,134 KB** | **4,383 KB** |
   | all but the charts (279 KB, 91 KB gzip) | 4,855 KB | 4,292 KB |
+
+  With 5.8.0, measured on 2026-11-22 the same way: 17 files, 5,242 KB decoded, 4,461 KB on the wire (JavaScript
+  826 / 217 KB, WebAssembly 4,236 / 4,207 KB, CSS 181 / 37 KB); 4,958 / 4,368 KB without the charts. The first rows
+  in 348 and 360 ms.
 
   The WebAssembly does not compress (`gzip -9`: 1.2 % and 0.5 %): Perspective compresses it itself and the browser
   unpacks it. From the click on the tab to the first rows, over localhost: 310 to 430 ms (two runs). A page without a viewer: 11.9 KB
