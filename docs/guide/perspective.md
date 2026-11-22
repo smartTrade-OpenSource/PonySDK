@@ -29,7 +29,7 @@ blotter.addClickListener(row -> fdc3.broadcast(Fdc3.instrument(row.getString("sy
 ## Setting it up
 
 1. **The library, from your own files.** `sample/perspective/package.json` pins the five packages exactly (`5.8.0`, Apache-2.0)
-   with a lock file; `./gradlew :sample:copyPerspective` runs `npm ci` and copies what a browser loads (5.1 MB: the modules,
+   with a lock file; `./gradlew :sample:copyPerspective` runs `npm ci` and copies what a browser loads (5.2 MB: the modules,
    the two WebAssembly files, the engine's worker, the grid, the charts, two themes, the licences) into `script/perspective/`.
    Nothing is fetched from a CDN at run time. To move versions, change the pins, run the Perspective tests and read the
    release notes: the integration reads the packages' files by path. Since 5.8 the viewer imports the client's registry
@@ -106,7 +106,7 @@ JSON text would be 9.3 KB and 2.3 KB. A replace of 5,000 rows is several calls o
 
 ## What it costs
 
-- **Bytes**: 5.1 MB of library on the page that has a viewer (4.4 MB gzip: the 4.2 MB of WebAssembly does not compress), 4.9 MB
+- **Bytes**: 5.2 MB of library on the page that has a viewer (4.5 MB gzip: the 4.2 MB of WebAssembly does not compress), 5.0 MB
   without the charts. A page without a viewer loads none of it. The first rows appear about 0.3 to 0.4 s after the page opens
   over localhost, nothing cached.
 - **Browser**: at 1,000 updates a second over 5,000 rows, the main thread is busy 17 to 27 ms in every second; the engine and the
