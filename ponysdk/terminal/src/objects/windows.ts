@@ -191,7 +191,7 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal, Bridge
         }
         // A window of another origin is not listened to: it says when it goes (closing), and watchWindows sees it closed
         if (this.bridge !== null) this.bridge.register(this);
-        else this.window.addEventListener('unload', () => this.onClose());
+        else this.window.addEventListener('pagehide', () => this.onClose()); // Chrome stops firing unload
     }
 
     get ready(): boolean {
@@ -238,7 +238,7 @@ export class PopupWindow extends AbstractWindow implements ChildTerminal, Bridge
 }
 
 /**
- * Every second, the windows closed without an unload event (a crash, a blocked event) are noticed; until signal is
+ * Every second, the windows closed without a pagehide event (a crash, a blocked event) are noticed; until signal is
  * aborted, when given (the terminal of a <pony-app> element goes).
  */
 export function watchWindows(windows: Windows, signal?: AbortSignal): void {
