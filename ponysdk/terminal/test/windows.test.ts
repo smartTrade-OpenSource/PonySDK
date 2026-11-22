@@ -17,7 +17,7 @@ import type { Terminal } from '../src/terminal.ts';
 
 // The windows a terminal opens and the bridge of a terminal opened by another page, apart from a browser
 
-test('every second, a window closed without an unload event is noticed', t => {
+test('every second, a window closed without a pagehide event is noticed', t => {
     t.mock.timers.enable({ apis: ['setInterval'] });
     const windows = new Windows();
     const noticed: number[] = [];
