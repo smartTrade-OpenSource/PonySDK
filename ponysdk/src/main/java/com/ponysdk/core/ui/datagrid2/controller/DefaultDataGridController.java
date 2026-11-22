@@ -121,7 +121,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     private synchronized Object getRenderingHelper(final V data, final Column<V> column) {
-        // FIXME : possible performance optimisation
         final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(data, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.getID()];
         if (helper == NO_RENDERING_HELPER) return null;
@@ -250,8 +249,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private void resetLiveData() {
         final int oldLiveDataSize = dataSource.getRowCount();
         dataSource.resetLiveData();
-        // FIXME : this is to prevent not refreshing in a db filter case
-        // refreshRows(0, Math.max(oldLiveDataSize, dataSource.getRowCount()));
+        // one row at least: a grid that was empty is refreshed too when it is bound again (setBound)
         refreshRows(0, Math.max(oldLiveDataSize, 1));
     }
 

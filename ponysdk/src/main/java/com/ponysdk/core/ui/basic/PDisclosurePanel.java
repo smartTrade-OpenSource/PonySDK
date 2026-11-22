@@ -59,10 +59,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.TEXT, headerText);
-
-        // TODO add ImageResources parametters ..
-        // writer.writeModel(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
-        // writer.writeModel(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
     @Override

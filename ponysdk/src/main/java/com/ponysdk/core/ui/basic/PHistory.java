@@ -79,7 +79,6 @@ public class PHistory {
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
-        // TODO the boolean need not be sent when it is false
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
         writer.endObject();
     }

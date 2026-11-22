@@ -39,8 +39,7 @@ public class CompositeSelectorView implements SelectorView {
 
     @Override
     public PWidget asWidget() {
-        // TODO
-        return views.get(0).asWidget();
+        return views.get(0).asWidget(); // the application places the others
     }
 
     @Override
