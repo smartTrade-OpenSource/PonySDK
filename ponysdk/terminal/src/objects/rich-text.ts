@@ -142,13 +142,13 @@ export class RichTextArea extends FocusWidget {
     }
 }
 
-/** The toolbar's buttons: command, label (GWT's), text; toggles show their state. */
+/** The toolbar's buttons: command, label (GWT's, holding the text: WCAG 2.5.3), text; toggles show their state. */
 const TOGGLES: [string, string, string][] = [
     ['bold', 'Toggle Bold', 'B'],
     ['italic', 'Toggle Italic', 'I'],
     ['underline', 'Toggle Underline', 'U'],
-    ['subscript', 'Toggle Subscript', 'x₂'],
-    ['superscript', 'Toggle Superscript', 'x²'],
+    ['subscript', 'x₂ Subscript', 'x₂'],
+    ['superscript', 'x² Superscript', 'x²'],
     ['strikeThrough', 'Toggle Strikethrough', 'S'],
 ];
 const PUSHES: [string, string, string][] = [
@@ -158,12 +158,12 @@ const PUSHES: [string, string, string][] = [
     ['indent', 'Indent Right', '→'],
     ['outdent', 'Indent Left', '←'],
     ['insertHorizontalRule', 'Insert Horizontal Rule', '―'],
-    ['insertOrderedList', 'Insert Ordered List', '1.'],
+    ['insertOrderedList', '1. Ordered List', '1.'],
     ['insertUnorderedList', 'Insert Unordered List', '•'],
-    ['insertImage', 'Insert Image', 'Img'],
+    ['insertImage', 'Insert Image', 'Image'],
     ['createLink', 'Create Link', 'Link'],
-    ['unlink', 'Remove Link', 'Unlink'],
-    ['removeFormat', 'Remove Formatting', 'Tx'],
+    ['unlink', 'Unlink', 'Unlink'],
+    ['removeFormat', 'Tx Remove Formatting', 'Tx'],
 ];
 const COLORS: [string, string][] = [['White', 'white'], ['Black', 'black'], ['Red', 'red'], ['Green', 'green'],
     ['Yellow', 'yellow'], ['Blue', 'blue']];
