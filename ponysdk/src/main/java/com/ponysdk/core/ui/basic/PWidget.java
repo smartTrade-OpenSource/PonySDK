@@ -480,19 +480,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (!doRemoveDomHandler(handler, type)) {
             log.warn("No event handler of type {} found for {}", type, this);
         }
-        //else{
-        // TODO Handle remove DOM handler
-        // if (eventBus.getHandlers(type, this).isEmpty()) {
-        //     executeRemoveDomHandler(type);
-        //     if (initialized) executeRemoveDomHandler(type);
-        //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
-        // }
-        //}
     }
 
+    /** The last handler of its type gone, the browser stops listening: its events would come for nothing. */
     private boolean doRemoveDomHandler(final EventHandler handler, final PDomEvent.Type type) {
-        if (eventSource == null) return false;
-        return eventSource.removeHandler(type, handler);
+        if (destroy || eventSource == null || !eventSource.removeHandler(type, handler)) return false;
+        if (eventSource.getEventHandlers(type).isEmpty()) {
+            oneTimeHandlerCreation = oneTimeHandlerCreation.getRemove(type);
+            saveRemoveHandler(DomHandlerConverter.convert(type.getDomHandlerType()));
+        }
+        return true;
     }
 
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
@@ -631,7 +628,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
         if (eventSource == null) eventSource = new CompactEventSource(); // 56 B for one handler (a HashMap: 160)
-        final HandlerRegistration handlerRegistration = eventSource.addHandler(type, handler);
+        eventSource.addHandler(type, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
         if (pool != oneTimeHandlerCreation) {
@@ -644,7 +641,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
             else safeStackedInstructions().append(() -> writeAddHandler(callback));
         }
 
-        return handlerRegistration;
+        return () -> doRemoveDomHandler(handler, type);
     }
 
     @Override

@@ -56,6 +56,8 @@ export class Widget extends BaseObject {
     private binding: NativeBinding | undefined;
     /** The DOM events listened to by name (LISTEN_EVENT). */
     private named: Map<string, NamedListener> | undefined;
+    /** The DOM handlers the server added, by DomHandlerType: aborted when it removes one. */
+    private domHandlers: Map<number, AbortController> | undefined;
 
     constructor(context: Context, id: number, type: number, element: HTMLElement, typeClass: string | null = null) {
         super(context, id, type);
@@ -75,6 +77,7 @@ export class Widget extends BaseObject {
 
     override destroy(): void {
         this.lifetime.abort();
+        if (this.domHandlers !== undefined) for (const handler of this.domHandlers.values()) handler.abort();
         this.visibility?.disconnect();
         this.attachListeners = undefined;
         if (this.named !== undefined) for (const listener of this.named.values()) listener.stop();
@@ -225,75 +228,83 @@ export class Widget extends BaseObject {
     }
 
     override removeHandler(_reader: Reader, handler: number): void {
-        if (handler === H.HANDLER_VISIBILITY) this.visibility?.unobserve(this.element);
+        if (HandlerModelDomHandler[handler]) this.removeDomHandler(HandlerModelToDomHandlerType[handler]!);
+        else if (handler === H.HANDLER_VISIBILITY) this.visibility?.unobserve(this.element);
     }
 
     /** Listens to a DOM event of the element until the widget is collected. */
-    protected listen<E extends Event>(type: string, listener: (event: E) => void, target: EventTarget = this.element): void {
-        target.addEventListener(type, event => this.context.guard(() => listener(event as E)), { signal: this.lifetime.signal });
+    protected listen<E extends Event>(type: string, listener: (event: E) => void, target: EventTarget = this.element,
+                                      signal: AbortSignal = this.lifetime.signal): void {
+        target.addEventListener(type, event => this.context.guard(() => listener(event as E)), { signal });
     }
 
     private addDomHandler(reader: Reader, type: number): void {
+        this.domHandlers ??= new Map();
+        if (this.domHandlers.has(type)) return;
+        const handler = new AbortController();
+        this.domHandlers.set(type, handler);
+        const listen = <E extends Event>(name: string, listener: (event: E) => void, target: EventTarget = this.element): void =>
+            this.listen(name, listener, target, handler.signal);
         switch (type) {
             case D.CLICK:
-                this.listen<MouseEvent>('click', e => this.onClick(type, e));
+                listen<MouseEvent>('click', e => this.onClick(type, e));
                 break;
             case D.DOUBLE_CLICK:
-                this.listen<MouseEvent>('dblclick', e => this.onClick(type, e));
+                listen<MouseEvent>('dblclick', e => this.onClick(type, e));
                 break;
             case D.MOUSE_OVER:
-                this.listen<MouseEvent>('mouseover', e => this.sendMouseEvent(type, e));
+                listen<MouseEvent>('mouseover', e => this.sendMouseEvent(type, e));
                 break;
             case D.MOUSE_OUT:
-                this.listen<MouseEvent>('mouseout', e => this.sendMouseEvent(type, e));
+                listen<MouseEvent>('mouseout', e => this.sendMouseEvent(type, e));
                 break;
             case D.MOUSE_DOWN:
-                this.listen<MouseEvent>('mousedown', e => this.sendMouseEvent(type, e));
+                listen<MouseEvent>('mousedown', e => this.sendMouseEvent(type, e));
                 break;
             case D.MOUSE_UP:
-                this.listen<MouseEvent>('mouseup', e => this.sendMouseEvent(type, e));
+                listen<MouseEvent>('mouseup', e => this.sendMouseEvent(type, e));
                 break;
             case D.MOUSE_WHELL:
-                this.listen<WheelEvent>('wheel', e => this.sendWheelEvent(type, e));
+                listen<WheelEvent>('wheel', e => this.sendWheelEvent(type, e));
                 break;
             case D.BLUR: // focus and blur do not bubble: those of the field, in an element that holds one
-                this.listen('blur', e => this.sendDomEvent(type, e), this.focusTarget);
+                listen('blur', e => this.sendDomEvent(type, e), this.focusTarget);
                 break;
             case D.FOCUS:
-                this.listen('focus', e => this.sendDomEvent(type, e), this.focusTarget);
+                listen('focus', e => this.sendDomEvent(type, e), this.focusTarget);
                 break;
             case D.KEY_PRESS:
             case D.KEY_DOWN:
             case D.KEY_UP: {
                 const filter = keyFilter(reader);
                 const name = type === D.KEY_PRESS ? 'keypress' : type === D.KEY_DOWN ? 'keydown' : 'keyup';
-                this.listen<KeyboardEvent>(name, e => this.onKey(type, e, filter));
+                listen<KeyboardEvent>(name, e => this.onKey(type, e, filter));
                 break;
             }
             case D.DRAG_START:
                 this.element.draggable = true;
-                this.listen<DragEvent>('dragstart', e => {
+                listen<DragEvent>('dragstart', e => {
                     e.dataTransfer?.setData('text', String(this.id));
                     e.dataTransfer?.setDragImage(this.element, 10, 10);
                     this.sendDomEvent(type, e);
                 });
                 break;
             case D.DRAG_END:
-                this.listen('dragend', e => this.sendDomEvent(type, e));
+                listen('dragend', e => this.sendDomEvent(type, e));
                 break;
             case D.DRAG_ENTER:
                 // As in GWT: a drag over an element is refused unless dragenter and dragover are prevented
-                this.listen('dragenter', e => {
+                listen('dragenter', e => {
                     e.preventDefault();
                     this.sendDomEvent(type, e);
                 });
                 break;
             case D.DRAG_LEAVE:
-                this.listen('dragleave', e => this.sendDomEvent(type, e));
+                listen('dragleave', e => this.sendDomEvent(type, e));
                 break;
             case D.DROP:
-                this.listen('dragover', e => e.preventDefault());
-                this.listen<DragEvent>('drop', e => {
+                listen('dragover', e => e.preventDefault());
+                listen<DragEvent>('drop', e => {
                     e.preventDefault();
                     const message = this.domEvent(type);
                     const source = e.dataTransfer?.getData('text');
@@ -302,11 +313,19 @@ export class Widget extends BaseObject {
                 });
                 break;
             case D.CONTEXT_MENU:
-                this.listen('contextmenu', e => this.sendDomEvent(type, e));
+                listen('contextmenu', e => this.sendDomEvent(type, e));
                 break;
             default:
                 log.info(`${this} does not handle the DOM event #${type}`);
         }
+    }
+
+    private removeDomHandler(type: number): void {
+        const handler = this.domHandlers?.get(type);
+        if (handler === undefined) return;
+        handler.abort();
+        this.domHandlers!.delete(type);
+        if (type === D.DRAG_START) this.element.draggable = false;
     }
 
     protected domEvent(type: number): Message {

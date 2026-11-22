@@ -450,6 +450,42 @@ public class PWidgetTest extends PSuite {
     }
 
     @Test
+    public void theLastDomHandlerRemovedStopsTheBrowserListening() {
+        final PLabel label = attachedLabel();
+        final PClickHandler h1 = e -> {
+        };
+        final PClickHandler h2 = e -> {
+        };
+        label.addDomHandler(h1, PClickEvent.TYPE);
+        label.addDomHandler(h2, PClickEvent.TYPE);
+        writer.clear();
+
+        label.removeDomHandler(h1, PClickEvent.TYPE);
+        assertEquals(0, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER), "a click handler is left");
+
+        label.removeDomHandler(h2, PClickEvent.TYPE);
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+        assertEquals(List.of(HandlerModel.HANDLER_DOM_CLICK.getValue()), writer.valuesOf(ServerToClientModel.HANDLER_TYPE));
+
+        writer.clear();
+        label.addDomHandler(h1, PClickEvent.TYPE);
+        assertEquals(List.of(label.getID()), writer.valuesOf(ServerToClientModel.TYPE_ADD_HANDLER), "listening again");
+    }
+
+    @Test
+    public void aDomHandlerRegistrationRemovedStopsTheBrowserListening() {
+        final PLabel label = attachedLabel();
+        final HandlerRegistration registration = label.addDomHandler((PClickHandler) e -> {
+        }, PClickEvent.TYPE);
+        writer.clear();
+
+        registration.removeHandler();
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+        registration.removeHandler(); // removed already: nothing more
+        assertEquals(1, writer.count(ServerToClientModel.TYPE_REMOVE_HANDLER));
+    }
+
+    @Test
     public void domHandlerAddedBeforeAttachIsSentOnInit() {
         final PLabel label = Element.newPLabel();
         label.addDomHandler((PClickHandler) e -> {
