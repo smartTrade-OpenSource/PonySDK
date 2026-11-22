@@ -311,7 +311,7 @@ test('panels: scrolled by the server; cells aligned, sized and inserted; table r
     await expect(cells).toHaveText('OneTwoThree');
     const cell = text => cells.locator('.pony-Cell', { has: page.getByText(text, { exact: true }) });
     await expect(cell('One')).toHaveCSS('text-align', 'right');
-    await expect(cell('One')).toHaveCSS('justify-content', 'flex-end');
+    await expect(cell('One')).toHaveCSS('justify-content', /^(flex|flow)-end$/); // Chromium 158 computes flex-end as flow-end
     await expect(cell('Three')).toHaveCSS('width', '80px');
     await expect(cells).toHaveCSS('gap', '4px');
     await expect(cells).toHaveCSS('border-top-width', '2px');
