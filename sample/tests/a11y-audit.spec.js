@@ -32,7 +32,7 @@ const ALLOWED = [
     rule: 'button-name',
     html: /^<button class="psp-tab-settings"><\/button>$/,
     why: 'The button that opens Perspective\'s settings panel, in the title bar of its viewer, is an icon without a text or an '
-      + 'aria-label: the library\'s own markup (@perspective-dev/viewer 5.6.0, in its shadow DOM), which the application cannot '
+      + 'aria-label: the library\'s own markup (@perspective-dev/viewer 5.8.0, in its shadow DOM), which the application cannot '
       + 'name. Its contrast was the library\'s too; the showcase fixes that one with the library\'s own custom properties '
       + '(showcase.css, ADR-0029).',
   },
