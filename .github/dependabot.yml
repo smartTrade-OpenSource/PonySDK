@@ -11,7 +11,7 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: npm
-    directories: [/ponysdk/terminal, /sample]
+    directories: [/ponysdk/terminal, /sample, /sample/perspective]
     schedule:
       interval: weekly
     groups:
@@ -22,6 +22,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # gradle/actions 6 asks to accept the Gradle terms of use: the build stays on 5.
+    ignore:
+      - dependency-name: gradle/actions
+        update-types: ["version-update:semver-major"]
     groups:
       actions:
         patterns: ["*"]
