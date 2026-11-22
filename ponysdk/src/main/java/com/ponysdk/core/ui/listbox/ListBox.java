@@ -48,6 +48,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
@@ -69,6 +70,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     private static final String STYLE_LISTBOX_GROUP = "dd-listbox-group";
     private static final String STYLE_LISTBOX_CONTAINER = "dd-listbox-container";
     private static final String STYLE_LISTBOX_FILTER = "dd-listbox-filter";
+    private static final String STYLE_LISTBOX_NO_MATCHES = "dd-listbox-no-matches";
     private static final String STYLE_LISTBOX_CLEAR_MULTI = "dd-listbox-clear-multi";
     private static final String STYLE_LISTBOX_BULK = "dd-listbox-bulk";
     private static final String STYLE_LISTBOX_SELECT_ALL = "dd-listbox-select-all";
@@ -78,6 +80,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     private ListBoxFilterWidget filterWidget;
     private PButton clearMultiButton;
+    private PLabel noMatches;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
 
     private Comparator<ListBoxItem<D>> groupComparator;
@@ -544,6 +547,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     public void refresh() {
         if (itemContainer != null && isOpen()) {
             itemContainer.refresh();
+            if (noMatches != null) {
+                final String filter = getFilter();
+                noMatches.setVisible(filter != null && !filter.isEmpty() && itemContainer.getFullSize() == 0);
+            }
             initIndex();
             if (index < visibleItems.size()) itemContainer.showIndex(index);
         }
@@ -638,6 +645,13 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         itemContainer.asWidget().setAttribute("role", "listbox");
         if (configuration.isMultiSelectionEnabled()) itemContainer.asWidget().setAttribute("aria-multiselectable", "true");
         defaultContainer.add(itemContainer);
+        if (filterWidget != null && configuration.getNoMatchesLabel() != null) {
+            noMatches = Element.newPLabel(configuration.getNoMatchesLabel());
+            noMatches.addStyleName(STYLE_LISTBOX_NO_MATCHES);
+            noMatches.setAttribute("role", "status");
+            noMatches.setVisible(false);
+            defaultContainer.add(noMatches);
+        }
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
                 // the rows show visible items only: the index row, when it is shown, holds one

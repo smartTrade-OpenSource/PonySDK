@@ -638,6 +638,60 @@ public class ListBoxTest extends PSuite {
         assertEquals(List.of("ab", "b"), renderedLabels(box));
     }
 
+    @Test
+    public void aFilterThatMatchesNothingShowsTheNoMatchesLabel() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().setNoMatchesLabel("No fruit"), items("apple", "pear"));
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        box.open();
+        final PLabel label = noMatches(box);
+        assertEquals("No fruit", label.getText());
+        assertEquals("status", label.getAttribute("role"));
+        assertFalse(label.isVisible(), "no filter typed");
+
+        filter.setFilter("x");
+        DropDownTestEvents.keyUp(filter.asWidget(), 88);
+        assertTrue(label.isVisible());
+        assertEquals(List.of(), renderedLabels(box));
+
+        filter.setFilter("p");
+        DropDownTestEvents.keyUp(filter.asWidget(), 80);
+        assertFalse(label.isVisible());
+    }
+
+    @Test
+    public void aDataProviderThatFindsNothingShowsTheNoMatchesLabel() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().setNoMatchesLabel("None"), new ListDataProvider("ab", "b"));
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+        box.open();
+
+        filter.setFilter("z");
+        DropDownTestEvents.keyUp(filter.asWidget(), 90);
+        assertTrue(noMatches(box).isVisible());
+    }
+
+    @Test
+    public void noNoMatchesLabelWithoutItsTextOrWithoutSearch() {
+        final ListBox<String> unset = attach(new ListBox<>(new ListBoxConfiguration(), items("a")));
+        unset.open();
+        assertNull(noMatches(unset));
+        final ListBox<String> noSearch = attach(new ListBox<>(new ListBoxConfiguration().setNoMatchesLabel("None").disableSearch(),
+            items("a")));
+        noSearch.open();
+        assertNull(noMatches(noSearch));
+    }
+
+    private static PLabel noMatches(final ListBox<?> box) {
+        final PComplexPanel defaultContainer = (PComplexPanel) ((PComplexPanel) box.getContainer().asWidget()).getWidget(0);
+        for (final PWidget widget : defaultContainer) {
+            if (widget.hasStyleName("dd-listbox-no-matches")) return (PLabel) widget;
+        }
+        return null;
+    }
+
     // Rendering and interaction
 
     @Test

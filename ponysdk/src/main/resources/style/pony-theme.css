@@ -709,6 +709,7 @@
 :where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-selected { background: var(--pony-accent-soft); }
 :where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-last-selected { box-shadow: inset 2px 0 0 var(--pony-accent); }
 :where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .is-item.dd-listbox-item-group { color: var(--pony-muted); font-size: var(--pony-font-size-sm); }
+:where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-no-matches { color: var(--pony-muted); }
 :where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-clear-multi,
 :where(.pony-theme,:host(.pony-theme)) .dd-listbox-container .dd-listbox-select-all { color: var(--pony-accent); cursor: pointer; }
 :where(.pony-theme,:host(.pony-theme)) .multi-level-dropdown-container { border-color: var(--pony-border-strong); }
