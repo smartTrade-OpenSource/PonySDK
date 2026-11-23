@@ -106,6 +106,10 @@ Vaadin 25.1 has "signals" for this: a value, a value computed from others, widge
   computed signal's binding went from 82–88 ns to 76–79 ns; a plain one did not move (50–55 ns, within noise). Two
   other changes were measured and dropped: the signal without its monitor (−2 ns, within noise; the monitor keeps
   `update` atomic) and a lock-free list of changed bindings instead of the context's lock (no difference).
+- Measured again (2026-11-23, same command, five runs): `setText` in one `execute` 31 to 33 ns, an `execute` each 89 to
+  93 ns, a bound signal 47 to 49 ns, a computed one 66 to 71 ns; allocation unchanged. A bound signal adds 15 to 16 ns
+  to the setter's best case: the double comparison and the two passes above, both the design's. Nothing else is left
+  to take out of it.
 - On the showcase's Signals page (Chrome, localhost, 8 instruments, bindings paced at 50 ms): 9 836 signals set a
   second, 144 values computed and shown a second, 98.5 % replaced before being shown.
 - `terminal.js` does not change: the terminal is not touched.
