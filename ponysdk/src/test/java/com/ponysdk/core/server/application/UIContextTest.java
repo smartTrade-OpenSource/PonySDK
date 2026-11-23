@@ -342,6 +342,9 @@ public class UIContextTest {
         uiContext.addContextDestroyListener(context -> destroyed.countDown());
         uiContext.moveByAdministrator();
         assertTrue(destroyed.await(5, TimeUnit.SECONDS));
+        // the listener runs inside the destroy, which closes the socket after it: its lock taken, the destroy is over
+        uiContext.acquire();
+        uiContext.release();
     }
 
     @Test
