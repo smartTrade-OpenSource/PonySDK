@@ -29,7 +29,7 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
 
     private boolean searchEnabled = true;
     private boolean autoFocusSearchEnabled = true;
-    private String noMatchesLabel; // TODO missing
+    private String noMatchesLabel;
     private boolean multiSelectionEnabled;
     private boolean sortingEnabled = true;
     private boolean selectionSortingEnabled = true;

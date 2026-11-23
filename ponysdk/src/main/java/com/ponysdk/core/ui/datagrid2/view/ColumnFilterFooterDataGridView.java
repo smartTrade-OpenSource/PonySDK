@@ -71,7 +71,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         disabledFooter.setEnabled(true);
         disabledFooter.focus();
         // must be sent immediately
-        Txn.get().flush(); // FIXME use Txn.get() ???
+        Txn.get().flush();
         disabledFooter = null;
     }
 
@@ -212,7 +212,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         private void onValueChange(final PValueChangeEvent<String> event) {
             footer.setEnabled(false);
             // must be sent immediately
-            Txn.get().flush(); // FIXME use Txn.get() ???
+            Txn.get().flush();
             disabledFooter = footer;
             filter(event.getData());
         }

@@ -150,6 +150,10 @@
   max-height: 150px;
 }
 
+.dd-listbox-container .dd-container-default .dd-listbox-no-matches {
+  padding: 5px;
+}
+
 .dd-listbox-container .dd-container-default .is-viewport .is-container {
   width: 100%;
 }

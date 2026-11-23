@@ -79,11 +79,6 @@ public class PWindow extends PObject {
         this.window = this;
         init();
     }
-    // return
-    // "resizable=yes,location=0,status=0,scrollbars=0,height=800,width=1200,title="
-    // + getName();
-
-    // TODO nciaravola => feature + relative should be include in an Option Pojo
     protected PWindow(final boolean relative, final String url, final String name, final String features) {
         this.window = getMain();
         this.url = url;

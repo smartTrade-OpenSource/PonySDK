@@ -95,8 +95,8 @@ public class PImage extends PWidget {
         this.left = left;
         this.top = top;
 
-        this.imageWidth = width; // TODO nicolas reuse widget width
-        this.imageHeight = height;// TODO nicolas reuse widget height;
+        this.imageWidth = width;
+        this.imageHeight = height;
     }
 
     @Override

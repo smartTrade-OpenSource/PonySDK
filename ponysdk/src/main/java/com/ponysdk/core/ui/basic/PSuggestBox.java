@@ -75,7 +75,6 @@ import java.util.Objects;
  * <dt>.pony-SuggestPopup [role=option]</dt>
  * <dd>a suggestion; <code>[aria-selected=true]</code> for the current one</dd>
  * </dl>
- * TODO(pdr): Add SafeHtml support to this and implementing classes.
  *
  * @see PSuggestOracle
  * @see PMultiWordSuggestOracle

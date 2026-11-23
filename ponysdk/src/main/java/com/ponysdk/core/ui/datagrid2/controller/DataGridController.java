@@ -82,7 +82,6 @@ public interface DataGridController<K, V> {
 
     void addSort(Object key, Comparator<V> comparator);
 
-    // FIXME a better solution can be an insert with a specified index
     void addPrimarySort(Object key, Comparator<V> comparator);
 
     void clearSort(Object key);

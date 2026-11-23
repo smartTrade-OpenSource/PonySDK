@@ -61,9 +61,8 @@ public class BasicUITest extends PSuite {
         }
 
         listBox.setSelectedIndex(itemCount - 1);
-        Assertions.assertEquals("Item" + (itemCount - 1), listBox.getItem(itemCount - 1));
-
-        //Assert.assertNull(listBox.getSelectedValue()); //TODO nciaravola behaviour ?
+        Assertions.assertEquals(itemCount - 1, listBox.getSelectedIndex());
+        Assertions.assertEquals("Item" + (itemCount - 1), listBox.getSelectedValue()); // addItem(item): the label is the value
     }
 
     @Test
