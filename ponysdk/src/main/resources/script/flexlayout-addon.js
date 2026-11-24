@@ -6,6 +6,8 @@
     return;
   }
 
+  // The height of .fl-status-bar (flexlayout.css)
+  var STATUS_BAR_H = 20;
   var _uid = 0;
   function genId() { return 'fl_p_' + (++_uid).toString(36) + '_' + Date.now().toString(36); }
   function parseJson(val) { return (typeof val === 'string') ? JSON.parse(val) : val; }
@@ -50,7 +52,8 @@
       var theme = config.theme || '';
 
       this._layoutContainer = document.createElement('div');
-      this._layoutContainer.style.cssText = 'width:100%;position:absolute;top:0;left:0;right:0;bottom:20px;';
+      // .fl-layout sets height:100%, which wins over an inline bottom: the height keeps the layout above the status bar
+      this._layoutContainer.style.cssText = 'width:100%;position:absolute;top:0;left:0;right:0;height:calc(100% - ' + STATUS_BAR_H + 'px);';
       el.appendChild(this._layoutContainer);
 
       // Feature 10: Status Bar
@@ -849,6 +852,26 @@
     setBadge: function (tabId, badge, color) {
       if (!this._layout) return;
       this._layout.setBadge(tabId, badge, color);
+    },
+
+    // A tab popped out is out of the model: its pop-out keeps the name and the component it comes back with.
+    renameTab: function (tabId, name) {
+      if (!this._model) return;
+      var info = this._popOuts && this._popOuts[tabId];
+      if (info) {
+        info.title = name;
+        var title = info.win && info.win.querySelector('.fl-popout-title');
+        if (title) title.textContent = name;
+      }
+      if (this._model.findById(tabId)) this._model.doAction({ type: 'RENAME_TAB', tabId: tabId, name: name });
+    },
+
+    setTabComponent: function (tabId, component) {
+      if (!this._model) return;
+      var info = this._popOuts && this._popOuts[tabId];
+      if (info) info.component = component;
+      var tabNode = this._model.findById(tabId);
+      if (tabNode) tabNode.component = component;
     },
 
     enableUndoRedo: function (enabled) {

@@ -28,6 +28,11 @@ public final class FlexLayoutPanel implements IsPWidget {
 
     private final FlexLayoutAddon addon;
     private final AtomicInteger tabCounter = new AtomicInteger(0);
+    /**
+     * A loaded model holds the tab ids of the session that saved it: a counter alone would give a new tab one of them.
+     * The time this layout was built keeps the ids of each session apart.
+     */
+    private final String tabIdPrefix = "tab_" + Long.toString(System.currentTimeMillis(), 36) + "_";
     private Function<String, PWidget> widgetFactory;
 
     // ─── Typed constructors ──────────────────────────────────────
@@ -75,7 +80,7 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     public String addTab(final String tabName, final PWidget content, final String tabsetId) {
-        final String tabId = "tab_" + tabCounter.incrementAndGet();
+        final String tabId = tabIdPrefix + tabCounter.incrementAndGet();
         addon.addTab(tabId, tabName, content, tabsetId);
         return tabId;
     }
@@ -91,13 +96,13 @@ public final class FlexLayoutPanel implements IsPWidget {
     }
 
     public String addBorderTab(final String side, final String tabName, final PWidget content, final String icon) {
-        final String tabId = "tab_" + tabCounter.incrementAndGet();
+        final String tabId = tabIdPrefix + tabCounter.incrementAndGet();
         addon.addBorderTab(side, tabId, tabName, content, -1, icon);
         return tabId;
     }
 
     public String addBorderTab(final FlexBorder border, final FlexTab tab, final PWidget content) {
-        final String tabId = "tab_" + tabCounter.incrementAndGet();
+        final String tabId = tabIdPrefix + tabCounter.incrementAndGet();
         addon.addBorderTab(border.getSide(), tabId, tab.getName(), content, -1, tab.getIcon());
         return tabId;
     }

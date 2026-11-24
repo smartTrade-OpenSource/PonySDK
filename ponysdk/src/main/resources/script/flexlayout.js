@@ -13,6 +13,9 @@
   let _uid = 0;
   function genId() { return 'fl_' + (++_uid).toString(36); }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  // Weights shrink with every split (down to 0.1), and siblings whose flex-grow add up to less than 1 leave the rest
+  // of the row empty: scaled, they keep their ratio and always fill it
+  function flexOf(w) { const g = w * 1000; return `${g} ${g} 0px`; }
 
   // ── EventEmitter ─────────────────────────────────────────────────
   class Emitter {
@@ -160,7 +163,30 @@
         });
       }
       if (migrateFn) m._migrateAll(migrateFn);
+      m._ensureUniqueIds();
       return m;
+    }
+
+    /**
+     * genId counts from 0 in each page, while a saved model holds the ids of the page that saved it: without this,
+     * a node created after loading takes the id of a loaded one, and two tabsets with one id make SELECT_TAB act on
+     * the wrong one. The counter moves past every loaded id, and an id already taken (a model saved with that defect)
+     * gets a new one.
+     */
+    _ensureUniqueIds() {
+      const nodes = [];
+      const collect = (node) => { nodes.push(node); (node.children || []).forEach(collect); };
+      if (this._root) collect(this._root);
+      this._borders.forEach(b => (b.children || []).forEach(collect));
+      nodes.forEach(node => {
+        const match = /^fl_([0-9a-z]+)$/.exec(node.id || '');
+        if (match) _uid = Math.max(_uid, parseInt(match[1], 36));
+      });
+      const seen = new Set();
+      nodes.forEach(node => {
+        if (seen.has(node.id)) node.id = genId();
+        seen.add(node.id);
+      });
     }
 
     _migrateAll(fn) {
@@ -708,7 +734,8 @@
     startExternalDrag(ev, tabDef, sourceEl) {
       sourceEl = sourceEl || ev.currentTarget;
       try { sourceEl.setPointerCapture(ev.pointerId); } catch (e) {}
-      const ox = 50, oy = 14;
+      // The ghost goes right of the pointer: a source at the left edge of the page (a sidebar) would hide it
+      const ox = -16, oy = -8;
       this._drag = {
         tab: null, isNew: true, isStarted: false, tabDef, tabset: null,
         offX: ox, offY: oy, x0: ev.clientX, y0: ev.clientY,
@@ -1487,7 +1514,7 @@
       node.children.forEach((child, i) => {
         if (i > 0) el.appendChild(this._mkSplitter(node, i - 1));
         const ce = this._renderNode(child);
-        ce.style.flex = `${child.getWeight()} ${child.getWeight()} 0px`;
+        ce.style.flex = flexOf(child.getWeight());
         el.appendChild(ce);
       });
       return el;
@@ -1681,13 +1708,18 @@
       // Slow double-click rename tracking
       let _lastClickTime = 0;
       btn.addEventListener('dblclick', ev => {
+        // Anywhere on the tab, a double click maximizes the tabset: F2 or a slow double click renames the tab.
+        // In the name being edited, it selects a word
+        if (lbl.isContentEditable) return;
         ev.preventDefault();
         if (tabset.enableMaximize) this._act(Actions.maximizeToggle(tabset.id));
       });
       btn.addEventListener('pointerdown', ev => {
-        if (ev.button !== 0 || ev.target.closest('.fl-tab-x')) return;
+        if (ev.button !== 0 || ev.target.closest('.fl-tab-x') || lbl.isContentEditable) return; // the name being edited keeps its caret
         if (this._locked) return;
         ev.preventDefault();
+        // The default focus is prevented: the layout takes it, or its shortcuts (F2, Ctrl+W...) never reach it
+        if (!this.container.contains(document.activeElement)) this.container.focus({ preventScroll: true });
 
         // Slow double-click rename detection
         const now = Date.now();
@@ -1814,8 +1846,10 @@
       }
 
       if (this._ghost) {
-        this._ghost.style.left = (ev.clientX - d.offX) + 'px';
-        this._ghost.style.top  = (ev.clientY - d.offY) + 'px';
+        // Kept in the window, whatever edge the drag goes near
+        const gw = this._ghost.offsetWidth, gh = this._ghost.offsetHeight;
+        this._ghost.style.left = clamp(ev.clientX - d.offX, 0, Math.max(0, window.innerWidth - gw)) + 'px';
+        this._ghost.style.top  = clamp(ev.clientY - d.offY, 0, Math.max(0, window.innerHeight - gh)) + 'px';
       }
       this._updateDrop(ev);
     }
@@ -2008,8 +2042,8 @@
       const nA = clamp(wa + (delta / total) * tw, tw * 0.05, tw * 0.95), nB = tw - nA;
       A.setWeight(nA); B.setWeight(nB);
       const eA = this._nodeEls.get(A.id), eB = this._nodeEls.get(B.id);
-      if (eA) eA.style.flex = `${nA} ${nA} 0px`;
-      if (eB) eB.style.flex = `${nB} ${nB} 0px`;
+      if (eA) eA.style.flex = flexOf(nA);
+      if (eB) eB.style.flex = flexOf(nB);
     }
     _onResUp() {
       const r = this._resize;
