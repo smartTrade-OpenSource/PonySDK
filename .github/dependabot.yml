@@ -1,11 +1,14 @@
 # Dependabot: a pull request when a dependency has a new version, grouped per ecosystem, once a week.
 # The alerts on vulnerable dependencies come from the dependency graph (workflow dependency-graph.yml for Gradle).
+# A version is proposed once it is 14 days old (cooldown); a security update is not held back by it.
 version: 2
 updates:
   - package-ecosystem: gradle
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     groups:
       gradle:
         patterns: ["*"]
@@ -14,6 +17,8 @@ updates:
     directories: [/ponysdk/terminal, /sample, /sample/perspective]
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     groups:
       npm:
         patterns: ["*"]
@@ -22,6 +27,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     # gradle/actions 6 asks to accept the Gradle terms of use: the build stays on 5.
     ignore:
       - dependency-name: gradle/actions
