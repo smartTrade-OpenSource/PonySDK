@@ -5,10 +5,10 @@
   "description": "FINOS Perspective as the showcase serves it: copied by Gradle (copyPerspective) into script/perspective, never fetched from a CDN. Pinned exactly (ADR-0029).",
   "license": "Apache-2.0",
   "dependencies": {
-    "@perspective-dev/client": "5.8.0",
-    "@perspective-dev/server": "5.8.0",
-    "@perspective-dev/viewer": "5.8.0",
-    "@perspective-dev/viewer-charts": "5.8.0",
-    "@perspective-dev/viewer-datagrid": "5.8.0"
+    "@perspective-dev/client": "5.9.4",
+    "@perspective-dev/server": "5.9.4",
+    "@perspective-dev/viewer": "5.9.4",
+    "@perspective-dev/viewer-charts": "5.9.4",
+    "@perspective-dev/viewer-datagrid": "5.9.4"
   }
 }
