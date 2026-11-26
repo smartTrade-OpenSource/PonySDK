@@ -89,7 +89,12 @@ public enum ClientToServerModel {
     HANDLER_PASTE("S"),
     HANDLER_WIDGET_VISIBILITY("T"),
     HANDLER_DOCUMENT_VISIBILITY("U"),
-    HANDLER_DESTROY("V");
+    HANDLER_DESTROY("V"),
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECT_UI_CONTEXT_ID("Y"), // reconnect request parameter: the id of the UIContext to resume
+    RECONNECT_OFFSET("Z"), // reconnect request parameter: the bytes the terminal has received from that context
+    RECEIVED_OFFSET("w"); // with a heartbeat: the bytes the terminal has received, which the server may release
 
     private final String key;
 

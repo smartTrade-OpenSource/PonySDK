@@ -37,6 +37,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
+import elemental.html.Window;
 
 public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
 
@@ -146,5 +147,45 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     public boolean isClosed() {
         return window == null || window.isClosed();
     }
+
+    /**
+     * Shows or removes, over this child window, the panel that tells the connection to the server is lost. A child
+     * window has no connection of its own: it would otherwise just freeze while the main window reconnects.
+     * <p>
+     * The panel is a copy of the main window's {@code #reconnection} element, which the application styles (the child
+     * window loads the same style sheets); a plain layer stands in for a page that has none.
+     */
+    public void setConnectionLost(final boolean lost) {
+        if (isClosed()) return;
+        try {
+            setConnectionLost(window, lost);
+        } catch (final Exception e) {
+            log.log(Level.WARNING, "Can't show the connection state in PTWindow #" + objectID, e);
+        }
+    }
+
+    private static final native void setConnectionLost(Window window, boolean lost) /*-{
+        var document = window.document;
+        if (!document || !document.body) return;
+        var layer = document.querySelector('[data-pony-connection-lost]');
+        if (!lost) {
+            if (layer) layer.parentNode.removeChild(layer);
+            return;
+        }
+        if (layer) return;
+        var source = $doc.getElementById('reconnection');
+        if (source) {
+            layer = document.importNode(source, true);
+            layer.style.display = 'block';
+        } else {
+            layer = document.createElement('div');
+            layer.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483647;display:flex;'
+                + 'align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,0.6);color:#fff;'
+                + 'font:16px sans-serif;cursor:wait';
+            layer.innerHTML = 'Connection to server lost<br>Reconnecting ...';
+        }
+        layer.setAttribute('data-pony-connection-lost', '');
+        document.body.appendChild(layer);
+    }-*/;
 
 }

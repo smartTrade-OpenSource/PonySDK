@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
@@ -58,6 +60,15 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
     private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
     private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
+
+    /** Close code sent to a terminal whose context cannot be resumed: it reloads its page. */
+    public static final int CLOSE_RESUME_REFUSED = 4001;
+
+    private static final AtomicBoolean CLIENT_HEARTBEAT_WARNED = new AtomicBoolean();
+
+    private static final String KEY_RECONNECT_UI_CONTEXT_ID = ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue();
+    private static final String KEY_RECONNECT_OFFSET = ClientToServerModel.RECONNECT_OFFSET.toStringValue();
+    private static final String KEY_RECEIVED_OFFSET = ClientToServerModel.RECEIVED_OFFSET.toStringValue();
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
@@ -78,14 +89,22 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             if (!session.isOpen()) throw new IllegalStateException("Session already closed");
             this.session = session;
 
-            // 1K for max chunk size and 1M for total buffer size
-            // Don't set max chunk size > 8K because when using Jetty Web when using Jetty Websocket compression, the chunks are limited to 8Ksocket compression, the chunks are limited to 8K
+            // The page's own query is part of this URL too: a parameter of the same name in it is ignored while
+            // reconnection is off, and the terminal's, appended last, wins otherwise
+            final String resumedID = applicationManager.getConfiguration().getReconnectionTimeoutMs() > 0
+                    ? getParameter(KEY_RECONNECT_UI_CONTEXT_ID)
+                    : null;
+            if (resumedID != null) {
+                resumeOrRefuse(resumedID, getParameter(KEY_RECONNECT_OFFSET));
+                return;
+            }
 
-            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 13, TimeUnit.SECONDS.toMillis(60));
+            this.websocketPusher = newPusher(0);
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
             log.info("Creating a new {}", uiContext);
 
             final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
+            uiContext.setCommunicationSanityChecker(communicationSanityChecker);
             context.registerUIContext(uiContext);
 
             uiContext.acquire();
@@ -101,6 +120,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
                 encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
+                if (configuration.getReconnectionTimeoutMs() > 0)
+                    encode(ServerToClientModel.RECONNECTION_TIMEOUT, (int) Math.min(Integer.MAX_VALUE, configuration.getReconnectionTimeoutMs()));
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {
@@ -116,18 +137,125 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
+    /**
+     * 1K for max chunk size and 1M for total buffer size. Don't set max chunk size > 8K: with Jetty WebSocket
+     * compression, the chunks are limited to 8K.
+     * <p>
+     * With transparent reconnection enabled, the bytes sent are kept until the terminal acknowledges them.
+     *
+     * @param startOffset the bytes the terminal has received from this context before this WebSocket
+     */
+    private WebSocketPusher newPusher(final long startOffset) {
+        final ApplicationConfiguration configuration = applicationManager.getConfiguration();
+        ReplayBuffer replayBuffer = null;
+        if (configuration.getReconnectionTimeoutMs() > 0) {
+            if (!configuration.isEnableClientToServerHeartBeat() && CLIENT_HEARTBEAT_WARNED.compareAndSet(false, true))
+                log.warn("Transparent reconnection without the client heartbeat: nothing is acknowledged, each UIContext holds "
+                        + "up to {} bytes of what it sent", configuration.getReplayBufferMaxBytes());
+            replayBuffer = new ReplayBuffer(startOffset, Math.max(configuration.getReplayBufferMaxBytes(), ReplayBuffer.MIN_SIZE));
+        }
+        return new WebSocketPusher(session, 1 << 20, 1 << 13, TimeUnit.SECONDS.toMillis(60), replayBuffer);
+    }
+
+    /**
+     * A terminal reconnects to its suspended context. It is resumed if it belongs to this HTTP session, is still
+     * suspended, and the bytes the terminal has not received are still held; otherwise the WebSocket is closed with
+     * {@link #CLOSE_RESUME_REFUSED} and the terminal reloads its page.
+     */
+    private void resume(final String uiContextID, final String offset) {
+        final Application application = context.getApplication();
+        UIContext suspended = null;
+        String refusal = null;
+        long receivedBytes = -1;
+        try {
+            if (applicationManager.getConfiguration().getReconnectionTimeoutMs() <= 0) refusal = "reconnection disabled";
+            else if (application == null) refusal = "no application for this HTTP session";
+            else if (offset == null) refusal = "no offset";
+            else {
+                receivedBytes = Long.parseLong(offset);
+                suspended = application.getUIContext(Integer.parseInt(uiContextID));
+                // Its terminal is back before this server saw the connection lost (a cut with no close, found only
+                // by the heartbeat): the old WebSocket is dropped now
+                if (suspended != null && suspended.isAlive() && !suspended.isSuspended()) suspended.onCommunicationLost();
+                if (suspended == null) refusal = "no such context in this HTTP session";
+                else if (!suspended.isSuspended()) refusal = "context not suspended";
+            }
+        } catch (final NumberFormatException e) {
+            refusal = "malformed parameter";
+        }
+
+        byte[] unreceivedBytes = null;
+        if (refusal == null) {
+            unreceivedBytes = suspended.getUnreceivedBytes(receivedBytes);
+            if (unreceivedBytes == null) refusal = "bytes from offset " + offset + " no longer held";
+        }
+
+        boolean failed = false;
+        if (refusal == null) {
+            this.uiContext = suspended;
+            this.context = suspended.getTxnContext();
+            this.websocketPusher = newPusher(receivedBytes);
+            if (suspended.resume(this, unreceivedBytes)) return;
+            refusal = "resume failed";
+            failed = true;
+        }
+
+        log.info("Reconnection to UIContext #{} refused: {}", uiContextID, refusal);
+        this.uiContext = null;
+        // Told first, so that the terminal reloads: destroying the context closes its socket normally
+        session.close(CLOSE_RESUME_REFUSED, "resume refused");
+        // A context its terminal cannot come back to is destroyed now rather than at its timeout; one whose replay
+        // failed is no longer suspended nor connected, and nothing else would end it
+        if (suspended != null && (failed || suspended.isSuspended())) suspended.destroy();
+    }
+
+    /** The last value of the parameter: the terminal appends its own after the page's query. */
+    private String getParameter(final String name) {
+        final List<String> values = request.getParameterMap().get(name);
+        return values != null && !values.isEmpty() ? values.get(values.size() - 1) : null;
+    }
+
+    /** {@link #resume(String, String)}, and a refusal whatever it throws, so that the terminal never waits. */
+    private void resumeOrRefuse(final String uiContextID, final String offset) {
+        try {
+            resume(uiContextID, offset);
+        } catch (final RuntimeException e) {
+            log.error("Reconnection to UIContext #{} failed", uiContextID, e);
+            final UIContext resumed = this.uiContext;
+            this.uiContext = null;
+            session.close(CLOSE_RESUME_REFUSED, "resume refused");
+            if (resumed != null) resumed.destroy();
+        }
+    }
+
     @Override
     public void onWebSocketError(final Throwable throwable) {
+        if (uiContext == null) return; // a refused reconnection
         log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
-        uiContext.onDestroy(StatusCode.SERVER_ERROR);
+        uiContext.onConnectionLost(this, StatusCode.SERVER_ERROR);
     }
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
+        if (uiContext == null) return; // a refused reconnection
         if (log.isInfoEnabled())
             log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
                     NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
-        uiContext.onDestroy(statusCode);
+        uiContext.onConnectionLost(this, statusCode);
+    }
+
+    /**
+     * The bytes from the given offset this WebSocket has sent, or null if they are not all held (transparent
+     * reconnection disabled, or released).
+     */
+    public byte[] getBytesFrom(final long offset) {
+        final ReplayBuffer replayBuffer = websocketPusher != null ? websocketPusher.getReplayBuffer() : null;
+        return replayBuffer != null ? replayBuffer.from(offset) : null;
+    }
+
+    /** Writes bytes already encoded, as they are: the ones a resumed terminal had not received. */
+    public void putRaw(final byte[] bytes) throws IOException {
+        websocketPusher.put(bytes);
     }
 
     /**
@@ -148,7 +276,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 }
 
                 if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_CLIENT.toStringValue())) {
-                    //do nothing
+                    if (jsonObject.containsKey(KEY_RECEIVED_OFFSET)) {
+                        final ReplayBuffer replayBuffer = websocketPusher.getReplayBuffer();
+                        if (replayBuffer != null) replayBuffer.acknowledge(jsonObject.getJsonNumber(KEY_RECEIVED_OFFSET).longValue());
+                    }
                 } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
@@ -250,8 +381,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         try {
             websocketPusher.flush();
         } catch (final IOException e) {
-            log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.onDestroy(StatusCode.SERVER_ERROR);
+            log.error("Can't write on the websocket for #{}", uiContext.getID(), e);
+            uiContext.onConnectionLost(this, StatusCode.SERVER_ERROR);
         }
     }
 
@@ -360,6 +491,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             return message + " (" + statusCode + ")";
         }
 
+    }
+
+    UIContext getUIContext() {
+        return uiContext;
     }
 
     public ServletUpgradeRequest getRequest() {

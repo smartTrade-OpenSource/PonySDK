@@ -117,6 +117,7 @@ public class CommunicationSanityChecker {
     }
 
     private void checkCommunicationState() {
+        if (uiContext.isSuspended()) return; // no WebSocket to check until it is resumed
         final long now = System.currentTimeMillis();
         switch (currentState) {
             case OK:
@@ -134,11 +135,11 @@ public class CommunicationSanityChecker {
                         // No message have been received since we suspected the
                         // communication to be non functional
                         log.info(
-                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
+                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, the connection is lost",
                             uiContext.getID());
                         currentState = CommunicationState.KO;
                         stop();
-                        uiContext.disconnect();
+                        uiContext.onCommunicationLost();
                     }
                 } else {
                     currentState = CommunicationState.OK;
@@ -150,7 +151,7 @@ public class CommunicationSanityChecker {
                 break;
         }
 
-        uiContext.sendRoundTrip();
+        if (!uiContext.isSuspended()) uiContext.sendRoundTrip();
     }
 
 }

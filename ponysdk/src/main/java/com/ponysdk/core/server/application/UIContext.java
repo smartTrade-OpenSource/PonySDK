@@ -27,10 +27,13 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
+import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
@@ -53,6 +56,9 @@ import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -74,6 +80,18 @@ public class UIContext {
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
     private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
+
+    /** Ends the suspensions that time out, and destroys the contexts whose recording overflowed. */
+    private static final ScheduledThreadPoolExecutor reconnectionTimer;
+
+    static {
+        reconnectionTimer = new ScheduledThreadPoolExecutor(1, runnable -> {
+            final Thread thread = new Thread(runnable, UIContext.class.getName() + "-reconnection");
+            thread.setDaemon(true);
+            return thread;
+        });
+        reconnectionTimer.setRemoveOnCancelPolicy(true);
+    }
 
     private final int ID;
 
@@ -102,12 +120,21 @@ public class UIContext {
     private boolean alive = true;
     private int closeStatusCode = StatusCode.NO_CODE;
 
+    // Transparent reconnection: while suspended, the context waits for its terminal to come back on a new WebSocket
+    private volatile boolean suspended = false;
+    /** Records the protocol writes while suspended; null otherwise. */
+    private RecordingEncoder recordingEncoder;
+    /** Ends this suspension if no terminal comes back in time. */
+    private ScheduledFuture<?> suspensionTimeout;
+    private CommunicationSanityChecker communicationSanityChecker;
+    private WebSocket.Listener webSocketListener;
+
     private final Latency roundtripLatency = new Latency(10);
     private final Latency networkLatency = new Latency(10);
     private final Latency terminalLatency = new Latency(10);
 
     private final ApplicationConfiguration configuration;
-    private final WebSocket socket;
+    private volatile WebSocket socket;
     private final ServletUpgradeRequest request;
 
     private long lastReceivedTime = System.currentTimeMillis();
@@ -347,7 +374,9 @@ public class UIContext {
      * Unlock the current UIContext
      */
     public void release() {
-        UIContext.remove();
+        // A nested release (the lock taken again by the thread that holds it) keeps the current context: the
+        // outer holder carries on with it
+        if (lock.getHoldCount() <= 1) UIContext.remove();
         lock.unlock();
     }
 
@@ -454,9 +483,11 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
-        socket.beginObject();
-        socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
-        socket.endObject();
+        // While suspended, after what was recorded: the lost WebSocket is not written to
+        final WebsocketEncoder target = suspended && recordingEncoder != null ? recordingEncoder : socket;
+        target.beginObject();
+        target.encode(ServerToClientModel.DESTROY_CONTEXT, null);
+        target.endObject();
     }
 
     /**
@@ -570,6 +601,7 @@ public class UIContext {
      */
     private void doDestroy() {
         alive = false;
+        endSuspension();
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
@@ -700,7 +732,201 @@ public class UIContext {
     }
 
     public void setWebSocketListener(final WebSocket.Listener listener) {
+        this.webSocketListener = listener;
         socket.setListener(listener);
+    }
+
+    public void setCommunicationSanityChecker(final CommunicationSanityChecker communicationSanityChecker) {
+        this.communicationSanityChecker = communicationSanityChecker;
+    }
+
+    /**
+     * The WebSocket of this UIContext was closed or failed.
+     * <p>
+     * With transparent reconnection enabled ({@link ApplicationConfiguration#getReconnectionTimeoutMs()}) and a
+     * close that does not say the page is gone, the context is suspended: it waits for its terminal to come back on
+     * a new WebSocket. Otherwise it is destroyed.
+     * <p>
+     * A close from a WebSocket that is no longer this context's (the one a reconnection replaced) is ignored.
+     *
+     * @param from the WebSocket that was closed
+     * @param statusCode the close status code
+     */
+    public void onConnectionLost(final WebSocket from, final int statusCode) {
+        if (!isAlive() || from != socket || suspended) return;
+        if (isReconnectionEnabled() && isResumable(statusCode)) {
+            acquire();
+            try {
+                if (!isAlive() || from != socket || suspended) return;
+                this.closeStatusCode = statusCode;
+                notifyConnectionLost();
+                suspend();
+            } finally {
+                release();
+            }
+        } else {
+            onDestroy(statusCode);
+        }
+    }
+
+    /**
+     * The communication sanity checker found no message from the terminal for too long: the connection is dropped,
+     * and the context suspended or destroyed as {@link #onConnectionLost(WebSocket, int)} does.
+     */
+    public void onCommunicationLost() {
+        if (!isAlive() || suspended) return;
+        if (isReconnectionEnabled()) {
+            final WebSocket lost = socket;
+            onConnectionLost(lost, StatusCode.ABNORMAL);
+            lost.disconnect();
+        } else {
+            disconnect();
+        }
+    }
+
+    private boolean isReconnectionEnabled() {
+        return configuration.getReconnectionTimeoutMs() > 0;
+    }
+
+    /**
+     * A normal close (1000) or a close with no code (1005, what the terminal sends when its page unloads) mean no
+     * terminal will come back: the context is destroyed. 1001 (going away) is resumable: proxies send it too, when
+     * they restart, while a page that unloads sends 1005 first.
+     */
+    private static boolean isResumable(final int statusCode) {
+        return statusCode != StatusCode.NORMAL && statusCode != StatusCode.NO_CODE;
+    }
+
+    private void notifyConnectionLost() {
+        final ApplicationConfiguration.ReconnectionListener listener = configuration.getReconnectionListener();
+        if (listener == null) return;
+        try {
+            listener.onConnectionLost(this);
+        } catch (final Throwable e) {
+            log.error("ReconnectionListener failed for UIContext #{}", ID, e);
+        }
+    }
+
+    /**
+     * Suspends this UIContext: its widgets and its application stay as they are. {@link #execute(Runnable)} still
+     * runs, but what it writes is recorded instead of sent, until {@link #resume(WebSocket, byte[])} or the timeout.
+     * <p>
+     * Called under the UIContext lock, so that no transaction is cut in two between the old WebSocket and the
+     * recording.
+     */
+    private void suspend() {
+        final long timeoutMs = configuration.getReconnectionTimeoutMs();
+        if (communicationSanityChecker != null) communicationSanityChecker.stop();
+        final RecordingEncoder recorder = new RecordingEncoder(configuration.getMaxRecordingEntries(), (count, max) -> {
+            final RecordingEncoder overflowed = recordingEncoder;
+            log.warn("UIContext #{} cannot be resumed: its recording holds {} entries, more than {}, it is destroyed. Held: {}",
+                ID, count, max, overflowed != null ? overflowed.describe() : "?");
+            // Not from inside the write that overflowed
+            reconnectionTimer.execute(this::destroy);
+        });
+        recordingEncoder = recorder;
+        modelWriter.setEncoder(recorder);
+        suspended = true;
+        suspensionTimeout = reconnectionTimer.schedule(() -> {
+            // Under the lock: a resume running now must not be undone once it is done
+            acquire();
+            try {
+                if (!isAlive() || !suspended || recordingEncoder != recorder) return; // resumed, or another suspension
+                log.info("UIContext #{} was not resumed within {} ms, it is destroyed", ID, timeoutMs);
+                destroy();
+            } finally {
+                release();
+            }
+        }, timeoutMs, TimeUnit.MILLISECONDS);
+        log.info("UIContext #{} suspended, waiting {} ms for its terminal to reconnect", ID, timeoutMs);
+    }
+
+    /** Releases what a suspension holds. Called under the UIContext lock. */
+    private void endSuspension() {
+        suspended = false;
+        if (suspensionTimeout != null) {
+            suspensionTimeout.cancel(false);
+            suspensionTimeout = null;
+        }
+        if (recordingEncoder != null) {
+            recordingEncoder.clear();
+            recordingEncoder = null;
+            modelWriter.setEncoder(socket);
+        }
+    }
+
+    /**
+     * The bytes from the given offset that the WebSocket this context lost had sent, or null if they are not all
+     * held any more.
+     */
+    public byte[] getUnreceivedBytes(final long offset) {
+        acquire(); // the lost WebSocket's buffer was written by the thread that held the context
+        try {
+            return socket.getBytesFrom(offset);
+        } finally {
+            release();
+        }
+    }
+
+    /**
+     * Resumes this suspended UIContext on a new WebSocket: sends first the bytes the terminal had not received from
+     * the lost WebSocket, then what was recorded while suspended, compacted, then a {@code RECONNECT_CONTEXT} block.
+     *
+     * @param newSocket the WebSocket the terminal reconnected with
+     * @param unreceivedBytes from {@link #getUnreceivedBytes(long)}
+     * @return false if the context could not be resumed: destroyed, no longer suspended, its recording overflowed, or
+     *         the replay failed (the context is then left to the caller to destroy)
+     */
+    public boolean resume(final WebSocket newSocket, final byte[] unreceivedBytes) {
+        acquire();
+        try {
+            if (!isAlive() || !suspended) return false;
+            final RecordingEncoder recorder = recordingEncoder;
+            if (recorder.isOverflowed()) return false;
+            recordingEncoder = null; // endSuspension must not put the lost socket back
+            endSuspension();
+
+            final Txn txn = Txn.get();
+            txn.begin(context);
+            try {
+                final int recorded = recorder.size();
+                recorder.compact();
+                log.info("UIContext #{} resumed: {} bytes not received sent again, {} recorded entries replayed ({} before compaction)",
+                    ID, unreceivedBytes.length, recorder.size(), recorded);
+
+                this.socket = newSocket;
+                context.setSocket(newSocket);
+                modelWriter.setEncoder(newSocket);
+                if (webSocketListener != null) newSocket.setListener(webSocketListener);
+                onMessageReceived();
+
+                newSocket.putRaw(unreceivedBytes);
+                recorder.replayTo(newSocket);
+                newSocket.encode(ServerToClientModel.RECONNECT_CONTEXT, ID);
+                newSocket.endObject();
+                txn.commit();
+            } catch (final Throwable e) {
+                // Neither suspended nor connected any more: the caller destroys it, once it has told the terminal
+                log.error("UIContext #{} could not be resumed", ID, e);
+                txn.rollback();
+                return false;
+            } finally {
+                recorder.clear();
+            }
+            if (communicationSanityChecker != null) communicationSanityChecker.start();
+            return true;
+        } finally {
+            release();
+        }
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    /** The context's transaction context: a resumed context keeps its own, not the new WebSocket's. */
+    public TxnContext getTxnContext() {
+        return context;
     }
 
     /**

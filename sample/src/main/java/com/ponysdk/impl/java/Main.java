@@ -55,6 +55,9 @@ public class Main {
             configuration.setJavascript(Arrays.stream(scripts.trim().split(";")).collect(Collectors.toSet()));
         }
 
+        // Transparent reconnection, off unless set: -Dponysdk.reconnection.timeout.ms=60000
+        configuration.setReconnectionTimeoutMs(Long.getLong("ponysdk.reconnection.timeout.ms", 0));
+
         final JavaApplicationManager applicationManager = new JavaApplicationManager();
         applicationManager.setConfiguration(configuration);
 

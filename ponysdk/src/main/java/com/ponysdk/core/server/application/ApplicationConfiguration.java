@@ -193,4 +193,77 @@ public class ApplicationConfiguration {
         this.enableClientToServerHeartBeat = enableClientToServerHeartBeat;
     }
 
+
+    /**
+     * Called, under the context's lock, when its connection is lost and it is about to be suspended. Not called when
+     * reconnection is off: the context is then destroyed, and its destroy listeners are told.
+     */
+    @FunctionalInterface
+    public interface ReconnectionListener {
+
+        void onConnectionLost(UIContext uiContext);
+    }
+
+    private ReconnectionListener reconnectionListener;
+    private long reconnectionTimeoutMs = 0;
+    private int maxRecordingEntries = 10_000;
+    private int replayBufferMaxBytes = 4 << 20;
+
+    public ReconnectionListener getReconnectionListener() {
+        return reconnectionListener;
+    }
+
+    public void setReconnectionListener(final ReconnectionListener reconnectionListener) {
+        this.reconnectionListener = reconnectionListener;
+    }
+
+    /**
+     * How long a UIContext whose WebSocket was lost is kept suspended, waiting for its terminal to reconnect.
+     * 0, the default, disables transparent reconnection: the context is destroyed with its WebSocket.
+     * <p>
+     * The delay counts from when the server sees the loss: a cut with no close is seen by the heartbeat, after up to
+     * two heartbeat periods. Acknowledgements travel with the client heartbeat
+     * ({@link #isEnableClientToServerHeartBeat()}): without it, each context holds up to
+     * {@link #getReplayBufferMaxBytes()}.
+     * <p>
+     * Not covered: a write that fails while the application writes (the send buffer full for 60 s on a dead
+     * connection, or a failed asynchronous send found by the next write) still destroys the context, since the failure
+     * may fall inside a block, which a suspension would cut in two; the page reloads as before.
+     * <p>
+     * A page that shows its own reconnection panel ({@code window.showReconnectionInformation}) must also define
+     * {@code window.hideReconnectionInformation}, called once the context is resumed.
+     */
+    public long getReconnectionTimeoutMs() {
+        return reconnectionTimeoutMs;
+    }
+
+    public void setReconnectionTimeoutMs(final long reconnectionTimeoutMs) {
+        this.reconnectionTimeoutMs = reconnectionTimeoutMs;
+    }
+
+    /**
+     * The protocol entries a suspended UIContext may hold, after compaction, before it is destroyed instead of
+     * resumed.
+     */
+    public int getMaxRecordingEntries() {
+        return maxRecordingEntries;
+    }
+
+    public void setMaxRecordingEntries(final int maxRecordingEntries) {
+        this.maxRecordingEntries = maxRecordingEntries;
+    }
+
+    /**
+     * The bytes sent to a terminal and not acknowledged yet that a UIContext holds at most, to send them again if
+     * the terminal reconnects. A terminal that lost more than this cannot resume: it reloads its page. At least
+     * 16 KB.
+     */
+    public int getReplayBufferMaxBytes() {
+        return replayBufferMaxBytes;
+    }
+
+    public void setReplayBufferMaxBytes(final int replayBufferMaxBytes) {
+        this.replayBufferMaxBytes = replayBufferMaxBytes;
+    }
+
 }

@@ -86,6 +86,15 @@ public class PTWindowManager {
         windows.put(window.getObjectID(), window);
     }
 
+    /** Shows or removes, over every open child window, the layer that tells the connection is lost. */
+    public static void setConnectionLost(final boolean lost) {
+        final ArrayOf<PTWindow> windows = get().windows.values();
+        for (int i = windows.length() - 1; i >= 0; i--) {
+            final PTWindow window = windows.get(i);
+            if (window != null) window.setConnectionLost(lost);
+        }
+    }
+
     void unregister(final PTWindow window) {
         windows.remove(window.getObjectID());
     }
