@@ -491,7 +491,17 @@ public abstract class AutoFlushedBuffer implements Closeable {
     }
 
     //update the data structure after a write to the buffer. Triggers flush automatically if needed
+    /**
+     * Called once the bytes [position, position + length[ of the given buffer were written, before they can be
+     * flushed. Does nothing by default.
+     * <p>
+     * Called by the writer thread only; the buffer must not be modified.
+     */
+    protected void onWrite(final ByteBuffer buffer, final int position, final int length) {
+    }
+
     private void notifyWrite(final int length) throws IOException {
+        onWrite(writeBuffer, writeBuffer.position() - length, length);
         producerIndex += length;
 
         //auto-flush if more than maxChunkSize data

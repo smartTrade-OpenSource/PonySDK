@@ -26,6 +26,7 @@ package com.ponysdk.core.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
@@ -41,44 +42,75 @@ public class WebSocketClient {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private final Window window;
-    private final WebSocket webSocket;
+    /** Close code of a server that cannot resume the context: the page reloads. */
+    private static final int CLOSE_RESUME_REFUSED = 4001;
 
+    private final Window window;
+    private final String url;
+    private final UIBuilder uiBuilder;
+    private final ReconnectionChecker reconnectionChecker;
+    private WebSocket webSocket;
     private long lastMessageTime = -1;
+
+    /** Bytes received from the server since the context was created, across reconnections. */
+    private double receivedBytes;
 
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
         this.window = Browser.getWindow();
-        this.webSocket = window.newWebSocket(url);
-        this.webSocket.setBinaryType("arraybuffer");
+        this.url = url;
+        this.uiBuilder = uiBuilder;
+        this.reconnectionChecker = reconnectionChecker;
+        open(url, false);
+    }
 
-        webSocket.setOnopen(event -> {
-            uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
+    /**
+     * Opens a new WebSocket to resume the given context, from the bytes received so far. The server answers with
+     * what was not received and a RECONNECT_CONTEXT block, or closes it with {@link #CLOSE_RESUME_REFUSED}.
+     */
+    public void reconnect(final int contextId) {
+        final String resumeUrl = url + "&" + ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue() + "=" + contextId + "&"
+                + ClientToServerModel.RECONNECT_OFFSET.toStringValue() + "=" + (long) receivedBytes;
+        open(resumeUrl, true);
+    }
+
+    private void open(final String socketUrl, final boolean resuming) {
+        final WebSocket socket = window.newWebSocket(socketUrl);
+        this.webSocket = socket;
+        socket.setBinaryType("arraybuffer");
+        socket.setOnopen(event -> {
+            if (socket != webSocket) return;
+            // A resumed context keeps its graphical system: only the first connection initializes it
+            if (!resuming) uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
+            if (log.isLoggable(Level.INFO)) log.info(resuming ? "WebSocket reconnected" : "WebSocket connected");
             lastMessageTime = System.currentTimeMillis();
         });
-
-        webSocket.setOnclose(event -> {
+        socket.setOnclose(event -> {
+            if (socket != webSocket) return;
             if (event instanceof CloseEvent) {
                 final CloseEvent closeEvent = (CloseEvent) event;
                 final int statusCode = closeEvent.getCode();
                 if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
+                if (resuming && statusCode == CLOSE_RESUME_REFUSED) reconnectionChecker.onResumeRefused();
                 // If it's a not normal disconnection
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
+                // A socket opened to resume a context failed whatever its close code: the checker tries again
+                else if (resuming || statusCode != 1000) reconnectionChecker.detectConnectionFailure();
             } else {
                 log.severe("WebSocket disconnected : " + event);
                 reconnectionChecker.detectConnectionFailure();
             }
         });
-
-        webSocket.setOnerror(event -> {
+        socket.setOnerror(event -> {
             log.severe("WebSocket error : " + event);
         });
-        webSocket.setOnmessage(event -> {
+        socket.setOnmessage(event -> {
+            if (socket != webSocket) return;
             lastMessageTime = System.currentTimeMillis();
-
             final Object data = ((MessageEvent) event).getData();
             if (data instanceof ArrayBuffer) {
                 final ArrayBuffer buffer = (ArrayBuffer) data; //TODO nciaravola avoid cast ?
+                // Counted before it is read: a block cut by the end of the frame is completed by the next bytes,
+                // from this socket or from the one a reconnection opens
+                receivedBytes += buffer.getByteLength();
                 try {
                     uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
                 } catch (final Exception e) {
@@ -89,12 +121,19 @@ public class WebSocketClient {
     }
 
     public void send(final String message) {
-
-        webSocket.send(message);
+        // Not while a reconnection opens the WebSocket (send would throw) nor once it is closed: an instruction sent
+        // while the connection is lost is dropped, never sent twice
+        if (webSocket.getReadyState() == 1) webSocket.send(message);
+        else if (log.isLoggable(Level.FINE)) log.fine("Connection lost, a message was dropped");
     }
 
     public void close() {
         webSocket.close();
+    }
+
+    /** True while the socket is being opened, or open. */
+    public boolean isConnectingOrOpen() {
+        return webSocket.getReadyState() <= 1;
     }
 
     public void close(final int code, final String reason) {
@@ -106,6 +145,11 @@ public class WebSocketClient {
      */
     public long getLastMessageTime() {
         return lastMessageTime;
+    }
+
+    /** Bytes received from the server since the context was created. */
+    public double getReceivedBytes() {
+        return receivedBytes;
     }
 
     /**

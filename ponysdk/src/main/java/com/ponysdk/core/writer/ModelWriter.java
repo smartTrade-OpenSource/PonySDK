@@ -32,12 +32,25 @@ import com.ponysdk.core.ui.basic.PWindow;
 
 public class ModelWriter {
 
-    private final WebsocketEncoder encoder;
+    private WebsocketEncoder encoder;
 
     private WeakReference<PWindow> currentWindow;
 
     public ModelWriter(final WebsocketEncoder encoder) {
         this.encoder = encoder;
+    }
+
+    /**
+     * Swaps the underlying encoder: to a recording one while the UIContext is suspended, back to the new
+     * WebSocket when it resumes.
+     */
+    public void setEncoder(final WebsocketEncoder encoder) {
+        this.encoder = encoder;
+        this.currentWindow = null; // the next write sends WINDOW_ID again
+    }
+
+    public WebsocketEncoder getEncoder() {
+        return encoder;
     }
 
     public void beginObject(final PWindow window) {

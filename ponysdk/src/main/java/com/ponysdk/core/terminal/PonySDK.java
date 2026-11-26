@@ -203,17 +203,61 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     long lastHeartBeatSent = -1;
 
+    private int heartBeatPeriodInSeconds;
+    /** Each heartbeat loop stops once a newer one is started (on a resumed context). */
+    private int heartBeatGeneration;
+    /** How long, in ms, the server keeps a lost context for this terminal to resume it; 0 if it does not. */
+    private int reconnectionTimeout;
+
+    public void setReconnectionTimeout(final int reconnectionTimeout) {
+        this.reconnectionTimeout = reconnectionTimeout;
+    }
+
+    public int getReconnectionTimeout() {
+        return reconnectionTimeout;
+    }
+
+    /** True if the server keeps this context when its connection is lost, so that it can be resumed. */
+    public boolean isResumable() {
+        return reconnectionTimeout > 0 && socketClient != null;
+    }
+
+    /** Opens a new WebSocket to resume this context. */
+    public void reconnect() {
+        socketClient.reconnect(contextId);
+    }
+
+    /** Gives up a resume the server has not answered: its socket is closed, and the checker tries again. */
+    public void abortReconnect() {
+        log.info("No answer to the resume of context " + contextId + ", trying again");
+        if (socketClient.isConnectingOrOpen()) socketClient.close(4000, "resume not answered");
+        else reconnectionChecker.detectConnectionFailure();
+    }
+
+    /** The server resumed this context on the new WebSocket. */
+    public void onReconnected() {
+        log.info("Context " + contextId + " resumed");
+        setHeartBeatPeriod(heartBeatPeriodInSeconds);
+        reconnectionChecker.onReconnected();
+    }
+
     public void setHeartBeatPeriod(final int heartBeatInseconds) {
+        heartBeatPeriodInSeconds = heartBeatInseconds;
         if (heartBeatInseconds == 0) return;
         final int heartBeatPeriodInMilli = heartBeatInseconds * 1000;
+        final int generation = ++heartBeatGeneration;
         Scheduler.get().scheduleFixedDelay(() -> {
-            if (socketClient.getReadyState() > 1) return false; // No need to check the heartbeat when the socket is closed
+            if (generation != heartBeatGeneration) return false; // replaced by the loop of a resumed context
+            // Only while the socket is open: once lost, a reconnection opens another one, which the loop of the resumed
+            // context checks
+            if (socketClient.getReadyState() != 1) return false;
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
 
             //heartbeat failure detection
             if (now - lastMessageTime > heartBeatPeriodInMilli) {
-                socketClient.close(1000, "no data received since " + (now - lastMessageTime) + " ms");
+                // 4000: the server keeps a resumable context, where 1000 would end it
+                socketClient.close(reconnectionTimeout > 0 ? 4000 : 1000, "no data received since " + (now - lastMessageTime) + " ms");
                 reconnectionChecker.detectConnectionFailure();
                 //stop the scheduling
                 return false;
@@ -223,6 +267,8 @@ public class PonySDK implements UncaughtExceptionHandler {
             if (lastHeartBeatSent < now - 1000) {
                 final PTInstruction requestData = new PTInstruction();
                 requestData.put(ClientToServerModel.HEARTBEAT_CLIENT);
+                // What was received may be released by the server
+                if (reconnectionTimeout > 0) requestData.put(ClientToServerModel.RECEIVED_OFFSET, socketClient.getReceivedBytes());
                 socketClient.send(requestData.toString());
                 lastHeartBeatSent = now;
             }

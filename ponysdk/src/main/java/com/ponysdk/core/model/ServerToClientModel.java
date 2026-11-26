@@ -257,7 +257,11 @@ public enum ServerToClientModel {
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    TEXTBOX_ID(ValueTypeModel.INTEGER),
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECTION_TIMEOUT(ValueTypeModel.INTEGER), // in the CREATE_CONTEXT block: how long, in ms, a lost context waits
+    RECONNECT_CONTEXT(ValueTypeModel.UINT31); // its own block: the context is resumed, carries its id
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

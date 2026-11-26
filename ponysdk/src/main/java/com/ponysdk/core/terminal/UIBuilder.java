@@ -112,7 +112,14 @@ public class UIBuilder {
                 // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
                 PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
                 PonySDK.get().setHeartBeatPeriod(readerBuffer.readBinaryModel().getIntValue());
+                final BinaryModel next = readerBuffer.readBinaryModel();
+                if (ServerToClientModel.RECONNECTION_TIMEOUT == next.getModel()) {
+                    PonySDK.get().setReconnectionTimeout(next.getIntValue());
+                    readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                } // else it was the ServerToClientModel.END element
+            } else if (ServerToClientModel.RECONNECT_CONTEXT == model) {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                PonySDK.get().onReconnected();
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
@@ -150,6 +157,7 @@ public class UIBuilder {
                                 final ServerToClientModel model2 = newBinaryModel.getModel();
                                 if (ServerToClientModel.WINDOW_ID != model2 && ServerToClientModel.ROUNDTRIP_LATENCY != model2
                                         && ServerToClientModel.CREATE_CONTEXT != model2
+                                        && ServerToClientModel.RECONNECT_CONTEXT != model2
                                         && ServerToClientModel.DESTROY_CONTEXT != model2) {
                                     endPosition = nextBlockPosition1;
                                     readerBuffer.setPosition(endPosition);

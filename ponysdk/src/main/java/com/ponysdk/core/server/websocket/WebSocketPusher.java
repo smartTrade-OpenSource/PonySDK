@@ -58,9 +58,27 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private WebSocket.Listener listener;
 
+    /** The bytes the terminal has not acknowledged yet, kept for a transparent reconnection; null when disabled. */
+    private final ReplayBuffer replayBuffer;
+
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
+        this(session, bufferSize, maxChunkSize, timeoutMillis, null);
+    }
+
+    public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis,
+            final ReplayBuffer replayBuffer) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
         this.session = session;
+        this.replayBuffer = replayBuffer;
+    }
+
+    @Override
+    protected void onWrite(final ByteBuffer buffer, final int position, final int length) {
+        if (replayBuffer != null) replayBuffer.append(buffer, position, length);
+    }
+
+    ReplayBuffer getReplayBuffer() {
+        return replayBuffer;
     }
 
     @Override

@@ -76,6 +76,16 @@ task runFlexLayoutDemo(type: JavaExec) {
     jvmArgs = ['-Xmx2g', '-Dlog4j.configurationFile=etc/log4j2.xml', '-Dspring.profiles.active=flexlayout']
 }
 
+task runReconnectionSample(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.ponysdk.impl.java.Main'
+    jvmArgs = ['-Dponysdk.application.id=reconnection', '-Dponysdk.application.name=Reconnection', '-Dponysdk.application.description=Reconnection',
+               '-Dponysdk.application.context.name=reconnection', '-Dponysdk.entry.point.class=com.ponysdk.impl.java.ReconnectionSampleEntryPoint',
+               '-Dponysdk.application.javascripts=script/ponysdk.js']
+    systemProperty 'ponysdk.reconnection.timeout.ms', project.findProperty('reconnectionTimeoutMs') ?: '60000'
+    if (project.hasProperty('log4jConfig')) systemProperty 'log4j2.configurationFile', project.property('log4jConfig')
+}
+
 task runSampleTrading(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/debug/gwt')
